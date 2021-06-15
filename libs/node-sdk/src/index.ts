@@ -1,0 +1,1 @@
+const variable = 'node-sdk';

@@ -1,0 +1,10 @@
+{
+  "name": "@featureboard/react-sdk",
+  "private": true,
+  "version": "0.0.1",
+  "main": "out-tsc/index.js",
+  "publishConfig": {
+    "main": "dist/index.js",
+    "module": "dist/esm/index.js"
+  }
+}
