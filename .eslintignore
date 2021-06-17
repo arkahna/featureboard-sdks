@@ -1,0 +1,4 @@
+out-tsc
+bundle.js
+dist
+node_modules
