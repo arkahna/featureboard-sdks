@@ -89,7 +89,6 @@ jobs:
         run: pnpm package
 
       - name: Release packages
-        with:
-          publish: pnpm publish -r
+        run: pnpm publish -r
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
