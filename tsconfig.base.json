@@ -1,26 +1,27 @@
 {
-  "compileOnSave": false,
-  "compilerOptions": {
-    "rootDir": ".",
-    "sourceMap": true,
-    "declaration": false,
-    "moduleResolution": "node",
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "importHelpers": true,
-    "allowSyntheticDefaultImports": true,
-    "target": "es2018",
-    "module": "esnext",
-    "lib": ["es2018", "dom"],
-    "skipLibCheck": true,
-    "skipDefaultLibCheck": true,
-    "baseUrl": ".",
-    "paths": {
-      "@featureboard/contracts": ["libs/contracts/src/index.ts"],
-      "@featureboard/js-sdk": ["libs/js-sdk/src/index.ts"],
-      "@featureboard/node-sdk": ["libs/node-sdk/src/index.ts"],
-      "@featureboard/react-sdk": ["libs/react-sdk/src/index.ts"]
-    }
-  },
-  "exclude": ["node_modules", "tmp"]
+    "compileOnSave": false,
+    "compilerOptions": {
+        "rootDir": ".",
+        "sourceMap": true,
+        "declaration": false,
+        "moduleResolution": "node",
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "importHelpers": true,
+        "allowSyntheticDefaultImports": true,
+        "target": "es2018",
+        "module": "esnext",
+        "lib": ["es2018", "dom"],
+        "skipLibCheck": true,
+        "skipDefaultLibCheck": true,
+        "baseUrl": ".",
+        "strict": true,
+        "paths": {
+            "@featureboard/contracts": ["libs/contracts/src/index.ts"],
+            "@featureboard/js-sdk": ["libs/js-sdk/src/index.ts"],
+            "@featureboard/node-sdk": ["libs/node-sdk/src/index.ts"],
+            "@featureboard/react-sdk": ["libs/react-sdk/src/index.ts"]
+        }
+    },
+    "exclude": ["node_modules", "tmp"]
 }

@@ -1,22 +1,27 @@
 {
-  "name": "@featureboard/js-sdk",
-  "version": "0.0.1",
-  "main": "out-tsc/index.js",
-  "license": "MIT",
-  "repository": {
-      "type": "git",
-      "url": "git+https://github.com/featureboard/sdks.git"
-  },
-  "keywords": [
-      "Feature toggle",
-      "Feature flags"
-  ],
-  "bugs": {
-      "url": "https://github.com/featureboard/sdks/issues"
-  },
-  "homepage": "https://github.com/featureboard/sdks/tree/master/libs/js-sdk#readme",
-  "publishConfig": {
-    "main": "dist/index.js",
-    "module": "dist/esm/index.js"
-  }
+    "name": "@featureboard/js-sdk",
+    "version": "0.0.1",
+    "main": "out-tsc/index.js",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/featureboard/sdks.git"
+    },
+    "keywords": [
+        "Feature toggle",
+        "Feature flags"
+    ],
+    "bugs": {
+        "url": "https://github.com/featureboard/sdks/issues"
+    },
+    "homepage": "https://github.com/featureboard/sdks/tree/master/libs/js-sdk#readme",
+    "publishConfig": {
+        "main": "dist/index.js",
+        "module": "dist/esm/index.js"
+    },
+    "dependencies": {
+        "debug": "^4.3.1",
+        "promise-completion-source": "^1.0.0",
+        "ws": "^7.5.0"
+    }
 }

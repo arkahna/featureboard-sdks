@@ -1,0 +1,44 @@
+name: PR Workflow
+env:
+  CI: true
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@main
+
+      - name: Enable node
+        uses: actions/setup-node@main
+        with:
+          node-version: 14.x
+
+      - name: Cache .pnpm-store
+        uses: actions/cache@v1
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-node${{ matrix.node-version }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Install pnpm
+        run: |
+          npm i -g pnpm
+          pnpm set verify-store-integrity false
+
+      - name: pnpm install
+        run: |
+          pnpm install --frozen-lockfile
+
+      - name: Build packages
+        run: pnpx tsc -b
+
+      - name: Lint types and code
+        run: pnpm run lint
+
+      - name: Lint types and code
+        run: pnpm run test

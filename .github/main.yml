@@ -1,0 +1,95 @@
+name: Build & Test CI
+concurrency: main
+env:
+  CI: true
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      changes: ${{ steps.version.outputs.changes }} # map step output to job output
+    steps:
+      - name: Checkout
+        uses: actions/checkout@main
+        with:
+          # This makes Actions fetch all Git history so that Changesets can generate changelogs with the correct commits
+          fetch-depth: 0
+          token: ${{ secrets.SERVICE_ACCOUNT_PAT }}
+
+      - name: Enable node
+        uses: actions/setup-node@main
+        with:
+          node-version: 14.x
+
+      - name: Version command
+        id: version
+        run: |
+          npm install --no-package-lock --no-save @changesets/cli
+          echo ::set-output name=changes::$(npx changeset version 2>&1 | grep -q 'No unreleased changesets found' && echo 'false' || echo 'true')
+
+      - name: Push changes
+        if: steps.version.outputs.changes == 'true'
+        run: |
+          git config user.email "jake@featureboard.app"
+          git config user.name "Jake Ginnivan"
+          git add -A
+          git commit -m "Version packages" || echo "No changes to commit"
+          git push
+
+  build:
+    runs-on: ubuntu-latest
+    needs: version
+    if: always() && needs.version.outputs.changes == 'false'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@main
+        with:
+          # This makes Actions fetch all Git history so that Changesets can generate changelogs with the correct commits
+          fetch-depth: 0
+
+      - name: Enable node
+        uses: actions/setup-node@main
+        with:
+          node-version: 14.x
+          registry-url: 'https://registry.npmjs.org'
+          scope: '@featureboard'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Cache .pnpm-store
+        uses: actions/cache@v1
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-node${{ matrix.node-version }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Install pnpm
+        run: |
+          npm i -g pnpm
+          pnpm set verify-store-integrity false
+
+      - name: pnpm install
+        run: |
+          pnpm install --frozen-lockfile
+
+      - name: Type check
+        run: pnpx tsx -b
+
+      - name: Lint types and code
+        run: pnpm run lint
+
+      - name: Run tests
+        run: pnpm test
+
+      - name: Package
+        run: pnpm package
+
+      - name: Release packages
+        with:
+          publish: pnpm publish -r
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

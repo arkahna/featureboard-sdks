@@ -1,7 +1,10 @@
-import WS from 'isomorphic-ws'
+import WS from 'ws'
 import { createBrowserHttpClient } from './browser-http-client'
 import { createBrowserWsClient } from './browser-ws-client'
-import { EffectiveFeatureState, EffectiveFeatureValues } from './effective-feature-state'
+import {
+    EffectiveFeatureState,
+    EffectiveFeatureValues,
+} from './effective-feature-state'
 import { FeatureBoardApiConfig } from './featureboard-api-config'
 import { featureBoardHostedService } from './featureboard-service-urls'
 import { FeatureBoardClient } from './features-client'
@@ -44,7 +47,12 @@ export const FeatureBoardService = {
     init(
         environmentApiKey: string,
         audiences: string[],
-        { updateStrategy, api, initialValues, fetch: fetchImpl }: FeatureBoardServiceOptions = {},
+        {
+            updateStrategy,
+            api,
+            initialValues,
+            fetch: fetchImpl,
+        }: FeatureBoardServiceOptions = {},
     ) {
         const resolvedUpdateStrategy: UpdateStrategies = !updateStrategy
             ? { kind: 'live' }
@@ -53,10 +61,14 @@ export const FeatureBoardService = {
                   kind: updateStrategy,
               }
             : updateStrategy
-        const effectiveFeatureState = new EffectiveFeatureState(audiences, initialValues)
+        const effectiveFeatureState = new EffectiveFeatureState(
+            audiences,
+            initialValues,
+        )
 
         if (resolvedUpdateStrategy.kind === 'live') {
-            const defaultWebsocketFactory = (address: string): any => new WS(address) as any
+            const defaultWebsocketFactory = (address: string): any =>
+                new WS(address) as any
             return createBrowserWsClient(environmentApiKey, audiences, {
                 api: api || featureBoardHostedService,
                 liveOptions: {

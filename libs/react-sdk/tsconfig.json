@@ -1,9 +1,11 @@
 {
-  "extends": "../../tsconfig.settings.json",
-  "compilerOptions": {
-    "outDir": "./out-tsc",
-    "rootDir": "./src",
-    "types": ["jest", "node"]
-  },
-  "include": ["src/**/*.ts", "src/**/*.tsx"]
+    "extends": "../../tsconfig.settings.json",
+    "compilerOptions": {
+        "outDir": "./out-tsc",
+        "rootDir": "./src",
+        "types": ["jest", "node"],
+        "jsx": "react-jsx"
+    },
+    "include": ["src/**/*.ts", "src/**/*.tsx"],
+    "references": [{ "path": "../js-sdk" }]
 }
