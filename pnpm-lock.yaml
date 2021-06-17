@@ -6,6 +6,7 @@ specifiers:
   '@nrwl/workspace': 12.3.6
   '@types/jest': ^26.0.23
   '@types/node': 15.12.2
+  '@types/ws': ^7.4.5
   '@wanews/nx-typescript-project-references': ^0.10.1
   dotenv: 10.0.0
   prettier: 2.3.1
@@ -22,6 +23,7 @@ devDependencies:
   '@nrwl/workspace': 12.3.6_prettier@2.3.1
   '@types/jest': 26.0.23
   '@types/node': 15.12.2
+  '@types/ws': 7.4.5
   '@wanews/nx-typescript-project-references': 0.10.1
   dotenv: 10.0.0
   prettier: 2.3.1
@@ -205,6 +207,12 @@ packages:
 
   /@types/normalize-package-data/2.4.0:
     resolution: {integrity: sha512-f5j5b/Gf71L+dbqxIpQ4Z2WlmI/mPJ0fOkGGmFgtb6sAu97EPczzbS3/tJKxmcYDj55OX6ssqwDAWOHIYDRDGA==}
+    dev: true
+
+  /@types/ws/7.4.5:
+    resolution: {integrity: sha512-8mbDgtc8xpxDDem5Gwj76stBDJX35KQ3YBoayxlqUQcL5BZUthiqP/VQ4PQnLHqM4PmlbyO74t98eJpURO+gPA==}
+    dependencies:
+      '@types/node': 15.12.2
     dev: true
 
   /@types/yargs-parser/20.2.0:

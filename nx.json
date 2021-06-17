@@ -27,6 +27,9 @@
     },
     "react-sdk": {
       "tags": []
+    },
+    "contracts": {
+      "tags": []
     }
   }
 }

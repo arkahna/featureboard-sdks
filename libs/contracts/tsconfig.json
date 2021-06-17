@@ -5,6 +5,5 @@
     "rootDir": "./src",
     "types": ["jest", "node"]
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"],
-  "references": [{ "path": "../js-sdk" }, { "path": "../contracts" }]
+  "include": ["src/**/*.ts", "src/**/*.tsx"]
 }

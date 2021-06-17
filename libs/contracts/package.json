@@ -1,7 +1,6 @@
 {
-  "name": "@featureboard/js-sdk",
+  "name": "@featureboard/contracts",
   "version": "0.0.1",
-  "main": "out-tsc/index.js",
   "license": "MIT",
   "repository": {
       "type": "git",
@@ -14,7 +13,8 @@
   "bugs": {
       "url": "https://github.com/featureboard/sdks/issues"
   },
-  "homepage": "https://github.com/featureboard/sdks/tree/master/libs/js-sdk#readme",
+  "homepage": "https://github.com/featureboard/sdks/tree/master/libs/contracts#readme",
+  "main": "out-tsc/index.js",
   "publishConfig": {
     "main": "dist/index.js",
     "module": "dist/esm/index.js"

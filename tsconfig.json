@@ -1,7 +1,12 @@
 {
-  "files": [],
-  "compilerOptions": {
-    "disableSourceOfProjectReferenceRedirect": true
-  },
-  "references": []
+    "files": [],
+    "compilerOptions": {
+        "disableSourceOfProjectReferenceRedirect": true
+    },
+    "references": [
+        { "path": "./libs/contracts" },
+        { "path": "./libs/js-sdk" },
+        { "path": "./libs/node-sdk" },
+        { "path": "./libs/react-sdk" }
+    ]
 }
