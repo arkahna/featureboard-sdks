@@ -16,10 +16,10 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@featureboard/contracts": ["libs/contracts/src/index.ts"],
       "@featureboard/js-sdk": ["libs/js-sdk/src/index.ts"],
       "@featureboard/node-sdk": ["libs/node-sdk/src/index.ts"],
-      "@featureboard/react-sdk": ["libs/react-sdk/src/index.ts"],
-      "@featureboard/contracts": ["libs/contracts/src/index.ts"]
+      "@featureboard/react-sdk": ["libs/react-sdk/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

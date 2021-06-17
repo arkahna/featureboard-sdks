@@ -19,6 +19,9 @@
     }
   },
   "projects": {
+    "contracts": {
+      "tags": []
+    },
     "js-sdk": {
       "tags": []
     },
@@ -26,9 +29,6 @@
       "tags": []
     },
     "react-sdk": {
-      "tags": []
-    },
-    "contracts": {
       "tags": []
     }
   }
