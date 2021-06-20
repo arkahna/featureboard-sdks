@@ -1,72 +1,96 @@
 lockfileVersion: 5.3
 
-specifiers:
-  '@changesets/changelog-github': ^0.4.0
-  '@changesets/cli': ^2.16.0
-  '@nrwl/cli': 12.4.0
-  '@nrwl/eslint-plugin-nx': ^12.4.0
-  '@nrwl/jest': 12.4.0
-  '@nrwl/tao': 12.4.0
-  '@nrwl/workspace': 12.4.0
-  '@types/debug': ^4.1.5
-  '@types/jest': ^26.0.23
-  '@types/node': 15.12.2
-  '@types/react': ^17.0.11
-  '@types/ws': ^7.4.5
-  '@typescript-eslint/eslint-plugin': ^4.27.0
-  '@typescript-eslint/parser': ^4.27.0
-  '@wanews/nx-typescript-project-references': ^0.11.0
-  dotenv: 10.0.0
-  eslint: ^7.28.0
-  eslint-config-prettier: ^8.3.0
-  eslint-plugin-import: ^2.23.4
-  eslint-plugin-jsx-a11y: ^6.4.1
-  eslint-plugin-prettier: ^3.4.0
-  eslint-plugin-react: ^7.24.0
-  eslint-plugin-react-hooks: ^4.2.0
-  jest: ^27.0.4
-  prettier: 2.3.1
-  promise-completion-source: ^1.0.0
-  ts-jest: ^27.0.3
-  ts-node: ~10.0.0
-  tslib: ^2.3.0
-  tsup: ^4.11.2
-  typescript: ~4.3.3
+importers:
 
-dependencies:
-  promise-completion-source: 1.0.0
-  tslib: 2.3.0
+  .:
+    specifiers:
+      '@changesets/changelog-github': ^0.4.0
+      '@changesets/cli': ^2.16.0
+      '@nrwl/cli': 12.4.0
+      '@nrwl/eslint-plugin-nx': ^12.4.0
+      '@nrwl/jest': 12.4.0
+      '@nrwl/tao': 12.4.0
+      '@nrwl/workspace': 12.4.0
+      '@types/debug': ^4.1.5
+      '@types/jest': ^26.0.23
+      '@types/node': 15.12.2
+      '@types/react': ^17.0.11
+      '@types/ws': ^7.4.5
+      '@typescript-eslint/eslint-plugin': ^4.27.0
+      '@typescript-eslint/parser': ^4.27.0
+      '@wanews/nx-typescript-project-references': ^0.11.0
+      dotenv: 10.0.0
+      eslint: ^7.28.0
+      eslint-config-prettier: ^8.3.0
+      eslint-plugin-import: ^2.23.4
+      eslint-plugin-jsx-a11y: ^6.4.1
+      eslint-plugin-prettier: ^3.4.0
+      eslint-plugin-react: ^7.24.0
+      eslint-plugin-react-hooks: ^4.2.0
+      jest: ^27.0.4
+      prettier: 2.3.1
+      ts-jest: ^27.0.3
+      ts-node: ~10.0.0
+      tslib: ^2.3.0
+      tsup: ^4.11.2
+      typescript: ~4.3.3
+    dependencies:
+      tslib: 2.3.0
+    devDependencies:
+      '@changesets/changelog-github': 0.4.0
+      '@changesets/cli': 2.16.0
+      '@nrwl/cli': 12.4.0
+      '@nrwl/eslint-plugin-nx': 12.4.0_482d375fabc321080f9eb97559b5aacd
+      '@nrwl/jest': 12.4.0
+      '@nrwl/tao': 12.4.0
+      '@nrwl/workspace': 12.4.0_prettier@2.3.1
+      '@types/debug': 4.1.5
+      '@types/jest': 26.0.23
+      '@types/node': 15.12.2
+      '@types/react': 17.0.11
+      '@types/ws': 7.4.5
+      '@typescript-eslint/eslint-plugin': 4.27.0_6125204aae72b1512129ab2b399bb3aa
+      '@typescript-eslint/parser': 4.27.0_eslint@7.28.0+typescript@4.3.3
+      '@wanews/nx-typescript-project-references': 0.11.0_@nrwl+jest@12.4.0
+      dotenv: 10.0.0
+      eslint: 7.28.0
+      eslint-config-prettier: 8.3.0_eslint@7.28.0
+      eslint-plugin-import: 2.23.4_eslint@7.28.0
+      eslint-plugin-jsx-a11y: 6.4.1_eslint@7.28.0
+      eslint-plugin-prettier: 3.4.0_441ef98f5280b4c825fe505e43fc5698
+      eslint-plugin-react: 7.24.0_eslint@7.28.0
+      eslint-plugin-react-hooks: 4.2.0_eslint@7.28.0
+      jest: 27.0.4_ts-node@10.0.0
+      prettier: 2.3.1
+      ts-jest: 27.0.3_jest@27.0.4+typescript@4.3.3
+      ts-node: 10.0.0_3e639e79a6165f2c833d70b5f310276e
+      tsup: 4.11.2_ts-node@10.0.0+typescript@4.3.3
+      typescript: 4.3.3
 
-devDependencies:
-  '@changesets/changelog-github': 0.4.0
-  '@changesets/cli': 2.16.0
-  '@nrwl/cli': 12.4.0
-  '@nrwl/eslint-plugin-nx': 12.4.0_482d375fabc321080f9eb97559b5aacd
-  '@nrwl/jest': 12.4.0
-  '@nrwl/tao': 12.4.0
-  '@nrwl/workspace': 12.4.0_prettier@2.3.1
-  '@types/debug': 4.1.5
-  '@types/jest': 26.0.23
-  '@types/node': 15.12.2
-  '@types/react': 17.0.11
-  '@types/ws': 7.4.5
-  '@typescript-eslint/eslint-plugin': 4.27.0_6125204aae72b1512129ab2b399bb3aa
-  '@typescript-eslint/parser': 4.27.0_eslint@7.28.0+typescript@4.3.3
-  '@wanews/nx-typescript-project-references': 0.11.0_@nrwl+jest@12.4.0
-  dotenv: 10.0.0
-  eslint: 7.28.0
-  eslint-config-prettier: 8.3.0_eslint@7.28.0
-  eslint-plugin-import: 2.23.4_eslint@7.28.0
-  eslint-plugin-jsx-a11y: 6.4.1_eslint@7.28.0
-  eslint-plugin-prettier: 3.4.0_441ef98f5280b4c825fe505e43fc5698
-  eslint-plugin-react: 7.24.0_eslint@7.28.0
-  eslint-plugin-react-hooks: 4.2.0_eslint@7.28.0
-  jest: 27.0.4_ts-node@10.0.0
-  prettier: 2.3.1
-  ts-jest: 27.0.3_jest@27.0.4+typescript@4.3.3
-  ts-node: 10.0.0_3e639e79a6165f2c833d70b5f310276e
-  tsup: 4.11.2_ts-node@10.0.0+typescript@4.3.3
-  typescript: 4.3.3
+  libs/contracts:
+    specifiers: {}
+
+  libs/js-sdk:
+    specifiers:
+      debug: ^4.3.1
+      promise-completion-source: ^1.0.0
+    dependencies:
+      debug: 4.3.1
+      promise-completion-source: 1.0.0
+
+  libs/node-sdk:
+    specifiers:
+      '@featureboard/js-sdk': 0.0.1
+      ws: ^7.5.0
+    dependencies:
+      '@featureboard/js-sdk': link:../js-sdk
+      ws: 7.5.0
+
+  libs/react-sdk:
+    specifiers:
+      '@featureboard/js-sdk': 0.0.1
+    dependencies:
+      '@featureboard/js-sdk': link:../js-sdk
 
 packages:
 
@@ -1980,7 +2004,6 @@ packages:
         optional: true
     dependencies:
       ms: 2.1.2
-    dev: true
 
   /decamelize-keys/1.1.0:
     resolution: {integrity: sha1-0XGoeTMlKAfrPLYdwcFEXQeN8tk=}
@@ -4061,7 +4084,6 @@ packages:
 
   /ms/2.1.2:
     resolution: {integrity: sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==}
-    dev: true
 
   /ms/2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
@@ -5563,7 +5585,6 @@ packages:
         optional: true
       utf-8-validate:
         optional: true
-    dev: true
 
   /xml-name-validator/3.0.0:
     resolution: {integrity: sha512-A5CUptxDsvxKJEU3yO6DuWBSJz/qizqzJKOMIfUJHETbBw/sFaDxgd6fxm1ewUaM0jZ444Fc5vC5ROYurg/4Pw==}
