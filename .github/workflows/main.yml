@@ -31,7 +31,6 @@ jobs:
         run: |
           npm install --no-package-lock --no-save @changesets/cli @changesets/changelog-github
           echo ::set-output name=changes::$(npx changeset version 2>&1 | grep -q 'No unreleased changesets found' && echo 'false' || echo 'true')
-          npx changeset version
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
