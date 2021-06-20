@@ -79,7 +79,7 @@ jobs:
           pnpm install --frozen-lockfile
 
       - name: Type check
-        run: pnpx tsx -b
+        run: pnpx tsc -b
 
       - name: Lint types and code
         run: pnpm run lint
