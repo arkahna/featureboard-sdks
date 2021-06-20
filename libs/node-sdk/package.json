@@ -20,6 +20,7 @@
         "module": "dist/esm/index.js"
     },
     "dependencies": {
+        "@featureboard/js-sdk": "0.0.1",
         "ws": "^7.5.0"
     }
 }

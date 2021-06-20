@@ -1,9 +1,11 @@
 lockfileVersion: 5.3
 
 specifiers:
+  '@featureboard/js-sdk': 0.0.1
   ws: ^7.5.0
 
 dependencies:
+  '@featureboard/js-sdk': link:../js-sdk
   ws: 7.5.0
 
 packages:

@@ -7,6 +7,7 @@
         "start": "nx serve",
         "build": "nx run-many --target=build --all",
         "test": "nx run-many --target=test --all",
+        "package": "nx run-many --target=package --all",
         "lint": "nx workspace-lint && nx run-many --target=lint --all",
         "e2e": "nx e2e",
         "affected:apps": "nx affected:apps",
@@ -43,7 +44,7 @@
         "@types/ws": "^7.4.5",
         "@typescript-eslint/eslint-plugin": "^4.27.0",
         "@typescript-eslint/parser": "^4.27.0",
-        "@wanews/nx-typescript-project-references": "^0.10.1",
+        "@wanews/nx-typescript-project-references": "^0.11.0",
         "dotenv": "10.0.0",
         "eslint": "^7.28.0",
         "eslint-config-prettier": "^8.3.0",
@@ -56,6 +57,7 @@
         "prettier": "2.3.1",
         "ts-jest": "^27.0.3",
         "ts-node": "~10.0.0",
+        "tsup": "^4.11.2",
         "typescript": "~4.3.3"
     }
 }

@@ -85,6 +85,9 @@ jobs:
       - name: Run tests
         run: pnpm test
 
+      - name: Package libs
+        run: pnpm package
+
       - name: Release packages
         run: pnpm publish -r --access public
         env:

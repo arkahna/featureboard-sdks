@@ -1,4 +1,3 @@
-import WS from 'ws'
 import { createBrowserHttpClient } from './browser-http-client'
 import { createBrowserWsClient } from './browser-ws-client'
 import {
@@ -68,7 +67,7 @@ export const FeatureBoardService = {
 
         if (resolvedUpdateStrategy.kind === 'live') {
             const defaultWebsocketFactory = (address: string): any =>
-                new WS(address) as any
+                new WebSocket(address)
             return createBrowserWsClient(environmentApiKey, audiences, {
                 api: api || featureBoardHostedService,
                 liveOptions: {
