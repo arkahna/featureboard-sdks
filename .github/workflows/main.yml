@@ -26,10 +26,24 @@ jobs:
         with:
           node-version: 14.x
 
+      - name: Cache .pnpm-store
+        uses: actions/cache@v1
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-node${{ matrix.node-version }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Install pnpm
+        run: |
+          npm i -g pnpm
+          pnpm set verify-store-integrity false
+
+      - name: pnpm install
+        run: |
+          pnpm install --frozen-lockfile
+
       - name: Version command
         id: version
         run: |
-          pnpm i -r
           echo ::set-output name=changes::$(npx changeset version 2>&1 | grep -q 'No unreleased changesets found' && echo 'false' || echo 'true')
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
