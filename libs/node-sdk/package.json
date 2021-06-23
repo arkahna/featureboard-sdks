@@ -3,6 +3,7 @@
     "version": "0.0.2",
     "main": "out-tsc/index.js",
     "license": "MIT",
+    "sideEffects": false,
     "repository": {
         "type": "git",
         "url": "git+https://github.com/featureboard/sdks.git"
