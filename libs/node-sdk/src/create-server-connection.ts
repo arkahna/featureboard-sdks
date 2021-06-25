@@ -71,9 +71,5 @@ function addUserWarnings(
 function addSyncUserWarnings(
     client: FeatureBoardClient,
 ): FeatureBoardClient & PromiseLike<FeatureBoardClient> {
-    ;(client as any).then = (cb: (client: FeatureBoardClient) => void) => {
-        return Promise.resolve(client).then(cb)
-    }
-
     return client as any
 }
