@@ -1,5 +1,11 @@
 # @featureboard/node-sdk
 
+## 0.0.4
+
+### Patch Changes
+
+- [`9d3ab09`](https://github.com/featureboard/sdks/commit/9d3ab09cfc9345c084601632781d32992b0ca29c) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Fixed awaiting .request() on server SDK when not using on-request mode hanging
+
 ## 0.0.3
 
 ### Patch Changes
