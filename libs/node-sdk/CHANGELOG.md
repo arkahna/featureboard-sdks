@@ -1,5 +1,11 @@
 # @featureboard/node-sdk
 
+## 0.0.5
+
+### Patch Changes
+
+- [`ab7b7bb`](https://github.com/featureboard/sdks/commit/ab7b7bbad7e11e0fa6d59c6b2279cdf6d1b24f9d) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Further fix for hang
+
 ## 0.0.4
 
 ### Patch Changes
