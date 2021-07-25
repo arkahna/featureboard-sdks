@@ -1,6 +1,6 @@
 // NOTE all notifications should coerce the value into the expected type
 
-export interface AudienceValue {
+export interface AudienceExceptionValue {
     audienceKey: string
     value: string | boolean | number
 }
@@ -8,7 +8,7 @@ export interface AudienceValue {
 export interface FeatureValues {
     featureKey: string
     defaultValue: string | boolean | number
-    audienceValues: AudienceValue[]
+    audienceExceptions: AudienceExceptionValue[]
 }
 
 export interface StateOfTheWorldNotification {

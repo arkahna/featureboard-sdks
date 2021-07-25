@@ -28,10 +28,10 @@ export function createServerConnection(
             if (!featureValues) {
                 return defaultValue
             }
-            const audienceValue = featureValues.audienceValues.find((value) =>
-                audienceKeys.includes(value.audienceKey),
+            const audienceException = featureValues.audienceExceptions.find(
+                (value) => audienceKeys.includes(value.audienceKey),
             )
-            return audienceValue?.value ?? featureValues.defaultValue
+            return audienceException?.value ?? featureValues.defaultValue
         }
 
         return {
