@@ -45,7 +45,7 @@ export async function createNodeWsClient(
                 state.updateFeatureState(message.featureKey, {
                     featureKey: message.featureKey,
                     defaultValue: message.defaultValue,
-                    audienceValues: message.audienceValues,
+                    audienceExceptions: message.audienceExceptions,
                 })
                 break
             }
@@ -60,7 +60,7 @@ export async function createNodeWsClient(
                     state.updateFeatureState(feature.featureKey, {
                         featureKey: feature.featureKey,
                         defaultValue: feature.defaultValue,
-                        audienceValues: feature.audienceValues,
+                        audienceExceptions: feature.audienceExceptions,
                     })
                 })
                 break
