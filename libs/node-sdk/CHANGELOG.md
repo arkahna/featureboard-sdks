@@ -1,5 +1,11 @@
 # @featureboard/node-sdk
 
+## 0.1.0
+
+### Minor Changes
+
+- [#1](https://github.com/featureboard/sdks/pull/1) [`8dc891f`](https://github.com/featureboard/sdks/commit/8dc891faeb173e24471a4322f964cceb96df0dda) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Renamed audienceValues to audienceExceptions in server SDK
+
 ## 0.0.5
 
 ### Patch Changes
