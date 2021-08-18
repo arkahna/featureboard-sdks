@@ -39,7 +39,7 @@ jobs:
 
       - name: pnpm install
         run: |
-          pnpm install
+          pnpm install --no-frozen-lockfile
 
       - name: Version command
         id: version
@@ -51,7 +51,7 @@ jobs:
       - name: Push changes
         if: steps.version.outputs.changes == 'true'
         run: |
-          pnpm i -r
+          pnpm i -r --no-frozen-lockfile
           git config user.email "jake@featureboard.app"
           git config user.name "Jake Ginnivan"
           git add -A
