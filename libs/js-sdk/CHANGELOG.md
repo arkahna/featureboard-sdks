@@ -1,5 +1,11 @@
 # @featureboard/js-sdk
 
+## 0.1.0
+
+### Minor Changes
+
+- [`ddee7b3`](https://github.com/featureboard/sdks/commit/ddee7b3dec288ee1f8920a750de29706f79a512f) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Upgrade dependencies and fixed IWebSocket.send argument type
+
 ## 0.0.3
 
 ### Patch Changes

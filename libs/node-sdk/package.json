@@ -1,6 +1,6 @@
 {
     "name": "@featureboard/node-sdk",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "main": "out-tsc/index.js",
     "license": "MIT",
     "sideEffects": false,
@@ -21,7 +21,7 @@
         "module": "dist/esm/index.js"
     },
     "dependencies": {
-        "@featureboard/js-sdk": "workspace:0.0.3",
+        "@featureboard/js-sdk": "workspace:0.1.0",
         "ws": "^8.2.0"
     }
 }
