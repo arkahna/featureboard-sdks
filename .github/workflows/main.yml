@@ -39,7 +39,7 @@ jobs:
 
       - name: pnpm install
         run: |
-          pnpm install --frozen-lockfile
+          pnpm install
 
       - name: Version command
         id: version
