@@ -21,7 +21,7 @@
         "module": "dist/esm/index.js"
     },
     "dependencies": {
-        "debug": "^4.3.1",
+        "debug": "^4.3.2",
         "promise-completion-source": "^1.0.0"
     }
 }

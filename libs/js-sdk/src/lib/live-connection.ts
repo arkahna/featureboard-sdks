@@ -10,7 +10,7 @@ export interface IWebSocket {
     onclose: ({ code, reason }: ICloseEvent) => void
     onopen: () => void
     close(): void
-    send(message: string): void
+    send(message: string | Buffer | ArrayBuffer | Buffer[]): void
 }
 export interface ICloseEvent {
     code: number

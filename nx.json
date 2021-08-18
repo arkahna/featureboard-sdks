@@ -1,35 +1,43 @@
 {
-  "npmScope": "featureboard-sdks",
-  "affected": {
-    "defaultBase": "master"
-  },
-  "implicitDependencies": {
-    "package.json": {
-      "dependencies": "*",
-      "devDependencies": "*"
+    "npmScope": "featureboard-sdks",
+    "affected": {
+        "defaultBase": "master"
     },
-    ".eslintrc.json": "*"
-  },
-  "tasksRunnerOptions": {
-    "default": {
-      "runner": "@nrwl/workspace/tasks-runners/default",
-      "options": {
-        "cacheableOperations": ["build", "lint", "test", "e2e"]
-      }
+    "implicitDependencies": {
+        "package.json": {
+            "dependencies": "*",
+            "devDependencies": "*"
+        },
+        ".eslintrc.json": "*"
+    },
+    "tasksRunnerOptions": {
+        "default": {
+            "runner": "@nrwl/workspace/tasks-runners/default",
+            "options": {
+                "cacheableOperations": ["build", "lint", "test", "e2e"]
+            }
+        }
+    },
+    "projects": {
+        "contracts": {
+            "tags": []
+        },
+        "js-sdk": {
+            "tags": []
+        },
+        "node-sdk": {
+            "tags": []
+        },
+        "react-sdk": {
+            "tags": []
+        }
+    },
+    "targetDependencies": {
+        "build": [
+            {
+                "target": "build",
+                "projects": "dependencies"
+            }
+        ]
     }
-  },
-  "projects": {
-    "contracts": {
-      "tags": []
-    },
-    "js-sdk": {
-      "tags": []
-    },
-    "node-sdk": {
-      "tags": []
-    },
-    "react-sdk": {
-      "tags": []
-    }
-  }
 }
