@@ -1,6 +1,6 @@
 {
     "name": "@featureboard/react-sdk",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "main": "out-tsc/index.js",
     "license": "MIT",
     "sideEffects": false,

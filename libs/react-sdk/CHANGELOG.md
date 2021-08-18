@@ -1,5 +1,11 @@
 # @featureboard/react-sdk
 
+## 0.1.1
+
+### Patch Changes
+
+- [`0ad794a`](https://github.com/featureboard/sdks/commit/0ad794ab5edfa75cc3e0ef073f765b6ab9de0fb8) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Fixed useFeature hook not returning current value during inital render
+
 ## 0.1.0
 
 ### Minor Changes
