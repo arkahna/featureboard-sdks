@@ -1,4 +1,4 @@
-import { Features } from '..'
+import { Features } from '.'
 
 export interface FeatureBoardClient {
     getFeatureValue(
