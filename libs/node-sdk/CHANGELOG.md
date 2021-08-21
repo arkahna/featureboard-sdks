@@ -1,5 +1,15 @@
 # @featureboard/node-sdk
 
+## 0.3.0
+
+### Minor Changes
+
+- [`3e8d085`](https://github.com/featureboard/sdks/commit/3e8d085f07b09f4dd595f3351343d8e02c3c1179) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Allow a custom feature store to be specified, this allows users to persist/hydrate their initial features outside the SDK
+
+* [`d7befc2`](https://github.com/featureboard/sdks/commit/d7befc28c06bdfc8c30f5a4df29f526a9891904d) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Implemented basic caching using Last-Modified headers in the SDK as most node fetch implementations do not support http caching, and the ones that do require additional configuration
+
+- [`d7befc2`](https://github.com/featureboard/sdks/commit/d7befc28c06bdfc8c30f5a4df29f526a9891904d) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Add maxAgeMs option to on-request update strategy to cache responses in the SDK for 30 seconds by default
+
 ## 0.2.0
 
 ### Minor Changes
