@@ -3,7 +3,10 @@ import { ClientConnection } from './client'
 import { createClient } from './create-client'
 import { EffectiveFeatureState } from './effective-feature-state'
 import { FeatureBoardApiConfig } from './featureboard-api-config'
-import { ManualUpdateStrategy, PollingUpdateStrategy } from './update-strategies'
+import {
+    ManualUpdateStrategy,
+    PollingUpdateStrategy,
+} from './update-strategies'
 
 export interface FeatureBoardBrowserHttpClientOptions {
     api: FeatureBoardApiConfig
@@ -31,27 +34,32 @@ export async function createBrowserHttpClient(
 
     if (!response.ok) {
         throw new Error(
-            'Failed to initialise FeatureBoard SDK: ' +
-                effectiveEndpoint +
-                response.statusText +
-                (await response.text()),
+            `Failed to initialise FeatureBoard SDK (${response.statusText}): ` +
+                ((await response.text()) || '-'),
         )
     }
 
     const effectiveFeatures: EffectiveFeatureValue[] = await response.json()
 
     for (const effectiveFeature of effectiveFeatures) {
-        state.updateFeatureValue(effectiveFeature.featureKey, effectiveFeature.value)
+        state.updateFeatureValue(
+            effectiveFeature.featureKey,
+            effectiveFeature.value,
+        )
     }
 
     const close =
         updateStrategy.kind === 'polling'
-            ? pollingUpdates(() => async () => {}, updateStrategy.options?.interval || 60000)
+            ? pollingUpdates(
+                  () => async () => {},
+                  updateStrategy.options?.interval || 60000,
+              )
             : () => {}
 
     return {
         client: createClient(state),
-        updateFeatures: () => triggerUpdate(fetch, effectiveEndpoint, environmentApiKey, state),
+        updateFeatures: () =>
+            triggerUpdate(fetch, effectiveEndpoint, environmentApiKey, state),
         close,
     }
 }
@@ -66,7 +74,10 @@ function pollingUpdates(update: () => void, interval: number) {
 }
 
 async function triggerUpdate(
-    fetch: (input: RequestInfo, init?: RequestInit | undefined) => Promise<Response>,
+    fetch: (
+        input: RequestInfo,
+        init?: RequestInit | undefined,
+    ) => Promise<Response>,
     effectiveEndpoint: string,
     environmentApiKey: string,
     state: EffectiveFeatureState,
@@ -95,8 +106,14 @@ async function triggerUpdate(
         state.updateFeatureValue(removedKey, undefined)
     }
     for (const effectiveFeature of effectiveFeatures) {
-        if (state.featureValues[effectiveFeature.featureKey] !== effectiveFeature.value) {
-            state.updateFeatureValue(effectiveFeature.featureKey, effectiveFeature.value)
+        if (
+            state.featureValues[effectiveFeature.featureKey] !==
+            effectiveFeature.value
+        ) {
+            state.updateFeatureValue(
+                effectiveFeature.featureKey,
+                effectiveFeature.value,
+            )
         }
     }
 }

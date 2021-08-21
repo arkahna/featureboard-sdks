@@ -27,7 +27,7 @@ export interface FeatureBoardServiceOptions {
     updateStrategy?: UpdateStrategies | UpdateStrategies['kind']
 
     /**
-     * Provide an alternate fetch implementation, only used when not in live mode
+     * Provide an alternate fetch implementation, not used when in live mode
      *
      * @default global fetch
      */

@@ -20,6 +20,7 @@ export interface PollingUpdateStrategy {
 
 export interface OnRequestUpdateStrategy {
     kind: 'on-request'
+    options?: OnRequestOptions
 }
 
 export interface LiveUpdateStrategy {
@@ -36,4 +37,13 @@ export type UpdateStrategies =
 export interface PollingOptions {
     /** in ms */
     interval?: number
+}
+
+export const maxAgeDefault = 30000
+export interface OnRequestOptions {
+    /**
+     * Specifies how long the featureboard SDK can wait before checking if features have updated.
+     * @default 30000 (30 seconds)
+     **/
+    maxAgeMs?: number
 }

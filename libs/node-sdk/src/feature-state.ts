@@ -24,6 +24,7 @@ export class FeatureState {
     ): void {
         this.featureUpdatedCallbacks.push(callback)
     }
+
     off(
         _event: 'feature-updated',
         callback: (
