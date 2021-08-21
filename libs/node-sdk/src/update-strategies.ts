@@ -35,8 +35,7 @@ export type UpdateStrategies =
     | OnRequestUpdateStrategy
 
 export interface PollingOptions {
-    /** in ms */
-    interval?: number
+    intervalMs?: number
 }
 
 export const maxAgeDefault = 30000

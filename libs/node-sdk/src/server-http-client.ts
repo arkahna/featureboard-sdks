@@ -52,7 +52,7 @@ export async function createNodeHttpClient(
     const allValues: FeatureValues[] = await response.json()
 
     for (const featureValue of allValues) {
-        state.updateFeatureState(featureValue.featureKey, featureValue)
+        await state.updateFeatureState(featureValue.featureKey, featureValue)
     }
 
     // Ensure that we don't trigger another request while one is in flight
@@ -67,7 +67,10 @@ export async function createNodeHttpClient(
     })
 
     if (updateStrategy.kind === 'polling') {
-        const stopUpdates = pollingUpdates(fetchUpdatesSingle, 30000)
+        const stopUpdates = pollingUpdates(
+            fetchUpdatesSingle,
+            updateStrategy.options?.intervalMs || 30000,
+        )
         return createServerConnection(state, fetchUpdatesSingle, stopUpdates)
     }
 
@@ -135,7 +138,7 @@ async function fetchUpdates(
     const allValues: FeatureValues[] = await response.json()
 
     for (const featureValue of allValues) {
-        state.updateFeatureState(featureValue.featureKey, featureValue)
+        await state.updateFeatureState(featureValue.featureKey, featureValue)
     }
 
     return response.headers.get('last-modified') || undefined

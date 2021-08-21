@@ -21,7 +21,7 @@ export function createServerConnection(
 
     function syncRequest(audienceKeys: string[]): FeatureBoardClient {
         // Shallow copy the feature state so requests are stable
-        const featuresState = { ...state.features }
+        const featuresState = state.store.all()
 
         const getFeatureValue = (featureKey: any, defaultValue: any) => {
             const featureValues = featuresState[featureKey]

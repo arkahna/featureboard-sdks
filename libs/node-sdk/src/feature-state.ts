@@ -1,15 +1,8 @@
 import { FeatureValues } from '@featureboard/contracts'
+import { FeatureStore, MemoryStore } from './feature-store'
 
 export class FeatureState {
-    features: {
-        [featureKey: string]: FeatureValues
-    } = {}
-
-    constructor(initialValues?: FeatureValues[]) {
-        for (const value of initialValues || []) {
-            this.features[value.featureKey] = value
-        }
-    }
+    constructor(public store: FeatureStore = new MemoryStore()) {}
 
     private featureUpdatedCallbacks: Array<
         (featureKey: string, values: FeatureValues | undefined) => void
@@ -38,17 +31,17 @@ export class FeatureState {
         )
     }
 
-    updateFeatureState(
+    async updateFeatureState(
         featureKey: string,
         featureValues: FeatureValues | undefined,
     ) {
         if (featureValues === undefined) {
-            delete this.features[featureKey]
+            await this.store.set(featureKey, undefined)
             this.featureUpdatedCallbacks.forEach((valueUpdated) =>
                 valueUpdated(featureKey, undefined),
             )
         } else {
-            this.features[featureKey] = featureValues
+            await this.store.set(featureKey, featureValues)
             this.featureUpdatedCallbacks.forEach((valueUpdated) =>
                 valueUpdated(featureKey, featureValues),
             )

@@ -1,27 +1,7 @@
 # FeatureBoard Node SDK
 
-## TypeScript
+NodeJS server side SDK for https://featureboard.app
 
-When using TypeScript add an ambient type definition of your features, for example
+## Docs
 
-```
-declare module '@featureboard/js-sdk' {
-    interface Features {
-        'test-feature-1': boolean
-        'test-feature-2': string
-        'test-feature-2b': string
-        'test-feature-3': number
-    }
-}
-```
-
-If you do not want to specify all your features the features you can just add:
-
-```
-declare module '@featureboard/js-sdk' {
-    interface Features extends Record<string, string | number | boolean> {
-    }
-}
-```
-
-## Usage
+See https://featureboard.app/docs/sdks/nodejs/ for usage instructions and documentation

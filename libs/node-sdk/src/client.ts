@@ -1,4 +1,3 @@
-import { FeatureValues } from '@featureboard/contracts'
 import {
     FeatureBoardApiConfig,
     FeatureBoardClient,
@@ -6,6 +5,7 @@ import {
 } from '@featureboard/js-sdk'
 import WS from 'ws'
 import { FeatureState } from './feature-state'
+import { FeatureStore } from './feature-store'
 import { createNodeHttpClient } from './server-http-client'
 import { createNodeWsClient } from './server-ws-client'
 import { UpdateStrategies } from './update-strategies'
@@ -14,7 +14,7 @@ export interface FeatureBoardServiceOptions {
     /** Connect to a self hosted instance of FeatureBoard */
     api?: FeatureBoardApiConfig
 
-    initialValues?: FeatureValues[]
+    store?: FeatureStore
 
     /**
      * The method your feature state is updated
@@ -40,12 +40,12 @@ export interface ClientConnection {
 }
 
 export const FeatureBoardService = {
-    init(
+    async init(
         environmentApiKey: string,
         {
             updateStrategy,
             api,
-            initialValues,
+            store,
             fetch: fetchImpl,
         }: FeatureBoardServiceOptions = {},
     ) {
@@ -57,7 +57,7 @@ export const FeatureBoardService = {
               }
             : updateStrategy
 
-        const featureState = new FeatureState(initialValues)
+        const featureState = new FeatureState(store)
 
         if (resolvedUpdateStrategy.kind === 'live') {
             const defaultWebsocketFactory = (address: string): any =>
@@ -72,10 +72,16 @@ export const FeatureBoardService = {
             })
         }
 
-        return createNodeHttpClient(environmentApiKey, {
+        return await createNodeHttpClient(environmentApiKey, {
             api: api || featureBoardHostedService,
             state: featureState,
-            fetch: fetchImpl || fetch,
+            fetch:
+                fetchImpl ||
+                (typeof fetch !== 'undefined'
+                    ? fetch
+                    : ((
+                          await import('node-fetch')
+                      ).default as any as typeof fetch)),
             updateStrategy: resolvedUpdateStrategy,
         })
     },

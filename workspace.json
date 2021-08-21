@@ -80,7 +80,8 @@
                     "executor": "@wanews/nx-typescript-project-references:package",
                     "options": {
                         "main": "libs/node-sdk/src/index.ts",
-                        "tsConfig": "libs/node-sdk/tsconfig.json"
+                        "tsConfig": "libs/node-sdk/tsconfig.json",
+                        "external": ["node-fetch"]
                     }
                 }
             }
