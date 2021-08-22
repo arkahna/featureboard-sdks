@@ -1,7 +1,6 @@
 import { FeatureValues } from '@featureboard/contracts'
-import { FeatureBoardApiConfig } from '@featureboard/js-sdk'
+import { createEnsureSingle, FeatureBoardApiConfig } from '@featureboard/js-sdk'
 import { createServerConnection } from './create-server-connection'
-import { createEnsureSingle } from './ensure-single'
 import { FeatureState } from './feature-state'
 import { interval } from './interval'
 import { ServerConnection } from './server-connection'
@@ -9,6 +8,7 @@ import {
     ManualUpdateStrategy,
     maxAgeDefault,
     OnRequestUpdateStrategy,
+    pollingIntervalDefault,
     PollingUpdateStrategy,
 } from './update-strategies'
 
@@ -41,18 +41,27 @@ export async function createNodeHttpClient(
     })
 
     if (!response.ok) {
-        throw new Error(
+        const errMsg =
             `Failed to initialise FeatureBoard SDK (${response.statusText}): ` +
-                ((await response.text()) || '-'),
-        )
-    }
+            ((await response.text()) || '-')
 
-    lastModified = response.headers.get('last-modified') || undefined
+        // If the SDK has been initialised with a valid set of features, we can continue
+        if (state.store.isInitialised) {
+            console.error(errMsg)
+        } else {
+            throw new Error(errMsg)
+        }
+    } else {
+        const allValues: FeatureValues[] = await response.json()
 
-    const allValues: FeatureValues[] = await response.json()
-
-    for (const featureValue of allValues) {
-        await state.updateFeatureState(featureValue.featureKey, featureValue)
+        for (const featureValue of allValues) {
+            await state.updateFeatureState(
+                featureValue.featureKey,
+                featureValue,
+            )
+        }
+        lastModified = response.headers.get('last-modified') || undefined
+        state.store.isInitialised = true
     }
 
     // Ensure that we don't trigger another request while one is in flight
@@ -69,7 +78,7 @@ export async function createNodeHttpClient(
     if (updateStrategy.kind === 'polling') {
         const stopUpdates = pollingUpdates(
             fetchUpdatesSingle,
-            updateStrategy.options?.intervalMs || 30000,
+            updateStrategy.options?.intervalMs || pollingIntervalDefault,
         )
         return createServerConnection(state, fetchUpdatesSingle, stopUpdates)
     }

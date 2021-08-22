@@ -2,7 +2,9 @@ import { EffectiveFeatureValue } from '@featureboard/contracts'
 import { ClientConnection } from './client'
 import { createClient } from './create-client'
 import { EffectiveFeatureState } from './effective-feature-state'
+import { createEnsureSingle } from './ensure-single'
 import { FeatureBoardApiConfig } from './featureboard-api-config'
+import { interval } from './interval'
 import {
     ManualUpdateStrategy,
     PollingUpdateStrategy,
@@ -22,54 +24,73 @@ export async function createBrowserHttpClient(
     audiences: string[],
     { api, fetch, state, updateStrategy }: FeatureBoardBrowserHttpClientOptions,
 ): Promise<ClientConnection> {
+    let lastModified: string | undefined
     const effectiveEndpoint = api.http.endsWith('/')
         ? `${api.http}effective?audiences=${audiences.join(',')}`
         : `${api.http}/effective?audiences=${audiences.join(',')}`
     const response = await fetch(effectiveEndpoint, {
-        method: 'POST',
+        method: 'GET',
         headers: {
             'x-environment-key': environmentApiKey,
         },
     })
 
     if (!response.ok) {
-        throw new Error(
+        const errMsg =
             `Failed to initialise FeatureBoard SDK (${response.statusText}): ` +
-                ((await response.text()) || '-'),
-        )
+            ((await response.text()) || '-')
+
+        // If the SDK has been initialised with a valid set of features, we can continue
+        if (state.store.isInitialised) {
+            console.error(errMsg)
+        } else {
+            throw new Error(errMsg)
+        }
+    } else {
+        const effectiveFeatures: EffectiveFeatureValue[] = await response.json()
+
+        for (const effectiveFeature of effectiveFeatures) {
+            state.updateFeatureValue(
+                effectiveFeature.featureKey,
+                effectiveFeature.value,
+            )
+        }
+        lastModified = response.headers.get('last-modified') || undefined
+        state.store.isInitialised = true
     }
 
-    const effectiveFeatures: EffectiveFeatureValue[] = await response.json()
-
-    for (const effectiveFeature of effectiveFeatures) {
-        state.updateFeatureValue(
-            effectiveFeature.featureKey,
-            effectiveFeature.value,
+    // Ensure that we don't trigger another request while one is in flight
+    const fetchUpdatesSingle = createEnsureSingle(async () => {
+        lastModified = await triggerUpdate(
+            fetch,
+            effectiveEndpoint,
+            environmentApiKey,
+            state,
+            lastModified,
         )
-    }
+    })
 
     const close =
         updateStrategy.kind === 'polling'
             ? pollingUpdates(
-                  () => async () => {},
+                  fetchUpdatesSingle,
                   updateStrategy.options?.interval || 60000,
               )
             : () => {}
 
     return {
         client: createClient(state),
-        updateFeatures: () =>
-            triggerUpdate(fetch, effectiveEndpoint, environmentApiKey, state),
+        updateFeatures: () => {
+            return fetchUpdatesSingle()
+        },
         close,
     }
 }
 
-function pollingUpdates(update: () => void, interval: number) {
-    const intervalRef = setInterval(() => {
-        update()
-    }, interval)
+function pollingUpdates(update: () => void, intervalMs: number) {
+    const intervalRef = interval.set(update, intervalMs)
 
-    const stopUpdates = () => clearInterval(intervalRef)
+    const stopUpdates = () => interval.clear(intervalRef)
     return stopUpdates
 }
 
@@ -81,24 +102,28 @@ async function triggerUpdate(
     effectiveEndpoint: string,
     environmentApiKey: string,
     state: EffectiveFeatureState,
+    lastModified: string | undefined,
 ) {
     const response = await fetch(effectiveEndpoint, {
         headers: {
             'x-environment-key': environmentApiKey,
+            ...(lastModified ? { 'if-modified-since': lastModified } : {}),
         },
     })
 
-    if (!response.ok) {
-        console.error('Failed to get latest toggles')
-        return
+    if (response.status !== 200 && response.status !== 304) {
+        throw new Error(
+            `Failed to get latest toggles: Service returned error ${response.status} (${response.statusText})`,
+        )
     }
+
     // Expect most times will just get a response from the HEAD request saying no updates
     if (response.status === 304) {
-        return
+        return lastModified
     }
 
     const effectiveFeatures: EffectiveFeatureValue[] = await response.json()
-    const removed = Object.keys(state.featureValues).filter(
+    const removed = Object.keys(state.store.all()).filter(
         (key) => !effectiveFeatures.some((feat) => feat.featureKey === key),
     )
 
@@ -106,14 +131,14 @@ async function triggerUpdate(
         state.updateFeatureValue(removedKey, undefined)
     }
     for (const effectiveFeature of effectiveFeatures) {
-        if (
-            state.featureValues[effectiveFeature.featureKey] !==
-            effectiveFeature.value
-        ) {
+        const currentStoredValue = state.store.get(effectiveFeature.featureKey)
+        if (currentStoredValue !== effectiveFeature.value) {
             state.updateFeatureValue(
                 effectiveFeature.featureKey,
                 effectiveFeature.value,
             )
         }
     }
+
+    return response.headers.get('last-modified') || undefined
 }

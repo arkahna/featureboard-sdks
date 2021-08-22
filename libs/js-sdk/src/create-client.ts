@@ -4,7 +4,7 @@ import { FeatureBoardClient } from './features-client'
 export function createClient(state: EffectiveFeatureState): FeatureBoardClient {
     return {
         getFeatureValue: (featureKey: string, defaultValue: any): any => {
-            return state.featureValues[featureKey] ?? defaultValue
+            return state.store.get(featureKey) ?? defaultValue
         },
         subscribeToFeatureValue(
             featureKey: string,
@@ -18,7 +18,7 @@ export function createClient(state: EffectiveFeatureState): FeatureBoardClient {
             }
 
             state.on('feature-updated', callback)
-            onValue((state.featureValues[featureKey] as any) ?? defaultValue)
+            onValue((state.store.get(featureKey) as any) ?? defaultValue)
 
             return () => {
                 state.off('feature-updated', callback)

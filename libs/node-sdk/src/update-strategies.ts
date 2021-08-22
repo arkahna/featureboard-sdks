@@ -34,7 +34,12 @@ export type UpdateStrategies =
     | PollingUpdateStrategy
     | OnRequestUpdateStrategy
 
+export const pollingIntervalDefault = 30000
 export interface PollingOptions {
+    /**
+     * The polling interval in ms
+     * @default 30000
+     **/
     intervalMs?: number
 }
 

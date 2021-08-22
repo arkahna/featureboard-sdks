@@ -1,9 +1,9 @@
-import { FeatureValues } from '@featureboard/contracts'
-import { featureBoardHostedService } from '@featureboard/js-sdk'
+import { EffectiveFeatureValue } from '@featureboard/contracts'
 import fetchMock from 'fetch-mock'
-import { FeatureState } from '../feature-state'
-import { MemoryFeatureStore } from '../feature-store'
-import { createNodeHttpClient } from '../server-http-client'
+import { createBrowserHttpClient } from '../browser-http-client'
+import { EffectiveFeatureState } from '../effective-feature-state'
+import { MemoryEffectiveFeatureStore } from '../effective-feature-store'
+import { featureBoardHostedService } from '../featureboard-service-urls'
 
 let fetch: fetchMock.FetchMockSandbox
 
@@ -14,35 +14,33 @@ beforeEach(() => {
 })
 
 describe('http client', () => {
-    it('calls featureboard /all endpoint on creation', async () => {
-        const values: FeatureValues[] = [
+    it('calls featureboard /effective endpoint on creation', async () => {
+        const values: EffectiveFeatureValue[] = [
             {
                 featureKey: 'my-feature',
-                audienceExceptions: [],
-                defaultValue: 'service-default-value',
+                value: 'service-default-value',
             },
         ]
-        fetch.getOnce('https://client.featureboard.app/all', {
+        fetch.getOnce('https://client.featureboard.app/effective?audiences=', {
             status: 200,
             body: values,
         })
 
-        const httpClient = await createNodeHttpClient('env-api-key', {
+        const httpClient = await createBrowserHttpClient('env-api-key', [], {
             fetch,
             api: featureBoardHostedService,
-            state: new FeatureState(),
+            state: new EffectiveFeatureState([]),
             updateStrategy: { kind: 'manual' },
         })
 
-        const newValues: FeatureValues[] = [
+        const newValues: EffectiveFeatureValue[] = [
             {
                 featureKey: 'my-feature',
-                audienceExceptions: [],
-                defaultValue: 'new-service-default-value',
+                value: 'new-service-default-value',
             },
         ]
         fetch.getOnce(
-            'https://client.featureboard.app/all',
+            'https://client.featureboard.app/effective?audiences=',
             {
                 status: 200,
                 body: newValues,
@@ -56,15 +54,14 @@ describe('http client', () => {
     // Below tests are testing behaviour around https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/If-Modified-Since
 
     it('Attaches last modified header to update requests', async () => {
-        const values: FeatureValues[] = [
+        const values: EffectiveFeatureValue[] = [
             {
                 featureKey: 'my-feature',
-                audienceExceptions: [],
-                defaultValue: 'service-default-value',
+                value: 'service-default-value',
             },
         ]
         const lastModified = new Date().toISOString()
-        fetch.getOnce('https://client.featureboard.app/all', {
+        fetch.getOnce('https://client.featureboard.app/effective?audiences=', {
             status: 200,
             body: values,
             headers: {
@@ -72,16 +69,16 @@ describe('http client', () => {
             },
         })
 
-        const httpClient = await createNodeHttpClient('env-api-key', {
+        const httpClient = await createBrowserHttpClient('env-api-key', [], {
             fetch,
             api: featureBoardHostedService,
-            state: new FeatureState(),
+            state: new EffectiveFeatureState([]),
             updateStrategy: { kind: 'manual' },
         })
 
         fetch.getOnce(
             {
-                url: 'https://client.featureboard.app/all',
+                url: 'https://client.featureboard.app/effective?audiences=',
                 headers: { 'If-Modified-Since': lastModified },
             },
             {
@@ -94,15 +91,14 @@ describe('http client', () => {
     })
 
     it('Handles updates from server', async () => {
-        const values: FeatureValues[] = [
+        const values: EffectiveFeatureValue[] = [
             {
                 featureKey: 'my-feature',
-                audienceExceptions: [],
-                defaultValue: 'service-default-value',
+                value: 'service-default-value',
             },
         ]
         const lastModified = new Date().toISOString()
-        fetch.getOnce('https://client.featureboard.app/all', {
+        fetch.getOnce('https://client.featureboard.app/effective?audiences=', {
             status: 200,
             body: values,
             headers: {
@@ -110,23 +106,22 @@ describe('http client', () => {
             },
         })
 
-        const httpClient = await createNodeHttpClient('env-api-key', {
+        const httpClient = await createBrowserHttpClient('env-api-key', [], {
             fetch,
             api: featureBoardHostedService,
-            state: new FeatureState(),
+            state: new EffectiveFeatureState([]),
             updateStrategy: { kind: 'manual' },
         })
 
-        const newValues: FeatureValues[] = [
+        const newValues: EffectiveFeatureValue[] = [
             {
                 featureKey: 'my-feature',
-                audienceExceptions: [],
-                defaultValue: 'new-service-default-value',
+                value: 'new-service-default-value',
             },
         ]
         fetch.getOnce(
             {
-                url: 'https://client.featureboard.app/all',
+                url: 'https://client.featureboard.app/effective?audiences=',
                 headers: { 'If-Modified-Since': lastModified },
             },
             {
@@ -139,22 +134,20 @@ describe('http client', () => {
         await httpClient.updateFeatures()
 
         expect(
-            httpClient
-                .request([])
-                .getFeatureValue('my-feature', 'default-value'),
+            httpClient.client.getFeatureValue('my-feature', 'default-value'),
         ).toEqual('new-service-default-value')
     })
 
     it('can start with last known good config', async () => {
-        await createNodeHttpClient('env-api-key', {
+        await createBrowserHttpClient('env-api-key', [], {
             fetch,
             api: featureBoardHostedService,
-            state: new FeatureState(
-                new MemoryFeatureStore([
+            state: new EffectiveFeatureState(
+                [],
+                new MemoryEffectiveFeatureStore([
                     {
                         featureKey: 'my-feature',
-                        audienceExceptions: [],
-                        defaultValue: 'service-default-value',
+                        value: 'service-default-value',
                     },
                 ]),
             ),

@@ -1,9 +1,7 @@
 import { createBrowserHttpClient } from './browser-http-client'
 import { createBrowserWsClient } from './browser-ws-client'
-import {
-    EffectiveFeatureState,
-    EffectiveFeatureValues,
-} from './effective-feature-state'
+import { EffectiveFeatureState } from './effective-feature-state'
+import { EffectiveFeatureStore } from './effective-feature-store'
 import { FeatureBoardApiConfig } from './featureboard-api-config'
 import { featureBoardHostedService } from './featureboard-service-urls'
 import { FeatureBoardClient } from './features-client'
@@ -13,7 +11,7 @@ export interface FeatureBoardServiceOptions {
     /** Connect to a self hosted instance of FeatureBoard */
     api?: FeatureBoardApiConfig
 
-    initialValues?: EffectiveFeatureValues | undefined
+    store?: EffectiveFeatureStore
 
     /**
      * The method your feature state is updated
@@ -22,7 +20,7 @@ export interface FeatureBoardServiceOptions {
      * live - uses websockets for near realtime updates
      * polling - checks with the featureboard service every 30seconds (or configured interval) for updates
      */
-    updateStrategy?: UpdateStrategies
+    updateStrategy?: UpdateStrategies | UpdateStrategies['kind']
 
     /**
      * Provide an alternate fetch implementation, only used when not in live mode
@@ -49,12 +47,12 @@ export const FeatureBoardService = {
         {
             updateStrategy,
             api,
-            initialValues,
+            store,
             fetch: fetchImpl,
         }: FeatureBoardServiceOptions = {},
     ) {
         const resolvedUpdateStrategy: UpdateStrategies = !updateStrategy
-            ? { kind: 'live' }
+            ? { kind: 'polling' }
             : typeof updateStrategy === 'string'
             ? {
                   kind: updateStrategy,
@@ -62,7 +60,7 @@ export const FeatureBoardService = {
             : updateStrategy
         const effectiveFeatureState = new EffectiveFeatureState(
             audiences,
-            initialValues,
+            store,
         )
 
         if (resolvedUpdateStrategy.kind === 'live') {

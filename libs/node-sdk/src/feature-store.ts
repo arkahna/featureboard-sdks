@@ -1,6 +1,9 @@
 import { FeatureValues } from '@featureboard/contracts'
 
 export interface FeatureStore {
+    /** Flag indicating the store has a valid set of feature values */
+    isInitialised: boolean
+
     /** Gets a stable copy of the feature values (will not be updated if the store is updated). */
     all(): Record<string, FeatureValues | undefined>
     get(featureKey: string): FeatureValues | undefined
@@ -10,10 +13,13 @@ export interface FeatureStore {
     ): void | PromiseLike<any>
 }
 
-export class MemoryStore implements FeatureStore {
+export class MemoryFeatureStore implements FeatureStore {
     private _store: Record<string, FeatureValues | undefined> = {}
+    isInitialised: boolean
 
     constructor(initialValues?: FeatureValues[]) {
+        // Assume if initial values are provided, they are a valid set of feature values
+        this.isInitialised = !!initialValues
         for (const value of initialValues || []) {
             this._store[value.featureKey] = value
         }

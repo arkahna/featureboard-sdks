@@ -1,8 +1,8 @@
 import { FeatureValues } from '@featureboard/contracts'
-import { FeatureStore, MemoryStore } from './feature-store'
+import { FeatureStore, MemoryFeatureStore } from './feature-store'
 
 export class FeatureState {
-    constructor(public store: FeatureStore = new MemoryStore()) {}
+    constructor(public store: FeatureStore = new MemoryFeatureStore()) {}
 
     private featureUpdatedCallbacks: Array<
         (featureKey: string, values: FeatureValues | undefined) => void
