@@ -1,5 +1,19 @@
 # @featureboard/js-sdk
 
+## 0.2.0
+
+### Minor Changes
+
+- [`30bcd26`](https://github.com/featureboard/sdks/commit/30bcd26fac6e5e7ea02dda54b09c088e891e1b35) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Added use of last-modfied into client header so server can return 304 if nothing has changed
+
+* [`30bcd26`](https://github.com/featureboard/sdks/commit/30bcd26fac6e5e7ea02dda54b09c088e891e1b35) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Ensure only one request for features can be in flight at the same time
+
+### Patch Changes
+
+- [`30bcd26`](https://github.com/featureboard/sdks/commit/30bcd26fac6e5e7ea02dda54b09c088e891e1b35) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Fixed wrong http method being used in the http client
+
+* [`30bcd26`](https://github.com/featureboard/sdks/commit/30bcd26fac6e5e7ea02dda54b09c088e891e1b35) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Update readme to point at documentation site
+
 ## 0.1.0
 
 ### Minor Changes

@@ -1,5 +1,16 @@
 # @featureboard/node-sdk
 
+## 0.4.0
+
+### Minor Changes
+
+- [`30bcd26`](https://github.com/featureboard/sdks/commit/30bcd26fac6e5e7ea02dda54b09c088e891e1b35) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Switch default strategy in node sdk to be polling
+
+### Patch Changes
+
+- Updated dependencies [[`30bcd26`](https://github.com/featureboard/sdks/commit/30bcd26fac6e5e7ea02dda54b09c088e891e1b35), [`30bcd26`](https://github.com/featureboard/sdks/commit/30bcd26fac6e5e7ea02dda54b09c088e891e1b35), [`30bcd26`](https://github.com/featureboard/sdks/commit/30bcd26fac6e5e7ea02dda54b09c088e891e1b35), [`30bcd26`](https://github.com/featureboard/sdks/commit/30bcd26fac6e5e7ea02dda54b09c088e891e1b35)]:
+  - @featureboard/js-sdk@0.2.0
+
 ## 0.3.0
 
 ### Minor Changes
