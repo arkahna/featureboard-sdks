@@ -1,5 +1,11 @@
 # @featureboard/react-sdk
 
+## 0.3.0
+
+### Minor Changes
+
+- [`ef075e9`](https://github.com/featureboard/sdks/commit/ef075e92dc7609125fca7a794690b160e57e74cb) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Fixed return types from useClient
+
 ## 0.2.0
 
 ### Minor Changes
