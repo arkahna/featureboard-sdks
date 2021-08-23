@@ -1,3 +1,3 @@
-export * from './lib/featureboard-provider'
-export * from './lib/use-client'
-export * from './lib/use-feature'
+export * from './featureboard-provider'
+export * from './use-client'
+export * from './use-feature'

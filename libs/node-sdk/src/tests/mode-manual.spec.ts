@@ -74,6 +74,52 @@ describe('Manual update mode', () => {
         ).toEqual('new-service-default-value')
     })
 
+    it('can manually update audience exception values', async () => {
+        const values: FeatureValues[] = [
+            {
+                featureKey: 'my-feature',
+                audienceExceptions: [
+                    { audienceKey: 'aud', value: 'aud-value' },
+                ],
+                defaultValue: 'service-default-value',
+            },
+        ]
+        fetch.getOnce('https://client.featureboard.app/all', {
+            status: 200,
+            body: values,
+        })
+
+        const client = await FeatureBoardService.init('fake-key', {
+            updateStrategy: 'manual',
+            fetch,
+        })
+
+        const newValues: FeatureValues[] = [
+            {
+                featureKey: 'my-feature',
+                audienceExceptions: [
+                    { audienceKey: 'aud', value: 'new-aud-value' },
+                ],
+                defaultValue: 'new-service-default-value',
+            },
+        ]
+        fetch.getOnce(
+            'https://client.featureboard.app/all',
+            {
+                status: 200,
+                body: newValues,
+            },
+            { overwriteRoutes: true },
+        )
+        await client.updateFeatures()
+
+        expect(
+            client
+                .request(['aud'])
+                .getFeatureValue('my-feature', 'default-value'),
+        ).toEqual('new-aud-value')
+    })
+
     it('close', async () => {
         const values: FeatureValues[] = [
             {
