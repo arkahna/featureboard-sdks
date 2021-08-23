@@ -1,5 +1,11 @@
 # @featureboard/react-sdk
 
+## 0.2.0
+
+### Minor Changes
+
+- [`26b573f`](https://github.com/featureboard/sdks/commit/26b573fffa906ba2bd6fedf473ecbd6ba9d1a56c) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Update useClient to return error if initialisation fails, allowing client to recover
+
 ## 0.1.2
 
 ### Patch Changes
