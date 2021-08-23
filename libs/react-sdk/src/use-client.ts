@@ -15,9 +15,9 @@ export function useClient({
     audiences: Array<string | undefined | false>
 } & FeatureBoardServiceOptions) {
     const [stableInitOptions] = useState(initOptions)
-    const [clientSdk, setClientSdk] = useState<ClientConnection | undefined>(
-        undefined,
-    )
+    const [connectionConnection, setClientSdk] = useState<
+        ClientConnection | undefined
+    >(undefined)
     const [initError, setInitError] = useState<string | undefined>(undefined)
 
     // Removed undefined/false audiences and sort to make as stable list as possible
@@ -37,8 +37,8 @@ export function useClient({
                 setInitError(undefined)
             }
             // Cleanup old client
-            if (clientSdk) {
-                clientSdk.close()
+            if (connectionConnection) {
+                connectionConnection.close()
             }
 
             if (apiKey) {
@@ -55,17 +55,30 @@ export function useClient({
                 }
             }
         },
-        [apiKey, clientSdk, initError, stableAudiences, stableInitOptions],
+        [
+            apiKey,
+            connectionConnection,
+            initError,
+            stableAudiences,
+            stableInitOptions,
+        ],
     )
 
     useEffect(() => {
         if (stableAudiences !== previousStableAudiences) {
             connect()
         }
-    }, [apiKey, clientSdk, connect, previousStableAudiences, stableAudiences])
+    }, [
+        apiKey,
+        connectionConnection,
+        connect,
+        previousStableAudiences,
+        stableAudiences,
+    ])
 
     return {
-        client: clientSdk,
+        client: connectionConnection?.client,
+        connectionConnection,
         initError,
         reconnect: () => {
             connect()

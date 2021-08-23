@@ -169,7 +169,7 @@ describe('useClient hook', () => {
 
         expect(result.current.initError).toBeUndefined()
         expect(result.current.client).not.toBe(originalClient)
-        const sdkValue = result.current.client?.client.getFeatureValue(
+        const sdkValue = result.current.client?.getFeatureValue(
             'my-feature',
             'default-val',
         )
