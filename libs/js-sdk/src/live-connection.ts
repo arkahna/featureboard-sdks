@@ -1,4 +1,7 @@
-import { NotificationType, SubscribeToEnvironment } from '@featureboard/contracts'
+import {
+    NotificationType,
+    SubscribeToEnvironment,
+} from '@featureboard/contracts'
 import { PromiseCompletionSource } from 'promise-completion-source'
 import { FeatureBoardApiConfig } from './featureboard-api-config'
 import { log } from './log'
@@ -28,7 +31,7 @@ export interface IErrorEvent {
 export interface LiveOptions {
     /**
      * Connection timeout for live updates
-     * @default 5000ms
+     * @default 15000ms
      **/
     connectTimeout?: number
 
@@ -53,7 +56,7 @@ export class LiveConnection {
         options: LiveOptions,
     ) {
         this.wsUrl = apiOptions.ws
-        this.connectTimeout = options?.connectTimeout || 5000
+        this.connectTimeout = options?.connectTimeout || 15000
         this.websocketFactory = options.websocketFactory
 
         // Enable callbacks to be used inline
@@ -78,7 +81,10 @@ export class LiveConnection {
         this.ws.onerror = this.onError
 
         const timeout = new Promise<void>((_, reject) =>
-            setTimeout(() => reject(new Error('SDK connection timeout')), this.connectTimeout),
+            setTimeout(
+                () => reject(new Error('SDK connection timeout')),
+                this.connectTimeout,
+            ),
         )
 
         await Promise.race([timeout, this.initialised.promise])

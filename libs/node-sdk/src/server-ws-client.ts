@@ -34,7 +34,7 @@ export async function createNodeWsClient(
 
     return createServerConnection(
         state,
-        () => liveConnection.connect(handleMessage),
+        async () => {},
         () => liveConnection.close(),
     )
 
