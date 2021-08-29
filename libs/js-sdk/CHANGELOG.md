@@ -1,5 +1,13 @@
 # @featureboard/js-sdk
 
+## 0.3.0
+
+### Minor Changes
+
+- [`af7baef`](https://github.com/featureboard/sdks/commit/af7baef7e5b28d0906140617339e645d104b2195) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - SDK will automatically retry when it fails to start
+
+  Live will fall back to fetching the initial values via HTTP then continue reconnecting in the background, HTTP will retry with backoff up to 4 times
+
 ## 0.2.0
 
 ### Minor Changes
