@@ -73,6 +73,7 @@ export const FeatureBoardService = {
                     ...resolvedUpdateStrategy.options,
                 },
                 state: effectiveFeatureState,
+                fetch: fetchImpl || fetch,
             })
         }
 

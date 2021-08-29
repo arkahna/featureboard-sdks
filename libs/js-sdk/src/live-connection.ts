@@ -5,6 +5,7 @@ import {
 import { PromiseCompletionSource } from 'promise-completion-source'
 import { FeatureBoardApiConfig } from './featureboard-api-config'
 import { log } from './log'
+import { timeout } from './timeout'
 
 /** Contract for web socket connection */
 export interface IWebSocket {
@@ -81,10 +82,12 @@ export class LiveConnection {
         this.ws.onerror = this.onError
 
         const timeout = new Promise<void>((_, reject) =>
-            setTimeout(
-                () => reject(new Error('SDK connection timeout')),
-                this.connectTimeout,
-            ),
+            setTimeout(() => {
+                // Timeout should close the connection
+                this.close()
+
+                reject(new Error('SDK connection timeout'))
+            }, this.connectTimeout),
         )
 
         await Promise.race([timeout, this.initialised.promise])
@@ -115,8 +118,10 @@ export class LiveConnection {
 
     private onClose({ code, reason }: ICloseEvent): void {
         log({ code, reason }, 'WS Disconnect')
-        // Application level close, don't reconnect
-        if (code === 1000) {
+        const applicationAskedClientToClose = 1000
+        const sdkClosed = 1005
+        // Don't reconnect for application-initiated disconnects
+        if (code === applicationAskedClientToClose || code === sdkClosed) {
             return
         }
 
@@ -199,5 +204,36 @@ export class LiveConnection {
             this.ws.close()
             this.ws = undefined
         }
+    }
+
+    async tryReconnectInBackground(
+        liveConnection: LiveConnection,
+        handleMessage: (message: NotificationType) => void,
+    ) {
+        let attemptedRetries = 0
+
+        do {
+            let delay = Math.pow(2, attemptedRetries) * 1000
+            // Max 60 seconds
+            if (delay > 60000) {
+                delay = 60000
+            }
+            attemptedRetries++
+            await new Promise((resolve) => timeout.set(resolve, delay))
+
+            try {
+                await liveConnection.connect(handleMessage)
+            } catch (err) {
+                console.error(
+                    `Failed to connect to FeatureBoard, trying again in ${delay}ms`,
+                    err,
+                )
+
+                continue
+            }
+
+            break
+            // eslint-disable-next-line no-constant-condition
+        } while (true)
     }
 }

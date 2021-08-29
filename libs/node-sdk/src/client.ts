@@ -59,6 +59,12 @@ export const FeatureBoardService = {
 
         const featureState = new FeatureState(store)
 
+        const resolveFetch = async () =>
+            fetchImpl ||
+            (typeof fetch !== 'undefined'
+                ? fetch
+                : ((await import('node-fetch')).default as any as typeof fetch))
+
         if (resolvedUpdateStrategy.kind === 'live') {
             const defaultWebsocketFactory = (address: string): any =>
                 new WS(address) as any
@@ -69,19 +75,14 @@ export const FeatureBoardService = {
                     ...resolvedUpdateStrategy.options,
                 },
                 state: featureState,
+                getFetch: resolveFetch,
             })
         }
 
         return await createNodeHttpClient(environmentApiKey, {
             api: api || featureBoardHostedService,
             state: featureState,
-            fetch:
-                fetchImpl ||
-                (typeof fetch !== 'undefined'
-                    ? fetch
-                    : ((
-                          await import('node-fetch')
-                      ).default as any as typeof fetch)),
+            fetch: await resolveFetch(),
             updateStrategy: resolvedUpdateStrategy,
         })
     },

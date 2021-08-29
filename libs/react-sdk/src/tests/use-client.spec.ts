@@ -1,4 +1,5 @@
 import { EffectiveFeatureValue } from '@featureboard/contracts'
+import { timeout } from '@featureboard/js-sdk/src/timeout'
 import { act, renderHook } from '@testing-library/react-hooks'
 import fetchMock from 'fetch-mock'
 import { useClient } from '../use-client'
@@ -28,14 +29,21 @@ describe('useClient hook', () => {
     })
 
     it('returns initError when client fails to initialised', async () => {
-        fetch.getOnce('https://client.featureboard.app/effective?audiences=', {
+        fetch.get('https://client.featureboard.app/effective?audiences=', {
             status: 500,
         })
+        timeout.set = ((cb: any) => setTimeout(cb, 0)) as any
+
         const { result } = renderHook(() =>
             useClient({ apiKey: '<apikey>', audiences: [], fetch }),
         )
 
         await act(async () => {
+            // Retries on error 4 times
+            await new Promise((resolve) => setTimeout(resolve))
+            await new Promise((resolve) => setTimeout(resolve))
+            await new Promise((resolve) => setTimeout(resolve))
+            await new Promise((resolve) => setTimeout(resolve))
             await new Promise((resolve) => setTimeout(resolve))
         })
 

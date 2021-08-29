@@ -1,4 +1,5 @@
 import { NotificationType } from '@featureboard/contracts'
+import { initStore } from './browser-http-client'
 import { ClientConnection } from './client'
 import { createClient } from './create-client'
 import { EffectiveFeatureState } from './effective-feature-state'
@@ -9,12 +10,15 @@ export interface FeatureBoardBrowserWsClientOptions {
     api: FeatureBoardApiConfig
     state: EffectiveFeatureState
     liveOptions: LiveOptions
+
+    /** Used for fallback if there are issues connecting */
+    fetch: (input: RequestInfo, init?: RequestInit) => Promise<Response>
 }
 
 export async function createBrowserWsClient(
     environmentApiKey: string,
     audiences: string[],
-    { api, state, liveOptions }: FeatureBoardBrowserWsClientOptions,
+    { api, state, liveOptions, fetch }: FeatureBoardBrowserWsClientOptions,
 ): Promise<ClientConnection> {
     const liveConnection = new LiveConnection(
         environmentApiKey,
@@ -23,11 +27,21 @@ export async function createBrowserWsClient(
         liveOptions,
     )
 
-    await liveConnection.connect(handleMessage)
+    try {
+        await liveConnection.connect(handleMessage)
+    } catch (err) {
+        if (!state.store.isInitialised) {
+            await initStore(api, audiences, fetch, environmentApiKey, state)
+        }
+
+        // We have successfully initialised the store using http, can now retry
+        // live connection in the background
+        liveConnection.tryReconnectInBackground(liveConnection, handleMessage)
+    }
 
     return {
         client: createClient(state),
-        updateFeatures: () => liveConnection.connect(handleMessage),
+        updateFeatures: async () => {},
         close() {
             liveConnection.close()
         },

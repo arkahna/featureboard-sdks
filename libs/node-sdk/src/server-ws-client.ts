@@ -8,11 +8,17 @@ import {
 import { createServerConnection } from './create-server-connection'
 import { FeatureState } from './feature-state'
 import { ServerConnection } from './server-connection'
+import { initStore } from './server-http-client'
 
 export interface FeatureBoardServerWsClientOptions {
     api?: FeatureBoardApiConfig
     state?: FeatureState
     liveOptions: LiveOptions
+
+    /** Used for fallback if there are issues connecting */
+    getFetch: () => Promise<
+        (input: RequestInfo, init?: RequestInit) => Promise<Response>
+    >
 }
 
 export async function createNodeWsClient(
@@ -21,6 +27,7 @@ export async function createNodeWsClient(
         api = featureBoardHostedService,
         state = new FeatureState(),
         liveOptions,
+        getFetch,
     }: FeatureBoardServerWsClientOptions,
 ): Promise<ServerConnection> {
     const liveConnection = new LiveConnection(
@@ -30,7 +37,17 @@ export async function createNodeWsClient(
         liveOptions,
     )
 
-    await liveConnection.connect(handleMessage)
+    try {
+        await liveConnection.connect(handleMessage)
+    } catch (err) {
+        if (!state.store.isInitialised) {
+            await initStore(api, await getFetch(), environmentApiKey, state)
+        }
+
+        // We have successfully initialised the store using http, can now retry
+        // live connection in the background
+        liveConnection.tryReconnectInBackground(liveConnection, handleMessage)
+    }
 
     return createServerConnection(
         state,

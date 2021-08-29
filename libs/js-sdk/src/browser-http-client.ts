@@ -5,6 +5,7 @@ import { EffectiveFeatureState } from './effective-feature-state'
 import { createEnsureSingle } from './ensure-single'
 import { FeatureBoardApiConfig } from './featureboard-api-config'
 import { interval } from './interval'
+import { timeout } from './timeout'
 import {
     ManualUpdateStrategy,
     PollingUpdateStrategy,
@@ -24,40 +25,14 @@ export async function createBrowserHttpClient(
     audiences: string[],
     { api, fetch, state, updateStrategy }: FeatureBoardBrowserHttpClientOptions,
 ): Promise<ClientConnection> {
-    let lastModified: string | undefined
-    const effectiveEndpoint = api.http.endsWith('/')
-        ? `${api.http}effective?audiences=${audiences.join(',')}`
-        : `${api.http}/effective?audiences=${audiences.join(',')}`
-    const response = await fetch(effectiveEndpoint, {
-        method: 'GET',
-        headers: {
-            'x-environment-key': environmentApiKey,
-        },
-    })
-
-    if (!response.ok) {
-        const errMsg =
-            `Failed to initialise FeatureBoard SDK (${response.statusText}): ` +
-            ((await response.text()) || '-')
-
-        // If the SDK has been initialised with a valid set of features, we can continue
-        if (state.store.isInitialised) {
-            console.error(errMsg)
-        } else {
-            throw new Error(errMsg)
-        }
-    } else {
-        const effectiveFeatures: EffectiveFeatureValue[] = await response.json()
-
-        for (const effectiveFeature of effectiveFeatures) {
-            state.updateFeatureValue(
-                effectiveFeature.featureKey,
-                effectiveFeature.value,
-            )
-        }
-        lastModified = response.headers.get('last-modified') || undefined
-        state.store.isInitialised = true
-    }
+    // eslint-disable-next-line prefer-const
+    let { lastModified, effectiveEndpoint } = await initStore(
+        api,
+        audiences,
+        fetch,
+        environmentApiKey,
+        state,
+    )
 
     // Ensure that we don't trigger another request while one is in flight
     const fetchUpdatesSingle = createEnsureSingle(async () => {
@@ -85,6 +60,72 @@ export async function createBrowserHttpClient(
         },
         close,
     }
+}
+
+export async function initStore(
+    api: FeatureBoardApiConfig,
+    audiences: string[],
+    fetch: (
+        input: RequestInfo,
+        init?: RequestInit | undefined,
+    ) => Promise<Response>,
+    environmentApiKey: string,
+    state: EffectiveFeatureState,
+    attemptedRetries = 0,
+): Promise<{ lastModified: string | undefined; effectiveEndpoint: string }> {
+    let lastModified: string | undefined
+    const effectiveEndpoint = api.http.endsWith('/')
+        ? `${api.http}effective?audiences=${audiences.join(',')}`
+        : `${api.http}/effective?audiences=${audiences.join(',')}`
+    const response = await fetch(effectiveEndpoint, {
+        method: 'GET',
+        headers: {
+            'x-environment-key': environmentApiKey,
+        },
+    })
+
+    if (!response.ok) {
+        const errMsg =
+            `Failed to initialise FeatureBoard SDK (${response.statusText}): ` +
+            ((await response.text()) || '-')
+
+        // If the SDK has been initialised with a valid set of features, we can continue
+        if (state.store.isInitialised) {
+            console.error(errMsg)
+        } else {
+            if (attemptedRetries < 4) {
+                const delay = Math.pow(2, attemptedRetries) * 1000
+                console.warn(
+                    `Failed to initialise FeatureBoard SDK, retrying in ${delay}`,
+                )
+                await new Promise((resolve) =>
+                    timeout.set(resolve, delay).unref(),
+                )
+
+                return initStore(
+                    api,
+                    audiences,
+                    fetch,
+                    environmentApiKey,
+                    state,
+                    attemptedRetries + 1,
+                )
+            }
+            throw new Error(errMsg)
+        }
+    } else {
+        const effectiveFeatures: EffectiveFeatureValue[] = await response.json()
+
+        for (const effectiveFeature of effectiveFeatures) {
+            state.updateFeatureValue(
+                effectiveFeature.featureKey,
+                effectiveFeature.value,
+            )
+        }
+        lastModified = response.headers.get('last-modified') || undefined
+        state.store.isInitialised = true
+    }
+    return { lastModified, effectiveEndpoint }
 }
 
 function pollingUpdates(update: () => void, intervalMs: number) {

@@ -29,40 +29,13 @@ export async function createNodeHttpClient(
     environmentApiKey: string,
     { api, fetch, state, updateStrategy }: FeatureBoardNodeHttpClientOptions,
 ): Promise<ServerConnection> {
-    let lastModified: string | undefined
-    const allEndpoint = api.http.endsWith('/')
-        ? `${api.http}all`
-        : `${api.http}/all`
-    const response = await fetch(allEndpoint, {
-        method: 'GET',
-        headers: {
-            'x-environment-key': environmentApiKey,
-        },
-    })
-
-    if (!response.ok) {
-        const errMsg =
-            `Failed to initialise FeatureBoard SDK (${response.statusText}): ` +
-            ((await response.text()) || '-')
-
-        // If the SDK has been initialised with a valid set of features, we can continue
-        if (state.store.isInitialised) {
-            console.error(errMsg)
-        } else {
-            throw new Error(errMsg)
-        }
-    } else {
-        const allValues: FeatureValues[] = await response.json()
-
-        for (const featureValue of allValues) {
-            await state.updateFeatureState(
-                featureValue.featureKey,
-                featureValue,
-            )
-        }
-        lastModified = response.headers.get('last-modified') || undefined
-        state.store.isInitialised = true
-    }
+    // eslint-disable-next-line prefer-const
+    let { lastModified, allEndpoint } = await initStore(
+        api,
+        fetch,
+        environmentApiKey,
+        state,
+    )
 
     // Ensure that we don't trigger another request while one is in flight
     const fetchUpdatesSingle = createEnsureSingle(async () => {
@@ -106,6 +79,71 @@ export async function createNodeHttpClient(
               }
             : undefined,
     )
+}
+
+export async function initStore(
+    api: FeatureBoardApiConfig,
+    fetch: (
+        input: RequestInfo,
+        init?: RequestInit | undefined,
+    ) => Promise<Response>,
+    environmentApiKey: string,
+    state: FeatureState,
+    attemptedRetries = 0,
+): Promise<{ lastModified: string | undefined; allEndpoint: string }> {
+    let lastModified: string | undefined
+    const allEndpoint = api.http.endsWith('/')
+        ? `${api.http}all`
+        : `${api.http}/all`
+    const response = await fetch(allEndpoint, {
+        method: 'GET',
+        headers: {
+            'x-environment-key': environmentApiKey,
+        },
+    })
+
+    if (!response.ok) {
+        const errMsg =
+            `Failed to initialise FeatureBoard SDK (${response.statusText}): ` +
+            ((await response.text()) || '-')
+
+        // If the SDK has been initialised with a valid set of features, we can continue
+        if (state.store.isInitialised) {
+            console.error(errMsg)
+        } else {
+            if (attemptedRetries < 4) {
+                const delay = Math.pow(2, attemptedRetries) * 1000
+                console.warn(
+                    `Failed to initialise FeatureBoard SDK, retrying in ${delay}`,
+                )
+                await new Promise((resolve) =>
+                    setTimeout(resolve, delay).unref(),
+                )
+
+                return initStore(
+                    api,
+                    fetch,
+                    environmentApiKey,
+                    state,
+                    attemptedRetries + 1,
+                )
+            }
+
+            throw new Error(errMsg)
+        }
+    } else {
+        const allValues: FeatureValues[] = await response.json()
+
+        for (const featureValue of allValues) {
+            await state.updateFeatureState(
+                featureValue.featureKey,
+                featureValue,
+            )
+        }
+        lastModified = response.headers.get('last-modified') || undefined
+        state.store.isInitialised = true
+    }
+    return { lastModified, allEndpoint }
 }
 
 function pollingUpdates(update: () => any, intervalMs: number) {
