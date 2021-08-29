@@ -1,5 +1,5 @@
 import { ClientMessages } from '@featureboard/contracts'
-import { IWebSocket } from '@featureboard/js-sdk'
+import { IWebSocket } from '../live-connection'
 
 export function connectToWsClient(
     onMessage: (msg: ClientMessages, ws: IWebSocket) => void,
