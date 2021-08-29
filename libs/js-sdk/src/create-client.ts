@@ -1,7 +1,10 @@
 import { EffectiveFeatureState } from './effective-feature-state'
 import { FeatureBoardClient } from './features-client'
+import { debugLog } from './log'
 
 export function createClient(state: EffectiveFeatureState): FeatureBoardClient {
+    debugLog('Creating client')
+
     return {
         getFeatureValue: (featureKey: string, defaultValue: any): any => {
             return state.store.get(featureKey) ?? defaultValue

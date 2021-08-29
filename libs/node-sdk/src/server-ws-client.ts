@@ -46,7 +46,7 @@ export async function createNodeWsClient(
 
         // We have successfully initialised the store using http, can now retry
         // live connection in the background
-        liveConnection.tryReconnectInBackground(liveConnection, handleMessage)
+        liveConnection.tryReconnectInBackground(handleMessage)
     }
 
     return createServerConnection(

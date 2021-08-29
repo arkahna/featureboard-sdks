@@ -5,6 +5,7 @@ import { createClient } from './create-client'
 import { EffectiveFeatureState } from './effective-feature-state'
 import { FeatureBoardApiConfig } from './featureboard-api-config'
 import { LiveConnection, LiveOptions } from './live-connection'
+import { debugLog } from './log'
 
 export interface FeatureBoardBrowserWsClientOptions {
     api: FeatureBoardApiConfig
@@ -20,6 +21,7 @@ export async function createBrowserWsClient(
     audiences: string[],
     { api, state, liveOptions, fetch }: FeatureBoardBrowserWsClientOptions,
 ): Promise<ClientConnection> {
+    debugLog('Creating browser ws client')
     const liveConnection = new LiveConnection(
         environmentApiKey,
         { kind: 'effective-values', audiences },
@@ -36,7 +38,7 @@ export async function createBrowserWsClient(
 
         // We have successfully initialised the store using http, can now retry
         // live connection in the background
-        liveConnection.tryReconnectInBackground(liveConnection, handleMessage)
+        liveConnection.tryReconnectInBackground(handleMessage)
     }
 
     return {

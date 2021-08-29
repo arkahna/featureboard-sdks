@@ -66,6 +66,7 @@ export const FeatureBoardService = {
         if (resolvedUpdateStrategy.kind === 'live') {
             const defaultWebsocketFactory = (address: string): any =>
                 new WebSocket(address)
+
             return createBrowserWsClient(environmentApiKey, audiences, {
                 api: api || featureBoardHostedService,
                 liveOptions: {

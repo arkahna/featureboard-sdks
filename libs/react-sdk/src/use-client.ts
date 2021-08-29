@@ -3,8 +3,8 @@ import {
     FeatureBoardService,
     FeatureBoardServiceOptions,
 } from '@featureboard/js-sdk'
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { usePrevious } from './use-previous'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { reactSdkDebugLog } from './log'
 
 export function useClient({
     apiKey,
@@ -19,6 +19,10 @@ export function useClient({
         ClientConnection | undefined
     >(undefined)
     const [initError, setInitError] = useState<string | undefined>(undefined)
+    const connectionValues = useRef<{
+        audiences: string[] | undefined
+        apiKey: string | undefined
+    }>({ apiKey: undefined, audiences: undefined })
 
     // Removed undefined/false audiences and sort to make as stable list as possible
     const filteredAudiences = audiences
@@ -29,7 +33,6 @@ export function useClient({
         // eslint-disable-next-line react-hooks/exhaustive-deps
         [filteredAudiences.join()],
     )
-    const previousStableAudiences = usePrevious(stableAudiences)
 
     const connect = useCallback(
         async function connect() {
@@ -43,6 +46,9 @@ export function useClient({
 
             if (apiKey) {
                 try {
+                    connectionValues.current.apiKey = apiKey
+                    connectionValues.current.audiences = stableAudiences
+
                     const sdk = await FeatureBoardService.init(
                         apiKey,
                         stableAudiences,
@@ -65,16 +71,16 @@ export function useClient({
     )
 
     useEffect(() => {
-        if (stableAudiences !== previousStableAudiences) {
+        if (
+            stableAudiences !== connectionValues.current.audiences ||
+            apiKey !== connectionValues.current.apiKey
+        ) {
+            reactSdkDebugLog(
+                'useClient arguments changed, re-initialising client',
+            )
             connect()
         }
-    }, [
-        apiKey,
-        connectionConnection,
-        connect,
-        previousStableAudiences,
-        stableAudiences,
-    ])
+    }, [apiKey, connectionConnection, connect, stableAudiences])
 
     return {
         client: connectionConnection?.client,

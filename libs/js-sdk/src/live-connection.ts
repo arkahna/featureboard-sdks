@@ -4,7 +4,7 @@ import {
 } from '@featureboard/contracts'
 import { PromiseCompletionSource } from 'promise-completion-source'
 import { FeatureBoardApiConfig } from './featureboard-api-config'
-import { log } from './log'
+import { debugLog } from './log'
 import { timeout } from './timeout'
 
 /** Contract for web socket connection */
@@ -39,6 +39,8 @@ export interface LiveOptions {
     websocketFactory: (address: string) => IWebSocket
 }
 
+const liveConnectionDebug = debugLog.extend('live-connection')
+
 export class LiveConnection {
     private ws?: IWebSocket
     private retryCount = 0
@@ -69,12 +71,13 @@ export class LiveConnection {
     }
 
     async connect(handleMessage: (message: NotificationType) => void) {
+        liveConnectionDebug('Connecting to FeatureBoard')
         this.close()
         this.handleMessage = handleMessage
         this.retryCount = 0
         this.initialised = new PromiseCompletionSource()
         this.ws = this.websocketFactory(this.wsUrl)
-        log('Connecting')
+        liveConnectionDebug('Connecting')
 
         this.ws.onopen = this.onOpen
         this.ws.onclose = this.onClose
@@ -96,15 +99,15 @@ export class LiveConnection {
     private onOpen(): void {
         this.heartbeat()
         if (!this.ws) {
-            log('No WebSocket instance')
+            liveConnectionDebug('No WebSocket instance')
             return
         }
         if (!this.environmentApiKey) {
-            log('Environment API Key empty')
+            liveConnectionDebug('Environment API Key empty')
             return
         }
         if (!this.mode) {
-            log('SDK mode not specified')
+            liveConnectionDebug('SDK mode not specified')
             return
         }
 
@@ -117,7 +120,7 @@ export class LiveConnection {
     }
 
     private onClose({ code, reason }: ICloseEvent): void {
-        log({ code, reason }, 'WS Disconnect')
+        liveConnectionDebug({ code, reason }, 'WS Disconnect')
         const applicationAskedClientToClose = 1000
         const sdkClosed = 1005
         // Don't reconnect for application-initiated disconnects
@@ -135,9 +138,12 @@ export class LiveConnection {
             const retryCount = this.retryCount + 1
             // Increase by a second each retry up to 30 seconds
             const waitTime = retryCount > 30 ? 30000 : retryCount * 1000
-            log({ retryCount, waitTime }, 'Waiting before reconnect')
+            liveConnectionDebug(
+                { retryCount, waitTime },
+                'Waiting before reconnect',
+            )
             this.reconnectingTimeout = setTimeout(() => {
-                log({ retryCount }, 'Trying to reconnect')
+                liveConnectionDebug({ retryCount }, 'Trying to reconnect')
                 this.connect(handleMessage)
                 this.retryCount = retryCount
             }, waitTime)
@@ -147,7 +153,7 @@ export class LiveConnection {
     private onMessage({ data }: IMessageEvent): void {
         try {
             const message: NotificationType = JSON.parse(data.toString())
-            log({ kind: message.kind }, 'Recieved WS Message')
+            liveConnectionDebug({ kind: message.kind }, 'Recieved WS Message')
 
             if (!message.kind) {
                 console.error({ message }, 'Message has unexpected shape')
@@ -169,7 +175,7 @@ export class LiveConnection {
     }
 
     private onPing(): void {
-        log('WS Ping')
+        liveConnectionDebug('WS Ping')
         this.heartbeat()
     }
 
@@ -178,7 +184,7 @@ export class LiveConnection {
             clearTimeout(this.pingTimeout as any)
         }
         if (this.reconnectingTimeout) {
-            log('Cancelling reconnect timeout, reconnected')
+            liveConnectionDebug('Cancelling reconnect timeout, reconnected')
             clearTimeout(this.reconnectingTimeout as any)
         }
 
@@ -195,7 +201,7 @@ export class LiveConnection {
 
     close(): void {
         if (this.ws) {
-            log('Cleaning up existing connection')
+            liveConnectionDebug('Cleaning up existing connection')
 
             this.ws.onopen = null as any
             this.ws.onclose = null as any
@@ -207,9 +213,9 @@ export class LiveConnection {
     }
 
     async tryReconnectInBackground(
-        liveConnection: LiveConnection,
         handleMessage: (message: NotificationType) => void,
     ) {
+        liveConnectionDebug('Attempting to reconnect in background')
         let attemptedRetries = 0
 
         do {
@@ -219,10 +225,11 @@ export class LiveConnection {
                 delay = 60000
             }
             attemptedRetries++
+            liveConnectionDebug('Waiting %o ms before reconnect', delay)
             await new Promise((resolve) => timeout.set(resolve, delay))
 
             try {
-                await liveConnection.connect(handleMessage)
+                await this.connect(handleMessage)
             } catch (err) {
                 console.error(
                     `Failed to connect to FeatureBoard, trying again in ${delay}ms`,
