@@ -1,5 +1,14 @@
 # @featureboard/node-sdk
 
+## 0.5.1
+
+### Patch Changes
+
+- [`4f8a247`](https://github.com/featureboard/sdks/commit/4f8a247620047c9b7f950e8a03b30f5de56cb687) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Improved debug logs
+
+- Updated dependencies [[`4f8a247`](https://github.com/featureboard/sdks/commit/4f8a247620047c9b7f950e8a03b30f5de56cb687)]:
+  - @featureboard/js-sdk@0.3.1
+
 ## 0.5.0
 
 ### Minor Changes
