@@ -107,8 +107,10 @@ importers:
   libs/react-sdk:
     specifiers:
       '@featureboard/js-sdk': workspace:0.3.1
+      debug: ^4.3.2
     dependencies:
       '@featureboard/js-sdk': link:../js-sdk
+      debug: 4.3.2
 
 packages:
 
