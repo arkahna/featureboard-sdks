@@ -1,5 +1,15 @@
 # @featureboard/js-sdk
 
+## 0.4.0
+
+### Minor Changes
+
+- [`e7f2df6`](https://github.com/featureboard/sdks/commit/e7f2df6af6d0b8bd2033c870f0c70bfe8f5fb113) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Added additional debug logging and close reason
+
+### Patch Changes
+
+- [`e7f2df6`](https://github.com/featureboard/sdks/commit/e7f2df6af6d0b8bd2033c870f0c70bfe8f5fb113) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Fixed timeout race always closing client connection
+
 ## 0.3.1
 
 ### Patch Changes

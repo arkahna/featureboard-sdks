@@ -1,6 +1,6 @@
 {
     "name": "@featureboard/js-sdk",
-    "version": "0.3.1",
+    "version": "0.4.0",
     "main": "out-tsc/index.js",
     "license": "MIT",
     "sideEffects": false,

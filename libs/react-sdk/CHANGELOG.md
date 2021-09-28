@@ -1,5 +1,12 @@
 # @featureboard/react-sdk
 
+## 0.4.2
+
+### Patch Changes
+
+- Updated dependencies [[`e7f2df6`](https://github.com/featureboard/sdks/commit/e7f2df6af6d0b8bd2033c870f0c70bfe8f5fb113), [`e7f2df6`](https://github.com/featureboard/sdks/commit/e7f2df6af6d0b8bd2033c870f0c70bfe8f5fb113)]:
+  - @featureboard/js-sdk@0.4.0
+
 ## 0.4.1
 
 ### Patch Changes
