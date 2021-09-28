@@ -45,7 +45,7 @@ export async function createBrowserWsClient(
         client: createClient(state),
         updateFeatures: async () => {},
         close() {
-            liveConnection.close()
+            liveConnection.close('Client called close()')
         },
     }
 
@@ -70,7 +70,7 @@ export async function createBrowserWsClient(
 
             case 'subscription-error': {
                 console.error('Failed to subscribe', message.error)
-                liveConnection.close()
+                liveConnection.close('Subscription error')
                 break
             }
 

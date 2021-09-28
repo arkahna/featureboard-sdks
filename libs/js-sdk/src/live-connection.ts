@@ -72,28 +72,31 @@ export class LiveConnection {
 
     async connect(handleMessage: (message: NotificationType) => void) {
         liveConnectionDebug('Connecting to FeatureBoard')
-        this.close()
+        this.close('Closing existing connection')
         this.handleMessage = handleMessage
         this.retryCount = 0
         this.initialised = new PromiseCompletionSource()
         this.ws = this.websocketFactory(this.wsUrl)
-        liveConnectionDebug('Connecting')
 
         this.ws.onopen = this.onOpen
         this.ws.onclose = this.onClose
         this.ws.onmessage = this.onMessage
         this.ws.onerror = this.onError
 
-        const timeout = new Promise<void>((_, reject) =>
-            setTimeout(() => {
-                // Timeout should close the connection
-                this.close()
+        let timeout: any
+        const timeoutPromise = new Promise<void>(
+            (_, reject) =>
+                (timeout = setTimeout(() => {
+                    // Timeout should close the connection
+                    this.close('Connection timeout')
 
-                reject(new Error('SDK connection timeout'))
-            }, this.connectTimeout),
+                    reject(new Error('SDK connection timeout'))
+                }, this.connectTimeout)),
         )
 
-        await Promise.race([timeout, this.initialised.promise])
+        await Promise.race([timeoutPromise, this.initialised.promise]).then(
+            () => clearTimeout(timeout),
+        )
     }
 
     private onOpen(): void {
@@ -192,16 +195,16 @@ export class LiveConnection {
         // instead of `WebSocket#close()`, which waits for the close timer.
         // Server should ping every 5 minutes, terminate if we haven't heard in 6 minutes
         this.pingTimeout = setTimeout(() => {
-            this.close()
+            this.close('Ping timeout')
             if (this.environmentApiKey && this.mode && this.handleMessage) {
                 this.connect(this.handleMessage)
             }
         }, 6 * 60 * 1000)
     }
 
-    close(): void {
+    close(reason: string): void {
         if (this.ws) {
-            liveConnectionDebug('Cleaning up existing connection')
+            liveConnectionDebug('Cleaning up existing connection: %o', reason)
 
             this.ws.onopen = null as any
             this.ws.onclose = null as any

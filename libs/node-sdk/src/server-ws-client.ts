@@ -52,7 +52,7 @@ export async function createNodeWsClient(
     return createServerConnection(
         state,
         async () => {},
-        () => liveConnection.close(),
+        () => liveConnection.close('Client called close()'),
     )
 
     function handleMessage(message: NotificationType) {
@@ -85,7 +85,7 @@ export async function createNodeWsClient(
 
             case 'subscription-error': {
                 console.error('Failed to subscribe', message.error)
-                liveConnection.close()
+                liveConnection.close('Subscription error')
                 break
             }
 
