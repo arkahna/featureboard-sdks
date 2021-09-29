@@ -1,19 +1,19 @@
 import { Features } from '.'
 
 export interface FeatureBoardClient {
-    getFeatureValue(
-        featureKey: keyof Features,
-        defaultValue: Features[typeof featureKey],
-    ): Features[typeof featureKey]
+    getFeatureValue<T extends keyof Features>(
+        featureKey: T,
+        defaultValue: Features[T],
+    ): Features[T]
 
     /**
      * Subscribe to value updates, will immediately call back with the current value
      *
      * @returns unsubscribe function
      */
-    subscribeToFeatureValue(
+    subscribeToFeatureValue<T extends keyof Features>(
         featureKey: keyof Features,
-        defaultValue: Features[typeof featureKey],
-        onValue: (value: Features[typeof featureKey]) => void,
+        defaultValue: Features[T],
+        onValue: (value: Features[T]) => void,
     ): () => void
 }
