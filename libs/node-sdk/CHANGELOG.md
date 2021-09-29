@@ -1,5 +1,12 @@
 # @featureboard/node-sdk
 
+## 0.6.1
+
+### Patch Changes
+
+- Updated dependencies [[`d10113f`](https://github.com/featureboard/sdks/commit/d10113f9591c4827591945f7dca846d222a2039f)]:
+  - @featureboard/js-sdk@0.5.0
+
 ## 0.6.0
 
 ### Minor Changes

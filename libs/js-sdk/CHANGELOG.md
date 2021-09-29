@@ -1,5 +1,11 @@
 # @featureboard/js-sdk
 
+## 0.5.0
+
+### Minor Changes
+
+- [`d10113f`](https://github.com/featureboard/sdks/commit/d10113f9591c4827591945f7dca846d222a2039f) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Improve type safety of getFeatureValue function
+
 ## 0.4.0
 
 ### Minor Changes
