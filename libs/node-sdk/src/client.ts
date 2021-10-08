@@ -50,7 +50,7 @@ export const FeatureBoardService = {
         }: FeatureBoardServiceOptions = {},
     ) {
         const resolvedUpdateStrategy: UpdateStrategies = !updateStrategy
-            ? { kind: 'live' }
+            ? { kind: 'polling' }
             : typeof updateStrategy === 'string'
             ? {
                   kind: updateStrategy,

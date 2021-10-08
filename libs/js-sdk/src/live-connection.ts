@@ -84,19 +84,24 @@ export class LiveConnection {
         this.ws.onerror = this.onError
 
         let timeout: any
-        const timeoutPromise = new Promise<void>(
-            (_, reject) =>
-                (timeout = setTimeout(() => {
-                    // Timeout should close the connection
-                    this.close('Connection timeout')
+        // Outside setTimeout to get correct stack trace on timeout
+        const timeoutError = new Error('SDK connection timeout')
+        const timeoutPromise = new Promise<void>((_, reject) => {
+            if (timeout) {
+                clearTimeout(timeout)
+            }
+            timeout = setTimeout(() => {
+                // Timeout should close the connection
+                this.close('Connection timeout')
 
-                    reject(new Error('SDK connection timeout'))
-                }, this.connectTimeout)),
-        )
+                reject(timeoutError)
+            }, this.connectTimeout)
+        })
 
-        await Promise.race([timeoutPromise, this.initialised.promise]).then(
-            () => clearTimeout(timeout),
-        )
+        await Promise.race([
+            timeoutPromise,
+            this.initialised.promise.then(() => clearTimeout(timeout)),
+        ])
     }
 
     private onOpen(): void {
