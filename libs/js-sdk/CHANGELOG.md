@@ -1,5 +1,11 @@
 # @featureboard/js-sdk
 
+## 0.6.0
+
+### Minor Changes
+
+- [`c346fd3`](https://github.com/featureboard/sdks/commit/c346fd3c73033bc56c1bb6c787567ced0964e454) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Better timeout handling
+
 ## 0.5.0
 
 ### Minor Changes

@@ -1,5 +1,16 @@
 # @featureboard/node-sdk
 
+## 0.7.0
+
+### Minor Changes
+
+- [`c346fd3`](https://github.com/featureboard/sdks/commit/c346fd3c73033bc56c1bb6c787567ced0964e454) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Switch node SDK default from live to polling
+
+### Patch Changes
+
+- Updated dependencies [[`c346fd3`](https://github.com/featureboard/sdks/commit/c346fd3c73033bc56c1bb6c787567ced0964e454)]:
+  - @featureboard/js-sdk@0.6.0
+
 ## 0.6.1
 
 ### Patch Changes
