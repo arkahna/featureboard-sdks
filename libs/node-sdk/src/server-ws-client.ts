@@ -5,9 +5,9 @@ import {
     LiveConnection,
     LiveOptions,
 } from '@featureboard/js-sdk'
-import { debugLog } from 'libs/js-sdk/src/log'
 import { createServerConnection } from './create-server-connection'
 import { FeatureState } from './feature-state'
+import { debugLog } from './log'
 import { ServerConnection } from './server-connection'
 import { initStore } from './server-http-client'
 

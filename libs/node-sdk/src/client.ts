@@ -3,10 +3,10 @@ import {
     FeatureBoardClient,
     featureBoardHostedService,
 } from '@featureboard/js-sdk'
-import { debugLog } from 'libs/js-sdk/src/log'
 import WS from 'ws'
 import { FeatureState } from './feature-state'
 import { FeatureStore } from './feature-store'
+import { debugLog } from './log'
 import { createNodeHttpClient } from './server-http-client'
 import { createNodeWsClient } from './server-ws-client'
 import { UpdateStrategies } from './update-strategies'
