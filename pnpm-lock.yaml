@@ -99,9 +99,11 @@ importers:
   libs/node-sdk:
     specifiers:
       '@featureboard/js-sdk': workspace:0.7.0
+      debug: ^4.3.2
       ws: ^8.2.0
     dependencies:
       '@featureboard/js-sdk': link:../js-sdk
+      debug: 4.3.2
       ws: 8.2.0
 
   libs/react-sdk:
@@ -3797,6 +3799,7 @@ packages:
     resolution: {integrity: sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==}
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
     os: [darwin]
+    requiresBuild: true
     dev: true
     optional: true
 
