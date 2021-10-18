@@ -5,6 +5,7 @@ import { EffectiveFeatureStore } from './effective-feature-store'
 import { FeatureBoardApiConfig } from './featureboard-api-config'
 import { featureBoardHostedService } from './featureboard-service-urls'
 import { FeatureBoardClient } from './features-client'
+import { debugLog } from './log'
 import { UpdateStrategies } from './update-strategies'
 
 export interface FeatureBoardServiceOptions {
@@ -58,6 +59,10 @@ export const FeatureBoardService = {
                   kind: updateStrategy,
               }
             : updateStrategy
+
+        debugLog('Initializing FeatureBoard client: %o', {
+            updateStrategy: resolvedUpdateStrategy,
+        })
         const effectiveFeatureState = new EffectiveFeatureState(
             audiences,
             store,

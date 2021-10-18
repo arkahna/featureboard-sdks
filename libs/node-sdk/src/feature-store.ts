@@ -1,4 +1,5 @@
 import { FeatureValues } from '@featureboard/contracts'
+import { debugLog } from './log'
 
 export interface FeatureStore {
     /** Flag indicating the store has a valid set of feature values */
@@ -13,11 +14,15 @@ export interface FeatureStore {
     ): void | PromiseLike<any>
 }
 
+const storeDebug = debugLog.extend('store')
+const memoryStoreDebug = storeDebug.extend('memory')
+
 export class MemoryFeatureStore implements FeatureStore {
     private _store: Record<string, FeatureValues | undefined> = {}
     isInitialised: boolean
 
     constructor(initialValues?: FeatureValues[]) {
+        memoryStoreDebug('initialising: %o', initialValues)
         // Assume if initial values are provided, they are a valid set of feature values
         this.isInitialised = !!initialValues
         for (const value of initialValues || []) {
@@ -30,10 +35,13 @@ export class MemoryFeatureStore implements FeatureStore {
     }
 
     get(featureKey: string): FeatureValues | undefined {
-        return this._store[featureKey]
+        const value = this._store[featureKey]
+        memoryStoreDebug("get '%s': %o", featureKey, value)
+        return value
     }
 
     set(featureKey: string, value: FeatureValues | undefined) {
+        memoryStoreDebug("set '%s': %o", featureKey, value)
         this._store[featureKey] = value
     }
 }

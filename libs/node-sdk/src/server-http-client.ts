@@ -3,6 +3,7 @@ import { createEnsureSingle, FeatureBoardApiConfig } from '@featureboard/js-sdk'
 import { createServerConnection } from './create-server-connection'
 import { FeatureState } from './feature-state'
 import { interval } from './interval'
+import { debugLog } from './log'
 import { ServerConnection } from './server-connection'
 import {
     ManualUpdateStrategy,
@@ -23,6 +24,8 @@ export interface FeatureBoardNodeHttpClientOptions {
 
     fetch: (input: RequestInfo, init?: RequestInit) => Promise<Response>
 }
+
+const httpClientDebug = debugLog.extend('http-client')
 
 // NOTE: Most node fetch implementations do not support any sort of http caching, so we implement it in our SDK
 export async function createNodeHttpClient(
@@ -72,6 +75,13 @@ export async function createNodeHttpClient(
 
                   if (!responseExpires || Date.now() > responseExpires) {
                       responseExpires = Date.now() + maxAgeMs
+                      httpClientDebug(
+                          'Response expired, fetching updates: %O',
+                          {
+                              maxAgeMs,
+                              newExpiry: responseExpires,
+                          },
+                      )
                       return fetchUpdatesSingle()
                   }
 
@@ -95,6 +105,7 @@ export async function initStore(
     const allEndpoint = api.http.endsWith('/')
         ? `${api.http}all`
         : `${api.http}/all`
+    httpClientDebug('Initialising Client')
     const response = await fetch(allEndpoint, {
         method: 'GET',
         headers: {
@@ -163,6 +174,7 @@ async function fetchUpdates(
     state: FeatureState,
     lastModified: string | undefined,
 ) {
+    httpClientDebug('Fetching updates')
     const response = await fetch(allEndpoint, {
         method: 'GET',
         headers: {
@@ -179,6 +191,7 @@ async function fetchUpdates(
 
     // Expect most times will just get a response from the HEAD request saying no updates
     if (response.status === 304) {
+        httpClientDebug('No changes')
         return lastModified
     }
 

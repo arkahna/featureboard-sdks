@@ -16,12 +16,14 @@ export interface FeatureBoardBrowserWsClientOptions {
     fetch: (input: RequestInfo, init?: RequestInit) => Promise<Response>
 }
 
+const wsClientDebug = debugLog.extend('ws-client')
+
 export async function createBrowserWsClient(
     environmentApiKey: string,
     audiences: string[],
     { api, state, liveOptions, fetch }: FeatureBoardBrowserWsClientOptions,
 ): Promise<ClientConnection> {
-    debugLog('Creating browser ws client')
+    wsClientDebug('Creating Client')
     const liveConnection = new LiveConnection(
         environmentApiKey,
         { kind: 'effective-values', audiences },
@@ -31,8 +33,13 @@ export async function createBrowserWsClient(
 
     try {
         await liveConnection.connect(handleMessage)
+        wsClientDebug('Connected')
     } catch (err) {
         if (!state.store.isInitialised) {
+            wsClientDebug(
+                'Failed to connect to WS, falling back to http while retrying in background: %O',
+                err,
+            )
             await initStore(api, audiences, fetch, environmentApiKey, state)
         }
 

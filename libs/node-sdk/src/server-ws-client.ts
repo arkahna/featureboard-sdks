@@ -5,6 +5,7 @@ import {
     LiveConnection,
     LiveOptions,
 } from '@featureboard/js-sdk'
+import { debugLog } from 'libs/js-sdk/src/log'
 import { createServerConnection } from './create-server-connection'
 import { FeatureState } from './feature-state'
 import { ServerConnection } from './server-connection'
@@ -21,6 +22,8 @@ export interface FeatureBoardServerWsClientOptions {
     >
 }
 
+const wsClientDebug = debugLog.extend('ws-client')
+
 export async function createNodeWsClient(
     environmentApiKey: string,
     {
@@ -30,6 +33,7 @@ export async function createNodeWsClient(
         getFetch,
     }: FeatureBoardServerWsClientOptions,
 ): Promise<ServerConnection> {
+    wsClientDebug('Creating Client')
     const liveConnection = new LiveConnection(
         environmentApiKey,
         { kind: 'all-values' },
@@ -39,8 +43,13 @@ export async function createNodeWsClient(
 
     try {
         await liveConnection.connect(handleMessage)
+        wsClientDebug('Connected')
     } catch (err) {
         if (!state.store.isInitialised) {
+            wsClientDebug(
+                'Failed to connect to WS, falling back to http while retrying in background: %O',
+                err,
+            )
             await initStore(api, await getFetch(), environmentApiKey, state)
         }
 
@@ -56,6 +65,7 @@ export async function createNodeWsClient(
     )
 
     function handleMessage(message: NotificationType) {
+        wsClientDebug('Handling message: %s', message.kind)
         switch (message.kind) {
             case 'feature-updated':
             case 'feature-available': {

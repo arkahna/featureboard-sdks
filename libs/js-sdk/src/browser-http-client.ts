@@ -5,6 +5,7 @@ import { EffectiveFeatureState } from './effective-feature-state'
 import { createEnsureSingle } from './ensure-single'
 import { FeatureBoardApiConfig } from './featureboard-api-config'
 import { interval } from './interval'
+import { debugLog } from './log'
 import { timeout } from './timeout'
 import {
     ManualUpdateStrategy,
@@ -19,6 +20,8 @@ export interface FeatureBoardBrowserHttpClientOptions {
 
     fetch: (input: RequestInfo, init?: RequestInit) => Promise<Response>
 }
+
+const httpClientDebug = debugLog.extend('http-client')
 
 export async function createBrowserHttpClient(
     environmentApiKey: string,
@@ -77,6 +80,7 @@ export async function initStore(
     const effectiveEndpoint = api.http.endsWith('/')
         ? `${api.http}effective?audiences=${audiences.join(',')}`
         : `${api.http}/effective?audiences=${audiences.join(',')}`
+    httpClientDebug('Initialising Client')
     const response = await fetch(effectiveEndpoint, {
         method: 'GET',
         headers: {
@@ -160,6 +164,7 @@ async function triggerUpdate(
 
     // Expect most times will just get a response from the HEAD request saying no updates
     if (response.status === 304) {
+        httpClientDebug('No changes')
         return lastModified
     }
 

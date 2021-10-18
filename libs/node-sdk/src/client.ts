@@ -3,6 +3,7 @@ import {
     FeatureBoardClient,
     featureBoardHostedService,
 } from '@featureboard/js-sdk'
+import { debugLog } from 'libs/js-sdk/src/log'
 import WS from 'ws'
 import { FeatureState } from './feature-state'
 import { FeatureStore } from './feature-store'
@@ -56,6 +57,10 @@ export const FeatureBoardService = {
                   kind: updateStrategy,
               }
             : updateStrategy
+
+        debugLog('Initializing FeatureBoard client: %o', {
+            updateStrategy: resolvedUpdateStrategy,
+        })
 
         const featureState = new FeatureState(store)
 
