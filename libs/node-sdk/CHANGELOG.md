@@ -1,5 +1,16 @@
 # @featureboard/node-sdk
 
+## 0.8.0
+
+### Minor Changes
+
+- [`a36b125`](https://github.com/featureboard/sdks/commit/a36b125ade4804ee29ca97edc8a1651774864689) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Extended lib debug logs
+
+### Patch Changes
+
+- Updated dependencies [[`a36b125`](https://github.com/featureboard/sdks/commit/a36b125ade4804ee29ca97edc8a1651774864689)]:
+  - @featureboard/js-sdk@0.7.0
+
 ## 0.7.0
 
 ### Minor Changes

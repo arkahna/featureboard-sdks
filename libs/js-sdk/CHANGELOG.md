@@ -1,5 +1,11 @@
 # @featureboard/js-sdk
 
+## 0.7.0
+
+### Minor Changes
+
+- [`a36b125`](https://github.com/featureboard/sdks/commit/a36b125ade4804ee29ca97edc8a1651774864689) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Extended lib debug logs
+
 ## 0.6.0
 
 ### Minor Changes
