@@ -1,5 +1,11 @@
 # @featureboard/node-sdk
 
+## 0.9.0
+
+### Minor Changes
+
+- [`9ff19b6`](https://github.com/featureboard/sdks/commit/9ff19b6db7316dc20fe36c5d1cadfa121e2fedf0) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Add some additional debug logging around feature resolution
+
 ## 0.8.0
 
 ### Minor Changes
