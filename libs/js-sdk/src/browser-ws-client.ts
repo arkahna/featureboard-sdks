@@ -37,7 +37,7 @@ export async function createBrowserWsClient(
     } catch (err) {
         if (!state.store.isInitialised) {
             wsClientDebug(
-                'Failed to connect to WS, falling back to http while retrying in background: %O',
+                'Failed to connect to WS, falling back to http while retrying in background: %o',
                 err,
             )
             await initStore(api, audiences, fetch, environmentApiKey, state)

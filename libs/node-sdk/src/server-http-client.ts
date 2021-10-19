@@ -76,7 +76,7 @@ export async function createNodeHttpClient(
                   if (!responseExpires || Date.now() > responseExpires) {
                       responseExpires = Date.now() + maxAgeMs
                       httpClientDebug(
-                          'Response expired, fetching updates: %O',
+                          'Response expired, fetching updates: %o',
                           {
                               maxAgeMs,
                               newExpiry: responseExpires,

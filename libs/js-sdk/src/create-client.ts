@@ -8,7 +8,7 @@ export function createClient(state: EffectiveFeatureState): FeatureBoardClient {
     return {
         getFeatureValue: (featureKey: string, defaultValue: any): any => {
             const value = state.store.get(featureKey)
-            debugLog('getFeatureValue: %O', { featureKey, value, defaultValue })
+            debugLog('getFeatureValue: %o', { featureKey, value, defaultValue })
 
             return value ?? defaultValue
         },
@@ -17,13 +17,13 @@ export function createClient(state: EffectiveFeatureState): FeatureBoardClient {
             defaultValue: any,
             onValue: (value: any) => void,
         ) {
-            debugLog('subscribeToFeatureValue: %O', {
+            debugLog('subscribeToFeatureValue: %o', {
                 featureKey,
             })
 
             const callback = (updatedFeatureKey: string, value: any): void => {
                 if (featureKey === updatedFeatureKey) {
-                    debugLog('subscribeToFeatureValue update: %O', {
+                    debugLog('subscribeToFeatureValue update: o', {
                         featureKey,
                         value,
                         defaultValue,
@@ -36,7 +36,7 @@ export function createClient(state: EffectiveFeatureState): FeatureBoardClient {
             onValue((state.store.get(featureKey) as any) ?? defaultValue)
 
             return () => {
-                debugLog('unsubscribeToFeatureValue: %O', {
+                debugLog('unsubscribeToFeatureValue: %o', {
                     featureKey,
                 })
                 state.off('feature-updated', callback)

@@ -44,7 +44,7 @@ export function createServerConnection(
                 (value) => audienceKeys.includes(value.audienceKey),
             )
             const value = audienceException?.value ?? featureValues.defaultValue
-            serverConnectionDebug('getFeatureValue: %O', {
+            serverConnectionDebug('getFeatureValue: %o', {
                 audienceExceptionValue: audienceException?.value,
                 defaultValue: featureValues.defaultValue,
                 value,

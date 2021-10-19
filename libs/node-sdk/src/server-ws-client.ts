@@ -47,7 +47,7 @@ export async function createNodeWsClient(
     } catch (err) {
         if (!state.store.isInitialised) {
             wsClientDebug(
-                'Failed to connect to WS, falling back to http while retrying in background: %O',
+                'Failed to connect to WS, falling back to http while retrying in background: %o',
                 err,
             )
             await initStore(api, await getFetch(), environmentApiKey, state)
