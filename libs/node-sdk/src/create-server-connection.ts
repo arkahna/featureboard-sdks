@@ -1,6 +1,9 @@
 import { FeatureBoardClient } from '@featureboard/js-sdk'
 import { FeatureState } from './feature-state'
+import { debugLog } from './log'
 import { ServerConnection } from './server-connection'
+
+const serverConnectionDebug = debugLog.extend('server-connection')
 
 export function createServerConnection(
     state: FeatureState,
@@ -9,12 +12,17 @@ export function createServerConnection(
     onRequest?: () => Promise<void>,
 ): ServerConnection {
     return {
-        request: (audienceKeys: string[]) =>
-            onRequest
+        request: (audienceKeys: string[]) => {
+            serverConnectionDebug(
+                'Creating request client for audiences: %o',
+                audienceKeys,
+            )
+            return onRequest
                 ? addUserWarnings(
                       onRequest().then(() => syncRequest(audienceKeys)),
                   )
-                : addSyncUserWarnings(syncRequest(audienceKeys)),
+                : addSyncUserWarnings(syncRequest(audienceKeys))
+        },
         updateFeatures,
         close,
     }
@@ -26,12 +34,22 @@ export function createServerConnection(
         const getFeatureValue = (featureKey: any, defaultValue: any) => {
             const featureValues = featuresState[featureKey]
             if (!featureValues) {
+                serverConnectionDebug(
+                    'getFeatureValue - no value, returning user fallback: %o',
+                    audienceKeys,
+                )
                 return defaultValue
             }
             const audienceException = featureValues.audienceExceptions.find(
                 (value) => audienceKeys.includes(value.audienceKey),
             )
-            return audienceException?.value ?? featureValues.defaultValue
+            const value = audienceException?.value ?? featureValues.defaultValue
+            serverConnectionDebug('getFeatureValue: %O', {
+                audienceExceptionValue: audienceException?.value,
+                defaultValue: featureValues.defaultValue,
+                value,
+            })
+            return value
         }
 
         return {

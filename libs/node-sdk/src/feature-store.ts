@@ -31,6 +31,7 @@ export class MemoryFeatureStore implements FeatureStore {
     }
 
     all(): Record<string, FeatureValues | undefined> {
+        memoryStoreDebug('all: %o', this._store)
         return { ...this._store }
     }
 
