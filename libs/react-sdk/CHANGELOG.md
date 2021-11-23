@@ -1,5 +1,16 @@
 # @featureboard/react-sdk
 
+## 0.5.0
+
+### Minor Changes
+
+- [#4](https://github.com/featureboard/sdks/pull/4) [`71895c7`](https://github.com/featureboard/sdks/commit/71895c79c29a73a3e9ceb8b122330d746146311d) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Add client.getEffectiveValues and FeatureBoardService.initStatic to allow a FeatureBoard client to be created from server side render values
+
+### Patch Changes
+
+- Updated dependencies [[`71895c7`](https://github.com/featureboard/sdks/commit/71895c79c29a73a3e9ceb8b122330d746146311d)]:
+  - @featureboard/js-sdk@0.8.0
+
 ## 0.4.6
 
 ### Patch Changes

@@ -1,5 +1,12 @@
 # @featureboard/node-sdk
 
+## 0.9.2
+
+### Patch Changes
+
+- Updated dependencies [[`71895c7`](https://github.com/featureboard/sdks/commit/71895c79c29a73a3e9ceb8b122330d746146311d)]:
+  - @featureboard/js-sdk@0.8.0
+
 ## 0.9.1
 
 ### Patch Changes
