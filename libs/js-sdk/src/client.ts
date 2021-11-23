@@ -1,7 +1,12 @@
+import { EffectiveFeatureValue } from '@featureboard/contracts'
 import { createBrowserHttpClient } from './browser-http-client'
 import { createBrowserWsClient } from './browser-ws-client'
+import { createClient } from './create-client'
 import { EffectiveFeatureState } from './effective-feature-state'
-import { EffectiveFeatureStore } from './effective-feature-store'
+import {
+    EffectiveFeatureStore,
+    MemoryEffectiveFeatureStore,
+} from './effective-feature-store'
 import { FeatureBoardApiConfig } from './featureboard-api-config'
 import { featureBoardHostedService } from './featureboard-service-urls'
 import { FeatureBoardClient } from './features-client'
@@ -42,6 +47,18 @@ export interface ClientConnection {
 }
 
 export const FeatureBoardService = {
+    /** Can be used to create a client from values transferred from server side renders, or test values */
+    initStatic(
+        audiences: string[],
+        effectiveFeatureValues: EffectiveFeatureValue[],
+    ): FeatureBoardClient {
+        return createClient(
+            new EffectiveFeatureState(
+                audiences,
+                new MemoryEffectiveFeatureStore(effectiveFeatureValues),
+            ),
+        )
+    },
     init(
         environmentApiKey: string,
         audiences: string[],

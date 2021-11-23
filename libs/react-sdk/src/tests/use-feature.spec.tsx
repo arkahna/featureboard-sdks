@@ -12,6 +12,7 @@ describe('useFeature hook', () => {
             subscribeToFeatureValue: () => {
                 return () => {}
             },
+            getEffectiveValues: () => ({ audiences: [], effectiveValues: [] }),
         }
         const { result } = renderHook(
             () => useFeature('feature-key', 'default-val'),
@@ -39,6 +40,7 @@ describe('useFeature hook', () => {
 
                 return () => {}
             },
+            getEffectiveValues: () => ({ audiences: [], effectiveValues: [] }),
         }
         const { result } = renderHook(
             () => useFeature('feature-key', 'default-val'),
