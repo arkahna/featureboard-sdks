@@ -1,5 +1,11 @@
 # @featureboard/node-sdk
 
+## 0.10.0
+
+### Minor Changes
+
+- [`361f44e`](https://github.com/featureboard/sdks/commit/361f44e6eae6552a78a4bbad2b48b19e294e1e04) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Fixed some type safety issues in the SDK which caused the new getEffectiveValues to be missing in some instances
+
 ## 0.9.2
 
 ### Patch Changes
