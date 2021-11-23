@@ -1,3 +1,4 @@
+import { EffectiveFeatureValue } from '@featureboard/contracts'
 import { Features } from '.'
 
 export interface FeatureBoardClient {
@@ -16,4 +17,9 @@ export interface FeatureBoardClient {
         defaultValue: Features[T],
         onValue: (value: Features[T]) => void,
     ): () => void
+
+    getEffectiveValues(): {
+        audiences: string[]
+        effectiveValues: EffectiveFeatureValue[]
+    }
 }

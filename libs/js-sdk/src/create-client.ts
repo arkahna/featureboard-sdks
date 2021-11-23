@@ -1,3 +1,4 @@
+import { EffectiveFeatureValue } from '@featureboard/contracts'
 import { EffectiveFeatureState } from './effective-feature-state'
 import { FeatureBoardClient } from './features-client'
 import { debugLog } from './log'
@@ -5,9 +6,21 @@ import { debugLog } from './log'
 export function createClient(state: EffectiveFeatureState): FeatureBoardClient {
     debugLog('Creating client')
 
-    return {
-        getFeatureValue: (featureKey: string, defaultValue: any): any => {
-            const value = state.store.get(featureKey)
+    const featureboardClient: FeatureBoardClient = {
+        getEffectiveValues: () => {
+            const all = state.store.all()
+            return {
+                audiences: [...state.audiences],
+                effectiveValues: Object.keys(all)
+                    .filter((key) => all[key])
+                    .map<EffectiveFeatureValue>((key) => ({
+                        featureKey: key,
+                        value: all[key]!,
+                    })),
+            }
+        },
+        getFeatureValue: (featureKey, defaultValue) => {
+            const value = state.store.get(featureKey as string)
             debugLog('getFeatureValue: %o', { featureKey, value, defaultValue })
 
             return value ?? defaultValue
@@ -42,5 +55,7 @@ export function createClient(state: EffectiveFeatureState): FeatureBoardClient {
                 state.off('feature-updated', callback)
             }
         },
-    } as any
+    }
+
+    return featureboardClient
 }
