@@ -1,4 +1,5 @@
-import { FeatureBoardClient } from '@featureboard/js-sdk'
+import { EffectiveFeatureValue } from '@featureboard/contracts'
+import { FeatureBoardClient, Features } from '@featureboard/js-sdk'
 import { FeatureState } from './feature-state'
 import { debugLog } from './log'
 import { ServerConnection } from './server-connection'
@@ -31,8 +32,39 @@ export function createServerConnection(
         // Shallow copy the feature state so requests are stable
         const featuresState = state.store.all()
 
-        const getFeatureValue = (featureKey: any, defaultValue: any) => {
-            const featureValues = featuresState[featureKey]
+        const client: FeatureBoardClient = {
+            getEffectiveValues: () => {
+                const all = state.store.all()
+                return {
+                    audiences: audienceKeys,
+                    effectiveValues: Object.keys(all)
+                        .map<EffectiveFeatureValue>((key) => ({
+                            featureKey: key,
+                            // We will filter the invalid undefined in the next filter
+                            value: getFeatureValue(key, undefined!),
+                        }))
+                        .filter(
+                            (effectiveValue) =>
+                                effectiveValue.value !== undefined,
+                        ),
+                }
+            },
+            getFeatureValue,
+            subscribeToFeatureValue: (
+                featureKey: string,
+                defaultValue: any,
+                onValue: (value: any) => void,
+            ) => {
+                onValue(getFeatureValue(featureKey, defaultValue))
+                return () => {}
+            },
+        }
+
+        function getFeatureValue<T extends string | number>(
+            featureKey: T,
+            defaultValue: Features[T],
+        ) {
+            const featureValues = featuresState[featureKey as string]
             if (!featureValues) {
                 serverConnectionDebug(
                     'getFeatureValue - no value, returning user fallback: %o',
@@ -52,35 +84,22 @@ export function createServerConnection(
             return value
         }
 
-        return {
-            getFeatureValue,
-            subscribeToFeatureValue: (
-                featureKey: string,
-                defaultValue: any,
-                onValue: (value: any) => void,
-            ) => {
-                onValue(getFeatureValue(featureKey, defaultValue))
-
-                return () => {}
-            },
-        } as any
+        return client
     }
 }
 
 const asyncErrorMessage =
     'request() must be awaited when using on-request update strategy'
-const getFeatureValueAsync = () => {
-    throw new Error(asyncErrorMessage)
-}
-const subscribeToFeatureValueAsync = () => {
+const getValueAsyncWarn = () => {
     throw new Error(asyncErrorMessage)
 }
 /** Adds errors to the promise if the user doesn't await it */
 function addUserWarnings(
     client: Promise<FeatureBoardClient>,
 ): FeatureBoardClient & PromiseLike<FeatureBoardClient> {
-    ;(client as any).getFeatureValue = getFeatureValueAsync
-    ;(client as any).subscribeToFeatureValue = subscribeToFeatureValueAsync
+    ;(client as any).getEffectiveValues = getValueAsyncWarn
+    ;(client as any).getFeatureValue = getValueAsyncWarn
+    ;(client as any).subscribeToFeatureValue = getValueAsyncWarn
 
     return client as any
 }
