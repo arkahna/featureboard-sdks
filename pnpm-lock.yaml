@@ -90,9 +90,11 @@ importers:
 
   libs/js-sdk:
     specifiers:
+      '@featureboard/contracts': workspace:0.1.0
       debug: ^4.3.2
       promise-completion-source: ^1.0.0
     dependencies:
+      '@featureboard/contracts': link:../contracts
       debug: 4.3.2
       promise-completion-source: 1.0.0
 
