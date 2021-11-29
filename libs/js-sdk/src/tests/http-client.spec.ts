@@ -139,6 +139,13 @@ describe('http client', () => {
     })
 
     it('can start with last known good config', async () => {
+        const lastModified = new Date().toISOString()
+        fetch.getOnce('https://client.featureboard.app/effective?audiences=', {
+            status: 500,
+            headers: {
+                'Last-Modified': lastModified,
+            },
+        })
         await createBrowserHttpClient('env-api-key', [], {
             fetch,
             api: featureBoardHostedService,
