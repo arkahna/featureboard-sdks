@@ -1,5 +1,16 @@
 # @featureboard/react-sdk
 
+## 0.6.0
+
+### Minor Changes
+
+- [`9a56897`](https://github.com/featureboard/sdks/commit/9a568972a53e8c214ba1000e8b44695572358402) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Fixed updating audiences with useFeature hooks still subscribed to original store
+
+### Patch Changes
+
+- Updated dependencies [[`9a56897`](https://github.com/featureboard/sdks/commit/9a568972a53e8c214ba1000e8b44695572358402), [`9a56897`](https://github.com/featureboard/sdks/commit/9a568972a53e8c214ba1000e8b44695572358402)]:
+  - @featureboard/js-sdk@0.9.0
+
 ## 0.5.0
 
 ### Minor Changes

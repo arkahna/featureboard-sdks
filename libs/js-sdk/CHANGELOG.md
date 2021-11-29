@@ -1,5 +1,15 @@
 # @featureboard/js-sdk
 
+## 0.9.0
+
+### Minor Changes
+
+- [`9a56897`](https://github.com/featureboard/sdks/commit/9a568972a53e8c214ba1000e8b44695572358402) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Allowed updating of audiences in client SDK
+
+### Patch Changes
+
+- [`9a56897`](https://github.com/featureboard/sdks/commit/9a568972a53e8c214ba1000e8b44695572358402) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Fixed missing @featureboard/contracts dependency
+
 ## 0.8.0
 
 ### Minor Changes
