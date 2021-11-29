@@ -48,6 +48,63 @@ describe('live client', () => {
         )
     })
 
+    it('can update audiences', async () => {
+        const client = await FeatureBoardService.init('fake-key', [], {
+            fetch,
+            updateStrategy: {
+                kind: 'live',
+                options: {
+                    websocketFactory: () =>
+                        connectToWsClient((msg, ws) => {
+                            if (msg.kind === 'subscribe') {
+                                if (
+                                    msg.mode.kind === 'effective-values' &&
+                                    msg.mode.audiences.length === 0
+                                ) {
+                                    const stateOfTheWorld: StateOfTheWorldEffectiveValuesNotification =
+                                        {
+                                            kind: 'state-of-the-world-effective-values',
+                                            features: [
+                                                {
+                                                    featureKey: 'my-feature',
+                                                    value: 'some-value',
+                                                },
+                                            ],
+                                        }
+
+                                    ws.send(JSON.stringify(stateOfTheWorld))
+                                }
+
+                                if (
+                                    msg.mode.kind === 'effective-values' &&
+                                    msg.mode.audiences.length === 1
+                                ) {
+                                    const stateOfTheWorld: StateOfTheWorldEffectiveValuesNotification =
+                                        {
+                                            kind: 'state-of-the-world-effective-values',
+                                            features: [
+                                                {
+                                                    featureKey: 'my-feature',
+                                                    value: 'new-some-value',
+                                                },
+                                            ],
+                                        }
+
+                                    ws.send(JSON.stringify(stateOfTheWorld))
+                                }
+                            }
+                        }),
+                },
+            },
+        })
+
+        await client.updateAudiences(['some-audience'])
+
+        expect(client.client.getFeatureValue('my-feature', 'default-val')).toBe(
+            'new-some-value',
+        )
+    })
+
     it('connection timeout falls back to http to get initial values, then retries in background', async () => {
         const values: EffectiveFeatureValue[] = [
             {

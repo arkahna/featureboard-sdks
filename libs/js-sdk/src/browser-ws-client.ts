@@ -1,6 +1,6 @@
 import { NotificationType } from '@featureboard/contracts'
 import { initStore } from './browser-http-client'
-import { ClientConnection } from './client'
+import { ClientConnection } from './client-connection'
 import { createClient } from './create-client'
 import { EffectiveFeatureState } from './effective-feature-state'
 import { FeatureBoardApiConfig } from './featureboard-api-config'
@@ -24,7 +24,7 @@ export async function createBrowserWsClient(
     { api, state, liveOptions, fetch }: FeatureBoardBrowserWsClientOptions,
 ): Promise<ClientConnection> {
     wsClientDebug('Creating Client')
-    const liveConnection = new LiveConnection(
+    let liveConnection = new LiveConnection(
         environmentApiKey,
         { kind: 'effective-values', audiences },
         api,
@@ -51,6 +51,23 @@ export async function createBrowserWsClient(
     return {
         client: createClient(state),
         updateFeatures: async () => {},
+        updateAudiences: async (audiences: string[]) => {
+            state.audiences = audiences
+            liveConnection.close('Changing audiences')
+            liveConnection = new LiveConnection(
+                environmentApiKey,
+                { kind: 'effective-values', audiences },
+                api,
+                liveOptions,
+            )
+
+            try {
+                await liveConnection.connect(handleMessage)
+                wsClientDebug('Connected')
+            } catch (err) {
+                liveConnection.tryReconnectInBackground(handleMessage)
+            }
+        },
         close() {
             liveConnection.close('Client called close()')
         },

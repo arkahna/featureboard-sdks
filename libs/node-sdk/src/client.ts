@@ -1,6 +1,5 @@
 import {
     FeatureBoardApiConfig,
-    FeatureBoardClient,
     featureBoardHostedService,
 } from '@featureboard/js-sdk'
 import WS from 'ws'
@@ -33,11 +32,6 @@ export interface FeatureBoardServiceOptions {
      * @default global fetch
      */
     fetch?: (input: RequestInfo, init?: RequestInit) => Promise<Response>
-}
-
-export interface ClientConnection {
-    client: FeatureBoardClient
-    close: () => void
 }
 
 export const FeatureBoardService = {

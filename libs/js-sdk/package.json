@@ -21,6 +21,7 @@
         "module": "dist/esm/index.js"
     },
     "dependencies": {
+        "@featureboard/contracts": "workspace:0.1.0",
         "debug": "^4.3.2",
         "promise-completion-source": "^1.0.0"
     }

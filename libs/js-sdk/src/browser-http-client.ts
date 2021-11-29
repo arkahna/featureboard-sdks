@@ -1,5 +1,5 @@
 import { EffectiveFeatureValue } from '@featureboard/contracts'
-import { ClientConnection } from './client'
+import { ClientConnection } from './client-connection'
 import { createClient } from './create-client'
 import { EffectiveFeatureState } from './effective-feature-state'
 import { createEnsureSingle } from './ensure-single'
@@ -60,6 +60,18 @@ export async function createBrowserHttpClient(
         client: createClient(state),
         updateFeatures: () => {
             return fetchUpdatesSingle()
+        },
+        updateAudiences: async (audiences: string[]) => {
+            state.audiences = audiences
+            const newInit = await initStore(
+                api,
+                audiences,
+                fetch,
+                environmentApiKey,
+                state,
+            )
+            effectiveEndpoint = newInit.effectiveEndpoint
+            lastModified = newInit.lastModified
         },
         close,
     }
@@ -149,6 +161,7 @@ async function triggerUpdate(
     state: EffectiveFeatureState,
     lastModified: string | undefined,
 ) {
+    httpClientDebug('Fetching updated toggles')
     const response = await fetch(effectiveEndpoint, {
         headers: {
             'x-environment-key': environmentApiKey,
@@ -169,6 +182,11 @@ async function triggerUpdate(
     }
 
     const effectiveFeatures: EffectiveFeatureValue[] = await response.json()
+    const nextUpdate = response.headers.get('last-modified')
+    httpClientDebug('Fetching updated toggles: %o', {
+        nextUpdate,
+        effectiveFeatures,
+    })
     const removed = Object.keys(state.store.all()).filter(
         (key) => !effectiveFeatures.some((feat) => feat.featureKey === key),
     )
@@ -186,5 +204,5 @@ async function triggerUpdate(
         }
     }
 
-    return response.headers.get('last-modified') || undefined
+    return nextUpdate || undefined
 }

@@ -57,7 +57,12 @@ export function useClient({
 
                     setClientSdk(sdk)
                 } catch (err) {
-                    setInitError(err.message || 'Unknown initialization error')
+                    if (err instanceof Error) {
+                        setInitError(
+                            err.message || 'Unknown initialization error',
+                        )
+                    }
+                    setInitError('Unknown initialization error')
                 }
             }
         },

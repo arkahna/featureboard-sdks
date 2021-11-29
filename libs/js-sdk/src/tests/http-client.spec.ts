@@ -154,4 +154,51 @@ describe('http client', () => {
             updateStrategy: { kind: 'manual' },
         })
     })
+
+    it('Handles updating audience', async () => {
+        const values: EffectiveFeatureValue[] = [
+            {
+                featureKey: 'my-feature',
+                value: 'service-default-value',
+            },
+        ]
+        const lastModified = new Date().toISOString()
+        fetch.getOnce('https://client.featureboard.app/effective?audiences=', {
+            status: 200,
+            body: values,
+            headers: {
+                'Last-Modified': lastModified,
+            },
+        })
+
+        const httpClient = await createBrowserHttpClient('env-api-key', [], {
+            fetch,
+            api: featureBoardHostedService,
+            state: new EffectiveFeatureState([]),
+            updateStrategy: { kind: 'manual' },
+        })
+
+        const newValues: EffectiveFeatureValue[] = [
+            {
+                featureKey: 'my-feature',
+                value: 'new-service-default-value',
+            },
+        ]
+        fetch.getOnce(
+            {
+                url: 'https://client.featureboard.app/effective?audiences=test-audience',
+            },
+            {
+                status: 200,
+                body: newValues,
+            },
+            { overwriteRoutes: true },
+        )
+
+        await httpClient.updateAudiences(['test-audience'])
+
+        expect(
+            httpClient.client.getFeatureValue('my-feature', 'default-value'),
+        ).toEqual('new-service-default-value')
+    })
 })

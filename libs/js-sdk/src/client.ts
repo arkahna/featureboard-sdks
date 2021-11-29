@@ -36,16 +36,6 @@ export interface FeatureBoardServiceOptions {
     fetch?: (input: RequestInfo, init?: RequestInit) => Promise<Response>
 }
 
-export interface ClientConnection {
-    client: FeatureBoardClient
-
-    /** Manually triggers an update to the feature state */
-    updateFeatures(): PromiseLike<void>
-
-    /** Closes subscription to the FeatureBoard service */
-    close: () => void
-}
-
 export const FeatureBoardService = {
     /** Can be used to create a client from values transferred from server side renders, or test values */
     initStatic(

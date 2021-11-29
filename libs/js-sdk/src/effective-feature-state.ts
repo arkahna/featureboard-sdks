@@ -16,7 +16,7 @@ export class EffectiveFeatureState {
     > = []
 
     constructor(
-        public readonly audiences: ReadonlyArray<string>,
+        public audiences: string[],
         public store: EffectiveFeatureStore = new MemoryEffectiveFeatureStore(),
     ) {}
 

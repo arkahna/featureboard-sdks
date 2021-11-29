@@ -1,4 +1,5 @@
 export * from './client'
+export * from './client-connection'
 export * from './effective-feature-state'
 export * from './effective-feature-store'
 export * from './ensure-single'
