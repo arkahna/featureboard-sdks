@@ -1,0 +1,18 @@
+{
+    "name": "@featureboard/live-connection",
+    "private": true,
+    "version": "0.0.1",
+    "main": "out-tsc/server.js",
+    "module": "src/server.ts",
+    "browser": "src/browser.ts",
+    "publishConfig": {
+        "main": "dist/server.js",
+        "module": "dist/esm/server.js",
+        "browser": "dist/esm/browser.js"
+    },
+    "dependencies": {
+        "@featureboard/contracts": "0.1.0",
+        "promise-completion-source": "^1.0.0",
+        "ws": "^8.3.0"
+    }
+}

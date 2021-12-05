@@ -25,6 +25,9 @@
         "js-sdk": {
             "tags": []
         },
+        "live-connection": {
+            "tags": []
+        },
         "node-sdk": {
             "tags": []
         },
