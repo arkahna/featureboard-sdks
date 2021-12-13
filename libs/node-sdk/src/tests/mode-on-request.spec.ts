@@ -1,4 +1,4 @@
-import { FeatureValues } from '@featureboard/contracts'
+import { FeatureConfiguration } from '@featureboard/contracts'
 import fetchMock from 'fetch-mock'
 import { FeatureBoardService } from '..'
 
@@ -12,7 +12,7 @@ beforeEach(() => {
 
 describe('On request update mode', () => {
     it('fetches initial values', async () => {
-        const values: FeatureValues[] = [
+        const values: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
                 audienceExceptions: [],
@@ -38,7 +38,7 @@ describe('On request update mode', () => {
     })
 
     it('throws if request() is not awaited in request mode', async () => {
-        const values: FeatureValues[] = [
+        const values: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
                 audienceExceptions: [],
@@ -65,7 +65,7 @@ describe('On request update mode', () => {
     // To reduce load on the FeatureBoard server, we only fetch the values once they are considered old
     // The maxAge can be configured in the client to be 0 to always check for updates
     it('does not fetch update when response is not expired', async () => {
-        const values: FeatureValues[] = [
+        const values: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
                 audienceExceptions: [],
@@ -82,7 +82,7 @@ describe('On request update mode', () => {
             fetch,
         })
 
-        const newValues: FeatureValues[] = [
+        const newValues: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
                 audienceExceptions: [],
@@ -105,7 +105,7 @@ describe('On request update mode', () => {
     })
 
     it('fetches update when response is expired', async () => {
-        const values: FeatureValues[] = [
+        const values: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
                 audienceExceptions: [],
@@ -122,7 +122,7 @@ describe('On request update mode', () => {
             fetch,
         })
 
-        const newValues: FeatureValues[] = [
+        const newValues: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
                 audienceExceptions: [],

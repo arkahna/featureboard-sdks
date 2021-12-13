@@ -1,15 +1,17 @@
 import { NotificationType } from '@featureboard/contracts'
-import { initStore } from './browser-http-client'
+import {
+    LiveConnection,
+    LiveOptions,
+} from '../../live-connection/src/live-connection'
+import { initStore } from './browser-http-connection'
 import { ClientConnection } from './client-connection'
-import { createClient } from './create-client'
-import { EffectiveFeatureState } from './effective-feature-state'
+import { EffectiveFeaturesState } from './effective-feature-state'
 import { FeatureBoardApiConfig } from './featureboard-api-config'
-import { LiveConnection, LiveOptions } from './live-connection'
 import { debugLog } from './log'
 
 export interface FeatureBoardBrowserWsClientOptions {
     api: FeatureBoardApiConfig
-    state: EffectiveFeatureState
+    state: EffectiveFeaturesState
     liveOptions: LiveOptions
 
     /** Used for fallback if there are issues connecting */
@@ -18,7 +20,7 @@ export interface FeatureBoardBrowserWsClientOptions {
 
 const wsClientDebug = debugLog.extend('ws-client')
 
-export async function createBrowserWsClient(
+export async function createBrowserWsClientConnection(
     environmentApiKey: string,
     audiences: string[],
     { api, state, liveOptions, fetch }: FeatureBoardBrowserWsClientOptions,
@@ -49,7 +51,6 @@ export async function createBrowserWsClient(
     }
 
     return {
-        client: createClient(state),
         updateFeatures: async () => {},
         updateAudiences: async (audiences: string[]) => {
             state.audiences = audiences

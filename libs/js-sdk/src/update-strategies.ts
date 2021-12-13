@@ -1,4 +1,4 @@
-import { LiveOptions } from './live-connection'
+import type { LiveOptions } from '@featureboard/live-connection'
 
 export interface ManualUpdateStrategy {
     kind: 'manual'
@@ -14,7 +14,10 @@ export interface LiveUpdateStrategy {
     options?: LiveOptions
 }
 
-export type UpdateStrategies = ManualUpdateStrategy | LiveUpdateStrategy | PollingUpdateStrategy
+export type UpdateStrategies =
+    | ManualUpdateStrategy
+    | LiveUpdateStrategy
+    | PollingUpdateStrategy
 
 export interface PollingOptions {
     /** in ms */

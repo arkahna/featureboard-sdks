@@ -7,7 +7,8 @@
  * on-request - checks for updates on every request - see docs for how to enable HTTP caching in node
  */
 
-import { LiveOptions } from '@featureboard/js-sdk'
+import type { LiveOptions } from '@featureboard/live-connection'
+import { AllFeaturesState } from '../feature-state'
 
 export interface ManualUpdateStrategy {
     kind: 'manual'
@@ -50,4 +51,13 @@ export interface OnRequestOptions {
      * @default 30000 (30 seconds)
      **/
     maxAgeMs?: number
+}
+
+export interface AllConfigUpdateStrategy {
+    state: 'connected' | 'disconnected'
+    connect(state: AllFeaturesState): Promise<void>
+    close(): Promise<void>
+    updateFeatures(): PromiseLike<void>
+    /** To be called when creating a request client */
+    onRequest(): PromiseLike<void> | undefined
 }

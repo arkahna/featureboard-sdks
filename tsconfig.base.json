@@ -19,6 +19,9 @@
         "paths": {
             "@featureboard/contracts": ["libs/contracts/src/index.ts"],
             "@featureboard/js-sdk": ["libs/js-sdk/src/index.ts"],
+            "@featureboard/live-connection": [
+                "libs/live-connection/src/server.ts"
+            ],
             "@featureboard/node-sdk": ["libs/node-sdk/src/index.ts"],
             "@featureboard/react-sdk": ["libs/react-sdk/src/index.ts"]
         }

@@ -91,22 +91,36 @@ importers:
   libs/js-sdk:
     specifiers:
       '@featureboard/contracts': workspace:0.1.0
+      '@xstate/fsm': ^1.6.2
       debug: ^4.3.2
       promise-completion-source: ^1.0.0
     dependencies:
       '@featureboard/contracts': link:../contracts
+      '@xstate/fsm': 1.6.2
       debug: 4.3.2
       promise-completion-source: 1.0.0
+
+  libs/live-connection:
+    specifiers:
+      '@featureboard/contracts': 0.1.0
+      promise-completion-source: ^1.0.0
+      ws: ^8.3.0
+    dependencies:
+      '@featureboard/contracts': link:../contracts
+      promise-completion-source: 1.0.0
+      ws: 8.3.0
 
   libs/node-sdk:
     specifiers:
       '@featureboard/js-sdk': workspace:0.9.0
       debug: ^4.3.2
-      ws: ^8.2.0
+      node-fetch: ^3.1.0
+      promise-completion-source: ^1.0.0
     dependencies:
       '@featureboard/js-sdk': link:../js-sdk
       debug: 4.3.2
-      ws: 8.2.0
+      node-fetch: 3.1.0
+      promise-completion-source: 1.0.0
 
   libs/react-sdk:
     specifiers:
@@ -2358,6 +2372,10 @@ packages:
       execa: 5.1.1
     dev: true
 
+  /@xstate/fsm/1.6.2:
+    resolution: {integrity: sha512-vOfiFVQu9mQceA8oJ3PcA4vwhtyo/j/mbVDVIlHDOh3iuiTqMnp805zZ3QsouRdO2Ie3B7n3jMw8BntI74fZxg==}
+    dev: false
+
   /abab/2.0.5:
     resolution: {integrity: sha512-9IK9EadsbHo6jLWIpxpR6pL0sazTXV6+SQv25ZB+F7Bj9mJNaOc4nCRabwd5M/JwmUa8idz6Eci6eKfJryPs6Q==}
     dev: true
@@ -3075,6 +3093,11 @@ packages:
     resolution: {integrity: sha512-VvdQIPGdWP0SqFXghj79Wf/5LArmreyMsGLa6FG6iC4t3j7j5s71TrwWmT/4akbDQIqjfACkLZmjXhA7g2oUZw==}
     dev: true
 
+  /data-uri-to-buffer/4.0.0:
+    resolution: {integrity: sha512-Vr3mLBA8qWmcuschSLAOogKgQ/Jwxulv3RNE4FXnYWRGujzrRWQI4m12fQqRkwX06C0KanhLr4hK+GydchZsaA==}
+    engines: {node: '>= 12'}
+    dev: false
+
   /data-urls/2.0.0:
     resolution: {integrity: sha512-X5eWTSXO/BJmpdIKCRuKUgSCgAN0OwliVK3yPKbwIWU1Tdw5BRajxlzMidvh+gwko9AfQ9zIj52pzF91Q3YAvQ==}
     engines: {node: '>=10'}
@@ -3666,6 +3689,13 @@ packages:
       bser: 2.1.1
     dev: true
 
+  /fetch-blob/3.1.3:
+    resolution: {integrity: sha512-ax1Y5I9w+9+JiM+wdHkhBoxew+zG4AJ2SvAD1v1szpddUIiPERVGBxrMcB2ZqW0Y3PP8bOWYv2zqQq1Jp2kqUQ==}
+    engines: {node: ^12.20 || >= 14.13}
+    dependencies:
+      web-streams-polyfill: 3.2.0
+    dev: false
+
   /fetch-mock/9.11.0:
     resolution: {integrity: sha512-PG1XUv+x7iag5p/iNHD4/jdpxL9FtVSqRMUQhPab4hVDt80T1MH5ehzVrL2IdXO9Q2iBggArFvPqjUbHFuI58Q==}
     engines: {node: '>=4.0.0'}
@@ -3764,6 +3794,13 @@ packages:
       combined-stream: 1.0.8
       mime-types: 2.1.32
     dev: true
+
+  /formdata-polyfill/4.0.10:
+    resolution: {integrity: sha512-buewHzMvYL29jdeQTVILecSaZKnt/RJWjoZCF5OW60Z67/GmSLBkOFM7qh1PI3zFNtJbaZL5eQu1vLfazOwj4g==}
+    engines: {node: '>=12.20.0'}
+    dependencies:
+      fetch-blob: 3.1.3
+    dev: false
 
   /fs-extra/7.0.1:
     resolution: {integrity: sha512-YJDaCJZEnBmcbw13fvdAM9AwNOJwOzrE4pqMqBq5nFiEqXUqHwlK4B+3pUw6JNvfSPtX05xFHtYy/1ni01eGCw==}
@@ -5216,6 +5253,15 @@ packages:
     resolution: {integrity: sha512-V4aYg89jEoVRxRb2fJdAg8FHvI7cEyYdVAh94HH0UIK8oJxUfkjlDQN9RbMx+bEjP7+ggMiFRprSti032Oipxw==}
     engines: {node: 4.x || >=6.0.0}
     dev: true
+
+  /node-fetch/3.1.0:
+    resolution: {integrity: sha512-QU0WbIfMUjd5+MUzQOYhenAazakV7Irh1SGkWCsRzBwvm4fAhzEUaHMJ6QLP7gWT6WO9/oH2zhKMMGMuIrDyKw==}
+    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
+    dependencies:
+      data-uri-to-buffer: 4.0.0
+      fetch-blob: 3.1.3
+      formdata-polyfill: 4.0.10
+    dev: false
 
   /node-int64/0.4.0:
     resolution: {integrity: sha1-h6kGXNs1XTGC2PlM4RGIuCXGijs=}
@@ -6704,6 +6750,11 @@ packages:
       defaults: 1.0.3
     dev: true
 
+  /web-streams-polyfill/3.2.0:
+    resolution: {integrity: sha512-EqPmREeOzttaLRm5HS7io98goBgZ7IVz79aDvqjD0kYXLtFZTc0T/U6wHTPKyIjb+MdN7DFIIX6hgdBEpWmfPA==}
+    engines: {node: '>= 8'}
+    dev: false
+
   /webidl-conversions/4.0.2:
     resolution: {integrity: sha512-YQ+BmxuTgd6UXZW3+ICGfyqRyHXVlD5GtQr5+qjiNW7bF0cqrzX500HVXPBOvgXb5YnzDd+h0zqyv61KUD7+Sg==}
     dev: true
@@ -6838,8 +6889,8 @@ packages:
         optional: true
     dev: true
 
-  /ws/8.2.0:
-    resolution: {integrity: sha512-uYhVJ/m9oXwEI04iIVmgLmugh2qrZihkywG9y5FfZV2ATeLIzHf93qs+tUNqlttbQK957/VX3mtwAS+UfIwA4g==}
+  /ws/8.3.0:
+    resolution: {integrity: sha512-Gs5EZtpqZzLvmIM59w4igITU57lrtYVFneaa434VROv4thzJyV6UjIL3D42lslWlI+D4KzLYnxSwtfuiO79sNw==}
     engines: {node: '>=10.0.0'}
     peerDependencies:
       bufferutil: ^4.0.1

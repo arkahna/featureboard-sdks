@@ -5,7 +5,7 @@ export interface AudienceExceptionValue {
     value: string | boolean | number
 }
 
-export interface FeatureValues {
+export interface FeatureConfiguration {
     featureKey: string
     defaultValue: string | boolean | number
     audienceExceptions: AudienceExceptionValue[]
@@ -14,7 +14,7 @@ export interface FeatureValues {
 export interface StateOfTheWorldNotification {
     kind: 'state-of-the-world'
 
-    features: FeatureValues[]
+    features: FeatureConfiguration[]
 }
 
 export interface EffectiveFeatureValue {
@@ -45,11 +45,11 @@ export interface FeatureValueAvailableNotification {
 }
 
 /** Sent for all-values subscription when feature updated */
-export interface FeatureValueNotification extends FeatureValues {
+export interface FeatureValueNotification extends FeatureConfiguration {
     kind: 'feature-updated'
 }
 
-export interface FeatureAvailable extends FeatureValues {
+export interface FeatureAvailable extends FeatureConfiguration {
     kind: 'feature-available'
 }
 

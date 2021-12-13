@@ -1,9 +1,11 @@
 import { EffectiveFeatureValue } from '@featureboard/contracts'
-import { EffectiveFeatureState } from './effective-feature-state'
+import { EffectiveFeaturesState } from './effective-feature-state'
 import { FeatureBoardClient } from './features-client'
 import { debugLog } from './log'
 
-export function createClient(state: EffectiveFeatureState): FeatureBoardClient {
+export function createClient(
+    state: EffectiveFeaturesState,
+): FeatureBoardClient {
     debugLog('Creating client')
 
     const featureboardClient: FeatureBoardClient = {

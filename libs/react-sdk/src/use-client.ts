@@ -15,6 +15,7 @@ export function useClient({
     audiences: Array<string | undefined | false>
 } & FeatureBoardServiceOptions) {
     const [stableInitOptions] = useState(initOptions)
+    const client = useMemo(() => createClient(), [])
     const [connectionConnection, setClientSdk] = useState<
         ClientConnection | undefined
     >(undefined)
@@ -39,6 +40,7 @@ export function useClient({
             if (initError) {
                 setInitError(undefined)
             }
+
             // Cleanup old client
             if (connectionConnection) {
                 connectionConnection.close()
@@ -49,13 +51,17 @@ export function useClient({
                     connectionValues.current.apiKey = apiKey
                     connectionValues.current.audiences = stableAudiences
 
-                    const sdk = await FeatureBoardService.init(
-                        apiKey,
-                        stableAudiences,
-                        stableInitOptions,
-                    )
+                    if (connectionConnection) {
+                        connectionConnection.updateAudiences(stableAudiences)
+                    } else {
+                        const sdk = await FeatureBoardService.init(
+                            apiKey,
+                            stableAudiences,
+                            stableInitOptions,
+                        )
 
-                    setClientSdk(sdk)
+                        setClientSdk(sdk)
+                    }
                 } catch (err: any) {
                     setInitError(err.message || 'Unknown initialization error')
                 }
@@ -83,7 +89,7 @@ export function useClient({
     }, [apiKey, connectionConnection, connect, stableAudiences])
 
     return {
-        client: connectionConnection?.client,
+        client,
         connectionConnection,
         initError,
         reconnect: () => {

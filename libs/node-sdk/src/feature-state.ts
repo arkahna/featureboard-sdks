@@ -1,18 +1,18 @@
-import { FeatureValues } from '@featureboard/contracts'
+import { FeatureConfiguration } from '@featureboard/contracts'
 import { FeatureStore, MemoryFeatureStore } from './feature-store'
 
-export class FeatureState {
+export class AllFeaturesState {
     constructor(public store: FeatureStore = new MemoryFeatureStore()) {}
 
     private featureUpdatedCallbacks: Array<
-        (featureKey: string, values: FeatureValues | undefined) => void
+        (featureKey: string, values: FeatureConfiguration | undefined) => void
     > = []
 
     on(
         _event: 'feature-updated',
         callback: (
             featureKey: string,
-            values: FeatureValues | undefined,
+            values: FeatureConfiguration | undefined,
         ) => void,
     ): void {
         this.featureUpdatedCallbacks.push(callback)
@@ -22,7 +22,7 @@ export class FeatureState {
         _event: 'feature-updated',
         callback: (
             featureKey: string,
-            values: FeatureValues | undefined,
+            values: FeatureConfiguration | undefined,
         ) => void,
     ): void {
         this.featureUpdatedCallbacks.splice(
@@ -33,7 +33,7 @@ export class FeatureState {
 
     async updateFeatureState(
         featureKey: string,
-        featureValues: FeatureValues | undefined,
+        featureValues: FeatureConfiguration | undefined,
     ) {
         if (featureValues === undefined) {
             await this.store.set(featureKey, undefined)

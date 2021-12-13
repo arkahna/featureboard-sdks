@@ -1,5 +1,5 @@
 import {
-    FeatureValues,
+    FeatureConfiguration,
     StateOfTheWorldNotification,
 } from '@featureboard/contracts'
 import { timeout } from '@featureboard/js-sdk/src/timeout'
@@ -49,7 +49,7 @@ describe('live client', () => {
     })
 
     it('connection timeout falls back to http to get initial values, then retries in background', async () => {
-        const values: FeatureValues[] = [
+        const values: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
                 audienceExceptions: [],
@@ -83,7 +83,7 @@ describe('live client', () => {
     it('uses value from live once it reconnects', async () => {
         let serverConnectAttempts = 0
 
-        const values: FeatureValues[] = [
+        const values: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
                 audienceExceptions: [],

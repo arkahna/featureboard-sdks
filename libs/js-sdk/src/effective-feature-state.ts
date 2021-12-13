@@ -7,12 +7,11 @@ export interface EffectiveFeatureValues {
     [featureKey: string]: string | boolean | number
 }
 
-export class EffectiveFeatureState {
+type FeatureValue = string | boolean | number | undefined
+
+export class EffectiveFeaturesState {
     private valueUpdatedCallbacks: Array<
-        (
-            featureKey: string,
-            value: string | boolean | number | undefined,
-        ) => void
+        (featureKey: string, value: FeatureValue) => void
     > = []
 
     constructor(
@@ -22,19 +21,13 @@ export class EffectiveFeatureState {
 
     on(
         _event: 'feature-updated',
-        callback: (
-            featureKey: string,
-            value: string | boolean | number | undefined,
-        ) => void,
+        callback: (featureKey: string, value: FeatureValue) => void,
     ): void {
         this.valueUpdatedCallbacks.push(callback)
     }
     off(
         _event: 'feature-updated',
-        callback: (
-            featureKey: string,
-            value: string | boolean | number | undefined,
-        ) => void,
+        callback: (featureKey: string, value: FeatureValue) => void,
     ): void {
         this.valueUpdatedCallbacks.splice(
             this.valueUpdatedCallbacks.indexOf(callback),
@@ -42,10 +35,7 @@ export class EffectiveFeatureState {
         )
     }
 
-    updateFeatureValue(
-        featureKey: string,
-        value: undefined | string | boolean | number,
-    ) {
+    updateFeatureValue(featureKey: string, value: FeatureValue) {
         if (value === undefined) {
             this.store.set(featureKey, undefined)
         } else {

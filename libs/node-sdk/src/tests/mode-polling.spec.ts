@@ -1,4 +1,4 @@
-import { FeatureValues } from '@featureboard/contracts'
+import { FeatureConfiguration } from '@featureboard/contracts'
 import fetchMock from 'fetch-mock'
 import { FeatureBoardService } from '..'
 import { interval } from '../interval'
@@ -16,7 +16,7 @@ beforeEach(() => {
 describe('Polling update mode', () => {
     it('fetches initial values', async () => {
         interval.set = jest.fn(() => {}) as any
-        const values: FeatureValues[] = [
+        const values: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
                 audienceExceptions: [],
@@ -44,7 +44,7 @@ describe('Polling update mode', () => {
         }) as any
         interval.clear = jest.fn(() => {})
 
-        const values: FeatureValues[] = [
+        const values: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
                 audienceExceptions: [],
@@ -70,7 +70,7 @@ describe('Polling update mode', () => {
         const setMock = jest.fn(() => {})
         interval.set = setMock as any
 
-        const values: FeatureValues[] = [
+        const values: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
                 audienceExceptions: [],
@@ -87,7 +87,7 @@ describe('Polling update mode', () => {
             fetch,
         })
 
-        const newValues: FeatureValues[] = [
+        const newValues: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
                 audienceExceptions: [],

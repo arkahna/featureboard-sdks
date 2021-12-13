@@ -22,6 +22,7 @@
     },
     "dependencies": {
         "@featureboard/contracts": "workspace:0.1.0",
+        "@xstate/fsm": "^1.6.2",
         "debug": "^4.3.2",
         "promise-completion-source": "^1.0.0"
     }

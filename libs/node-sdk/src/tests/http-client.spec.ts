@@ -1,7 +1,7 @@
-import { FeatureValues } from '@featureboard/contracts'
+import { FeatureConfiguration } from '@featureboard/contracts'
 import { featureBoardHostedService } from '@featureboard/js-sdk'
 import fetchMock from 'fetch-mock'
-import { FeatureState } from '../feature-state'
+import { AllFeaturesState } from '../feature-state'
 import { MemoryFeatureStore } from '../feature-store'
 import { createNodeHttpClient } from '../server-http-client'
 
@@ -15,7 +15,7 @@ beforeEach(() => {
 
 describe('http client', () => {
     it('calls featureboard /all endpoint on creation', async () => {
-        const values: FeatureValues[] = [
+        const values: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
                 audienceExceptions: [],
@@ -30,11 +30,11 @@ describe('http client', () => {
         const httpClient = await createNodeHttpClient('env-api-key', {
             fetch,
             api: featureBoardHostedService,
-            state: new FeatureState(),
+            state: new AllFeaturesState(),
             updateStrategy: { kind: 'manual' },
         })
 
-        const newValues: FeatureValues[] = [
+        const newValues: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
                 audienceExceptions: [],
@@ -56,7 +56,7 @@ describe('http client', () => {
     // Below tests are testing behaviour around https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/If-Modified-Since
 
     it('Attaches last modified header to update requests', async () => {
-        const values: FeatureValues[] = [
+        const values: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
                 audienceExceptions: [],
@@ -75,7 +75,7 @@ describe('http client', () => {
         const httpClient = await createNodeHttpClient('env-api-key', {
             fetch,
             api: featureBoardHostedService,
-            state: new FeatureState(),
+            state: new AllFeaturesState(),
             updateStrategy: { kind: 'manual' },
         })
 
@@ -94,7 +94,7 @@ describe('http client', () => {
     })
 
     it('Handles updates from server', async () => {
-        const values: FeatureValues[] = [
+        const values: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
                 audienceExceptions: [],
@@ -113,11 +113,11 @@ describe('http client', () => {
         const httpClient = await createNodeHttpClient('env-api-key', {
             fetch,
             api: featureBoardHostedService,
-            state: new FeatureState(),
+            state: new AllFeaturesState(),
             updateStrategy: { kind: 'manual' },
         })
 
-        const newValues: FeatureValues[] = [
+        const newValues: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
                 audienceExceptions: [],
@@ -149,7 +149,7 @@ describe('http client', () => {
         await createNodeHttpClient('env-api-key', {
             fetch,
             api: featureBoardHostedService,
-            state: new FeatureState(
+            state: new AllFeaturesState(
                 new MemoryFeatureStore([
                     {
                         featureKey: 'my-feature',

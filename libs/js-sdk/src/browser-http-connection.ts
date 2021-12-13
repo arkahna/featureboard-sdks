@@ -1,29 +1,26 @@
 import { EffectiveFeatureValue } from '@featureboard/contracts'
 import { ClientConnection } from './client-connection'
-import { createClient } from './create-client'
-import { EffectiveFeatureState } from './effective-feature-state'
+import { EffectiveFeaturesState } from './effective-feature-state'
 import { createEnsureSingle } from './ensure-single'
 import { FeatureBoardApiConfig } from './featureboard-api-config'
 import { interval } from './interval'
-import { debugLog } from './log'
 import { timeout } from './timeout'
 import {
     ManualUpdateStrategy,
     PollingUpdateStrategy,
 } from './update-strategies'
+import { httpClientDebug } from './utils/http-log'
 
 export interface FeatureBoardBrowserHttpClientOptions {
     api: FeatureBoardApiConfig
-    state: EffectiveFeatureState
+    state: EffectiveFeaturesState
 
     updateStrategy: ManualUpdateStrategy | PollingUpdateStrategy
 
     fetch: (input: RequestInfo, init?: RequestInit) => Promise<Response>
 }
 
-const httpClientDebug = debugLog.extend('http-client')
-
-export async function createBrowserHttpClient(
+export async function createBrowserHttpClientConnection(
     environmentApiKey: string,
     audiences: string[],
     { api, fetch, state, updateStrategy }: FeatureBoardBrowserHttpClientOptions,
@@ -57,7 +54,6 @@ export async function createBrowserHttpClient(
             : () => {}
 
     return {
-        client: createClient(state),
         updateFeatures: () => {
             return fetchUpdatesSingle()
         },
@@ -85,7 +81,7 @@ export async function initStore(
         init?: RequestInit | undefined,
     ) => Promise<Response>,
     environmentApiKey: string,
-    state: EffectiveFeatureState,
+    state: EffectiveFeaturesState,
     attemptedRetries = 0,
 ): Promise<{ lastModified: string | undefined; effectiveEndpoint: string }> {
     let lastModified: string | undefined
@@ -158,7 +154,7 @@ async function triggerUpdate(
     ) => Promise<Response>,
     effectiveEndpoint: string,
     environmentApiKey: string,
-    state: EffectiveFeatureState,
+    state: EffectiveFeaturesState,
     lastModified: string | undefined,
 ) {
     httpClientDebug('Fetching updated toggles')

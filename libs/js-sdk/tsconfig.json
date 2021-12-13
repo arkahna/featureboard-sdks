@@ -5,6 +5,10 @@
         "rootDir": "./src",
         "types": ["jest", "node"]
     },
-    "include": ["src/**/*.ts", "src/**/*.tsx"],
-    "references": [{ "path": "../contracts" }]
+    "include": [
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "../live-connection/src/live-connection.ts"
+    ],
+    "references": [{ "path": "../contracts" }, { "path": "../live-connection" }]
 }

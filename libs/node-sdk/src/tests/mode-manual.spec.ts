@@ -1,4 +1,4 @@
-import { FeatureValues } from '@featureboard/contracts'
+import { FeatureConfiguration } from '@featureboard/contracts'
 import fetchMock from 'fetch-mock'
 import { FeatureBoardService } from '../'
 
@@ -12,7 +12,7 @@ beforeEach(() => {
 
 describe('Manual update mode', () => {
     it('fetches initial values', async () => {
-        const values: FeatureValues[] = [
+        const values: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
                 audienceExceptions: [],
@@ -35,7 +35,7 @@ describe('Manual update mode', () => {
     })
 
     it('can manually update values', async () => {
-        const values: FeatureValues[] = [
+        const values: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
                 audienceExceptions: [],
@@ -52,7 +52,7 @@ describe('Manual update mode', () => {
             fetch,
         })
 
-        const newValues: FeatureValues[] = [
+        const newValues: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
                 audienceExceptions: [],
@@ -75,7 +75,7 @@ describe('Manual update mode', () => {
     })
 
     it('can manually update audience exception values', async () => {
-        const values: FeatureValues[] = [
+        const values: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
                 audienceExceptions: [
@@ -94,7 +94,7 @@ describe('Manual update mode', () => {
             fetch,
         })
 
-        const newValues: FeatureValues[] = [
+        const newValues: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
                 audienceExceptions: [
@@ -121,7 +121,7 @@ describe('Manual update mode', () => {
     })
 
     it('close', async () => {
-        const values: FeatureValues[] = [
+        const values: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
                 audienceExceptions: [],
