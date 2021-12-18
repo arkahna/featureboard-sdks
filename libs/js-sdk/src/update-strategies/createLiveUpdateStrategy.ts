@@ -6,13 +6,15 @@ import { EffectiveConfigUpdateStrategy } from './update-strategies'
 export function createLiveUpdateStrategy(
     environmentApiKey: string,
     endpoint: string,
+    audiences: string[],
     options: LiveOptions,
 ): EffectiveConfigUpdateStrategy {
+    let currentAudiences = audiences
     const liveConnectionLib = import('@featureboard/live-connection')
     const liveConnectionAsync = liveConnectionLib.then(({ LiveConnection }) => {
         return new LiveConnection(
             environmentApiKey,
-            { kind: 'all-values' },
+            { kind: 'effective-values', audiences: currentAudiences },
             endpoint,
             options,
         )
@@ -25,22 +27,15 @@ export function createLiveUpdateStrategy(
             const liveConnection = await liveConnectionAsync
 
             function handleMessage(message: NotificationType) {
-                // wsClientDebug('Handling message: %s', message.kind)
                 switch (message.kind) {
-                    case 'feature-value-available':
-                    case 'feature-value-updated': {
+                    case 'feature-value-updated':
+                    case 'feature-value-available': {
                         state.updateFeatureValue(
                             message.featureKey,
                             message.value,
                         )
                         break
                     }
-
-                    case 'feature-unavailable': {
-                        state.updateFeatureValue(message.featureKey, undefined)
-                        break
-                    }
-
                     case 'state-of-the-world-effective-values': {
                         message.features.forEach((feature) => {
                             state.updateFeatureValue(
@@ -51,6 +46,11 @@ export function createLiveUpdateStrategy(
                         break
                     }
 
+                    case 'feature-unavailable': {
+                        state.updateFeatureValue(message.featureKey, undefined)
+                        break
+                    }
+
                     case 'subscription-error': {
                         console.error('Failed to subscribe', message.error)
                         liveConnection.close('Subscription error')
@@ -58,6 +58,7 @@ export function createLiveUpdateStrategy(
                     }
 
                     default: {
+                        // Kind should be never here if everything has been handled
                         console.warn(
                             { kind: message.kind },
                             'Unknown message type from FeatureBoard, you may need to upgrade your SDK',
@@ -84,6 +85,10 @@ export function createLiveUpdateStrategy(
         },
         onRequest() {
             return undefined
+        },
+        updateAudiences(state, updatedAudiences) {
+            currentAudiences = updatedAudiences
+            return this.connect(state)
         },
     }
 }

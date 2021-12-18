@@ -12,19 +12,16 @@ export function resolveUpdateStrategy(
     updateStrategy: UpdateStrategies['kind'] | UpdateStrategies | undefined,
     environmentApiKey: string,
     api: FeatureBoardApiConfig,
+    audiences: string[],
 ): EffectiveConfigUpdateStrategy {
-    const resolvedUpdateStrategy: UpdateStrategies = !updateStrategy
-        ? { kind: 'polling' }
-        : typeof updateStrategy === 'string'
-        ? {
-              kind: updateStrategy,
-          }
-        : updateStrategy
+    const resolvedUpdateStrategy: UpdateStrategies =
+        toUpdateStrategyOptions(updateStrategy)
 
     if (resolvedUpdateStrategy.kind === 'live') {
         return createLiveUpdateStrategy(
             environmentApiKey,
             api.ws,
+            audiences,
             resolvedUpdateStrategy.options
                 ? resolvedUpdateStrategy.options
                 : {},
@@ -36,12 +33,31 @@ export function resolveUpdateStrategy(
             api.http,
             resolvedUpdateStrategy.options?.intervalMs ||
                 pollingIntervalDefault,
+            audiences,
         )
     }
 
     if (resolvedUpdateStrategy.kind === 'manual') {
-        return createManualUpdateStrategy(environmentApiKey, api.http)
+        return createManualUpdateStrategy(
+            environmentApiKey,
+            api.http,
+            audiences,
+        )
     }
 
     throw new Error('Unknown update strategy: ' + updateStrategy)
+}
+
+function toUpdateStrategyOptions(
+    updateStrategy: UpdateStrategies['kind'] | UpdateStrategies | undefined,
+): UpdateStrategies {
+    if (!updateStrategy) {
+        return { kind: 'polling' }
+    }
+    if (typeof updateStrategy === 'string') {
+        return {
+            kind: updateStrategy,
+        }
+    }
+    return updateStrategy
 }

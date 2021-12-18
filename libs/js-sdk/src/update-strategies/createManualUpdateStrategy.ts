@@ -1,13 +1,16 @@
 import { createEnsureSingle } from '@featureboard/js-sdk'
 import { fetchFeaturesConfigurationViaHttp } from '../utils/fetchFeaturesConfiguration'
+import { getEffectiveEndpoint } from './getEffectiveEndpoint'
 import { EffectiveConfigUpdateStrategy } from './update-strategies'
 
 export function createManualUpdateStrategy(
     environmentApiKey: string,
     httpEndpoint: string,
+    audiences: string[],
 ): EffectiveConfigUpdateStrategy {
     let lastModified: undefined | string
     let fetchUpdatesSingle: undefined | (() => Promise<void>)
+    let currentAudiences = audiences
 
     return {
         async connect(state) {
@@ -15,7 +18,7 @@ export function createManualUpdateStrategy(
             fetchUpdatesSingle = createEnsureSingle(async () => {
                 lastModified = await fetchFeaturesConfigurationViaHttp(
                     fetch as any,
-                    httpEndpoint,
+                    getEffectiveEndpoint(httpEndpoint, currentAudiences),
                     environmentApiKey,
                     state,
                     lastModified,
@@ -37,6 +40,10 @@ export function createManualUpdateStrategy(
         },
         onRequest() {
             return undefined
+        },
+        updateAudiences(state, updatedAudiences) {
+            currentAudiences = updatedAudiences
+            return this.connect(state)
         },
     }
 }

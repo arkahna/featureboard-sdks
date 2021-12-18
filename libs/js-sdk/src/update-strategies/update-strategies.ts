@@ -51,6 +51,10 @@ export interface EffectiveConfigUpdateStrategy {
     connect(state: EffectiveFeaturesState): Promise<void>
     close(): Promise<void>
     updateFeatures(): PromiseLike<void>
+    updateAudiences(
+        state: EffectiveFeaturesState,
+        audiences: string[],
+    ): PromiseLike<void>
     /** To be called when creating a request client */
     onRequest(): PromiseLike<void> | undefined
 }

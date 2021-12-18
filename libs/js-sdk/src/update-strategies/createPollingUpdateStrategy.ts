@@ -2,24 +2,32 @@ import { createEnsureSingle } from '@featureboard/js-sdk'
 import fetch from 'node-fetch'
 import { fetchFeaturesConfigurationViaHttp } from '../utils/fetchFeaturesConfiguration'
 import { pollingUpdates } from '../utils/pollingUpdates'
+import { getEffectiveEndpoint } from './getEffectiveEndpoint'
 import { EffectiveConfigUpdateStrategy } from './update-strategies'
 
 export function createPollingUpdateStrategy(
     environmentApiKey: string,
     httpEndpoint: string,
     intervalMs: number,
+    audiences: string[],
 ): EffectiveConfigUpdateStrategy {
     let stopPolling: undefined | (() => void)
     let lastModified: undefined | string
     let fetchUpdatesSingle: undefined | (() => Promise<void>)
+    let currentAudiences = audiences
 
     return {
         async connect(state) {
             // Ensure that we don't trigger another request while one is in flight
             fetchUpdatesSingle = createEnsureSingle(async () => {
+                const effectiveEndpoint = getEffectiveEndpoint(
+                    httpEndpoint,
+                    currentAudiences,
+                )
+
                 lastModified = await fetchFeaturesConfigurationViaHttp(
                     fetch as any,
-                    httpEndpoint,
+                    effectiveEndpoint,
                     environmentApiKey,
                     state,
                     lastModified,
@@ -55,6 +63,10 @@ export function createPollingUpdateStrategy(
         },
         onRequest() {
             return undefined
+        },
+        updateAudiences(state, updatedAudiences) {
+            currentAudiences = updatedAudiences
+            return this.connect(state)
         },
     }
 }
