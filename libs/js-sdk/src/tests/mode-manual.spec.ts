@@ -1,6 +1,6 @@
 import { EffectiveFeatureValue } from '@featureboard/contracts'
 import fetchMock from 'fetch-mock'
-import { FeatureBoardService } from '../'
+import { createBrowserClient } from '../client'
 
 let fetch: fetchMock.FetchMockSandbox
 
@@ -45,7 +45,9 @@ describe('Manual update mode', () => {
             body: values,
         })
 
-        const client = await FeatureBoardService.init('fake-key', [], {
+        const client = createBrowserClient({
+            environmentApiKey: 'fake-key',
+            audiences: [],
             updateStrategy: 'manual',
             fetch,
         })

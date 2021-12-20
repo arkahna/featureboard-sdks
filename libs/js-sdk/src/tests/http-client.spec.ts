@@ -1,6 +1,6 @@
 import { EffectiveFeatureValue } from '@featureboard/contracts'
 import fetchMock from 'fetch-mock'
-import { createBrowserHttpClientConnection } from '../browser-http-connection'
+import { createBrowserClient } from '../client'
 import { EffectiveFeaturesState } from '../effective-feature-state'
 import { MemoryEffectiveFeatureStore } from '../effective-feature-store'
 import { featureBoardHostedService } from '../featureboard-service-urls'
@@ -26,16 +26,15 @@ describe('http client', () => {
             body: values,
         })
 
-        const httpClient = await createBrowserHttpClientConnection(
-            'env-api-key',
-            [],
-            {
-                fetch,
-                api: featureBoardHostedService,
-                state: new EffectiveFeaturesState([]),
-                updateStrategy: { kind: 'manual' },
-            },
-        )
+        const httpClient = createBrowserClient({
+            environmentApiKey: 'env-api-key',
+            audiences: [],
+
+            fetch,
+            api: featureBoardHostedService,
+            state: new EffectiveFeaturesState([]),
+            updateStrategy: { kind: 'manual' },
+        })
 
         const newValues: EffectiveFeatureValue[] = [
             {
@@ -73,16 +72,13 @@ describe('http client', () => {
             },
         })
 
-        const httpClient = await createBrowserHttpClientConnection(
-            'env-api-key',
-            [],
-            {
-                fetch,
-                api: featureBoardHostedService,
-                state: new EffectiveFeaturesState([]),
-                updateStrategy: { kind: 'manual' },
-            },
-        )
+        const httpClient = createBrowserClient({
+            environmentApiKey: 'env-api-key',
+            audiences: [],
+            fetch,
+            api: featureBoardHostedService,
+            updateStrategy: { kind: 'manual' },
+        })
 
         fetch.getOnce(
             {
@@ -114,16 +110,13 @@ describe('http client', () => {
             },
         })
 
-        const httpClient = await createBrowserHttpClientConnection(
-            'env-api-key',
-            [],
-            {
-                fetch,
-                api: featureBoardHostedService,
-                state: new EffectiveFeaturesState([]),
-                updateStrategy: { kind: 'manual' },
-            },
-        )
+        const httpClient = createBrowserClient({
+            environmentApiKey: 'env-api-key',
+            audiences: [],
+            fetch,
+            api: featureBoardHostedService,
+            updateStrategy: { kind: 'manual' },
+        })
 
         const newValues: EffectiveFeatureValue[] = [
             {
@@ -158,20 +151,23 @@ describe('http client', () => {
                 'Last-Modified': lastModified,
             },
         })
-        await createBrowserHttpClientConnection('env-api-key', [], {
+        const client = createBrowserClient({
+            environmentApiKey: 'env-api-key',
+            audiences: [],
             fetch,
             api: featureBoardHostedService,
-            state: new EffectiveFeaturesState(
-                [],
-                new MemoryEffectiveFeatureStore([
-                    {
-                        featureKey: 'my-feature',
-                        value: 'service-default-value',
-                    },
-                ]),
-            ),
+            store: new MemoryEffectiveFeatureStore([
+                {
+                    featureKey: 'my-feature',
+                    value: 'service-default-value',
+                },
+            ]),
             updateStrategy: { kind: 'manual' },
         })
+
+        expect(
+            client.client.getFeatureValue('my-feature', 'default-value'),
+        ).toEqual('service-default-value')
     })
 
     it('Handles updating audience', async () => {
@@ -190,16 +186,13 @@ describe('http client', () => {
             },
         })
 
-        const httpClient = await createBrowserHttpClientConnection(
-            'env-api-key',
-            [],
-            {
-                fetch,
-                api: featureBoardHostedService,
-                state: new EffectiveFeaturesState([]),
-                updateStrategy: { kind: 'manual' },
-            },
-        )
+        const httpClient = createBrowserClient({
+            environmentApiKey: 'env-api-key',
+            audiences: [],
+            fetch,
+            api: featureBoardHostedService,
+            updateStrategy: { kind: 'manual' },
+        })
 
         const newValues: EffectiveFeatureValue[] = [
             {

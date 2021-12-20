@@ -1,11 +1,7 @@
 import { EffectiveFeatureValue } from '@featureboard/contracts'
 import { EffectiveFeaturesState } from '../effective-feature-state'
+import { FetchSignature } from './FetchSignature'
 import { httpClientDebug } from './http-log'
-
-export type FetchSignature = (
-    input: RequestInfo,
-    init?: RequestInit | undefined,
-) => Promise<Response>
 
 export async function fetchFeaturesConfigurationViaHttp(
     fetch: FetchSignature,

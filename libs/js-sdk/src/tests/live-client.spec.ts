@@ -3,7 +3,7 @@ import {
     StateOfTheWorldEffectiveValuesNotification,
 } from '@featureboard/contracts'
 import fetchMock from 'fetch-mock'
-import { FeatureBoardService } from '../client'
+import { createBrowserClient } from '../client'
 import { timeout } from '../timeout'
 import { connectToWsClient } from './ws-helper'
 
@@ -17,7 +17,9 @@ beforeEach(() => {
 
 describe('live client', () => {
     it('can connect to featureboard', async () => {
-        const client = await FeatureBoardService.init('fake-key', [], {
+        const client = createBrowserClient({
+            environmentApiKey: 'fake-key',
+            audiences: [],
             fetch,
             updateStrategy: {
                 kind: 'live',

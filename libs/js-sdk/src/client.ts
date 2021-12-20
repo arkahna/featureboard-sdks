@@ -11,6 +11,8 @@ import { featureBoardHostedService } from './featureboard-service-urls'
 import { FeatureBoardClient } from './features-client'
 import { debugLog } from './log'
 import { resolveUpdateStrategy } from './update-strategies/resolveUpdateStrategy'
+import { UpdateStrategies } from './update-strategies/update-strategies'
+import { FetchSignature } from './utils/FetchSignature'
 
 export function createBrowserClient({
     initialValues,
@@ -30,7 +32,7 @@ export function createBrowserClient({
      * live - uses websockets for near realtime updates
      * polling - checks with the featureboard service every 30seconds (or configured interval) for updates
      */
-    updateStrategy?: 'manual' | 'live' | 'polling'
+    updateStrategy?: UpdateStrategies['kind'] | UpdateStrategies
 
     store?: EffectiveFeatureStore
     audiences: string[]
@@ -38,6 +40,8 @@ export function createBrowserClient({
     initialValues?: EffectiveFeatureValue[]
 
     environmentApiKey: string
+
+    fetch?: FetchSignature
 }): BrowserClient {
     if (store && initialValues) {
         throw new Error('Cannot specify both store and initialValues')
@@ -54,6 +58,7 @@ export function createBrowserClient({
         environmentApiKey,
         api || featureBoardHostedService,
         audiences,
+        fetch ?? (window.fetch as any),
     )
 
     updateStrategyImplementation.connect(state).then(() => {

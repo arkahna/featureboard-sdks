@@ -1,4 +1,5 @@
 import { FeatureBoardApiConfig } from '@featureboard/js-sdk'
+import { FetchSignature } from '../utils/FetchSignature'
 import { createLiveUpdateStrategy } from './createLiveUpdateStrategy'
 import { createManualUpdateStrategy } from './createManualUpdateStrategy'
 import { createPollingUpdateStrategy } from './createPollingUpdateStrategy'
@@ -13,6 +14,7 @@ export function resolveUpdateStrategy(
     environmentApiKey: string,
     api: FeatureBoardApiConfig,
     audiences: string[],
+    fetch: FetchSignature,
 ): EffectiveConfigUpdateStrategy {
     const resolvedUpdateStrategy: UpdateStrategies =
         toUpdateStrategyOptions(updateStrategy)
@@ -34,6 +36,7 @@ export function resolveUpdateStrategy(
             resolvedUpdateStrategy.options?.intervalMs ||
                 pollingIntervalDefault,
             audiences,
+            fetch,
         )
     }
 
@@ -42,6 +45,7 @@ export function resolveUpdateStrategy(
             environmentApiKey,
             api.http,
             audiences,
+            fetch,
         )
     }
 
