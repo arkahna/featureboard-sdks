@@ -23,7 +23,9 @@ describe('Manual update mode', () => {
             body: values,
         })
 
-        const client = await FeatureBoardService.init('fake-key', [], {
+        const client = createBrowserClient({
+            environmentApiKey: 'fake-key',
+            audiences: [],
             updateStrategy: 'manual',
             fetch,
         })
@@ -85,7 +87,9 @@ describe('Manual update mode', () => {
             body: values,
         })
 
-        const client = await FeatureBoardService.init('fake-key', [], {
+        const client = createBrowserClient({
+            environmentApiKey: 'fake-key',
+            audiences: [],
             updateStrategy: 'manual',
             fetch,
         })

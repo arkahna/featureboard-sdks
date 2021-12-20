@@ -1,5 +1,5 @@
 import { ClientMessages } from '@featureboard/contracts'
-import { IWebSocket } from '@featureboard/js-sdk'
+import { IWebSocket } from '@featureboard/live-connection'
 
 export function connectToWsClient(
     onMessage: (msg: ClientMessages, ws: IWebSocket) => void,
@@ -23,9 +23,9 @@ export function connectToWsClient(
                     // When the SDK sends a message, let the caller know and also give them
                     // a websocket interface they can interact with in response
                     return onMessage(parsed, {
-                        send: async (message) => {
+                        send: async (msg) => {
                             client.onmessage({
-                                data: message,
+                                data: msg,
                             })
                         },
                         close: () => {},

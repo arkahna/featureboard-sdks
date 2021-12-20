@@ -35,6 +35,8 @@ export interface LiveOptions {
      * @default 15000ms
      **/
     connectTimeout?: number
+
+    websocketFactory?: (address: string) => IWebSocket
 }
 
 const liveConnectionDebug = liveConnectionLog.extend('live-connection')

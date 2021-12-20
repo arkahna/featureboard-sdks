@@ -1,6 +1,6 @@
 import { EffectiveFeatureValue } from '@featureboard/contracts'
 import fetchMock from 'fetch-mock'
-import { FeatureBoardService } from '..'
+import { createBrowserClient } from '../client'
 import { interval } from '../interval'
 
 let fetch: fetchMock.FetchMockSandbox
@@ -27,7 +27,9 @@ describe('Polling update mode', () => {
             body: values,
         })
 
-        const connection = await FeatureBoardService.init('fake-key', [], {
+        const connection = createBrowserClient({
+            environmentApiKey: 'fake-key',
+            audiences: [],
             updateStrategy: 'polling',
             fetch,
         })
@@ -55,7 +57,9 @@ describe('Polling update mode', () => {
             body: values,
         })
 
-        const connection = await FeatureBoardService.init('fake-key', [], {
+        const connection = createBrowserClient({
+            environmentApiKey: 'fake-key',
+            audiences: [],
             updateStrategy: 'polling',
             fetch,
         })
@@ -80,7 +84,9 @@ describe('Polling update mode', () => {
             body: values,
         })
 
-        const client = await FeatureBoardService.init('fake-key', [], {
+        const client = createBrowserClient({
+            environmentApiKey: 'fake-key',
+            audiences: [],
             updateStrategy: 'polling',
             fetch,
         })

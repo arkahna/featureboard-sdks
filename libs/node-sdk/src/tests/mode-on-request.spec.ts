@@ -1,6 +1,6 @@
 import { FeatureConfiguration } from '@featureboard/contracts'
 import fetchMock from 'fetch-mock'
-import { FeatureBoardService } from '..'
+import { createServerClient } from '../server-client'
 
 let fetch: fetchMock.FetchMockSandbox
 
@@ -24,7 +24,8 @@ describe('On request update mode', () => {
             body: values,
         })
 
-        const client = await FeatureBoardService.init('fake-key', {
+        const client = createServerClient({
+            environmentApiKey: 'fake-key',
             updateStrategy: 'on-request',
             fetch,
         })
@@ -50,7 +51,8 @@ describe('On request update mode', () => {
             body: values,
         })
 
-        const client = await FeatureBoardService.init('fake-key', {
+        const client = createServerClient({
+            environmentApiKey: 'fake-key',
             updateStrategy: 'on-request',
             fetch,
         })
@@ -77,7 +79,8 @@ describe('On request update mode', () => {
             body: values,
         })
 
-        const connection = await FeatureBoardService.init('fake-key', {
+        const connection = createServerClient({
+            environmentApiKey: 'fake-key',
             updateStrategy: 'on-request',
             fetch,
         })
@@ -117,7 +120,8 @@ describe('On request update mode', () => {
             body: values,
         })
 
-        const connection = await FeatureBoardService.init('fake-key', {
+        const connection = createServerClient({
+            environmentApiKey: 'fake-key',
             updateStrategy: { kind: 'on-request', options: { maxAgeMs: 1 } },
             fetch,
         })

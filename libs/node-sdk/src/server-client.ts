@@ -15,8 +15,12 @@ import {
     MemoryFeatureStore,
     ServerClient,
 } from '.'
+import { debugLog } from './log'
 import { resolveUpdateStrategy } from './update-strategies/resolveUpdateStrategy'
 import { UpdateStrategies } from './update-strategies/update-strategies'
+import { FetchSignature } from './utils/fetchFeaturesConfiguration'
+
+const serverConnectionDebug = debugLog.extend('server-connection')
 
 export interface CreateServerClientOptions {
     /** Connect to a self hosted instance of FeatureBoard */
@@ -37,6 +41,8 @@ export interface CreateServerClientOptions {
     updateStrategy?: UpdateStrategies | UpdateStrategies['kind']
 
     environmentApiKey: string
+
+    fetch?: FetchSignature
 }
 
 export function createServerClient({
@@ -45,6 +51,7 @@ export function createServerClient({
     store,
     updateStrategy,
     environmentApiKey,
+    fetch,
 }: CreateServerClientOptions): ServerClient {
     if (store && initialValues) {
         throw new Error('Cannot specify both store and initialValues')
@@ -58,6 +65,7 @@ export function createServerClient({
         updateStrategy,
         environmentApiKey,
         api || featureBoardHostedService,
+        fetch,
     )
 
     updateStrategyImplementation.connect(state).then(() => {
@@ -164,8 +172,8 @@ function syncRequest(
             )
             return defaultValue
         }
-        const audienceException = featureValues.audienceExceptions.find(
-            (value) => audienceKeys.includes(value.audienceKey),
+        const audienceException = featureValues.audienceExceptions.find((a) =>
+            audienceKeys.includes(a.audienceKey),
         )
         const value = audienceException?.value ?? featureValues.defaultValue
         serverConnectionDebug('getFeatureValue: %o', {

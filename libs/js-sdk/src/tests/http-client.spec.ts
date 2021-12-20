@@ -1,7 +1,6 @@
 import { EffectiveFeatureValue } from '@featureboard/contracts'
 import fetchMock from 'fetch-mock'
 import { createBrowserClient } from '../client'
-import { EffectiveFeaturesState } from '../effective-feature-state'
 import { MemoryEffectiveFeatureStore } from '../effective-feature-store'
 import { featureBoardHostedService } from '../featureboard-service-urls'
 
@@ -29,10 +28,8 @@ describe('http client', () => {
         const httpClient = createBrowserClient({
             environmentApiKey: 'env-api-key',
             audiences: [],
-
             fetch,
             api: featureBoardHostedService,
-            state: new EffectiveFeaturesState([]),
             updateStrategy: { kind: 'manual' },
         })
 

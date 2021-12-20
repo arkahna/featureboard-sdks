@@ -51,7 +51,9 @@ describe('live client', () => {
     })
 
     it('can update audiences', async () => {
-        const client = await FeatureBoardService.init('fake-key', [], {
+        const client = createBrowserClient({
+            environmentApiKey: 'fake-key',
+            audiences: [],
             fetch,
             updateStrategy: {
                 kind: 'live',
@@ -119,7 +121,9 @@ describe('live client', () => {
             body: values,
         })
 
-        const client = await FeatureBoardService.init('fake-key', [], {
+        const client = createBrowserClient({
+            environmentApiKey: 'fake-key',
+            audiences: [],
             fetch,
             updateStrategy: {
                 kind: 'live',
@@ -154,7 +158,9 @@ describe('live client', () => {
 
         timeout.set = ((cb: any) => setTimeout(cb)) as any
 
-        const client = await FeatureBoardService.init('fake-key', [], {
+        const client = createBrowserClient({
+            environmentApiKey: 'fake-key',
+            audiences: [],
             fetch,
             updateStrategy: {
                 kind: 'live',

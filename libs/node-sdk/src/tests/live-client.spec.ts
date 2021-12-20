@@ -4,7 +4,7 @@ import {
 } from '@featureboard/contracts'
 import { timeout } from '@featureboard/js-sdk/src/timeout'
 import fetchMock from 'fetch-mock'
-import { FeatureBoardService } from '../client'
+import { createServerClient } from '../server-client'
 import { connectToWsClient } from './ws-helper'
 
 let fetch: fetchMock.FetchMockSandbox
@@ -17,7 +17,8 @@ beforeEach(() => {
 
 describe('live client', () => {
     it('can connect to featureboard', async () => {
-        const client = await FeatureBoardService.init('fake-key', {
+        const client = createServerClient({
+            environmentApiKey: 'fake-key',
             updateStrategy: {
                 kind: 'live',
                 options: {
@@ -61,7 +62,8 @@ describe('live client', () => {
             body: values,
         })
 
-        const client = await FeatureBoardService.init('fake-key', {
+        const client = createServerClient({
+            environmentApiKey: 'fake-key',
             fetch,
             updateStrategy: {
                 kind: 'live',
@@ -97,7 +99,8 @@ describe('live client', () => {
 
         timeout.set = ((cb: any) => setTimeout(cb)) as any
 
-        const client = await FeatureBoardService.init('fake-key', {
+        const client = createServerClient({
+            environmentApiKey: 'fake-key',
             fetch,
             updateStrategy: {
                 kind: 'live',

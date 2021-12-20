@@ -1,9 +1,8 @@
 import { FeatureConfiguration } from '@featureboard/contracts'
 import { featureBoardHostedService } from '@featureboard/js-sdk'
 import fetchMock from 'fetch-mock'
-import { AllFeaturesState } from '../feature-state'
 import { MemoryFeatureStore } from '../feature-store'
-import { createNodeHttpClient } from '../server-http-client'
+import { createServerClient } from '../server-client'
 
 let fetch: fetchMock.FetchMockSandbox
 
@@ -27,10 +26,10 @@ describe('http client', () => {
             body: values,
         })
 
-        const httpClient = await createNodeHttpClient('env-api-key', {
+        const httpClient = createServerClient({
+            environmentApiKey: 'env-api-key',
             fetch,
             api: featureBoardHostedService,
-            state: new AllFeaturesState(),
             updateStrategy: { kind: 'manual' },
         })
 
@@ -72,10 +71,10 @@ describe('http client', () => {
             },
         })
 
-        const httpClient = await createNodeHttpClient('env-api-key', {
+        const httpClient = createServerClient({
+            environmentApiKey: 'env-api-key',
             fetch,
             api: featureBoardHostedService,
-            state: new AllFeaturesState(),
             updateStrategy: { kind: 'manual' },
         })
 
@@ -110,10 +109,10 @@ describe('http client', () => {
             },
         })
 
-        const httpClient = await createNodeHttpClient('env-api-key', {
+        const httpClient = createServerClient({
+            environmentApiKey: 'env-api-key',
             fetch,
             api: featureBoardHostedService,
-            state: new AllFeaturesState(),
             updateStrategy: { kind: 'manual' },
         })
 
@@ -146,18 +145,17 @@ describe('http client', () => {
     })
 
     it('can start with last known good config', async () => {
-        await createNodeHttpClient('env-api-key', {
+        createServerClient({
+            environmentApiKey: 'env-api-key',
             fetch,
             api: featureBoardHostedService,
-            state: new AllFeaturesState(
-                new MemoryFeatureStore([
-                    {
-                        featureKey: 'my-feature',
-                        audienceExceptions: [],
-                        defaultValue: 'service-default-value',
-                    },
-                ]),
-            ),
+            store: new MemoryFeatureStore([
+                {
+                    featureKey: 'my-feature',
+                    audienceExceptions: [],
+                    defaultValue: 'service-default-value',
+                },
+            ]),
             updateStrategy: { kind: 'manual' },
         })
     })

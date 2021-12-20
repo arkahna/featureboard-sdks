@@ -1,7 +1,7 @@
 import { FeatureConfiguration } from '@featureboard/contracts'
 import fetchMock from 'fetch-mock'
-import { FeatureBoardService } from '..'
 import { interval } from '../interval'
+import { createServerClient } from '../server-client'
 
 let fetch: fetchMock.FetchMockSandbox
 
@@ -28,7 +28,8 @@ describe('Polling update mode', () => {
             body: values,
         })
 
-        const client = await FeatureBoardService.init('fake-key', {
+        const client = createServerClient({
+            environmentApiKey: 'fake-key',
             updateStrategy: 'polling',
             fetch,
         })
@@ -56,7 +57,8 @@ describe('Polling update mode', () => {
             body: values,
         })
 
-        const client = await FeatureBoardService.init('fake-key', {
+        const client = createServerClient({
+            environmentApiKey: 'fake-key',
             updateStrategy: 'polling',
             fetch,
         })
@@ -82,7 +84,8 @@ describe('Polling update mode', () => {
             body: values,
         })
 
-        const client = await FeatureBoardService.init('fake-key', {
+        const client = createServerClient({
+            environmentApiKey: 'fake-key',
             updateStrategy: 'polling',
             fetch,
         })
