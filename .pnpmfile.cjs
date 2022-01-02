@@ -18,7 +18,7 @@ function readPackage(pkg) {
     delete pkg.dependencies['@nrwl/jest']
   }
   if (pkg.name === '@wanews/nx-typescript-project-references') {
-    delete pkg.dependencies['@nrwl/jest']
+    delete pkg.peerDependencies['@nrwl/jest']
   }
   if (pkg.name === 'fetch-mock') {
     delete pkg.dependencies['@babel/core']
