@@ -22,7 +22,7 @@
     },
     "dependencies": {
         "@featureboard/contracts": "workspace:0.1.0",
-        "debug": "^4.3.2",
+        "debug": "^4.3.3",
         "promise-completion-source": "^1.0.0"
     }
 }
