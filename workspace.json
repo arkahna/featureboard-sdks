@@ -142,8 +142,5 @@
                 }
             }
         }
-    },
-    "cli": {
-        "defaultCollection": "@nrwl/workspace"
     }
 }

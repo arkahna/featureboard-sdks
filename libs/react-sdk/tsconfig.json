@@ -7,5 +7,9 @@
         "jsx": "react-jsx"
     },
     "include": ["src/**/*.ts", "src/**/*.tsx"],
-    "references": [{ "path": "../js-sdk" }]
+    "references": [
+        {
+            "path": "../js-sdk"
+        }
+    ]
 }

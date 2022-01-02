@@ -5,7 +5,10 @@
     "overrides": [
         {
             "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
-            "extends": ["plugin:@nrwl/nx/javascript", "plugin:@nrwl/nx/typescript"],
+            "extends": [
+                "plugin:@nrwl/nx/javascript",
+                "plugin:@nrwl/nx/typescript"
+            ],
             "parserOptions": {},
             "rules": {
                 "@nrwl/nx/enforce-module-boundaries": [

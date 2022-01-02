@@ -14,25 +14,9 @@
         "default": {
             "runner": "@nrwl/workspace/tasks-runners/default",
             "options": {
-                "cacheableOperations": ["build", "lint", "test", "e2e"]
+                "cacheableOperations": ["build", "lint", "test", "e2e"],
+                "parallel": 1
             }
-        }
-    },
-    "projects": {
-        "contracts": {
-            "tags": []
-        },
-        "js-sdk": {
-            "tags": []
-        },
-        "live-connection": {
-            "tags": []
-        },
-        "node-sdk": {
-            "tags": []
-        },
-        "react-sdk": {
-            "tags": []
         }
     },
     "targetDependencies": {
@@ -42,5 +26,8 @@
                 "projects": "dependencies"
             }
         ]
+    },
+    "cli": {
+        "defaultCollection": "@nrwl/workspace"
     }
 }

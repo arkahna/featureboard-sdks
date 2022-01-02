@@ -10,5 +10,12 @@
         "src/**/*.tsx",
         "../live-connection/src/live-connection.ts"
     ],
-    "references": [{ "path": "../contracts" }, { "path": "../live-connection" }]
+    "references": [
+        {
+            "path": "../contracts"
+        },
+        {
+            "path": "../live-connection"
+        }
+    ]
 }
