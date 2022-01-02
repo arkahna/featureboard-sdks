@@ -1,0 +1,28 @@
+{
+    "root": "libs/contracts",
+    "projectType": "library",
+    "sourceRoot": "libs/contracts/src",
+    "targets": {
+        "lint": {
+            "executor": "@nrwl/linter:eslint",
+            "options": {
+                "lintFilePatterns": ["libs/contracts/**/*.ts"]
+            }
+        },
+        "test": {
+            "executor": "@nrwl/jest:jest",
+            "options": {
+                "jestConfig": "libs/contracts/jest.config.js",
+                "passWithNoTests": true
+            },
+            "outputs": ["coverage/libs/contracts"]
+        },
+        "package": {
+            "executor": "@wanews/nx-typescript-project-references:package",
+            "options": {
+                "main": "libs/contracts/src/index.ts",
+                "tsConfig": "libs/contracts/tsconfig.json"
+            }
+        }
+    }
+}
