@@ -2,25 +2,19 @@ import {
     EffectiveFeatureValue,
     StateOfTheWorldEffectiveValuesNotification,
 } from '@featureboard/contracts'
-import fetchMock from 'fetch-mock'
+import { describe, expect, it } from 'vitest'
 import { createBrowserClient } from '../client'
 import { timeout } from '../timeout'
+import { FetchMock } from './fetch-mock'
 import { connectToWsClient } from './ws-helper'
-
-let fetch: fetchMock.FetchMockSandbox
-
-beforeEach(() => {
-    fetch = fetchMock.sandbox()
-    // Default to internal server error
-    fetch.catch(500)
-})
 
 describe('live client', () => {
     it('can connect to featureboard', async () => {
+        const fetchMock = new FetchMock()
         const client = createBrowserClient({
             environmentApiKey: 'fake-key',
             audiences: [],
-            fetch,
+            fetchInstance: fetchMock.instance,
             updateStrategy: {
                 kind: 'live',
                 options: {
@@ -51,10 +45,12 @@ describe('live client', () => {
     })
 
     it('can update audiences', async () => {
+        const fetchMock = new FetchMock()
+
         const client = createBrowserClient({
             environmentApiKey: 'fake-key',
             audiences: [],
-            fetch,
+            fetchInstance: fetchMock.instance,
             updateStrategy: {
                 kind: 'live',
                 options: {
@@ -110,21 +106,26 @@ describe('live client', () => {
     })
 
     it('connection timeout falls back to http to get initial values, then retries in background', async () => {
+        const fetchMock = new FetchMock()
         const values: EffectiveFeatureValue[] = [
             {
                 featureKey: 'my-feature',
                 value: 'from-http',
             },
         ]
-        fetch.getOnce('https://client.featureboard.app/effective?audiences=', {
-            status: 200,
-            body: values,
-        })
+        fetchMock.matchOnce(
+            'get',
+            'https://client.featureboard.app/effective?audiences=',
+            {
+                status: 200,
+                body: JSON.stringify(values),
+            },
+        )
 
         const client = createBrowserClient({
             environmentApiKey: 'fake-key',
             audiences: [],
-            fetch,
+            fetchInstance: fetchMock.instance,
             updateStrategy: {
                 kind: 'live',
                 options: {
@@ -143,6 +144,7 @@ describe('live client', () => {
     })
 
     it('uses value from live once it reconnects', async () => {
+        const fetchMock = new FetchMock()
         let serverConnectAttempts = 0
 
         const values: EffectiveFeatureValue[] = [
@@ -151,17 +153,21 @@ describe('live client', () => {
                 value: 'from-http',
             },
         ]
-        fetch.getOnce('https://client.featureboard.app/effective?audiences=', {
-            status: 200,
-            body: values,
-        })
+        fetchMock.matchOnce(
+            'get',
+            'https://client.featureboard.app/effective?audiences=',
+            {
+                status: 200,
+                body: JSON.stringify(values),
+            },
+        )
 
         timeout.set = ((cb: any) => setTimeout(cb)) as any
 
         const client = createBrowserClient({
             environmentApiKey: 'fake-key',
             audiences: [],
-            fetch,
+            fetchInstance: fetchMock.instance,
             updateStrategy: {
                 kind: 'live',
                 options: {

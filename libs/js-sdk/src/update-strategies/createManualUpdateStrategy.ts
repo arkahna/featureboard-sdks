@@ -1,4 +1,4 @@
-import { createEnsureSingle } from '@featureboard/js-sdk'
+import { createEnsureSingle } from '../ensure-single'
 import { fetchFeaturesConfigurationViaHttp } from '../utils/fetchFeaturesConfiguration'
 import { FetchSignature } from '../utils/FetchSignature'
 import { getEffectiveEndpoint } from './getEffectiveEndpoint'

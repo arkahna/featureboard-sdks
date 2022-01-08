@@ -1,4 +1,4 @@
-import { createEnsureSingle } from '@featureboard/js-sdk'
+import { createEnsureSingle } from '../ensure-single'
 import { fetchFeaturesConfigurationViaHttp } from '../utils/fetchFeaturesConfiguration'
 import { FetchSignature } from '../utils/FetchSignature'
 import { pollingUpdates } from '../utils/pollingUpdates'
@@ -10,7 +10,7 @@ export function createPollingUpdateStrategy(
     httpEndpoint: string,
     intervalMs: number,
     audiences: string[],
-    fetch: FetchSignature,
+    fetchInstance: FetchSignature,
 ): EffectiveConfigUpdateStrategy {
     let stopPolling: undefined | (() => void)
     let lastModified: undefined | string
@@ -27,7 +27,7 @@ export function createPollingUpdateStrategy(
                 )
 
                 lastModified = await fetchFeaturesConfigurationViaHttp(
-                    fetch,
+                    fetchInstance,
                     effectiveEndpoint,
                     environmentApiKey,
                     state,

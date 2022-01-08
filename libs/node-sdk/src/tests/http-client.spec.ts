@@ -1,19 +1,13 @@
 import { FeatureConfiguration } from '@featureboard/contracts'
 import { featureBoardHostedService } from '@featureboard/js-sdk'
-import fetchMock from 'fetch-mock'
+import { FetchMock } from '@featureboard/js-sdk/src/tests/fetch-mock'
+import { describe, expect, it } from 'vitest'
 import { MemoryFeatureStore } from '../feature-store'
 import { createServerClient } from '../server-client'
 
-let fetch: fetchMock.FetchMockSandbox
-
-beforeEach(() => {
-    fetch = fetchMock.sandbox()
-    // Default to internal server error
-    fetch.catch(500)
-})
-
 describe('http client', () => {
     it('calls featureboard /all endpoint on creation', async () => {
+        const fetchMock = new FetchMock()
         const values: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
@@ -21,9 +15,9 @@ describe('http client', () => {
                 defaultValue: 'service-default-value',
             },
         ]
-        fetch.getOnce('https://client.featureboard.app/all', {
+        fetchMock.matchOnce('get', 'https://client.featureboard.app/all', {
             status: 200,
-            body: values,
+            body: JSON.stringify(values),
         })
 
         const httpClient = createServerClient({
@@ -40,14 +34,10 @@ describe('http client', () => {
                 defaultValue: 'new-service-default-value',
             },
         ]
-        fetch.getOnce(
-            'https://client.featureboard.app/all',
-            {
-                status: 200,
-                body: newValues,
-            },
-            { overwriteRoutes: true },
-        )
+        fetchMock.matchOnce('get', 'https://client.featureboard.app/all', {
+            status: 200,
+            body: JSON.stringify(newValues),
+        })
 
         await httpClient.updateFeatures()
     })
@@ -55,6 +45,7 @@ describe('http client', () => {
     // Below tests are testing behaviour around https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/If-Modified-Since
 
     it('Attaches last modified header to update requests', async () => {
+        const fetchMock = new FetchMock()
         const values: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
@@ -63,9 +54,9 @@ describe('http client', () => {
             },
         ]
         const lastModified = new Date().toISOString()
-        fetch.getOnce('https://client.featureboard.app/all', {
+        fetchMock.matchOnce('get', 'https://client.featureboard.app/all', {
             status: 200,
-            body: values,
+            body: JSON.stringify(values),
             headers: {
                 'Last-Modified': lastModified,
             },
@@ -78,7 +69,8 @@ describe('http client', () => {
             updateStrategy: { kind: 'manual' },
         })
 
-        fetch.getOnce(
+        fetchMock.matchOnce(
+            'get',
             {
                 url: 'https://client.featureboard.app/all',
                 headers: { 'If-Modified-Since': lastModified },
@@ -86,13 +78,13 @@ describe('http client', () => {
             {
                 status: 304,
             },
-            { overwriteRoutes: true },
         )
 
         await httpClient.updateFeatures()
     })
 
     it('Handles updates from server', async () => {
+        const fetchMock = new FetchMock()
         const values: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
@@ -101,9 +93,9 @@ describe('http client', () => {
             },
         ]
         const lastModified = new Date().toISOString()
-        fetch.getOnce('https://client.featureboard.app/all', {
+        fetchMock.matchOnce('get', 'https://client.featureboard.app/all', {
             status: 200,
-            body: values,
+            body: JSON.stringify(values),
             headers: {
                 'Last-Modified': lastModified,
             },
@@ -123,16 +115,16 @@ describe('http client', () => {
                 defaultValue: 'new-service-default-value',
             },
         ]
-        fetch.getOnce(
+        fetchMock.matchOnce(
+            'get',
             {
                 url: 'https://client.featureboard.app/all',
                 headers: { 'If-Modified-Since': lastModified },
             },
             {
                 status: 200,
-                body: newValues,
+                body: JSON.stringify(newValues),
             },
-            { overwriteRoutes: true },
         )
 
         await httpClient.updateFeatures()

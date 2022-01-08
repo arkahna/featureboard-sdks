@@ -4,14 +4,14 @@ import { FetchSignature } from './FetchSignature'
 import { httpClientDebug } from './http-log'
 
 export async function fetchFeaturesConfigurationViaHttp(
-    fetch: FetchSignature,
+    fetchInstance: FetchSignature,
     effectiveEndpoint: string,
     environmentApiKey: string,
     state: EffectiveFeaturesState,
     lastModified: string | undefined,
 ) {
     httpClientDebug('Fetching updates')
-    const response = await fetch(effectiveEndpoint, {
+    const response = await fetchInstance(effectiveEndpoint, {
         method: 'GET',
         headers: {
             'x-environment-key': environmentApiKey,

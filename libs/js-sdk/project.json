@@ -6,16 +6,17 @@
         "lint": {
             "executor": "@nrwl/linter:eslint",
             "options": {
-                "lintFilePatterns": ["libs/js-sdk/**/*.ts"]
+                "lintFilePatterns": [
+                    "libs/js-sdk/**/*.ts"
+                ]
             }
         },
         "test": {
-            "executor": "@nrwl/jest:jest",
+            "executor": "@nrwl/workspace:run-commands",
             "options": {
-                "jestConfig": "libs/js-sdk/jest.config.js",
-                "passWithNoTests": true
-            },
-            "outputs": ["coverage/libs/js-sdk"]
+                "command": "npx vitest --run --passWithNoTests",
+                "cwd": "libs/js-sdk"
+            }
         },
         "package": {
             "executor": "@wanews/nx-typescript-project-references:package",

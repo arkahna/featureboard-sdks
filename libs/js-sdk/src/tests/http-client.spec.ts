@@ -1,34 +1,33 @@
 import { EffectiveFeatureValue } from '@featureboard/contracts'
-import fetchMock from 'fetch-mock'
+import { describe, expect, it } from 'vitest'
 import { createBrowserClient } from '../client'
 import { MemoryEffectiveFeatureStore } from '../effective-feature-store'
 import { featureBoardHostedService } from '../featureboard-service-urls'
-
-let fetch: fetchMock.FetchMockSandbox
-
-beforeEach(() => {
-    fetch = fetchMock.sandbox()
-    // Default to internal server error
-    fetch.catch(500)
-})
+import { FetchMock } from './fetch-mock'
 
 describe('http client', () => {
     it('calls featureboard /effective endpoint on creation', async () => {
+        const fetchMock = new FetchMock()
+
         const values: EffectiveFeatureValue[] = [
             {
                 featureKey: 'my-feature',
                 value: 'service-default-value',
             },
         ]
-        fetch.getOnce('https://client.featureboard.app/effective?audiences=', {
-            status: 200,
-            body: values,
-        })
+        fetchMock.matchOnce(
+            'get',
+            'https://client.featureboard.app/effective?audiences=',
+            {
+                status: 200,
+                body: JSON.stringify(values),
+            },
+        )
 
         const httpClient = createBrowserClient({
             environmentApiKey: 'env-api-key',
             audiences: [],
-            fetch,
+            fetchInstance: fetchMock.instance,
             api: featureBoardHostedService,
             updateStrategy: { kind: 'manual' },
         })
@@ -39,13 +38,13 @@ describe('http client', () => {
                 value: 'new-service-default-value',
             },
         ]
-        fetch.getOnce(
+        fetchMock.matchOnce(
+            'get',
             'https://client.featureboard.app/effective?audiences=',
             {
                 status: 200,
-                body: newValues,
+                body: JSON.stringify(newValues),
             },
-            { overwriteRoutes: true },
         )
 
         await httpClient.updateFeatures()
@@ -54,6 +53,7 @@ describe('http client', () => {
     // Below tests are testing behaviour around https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/If-Modified-Since
 
     it('Attaches last modified header to update requests', async () => {
+        const fetchMock = new FetchMock()
         const values: EffectiveFeatureValue[] = [
             {
                 featureKey: 'my-feature',
@@ -61,37 +61,42 @@ describe('http client', () => {
             },
         ]
         const lastModified = new Date().toISOString()
-        fetch.getOnce('https://client.featureboard.app/effective?audiences=', {
-            status: 200,
-            body: values,
-            headers: {
-                'Last-Modified': lastModified,
+        fetchMock.matchOnce(
+            'get',
+            'https://client.featureboard.app/effective?audiences=',
+            {
+                status: 200,
+                body: JSON.stringify(values),
+                headers: {
+                    'Last-Modified': lastModified,
+                },
             },
-        })
+        )
 
         const httpClient = createBrowserClient({
             environmentApiKey: 'env-api-key',
             audiences: [],
-            fetch,
+            fetchInstance: fetchMock.instance,
             api: featureBoardHostedService,
             updateStrategy: { kind: 'manual' },
         })
 
-        fetch.getOnce(
-            {
-                url: 'https://client.featureboard.app/effective?audiences=',
-                headers: { 'If-Modified-Since': lastModified },
-            },
-            {
-                status: 304,
-            },
-            { overwriteRoutes: true },
+        fetchMock.matchOnce((path, init) =>
+            init?.method?.toLocaleLowerCase() === 'get' &&
+            path === 'https://client.featureboard.app/effective?audiences=' &&
+            init.headers &&
+            init.headers['If-Modified-Since'][0] === lastModified
+                ? {
+                      status: 304,
+                  }
+                : undefined,
         )
 
         await httpClient.updateFeatures()
     })
 
     it('Handles updates from server', async () => {
+        const fetchMock = new FetchMock()
         const values: EffectiveFeatureValue[] = [
             {
                 featureKey: 'my-feature',
@@ -99,18 +104,22 @@ describe('http client', () => {
             },
         ]
         const lastModified = new Date().toISOString()
-        fetch.getOnce('https://client.featureboard.app/effective?audiences=', {
-            status: 200,
-            body: values,
-            headers: {
-                'Last-Modified': lastModified,
+        fetchMock.matchOnce(
+            'get',
+            'https://client.featureboard.app/effective?audiences=',
+            {
+                status: 200,
+                body: JSON.stringify(values),
+                headers: {
+                    'Last-Modified': lastModified,
+                },
             },
-        })
+        )
 
         const httpClient = createBrowserClient({
             environmentApiKey: 'env-api-key',
             audiences: [],
-            fetch,
+            fetchInstance: fetchMock.instance,
             api: featureBoardHostedService,
             updateStrategy: { kind: 'manual' },
         })
@@ -121,16 +130,16 @@ describe('http client', () => {
                 value: 'new-service-default-value',
             },
         ]
-        fetch.getOnce(
+        fetchMock.matchOnce(
+            'get',
             {
                 url: 'https://client.featureboard.app/effective?audiences=',
                 headers: { 'If-Modified-Since': lastModified },
             },
             {
                 status: 200,
-                body: newValues,
+                body: JSON.stringify(newValues),
             },
-            { overwriteRoutes: true },
         )
 
         await httpClient.updateFeatures()
@@ -141,17 +150,22 @@ describe('http client', () => {
     })
 
     it('can start with last known good config', async () => {
+        const fetchMock = new FetchMock()
         const lastModified = new Date().toISOString()
-        fetch.getOnce('https://client.featureboard.app/effective?audiences=', {
-            status: 500,
-            headers: {
-                'Last-Modified': lastModified,
+        fetchMock.matchOnce(
+            'get',
+            'https://client.featureboard.app/effective?audiences=',
+            {
+                status: 500,
+                headers: {
+                    'Last-Modified': lastModified,
+                },
             },
-        })
+        )
         const client = createBrowserClient({
             environmentApiKey: 'env-api-key',
             audiences: [],
-            fetch,
+            fetchInstance: fetchMock.instance,
             api: featureBoardHostedService,
             store: new MemoryEffectiveFeatureStore([
                 {
@@ -168,6 +182,7 @@ describe('http client', () => {
     })
 
     it('Handles updating audience', async () => {
+        const fetchMock = new FetchMock()
         const values: EffectiveFeatureValue[] = [
             {
                 featureKey: 'my-feature',
@@ -175,18 +190,22 @@ describe('http client', () => {
             },
         ]
         const lastModified = new Date().toISOString()
-        fetch.getOnce('https://client.featureboard.app/effective?audiences=', {
-            status: 200,
-            body: values,
-            headers: {
-                'Last-Modified': lastModified,
+        fetchMock.matchOnce(
+            'get',
+            'https://client.featureboard.app/effective?audiences=',
+            {
+                status: 200,
+                body: JSON.stringify(values),
+                headers: {
+                    'Last-Modified': lastModified,
+                },
             },
-        })
+        )
 
         const httpClient = createBrowserClient({
             environmentApiKey: 'env-api-key',
             audiences: [],
-            fetch,
+            fetchInstance: fetchMock.instance,
             api: featureBoardHostedService,
             updateStrategy: { kind: 'manual' },
         })
@@ -197,15 +216,13 @@ describe('http client', () => {
                 value: 'new-service-default-value',
             },
         ]
-        fetch.getOnce(
-            {
-                url: 'https://client.featureboard.app/effective?audiences=test-audience',
-            },
+        fetchMock.matchOnce(
+            'get',
+            'https://client.featureboard.app/effective?audiences=test-audience',
             {
                 status: 200,
-                body: newValues,
+                body: JSON.stringify(newValues),
             },
-            { overwriteRoutes: true },
         )
 
         await httpClient.updateAudiences(['test-audience'])

@@ -2,18 +2,11 @@ import {
     FeatureConfiguration,
     StateOfTheWorldNotification,
 } from '@featureboard/contracts'
+import { FetchMock } from '@featureboard/js-sdk/src/tests/fetch-mock'
 import { timeout } from '@featureboard/js-sdk/src/timeout'
-import fetchMock from 'fetch-mock'
+import { describe, expect, it } from 'vitest'
 import { createServerClient } from '../server-client'
 import { connectToWsClient } from './ws-helper'
-
-let fetch: fetchMock.FetchMockSandbox
-
-beforeEach(() => {
-    fetch = fetchMock.sandbox()
-    // Default to internal server error
-    fetch.catch(500)
-})
 
 describe('live client', () => {
     it('can connect to featureboard', async () => {
@@ -50,6 +43,7 @@ describe('live client', () => {
     })
 
     it('connection timeout falls back to http to get initial values, then retries in background', async () => {
+        const fetchMock = new FetchMock()
         const values: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
@@ -57,9 +51,9 @@ describe('live client', () => {
                 defaultValue: 'from-http',
             },
         ]
-        fetch.getOnce('https://client.featureboard.app/all', {
+        fetchMock.matchOnce('get', 'https://client.featureboard.app/all', {
             status: 200,
-            body: values,
+            body: JSON.stringify(values),
         })
 
         const client = createServerClient({
@@ -83,6 +77,7 @@ describe('live client', () => {
     })
 
     it('uses value from live once it reconnects', async () => {
+        const fetchMock = new FetchMock()
         let serverConnectAttempts = 0
 
         const values: FeatureConfiguration[] = [
@@ -92,9 +87,9 @@ describe('live client', () => {
                 defaultValue: 'from-http',
             },
         ]
-        fetch.getOnce('https://client.featureboard.app/all', {
+        fetchMock.matchOnce('get', 'https://client.featureboard.app/all', {
             status: 200,
-            body: values,
+            body: JSON.stringify(values),
         })
 
         timeout.set = ((cb: any) => setTimeout(cb)) as any

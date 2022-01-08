@@ -12,6 +12,22 @@
             },
             "label": "tsc: watch - tsconfig.json",
             "isBackground": true
+        },
+        {
+            "type": "process",
+            "label": "test",
+            "command": "node --debug-brk --inspect ${workspaceRoot}\\node_modules\\vitest\\vitest.mjs -i",
+            "group": "test",
+            "options": {
+                "cwd": "libs/js-sdk",
+                "env": {
+                    "NODE_ENV": "test"
+                }
+            }
+            // "type": "npm",
+            // "problemMatcher": [],
+            // "label": "npm: test",
+            // "detail": "vitest"
         }
     ]
 }

@@ -7,6 +7,7 @@ import {
     FeatureBoardClient,
     featureBoardHostedService,
     Features,
+    FetchSignature,
 } from '@featureboard/js-sdk'
 import { PromiseCompletionSource } from 'promise-completion-source'
 import {
@@ -18,7 +19,6 @@ import {
 import { debugLog } from './log'
 import { resolveUpdateStrategy } from './update-strategies/resolveUpdateStrategy'
 import { UpdateStrategies } from './update-strategies/update-strategies'
-import { FetchSignature } from './utils/fetchFeaturesConfiguration'
 
 const serverConnectionDebug = debugLog.extend('server-connection')
 

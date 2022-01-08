@@ -1,33 +1,32 @@
 import { EffectiveFeatureValue } from '@featureboard/contracts'
-import fetchMock from 'fetch-mock'
+import { describe, expect, it } from 'vitest'
 import { createBrowserClient } from '../client'
-
-let fetch: fetchMock.FetchMockSandbox
-
-beforeEach(() => {
-    fetch = fetchMock.sandbox()
-    // Default to internal server error
-    fetch.catch(500)
-})
+import { FetchMock } from './fetch-mock'
 
 describe('Manual update mode', () => {
     it('fetches initial values', async () => {
+        const fetchMock = new FetchMock()
+
         const values: EffectiveFeatureValue[] = [
             {
                 featureKey: 'my-feature',
                 value: 'service-default-value',
             },
         ]
-        fetch.getOnce('https://client.featureboard.app/effective?audiences=', {
-            status: 200,
-            body: values,
-        })
+        fetchMock.matchOnce(
+            'get',
+            'https://client.featureboard.app/effective?audiences=',
+            {
+                status: 200,
+                body: JSON.stringify(values),
+            },
+        )
 
         const client = createBrowserClient({
             environmentApiKey: 'fake-key',
             audiences: [],
             updateStrategy: 'manual',
-            fetch,
+            fetchInstance: fetchMock.instance,
         })
 
         expect(
@@ -36,22 +35,28 @@ describe('Manual update mode', () => {
     })
 
     it('can manually update values', async () => {
+        const fetchMock = new FetchMock()
+
         const values: EffectiveFeatureValue[] = [
             {
                 featureKey: 'my-feature',
                 value: 'service-default-value',
             },
         ]
-        fetch.getOnce('https://client.featureboard.app/effective?audiences=', {
-            status: 200,
-            body: values,
-        })
+        fetchMock.matchOnce(
+            'get',
+            'https://client.featureboard.app/effective?audiences=',
+            {
+                status: 200,
+                body: JSON.stringify(values),
+            },
+        )
 
         const client = createBrowserClient({
             environmentApiKey: 'fake-key',
             audiences: [],
             updateStrategy: 'manual',
-            fetch,
+            fetchInstance: fetchMock.instance,
         })
 
         const newValues: EffectiveFeatureValue[] = [
@@ -60,13 +65,13 @@ describe('Manual update mode', () => {
                 value: 'new-service-default-value',
             },
         ]
-        fetch.getOnce(
+        fetchMock.matchOnce(
+            'get',
             'https://client.featureboard.app/effective?audiences=',
             {
                 status: 200,
-                body: newValues,
+                body: JSON.stringify(newValues),
             },
-            { overwriteRoutes: true },
         )
         await client.updateFeatures()
 
@@ -76,22 +81,28 @@ describe('Manual update mode', () => {
     })
 
     it('close', async () => {
+        const fetchMock = new FetchMock()
+
         const values: EffectiveFeatureValue[] = [
             {
                 featureKey: 'my-feature',
                 value: 'service-default-value',
             },
         ]
-        fetch.get('https://client.featureboard.app/effective?audiences=', {
-            status: 200,
-            body: values,
-        })
+        fetchMock.matchOnce(
+            'get',
+            'https://client.featureboard.app/effective?audiences=',
+            {
+                status: 200,
+                body: JSON.stringify(values),
+            },
+        )
 
         const client = createBrowserClient({
             environmentApiKey: 'fake-key',
             audiences: [],
             updateStrategy: 'manual',
-            fetch,
+            fetchInstance: fetchMock.instance,
         })
 
         client.close()

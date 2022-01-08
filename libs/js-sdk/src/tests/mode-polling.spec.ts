@@ -1,37 +1,39 @@
 import { EffectiveFeatureValue } from '@featureboard/contracts'
-import fetchMock from 'fetch-mock'
+import { beforeEach, describe, expect, fn, it } from 'vitest'
 import { createBrowserClient } from '../client'
 import { interval } from '../interval'
-
-let fetch: fetchMock.FetchMockSandbox
+import { FetchMock } from './fetch-mock'
 
 beforeEach(() => {
-    fetch = fetchMock.sandbox()
-    // Default to internal server error
-    fetch.catch(500)
     interval.set = setInterval
     interval.clear = clearInterval
 })
 
 describe('Polling update mode', () => {
     it('fetches initial values', async () => {
-        interval.set = jest.fn(() => {}) as any
+        const fetchMock = new FetchMock()
+
+        interval.set = fn(() => {}) as any
         const values: EffectiveFeatureValue[] = [
             {
                 featureKey: 'my-feature',
                 value: 'service-default-value',
             },
         ]
-        fetch.get('https://client.featureboard.app/effective?audiences=', {
-            status: 200,
-            body: values,
-        })
+        fetchMock.matchOnce(
+            'get',
+            'https://client.featureboard.app/effective?audiences=',
+            {
+                status: 200,
+                body: JSON.stringify(values),
+            },
+        )
 
         const connection = createBrowserClient({
             environmentApiKey: 'fake-key',
             audiences: [],
             updateStrategy: 'polling',
-            fetch,
+            fetchInstance: fetchMock.instance,
         })
 
         expect(
@@ -40,11 +42,12 @@ describe('Polling update mode', () => {
     })
 
     it('sets up interval correctly', async () => {
+        const fetchMock = new FetchMock()
         const handle = {}
-        interval.set = jest.fn(() => {
+        interval.set = fn(() => {
             return handle
         }) as any
-        interval.clear = jest.fn(() => {})
+        interval.clear = fn(() => {})
 
         const values: EffectiveFeatureValue[] = [
             {
@@ -52,16 +55,20 @@ describe('Polling update mode', () => {
                 value: 'service-default-value',
             },
         ]
-        fetch.get('https://client.featureboard.app/effective?audiences=', {
-            status: 200,
-            body: values,
-        })
+        fetchMock.match(
+            'get',
+            'https://client.featureboard.app/effective?audiences=',
+            {
+                status: 200,
+                body: JSON.stringify(values),
+            },
+        )
 
         const connection = createBrowserClient({
             environmentApiKey: 'fake-key',
             audiences: [],
             updateStrategy: 'polling',
-            fetch,
+            fetchInstance: fetchMock.instance,
         })
         connection.close()
 
@@ -70,7 +77,9 @@ describe('Polling update mode', () => {
     })
 
     it('fetches updates when interval fires', async () => {
-        const setMock = jest.fn(() => {})
+        const fetchMock = new FetchMock()
+
+        const setMock = fn(() => {})
         interval.set = setMock as any
 
         const values: EffectiveFeatureValue[] = [
@@ -79,16 +88,20 @@ describe('Polling update mode', () => {
                 value: 'service-default-value',
             },
         ]
-        fetch.get('https://client.featureboard.app/effective?audiences=', {
-            status: 200,
-            body: values,
-        })
+        fetchMock.matchOnce(
+            'get',
+            'https://client.featureboard.app/effective?audiences=',
+            {
+                status: 200,
+                body: JSON.stringify(values),
+            },
+        )
 
         const client = createBrowserClient({
             environmentApiKey: 'fake-key',
             audiences: [],
             updateStrategy: 'polling',
-            fetch,
+            fetchInstance: fetchMock.instance,
         })
 
         const newValues: EffectiveFeatureValue[] = [
@@ -97,13 +110,13 @@ describe('Polling update mode', () => {
                 value: 'new-service-default-value',
             },
         ]
-        fetch.get(
+        fetchMock.matchOnce(
+            'get',
             'https://client.featureboard.app/effective?audiences=',
             {
                 status: 200,
-                body: newValues,
+                body: JSON.stringify(newValues),
             },
-            { overwriteRoutes: true },
         )
 
         const pollCallback = (setMock.mock.calls[0] as any)[0]

@@ -1,5 +1,4 @@
-import { FeatureBoardApiConfig } from '@featureboard/js-sdk'
-import { FetchSignature } from '../utils/fetchFeaturesConfiguration'
+import { FeatureBoardApiConfig, FetchSignature } from '@featureboard/js-sdk'
 import { createLiveUpdateStrategy } from './createLiveUpdateStrategy'
 import { createManualUpdateStrategy } from './createManualUpdateStrategy'
 import { createOnRequestUpdateStrategy } from './createOnRequestUpdateStrategy'

@@ -1,17 +1,11 @@
 import { FeatureConfiguration } from '@featureboard/contracts'
-import fetchMock from 'fetch-mock'
+import { FetchMock } from '@featureboard/js-sdk/src/tests/fetch-mock'
+import { describe, expect, it } from 'vitest'
 import { createServerClient } from '../server-client'
-
-let fetch: fetchMock.FetchMockSandbox
-
-beforeEach(() => {
-    fetch = fetchMock.sandbox()
-    // Default to internal server error
-    fetch.catch(500)
-})
 
 describe('Manual update mode', () => {
     it('fetches initial values', async () => {
+        const fetchMock = new FetchMock()
         const values: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
@@ -19,9 +13,9 @@ describe('Manual update mode', () => {
                 defaultValue: 'service-default-value',
             },
         ]
-        fetch.getOnce('https://client.featureboard.app/all', {
+        fetchMock.matchOnce('get', 'https://client.featureboard.app/all', {
             status: 200,
-            body: values,
+            body: JSON.stringify(values),
         })
 
         const client = createServerClient({
@@ -36,6 +30,7 @@ describe('Manual update mode', () => {
     })
 
     it('can manually update values', async () => {
+        const fetchMock = new FetchMock()
         const values: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
@@ -43,9 +38,9 @@ describe('Manual update mode', () => {
                 defaultValue: 'service-default-value',
             },
         ]
-        fetch.getOnce('https://client.featureboard.app/all', {
+        fetchMock.matchOnce('get', 'https://client.featureboard.app/all', {
             status: 200,
-            body: values,
+            body: JSON.stringify(values),
         })
 
         const client = createServerClient({
@@ -61,14 +56,10 @@ describe('Manual update mode', () => {
                 defaultValue: 'new-service-default-value',
             },
         ]
-        fetch.getOnce(
-            'https://client.featureboard.app/all',
-            {
-                status: 200,
-                body: newValues,
-            },
-            { overwriteRoutes: true },
-        )
+        fetchMock.matchOnce('get', 'https://client.featureboard.app/all', {
+            status: 200,
+            body: JSON.stringify(newValues),
+        })
         await client.updateFeatures()
 
         expect(
@@ -77,6 +68,7 @@ describe('Manual update mode', () => {
     })
 
     it('can manually update audience exception values', async () => {
+        const fetchMock = new FetchMock()
         const values: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
@@ -86,9 +78,9 @@ describe('Manual update mode', () => {
                 defaultValue: 'service-default-value',
             },
         ]
-        fetch.getOnce('https://client.featureboard.app/all', {
+        fetchMock.matchOnce('get', 'https://client.featureboard.app/all', {
             status: 200,
-            body: values,
+            body: JSON.stringify(values),
         })
 
         const client = createServerClient({
@@ -106,14 +98,10 @@ describe('Manual update mode', () => {
                 defaultValue: 'new-service-default-value',
             },
         ]
-        fetch.getOnce(
-            'https://client.featureboard.app/all',
-            {
-                status: 200,
-                body: newValues,
-            },
-            { overwriteRoutes: true },
-        )
+        fetchMock.matchOnce('get', 'https://client.featureboard.app/all', {
+            status: 200,
+            body: JSON.stringify(newValues),
+        })
         await client.updateFeatures()
 
         expect(
@@ -124,6 +112,7 @@ describe('Manual update mode', () => {
     })
 
     it('close', async () => {
+        const fetchMock = new FetchMock()
         const values: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
@@ -131,9 +120,9 @@ describe('Manual update mode', () => {
                 defaultValue: 'service-default-value',
             },
         ]
-        fetch.get('https://client.featureboard.app/all', {
+        fetchMock.matchOnce('get', 'https://client.featureboard.app/all', {
             status: 200,
-            body: values,
+            body: JSON.stringify(values),
         })
 
         const client = createServerClient({
