@@ -15,19 +15,31 @@
         },
         {
             "type": "process",
-            "label": "test",
-            "command": "node --debug-brk --inspect ${workspaceRoot}\\node_modules\\vitest\\vitest.mjs -i",
+            "command": "pnpx",
+            "args": ["vitest", "run", "${relativeFile}"],
             "group": "test",
+            "isTestCommand": true,
             "options": {
-                "cwd": "libs/js-sdk",
                 "env": {
                     "NODE_ENV": "test"
                 }
-            }
-            // "type": "npm",
-            // "problemMatcher": [],
-            // "label": "npm: test",
-            // "detail": "vitest"
+            },
+            "problemMatcher": [],
+            "label": "Run test file"
+        },
+        {
+            "type": "process",
+            "command": "pnpx",
+            "args": ["vitest", "${relativeFile}"],
+            "group": "test",
+            "isTestCommand": true,
+            "options": {
+                "env": {
+                    "NODE_ENV": "test"
+                }
+            },
+            "problemMatcher": [],
+            "label": "Watch test file"
         }
     ]
 }

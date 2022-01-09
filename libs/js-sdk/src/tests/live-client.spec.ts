@@ -143,7 +143,7 @@ describe('live client', () => {
         )
     })
 
-    it('uses value from live once it reconnects', async () => {
+    it.only('uses value from live once it reconnects', async () => {
         const fetchMock = new FetchMock()
         let serverConnectAttempts = 0
 
@@ -195,6 +195,8 @@ describe('live client', () => {
                 },
             },
         })
+
+        await client.waitForInitialised()
 
         // Wait for timeout of sdk
         await new Promise((resolve) => setTimeout(resolve, 50))

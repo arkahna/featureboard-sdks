@@ -83,7 +83,9 @@ export function createBrowserClient({
 
     return {
         client: createBrowserFbClient(state),
-        initialised: false,
+        get initialised() {
+            return initialisedPromise.completed
+        },
         waitForInitialised() {
             return new Promise((resolve) => {
                 const interval = setInterval(() => {

@@ -45,7 +45,13 @@ export class FetchMock {
                             if (!match.headers) {
                                 return null
                             }
-                            return match.headers[header] || null
+
+                            return (
+                                getHeaderCaseInsensitive(
+                                    match.headers,
+                                    header,
+                                ) || null
+                            )
                         },
                     },
                 }
@@ -54,7 +60,7 @@ export class FetchMock {
 
         return {
             status: 500,
-            statusText: 'Internal Server Error',
+            statusText: 'Unmatched route: ' + input,
             json: () =>
                 Promise.resolve({ message: 'Unmatched route:' + input }),
             headers: {
@@ -175,5 +181,18 @@ function matchesUrl(url: string | RegExp, input: string) {
         return input.includes(url)
     } else {
         return url.test(input)
+    }
+}
+
+function getHeaderCaseInsensitive(
+    headers: Record<string, string>,
+    header: string,
+) {
+    for (const requestHeaderName in headers) {
+        if (Object.prototype.hasOwnProperty.call(headers, requestHeaderName)) {
+            if (requestHeaderName.toLowerCase() === header.toLowerCase()) {
+                return headers[requestHeaderName]
+            }
+        }
     }
 }
