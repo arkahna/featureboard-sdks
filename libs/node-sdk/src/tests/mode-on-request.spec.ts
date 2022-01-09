@@ -119,6 +119,7 @@ describe('On request update mode', () => {
             updateStrategy: { kind: 'on-request', options: { maxAgeMs: 1 } },
             fetchInstance: fetchMock.instance,
         })
+        await connection.waitForInitialised()
 
         const newValues: FeatureConfiguration[] = [
             {
