@@ -8,7 +8,7 @@ export function createManualUpdateStrategy(
     environmentApiKey: string,
     httpEndpoint: string,
     audiences: string[],
-    fetch: FetchSignature,
+    fetchInstance: FetchSignature,
 ): EffectiveConfigUpdateStrategy {
     let lastModified: undefined | string
     let fetchUpdatesSingle: undefined | (() => Promise<void>)
@@ -19,7 +19,7 @@ export function createManualUpdateStrategy(
             // Ensure that we don't trigger another request while one is in flight
             fetchUpdatesSingle = createEnsureSingle(async () => {
                 lastModified = await fetchFeaturesConfigurationViaHttp(
-                    fetch,
+                    fetchInstance,
                     getEffectiveEndpoint(httpEndpoint, currentAudiences),
                     environmentApiKey,
                     state,

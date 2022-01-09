@@ -9,6 +9,7 @@ import {
     Features,
     FetchSignature,
 } from '@featureboard/js-sdk'
+import nodeFetch from 'node-fetch'
 import { PromiseCompletionSource } from 'promise-completion-source'
 import {
     AllFeaturesState,
@@ -42,7 +43,7 @@ export interface CreateServerClientOptions {
 
     environmentApiKey: string
 
-    fetch?: FetchSignature
+    fetchInstance?: FetchSignature
 }
 
 export function createServerClient({
@@ -51,13 +52,15 @@ export function createServerClient({
     store,
     updateStrategy,
     environmentApiKey,
-    fetch,
+    fetchInstance,
 }: CreateServerClientOptions): ServerClient {
     if (store && initialValues) {
         throw new Error('Cannot specify both store and initialValues')
     }
 
     const initialisedPromise = new PromiseCompletionSource<boolean>()
+    // Ensure that the init promise doesn't cause an unhandled promise rejection
+    initialisedPromise.promise.catch(() => {})
     const state = new AllFeaturesState(
         store || new MemoryFeatureStore(initialValues),
     )
@@ -65,14 +68,21 @@ export function createServerClient({
         updateStrategy,
         environmentApiKey,
         api || featureBoardHostedService,
-        fetch,
+        fetchInstance || nodeFetch,
     )
 
-    updateStrategyImplementation.connect(state).then(() => {
-        if (!initialisedPromise.completed) {
-            initialisedPromise.resolve(true)
-        }
-    })
+    updateStrategyImplementation
+        .connect(state)
+        .then(() => {
+            if (!initialisedPromise.completed) {
+                initialisedPromise.resolve(true)
+            }
+        })
+        .catch((err) => {
+            if (!initialisedPromise.completed) {
+                initialisedPromise.reject(err)
+            }
+        })
 
     return {
         get initialised() {

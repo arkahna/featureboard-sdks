@@ -14,7 +14,7 @@ export function resolveUpdateStrategy(
     updateStrategy: UpdateStrategies['kind'] | UpdateStrategies | undefined,
     environmentApiKey: string,
     api: FeatureBoardApiConfig,
-    fetch: FetchSignature | undefined,
+    fetchInstance: FetchSignature,
 ): AllConfigUpdateStrategy {
     const resolvedUpdateStrategy: UpdateStrategies =
         toUpdateStrategyOptions(updateStrategy)
@@ -34,7 +34,7 @@ export function resolveUpdateStrategy(
             api.http,
             resolvedUpdateStrategy.options?.intervalMs ||
                 pollingIntervalDefault,
-            fetch,
+            fetchInstance,
         )
     }
     if (resolvedUpdateStrategy.kind === 'on-request') {
@@ -42,10 +42,15 @@ export function resolveUpdateStrategy(
             environmentApiKey,
             api.http,
             resolvedUpdateStrategy.options?.maxAgeMs || maxAgeDefault,
+            fetchInstance,
         )
     }
     if (resolvedUpdateStrategy.kind === 'manual') {
-        return createManualUpdateStrategy(environmentApiKey, api.http)
+        return createManualUpdateStrategy(
+            environmentApiKey,
+            api.http,
+            fetchInstance,
+        )
     }
 
     throw new Error('Unknown update strategy: ' + updateStrategy)

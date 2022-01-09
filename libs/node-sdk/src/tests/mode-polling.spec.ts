@@ -28,7 +28,7 @@ describe('Polling update mode', () => {
         const client = createServerClient({
             environmentApiKey: 'fake-key',
             updateStrategy: 'polling',
-            fetch,
+            fetchInstance: fetchMock.instance,
         })
         expect(
             client.request([]).getFeatureValue('my-feature', 'default-value'),
@@ -58,7 +58,7 @@ describe('Polling update mode', () => {
         const client = createServerClient({
             environmentApiKey: 'fake-key',
             updateStrategy: 'polling',
-            fetch,
+            fetchInstance: fetchMock.instance,
         })
         client.close()
 
@@ -86,7 +86,7 @@ describe('Polling update mode', () => {
         const client = createServerClient({
             environmentApiKey: 'fake-key',
             updateStrategy: 'polling',
-            fetch,
+            fetchInstance: fetchMock.instance,
         })
 
         const newValues: FeatureConfiguration[] = [

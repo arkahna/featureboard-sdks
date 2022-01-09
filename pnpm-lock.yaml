@@ -33,6 +33,7 @@ importers:
       react: ^17.0.2
       react-test-renderer: ^17.0.2
       ts-node: ~10.4.0
+      tsconfig-paths: ^3.12.0
       tslib: ^2.3.1
       tsup: ^5.11.10
       typescript: 4.5.4
@@ -71,6 +72,7 @@ importers:
       react: 17.0.2
       react-test-renderer: 17.0.2_react@17.0.2
       ts-node: 10.4.0_c0a36305688e9b0ddf12092ca60b0ad2
+      tsconfig-paths: 3.12.0
       tsup: 5.11.10_ts-node@10.4.0+typescript@4.5.4
       typescript: 4.5.4
       vite: 2.7.10

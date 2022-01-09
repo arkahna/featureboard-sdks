@@ -8,7 +8,7 @@ export function createPollingUpdateStrategy(
     environmentApiKey: string,
     httpEndpoint: string,
     intervalMs: number,
-    fetchInstance: FetchSignature | undefined,
+    fetchInstance: FetchSignature,
 ): AllConfigUpdateStrategy {
     let stopPolling: undefined | (() => void)
     let lastModified: undefined | string

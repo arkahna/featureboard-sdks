@@ -21,7 +21,7 @@ describe('Manual update mode', () => {
         const client = createServerClient({
             environmentApiKey: 'fake-key',
             updateStrategy: 'manual',
-            fetch,
+            fetchInstance: fetchMock.instance,
         })
 
         expect(
@@ -46,7 +46,7 @@ describe('Manual update mode', () => {
         const client = createServerClient({
             environmentApiKey: 'fake-key',
             updateStrategy: 'manual',
-            fetch,
+            fetchInstance: fetchMock.instance,
         })
 
         const newValues: FeatureConfiguration[] = [
@@ -86,7 +86,7 @@ describe('Manual update mode', () => {
         const client = createServerClient({
             environmentApiKey: 'fake-key',
             updateStrategy: 'manual',
-            fetch,
+            fetchInstance: fetchMock.instance,
         })
 
         const newValues: FeatureConfiguration[] = [
@@ -128,7 +128,7 @@ describe('Manual update mode', () => {
         const client = createServerClient({
             environmentApiKey: 'fake-key',
             updateStrategy: 'manual',
-            fetch,
+            fetchInstance: fetchMock.instance,
         })
 
         client.close()

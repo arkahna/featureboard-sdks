@@ -21,7 +21,7 @@ describe('On request update mode', () => {
         const client = createServerClient({
             environmentApiKey: 'fake-key',
             updateStrategy: 'on-request',
-            fetch,
+            fetchInstance: fetchMock.instance,
         })
 
         expect(
@@ -49,7 +49,7 @@ describe('On request update mode', () => {
         const client = createServerClient({
             environmentApiKey: 'fake-key',
             updateStrategy: 'on-request',
-            fetch,
+            fetchInstance: fetchMock.instance,
         })
 
         expect(() =>
@@ -78,7 +78,7 @@ describe('On request update mode', () => {
         const connection = createServerClient({
             environmentApiKey: 'fake-key',
             updateStrategy: 'on-request',
-            fetch,
+            fetchInstance: fetchMock.instance,
         })
 
         const newValues: FeatureConfiguration[] = [
@@ -116,7 +116,7 @@ describe('On request update mode', () => {
         const connection = createServerClient({
             environmentApiKey: 'fake-key',
             updateStrategy: { kind: 'on-request', options: { maxAgeMs: 1 } },
-            fetch,
+            fetchInstance: fetchMock.instance,
         })
 
         const newValues: FeatureConfiguration[] = [

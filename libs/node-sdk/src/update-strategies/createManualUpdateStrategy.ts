@@ -1,10 +1,11 @@
-import { createEnsureSingle } from '@featureboard/js-sdk'
+import { createEnsureSingle, FetchSignature } from '@featureboard/js-sdk'
 import { fetchFeaturesConfigurationViaHttp } from '../utils/fetchFeaturesConfiguration'
 import { AllConfigUpdateStrategy } from './update-strategies'
 
 export function createManualUpdateStrategy(
     environmentApiKey: string,
     httpEndpoint: string,
+    fetchInstance: FetchSignature,
 ): AllConfigUpdateStrategy {
     let lastModified: undefined | string
     let fetchUpdatesSingle: undefined | (() => Promise<void>)
@@ -14,7 +15,7 @@ export function createManualUpdateStrategy(
             // Ensure that we don't trigger another request while one is in flight
             fetchUpdatesSingle = createEnsureSingle(async () => {
                 lastModified = await fetchFeaturesConfigurationViaHttp(
-                    fetch as any,
+                    fetchInstance,
                     httpEndpoint,
                     environmentApiKey,
                     state,

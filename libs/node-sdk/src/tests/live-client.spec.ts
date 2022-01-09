@@ -58,7 +58,7 @@ describe('live client', () => {
 
         const client = createServerClient({
             environmentApiKey: 'fake-key',
-            fetch,
+            fetchInstance: fetchMock.instance,
             updateStrategy: {
                 kind: 'live',
                 options: {
@@ -96,7 +96,7 @@ describe('live client', () => {
 
         const client = createServerClient({
             environmentApiKey: 'fake-key',
-            fetch,
+            fetchInstance: fetchMock.instance,
             updateStrategy: {
                 kind: 'live',
                 options: {
