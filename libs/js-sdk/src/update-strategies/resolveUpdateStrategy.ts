@@ -1,6 +1,5 @@
 import { FeatureBoardApiConfig } from '../featureboard-api-config'
 import { FetchSignature } from '../utils/FetchSignature'
-import { createLiveUpdateStrategy } from './createLiveUpdateStrategy'
 import { createManualUpdateStrategy } from './createManualUpdateStrategy'
 import { createPollingUpdateStrategy } from './createPollingUpdateStrategy'
 import {
@@ -19,16 +18,16 @@ export function resolveUpdateStrategy(
     const resolvedUpdateStrategy: UpdateStrategies =
         toUpdateStrategyOptions(updateStrategy)
 
-    if (resolvedUpdateStrategy.kind === 'live') {
-        return createLiveUpdateStrategy(
-            environmentApiKey,
-            api.ws,
-            audiences,
-            resolvedUpdateStrategy.options
-                ? resolvedUpdateStrategy.options
-                : {},
-        )
-    }
+    // if (resolvedUpdateStrategy.kind === 'live') {
+    //     return createLiveUpdateStrategy(
+    //         environmentApiKey,
+    //         api.ws,
+    //         audiences,
+    //         resolvedUpdateStrategy.options
+    //             ? resolvedUpdateStrategy.options
+    //             : {},
+    //     )
+    // }
     if (resolvedUpdateStrategy.kind === 'polling') {
         return createPollingUpdateStrategy(
             environmentApiKey,

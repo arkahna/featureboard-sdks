@@ -23,10 +23,13 @@ describe('Manual update mode', () => {
             updateStrategy: 'manual',
             fetchInstance: fetchMock.instance,
         })
+        expect(client.initialised).toBe(false)
+        await client.waitForInitialised()
 
-        expect(
-            client.request([]).getFeatureValue('my-feature', 'default-value'),
-        ).toEqual('service-default-value')
+        const value = client
+            .request([])
+            .getFeatureValue('my-feature', 'default-value')
+        expect(value).toEqual('service-default-value')
     })
 
     it('can manually update values', async () => {
@@ -48,6 +51,7 @@ describe('Manual update mode', () => {
             updateStrategy: 'manual',
             fetchInstance: fetchMock.instance,
         })
+        await client.waitForInitialised()
 
         const newValues: FeatureConfiguration[] = [
             {
@@ -88,6 +92,7 @@ describe('Manual update mode', () => {
             updateStrategy: 'manual',
             fetchInstance: fetchMock.instance,
         })
+        await client.waitForInitialised()
 
         const newValues: FeatureConfiguration[] = [
             {

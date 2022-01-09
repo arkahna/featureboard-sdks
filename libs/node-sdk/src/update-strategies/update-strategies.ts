@@ -31,7 +31,8 @@ export interface LiveUpdateStrategy {
 
 export type UpdateStrategies =
     | ManualUpdateStrategy
-    | LiveUpdateStrategy
+    // TODO Currently disabled
+    //| LiveUpdateStrategy
     | PollingUpdateStrategy
     | OnRequestUpdateStrategy
 

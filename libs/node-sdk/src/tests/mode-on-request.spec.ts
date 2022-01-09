@@ -23,13 +23,14 @@ describe('On request update mode', () => {
             updateStrategy: 'on-request',
             fetchInstance: fetchMock.instance,
         })
+        await client.waitForInitialised()
 
-        expect(
-            (await client.request([])).getFeatureValue(
-                'my-feature',
-                'default-value',
-            ),
-        ).toEqual('service-default-value')
+        const requestClient = await client.request([])
+        const value = requestClient.getFeatureValue(
+            'my-feature',
+            'default-value',
+        )
+        expect(value).toEqual('service-default-value')
     })
 
     it('throws if request() is not awaited in request mode', async () => {

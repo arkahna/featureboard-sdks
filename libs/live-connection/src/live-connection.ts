@@ -41,7 +41,7 @@ export interface LiveOptions {
 
 const liveConnectionDebug = liveConnectionLog.extend('live-connection')
 
-export class LiveConnection {
+export class CommonLiveConnection {
     private ws?: IWebSocket
     private retryCount = 0
     private initialised: PromiseCompletionSource<void> | undefined

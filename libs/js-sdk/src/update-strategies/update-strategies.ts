@@ -25,7 +25,8 @@ export interface LiveUpdateStrategy {
 
 export type UpdateStrategies =
     | ManualUpdateStrategy
-    | LiveUpdateStrategy
+    // TODO reenable
+    // | LiveUpdateStrategy
     | PollingUpdateStrategy
 
 export const pollingIntervalDefault = 30000

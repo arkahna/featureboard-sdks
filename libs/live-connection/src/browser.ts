@@ -1,7 +1,7 @@
 import { SubscribeToEnvironment } from '@featureboard/contracts'
 import {
+    CommonLiveConnection,
     IWebSocket,
-    LiveConnection as SharedLiveConnection,
     LiveOptions,
 } from './live-connection'
 export type {
@@ -12,7 +12,7 @@ export type {
     LiveOptions,
 } from './live-connection'
 
-export class LiveConnection extends SharedLiveConnection {
+export class LiveConnection extends CommonLiveConnection {
     constructor(
         environmentApiKey: string,
         mode: SubscribeToEnvironment['mode'],

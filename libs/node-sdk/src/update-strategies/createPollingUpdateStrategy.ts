@@ -34,7 +34,7 @@ export function createPollingUpdateStrategy(
             }
             stopPolling = pollingUpdates(() => {
                 if (fetchUpdatesSingle) {
-                    fetchUpdatesSingle()
+                    return fetchUpdatesSingle()
                 }
             }, intervalMs)
 

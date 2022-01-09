@@ -1,5 +1,5 @@
 import { NotificationType } from '@featureboard/contracts'
-import { LiveOptions } from '@featureboard/live-connection'
+import type { LiveOptions } from '@featureboard/live-connection'
 import { EffectiveFeaturesState } from '../effective-feature-state'
 import { EffectiveConfigUpdateStrategy } from './update-strategies'
 
