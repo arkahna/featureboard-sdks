@@ -2,6 +2,7 @@ import { createEnsureSingle, FetchSignature } from '@featureboard/js-sdk'
 import nodeFetch from 'node-fetch'
 import { fetchFeaturesConfigurationViaHttp } from '../utils/fetchFeaturesConfiguration'
 import { pollingUpdates } from '../utils/pollingUpdates'
+import { getAllEndpoint } from './getEffectiveEndpoint'
 import { AllConfigUpdateStrategy } from './update-strategies'
 
 export function createPollingUpdateStrategy(
@@ -18,9 +19,10 @@ export function createPollingUpdateStrategy(
         async connect(state) {
             // Ensure that we don't trigger another request while one is in flight
             fetchUpdatesSingle = createEnsureSingle(async () => {
+                const allEndpoint = getAllEndpoint(httpEndpoint)
                 lastModified = await fetchFeaturesConfigurationViaHttp(
                     fetchInstance || (nodeFetch as any),
-                    httpEndpoint,
+                    allEndpoint,
                     environmentApiKey,
                     state,
                     lastModified,
