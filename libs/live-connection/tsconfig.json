@@ -1,0 +1,14 @@
+{
+    "extends": "../../tsconfig.settings.json",
+    "compilerOptions": {
+        "outDir": "./out-tsc",
+        "rootDir": "./src",
+        "types": ["node"]
+    },
+    "include": ["src/**/*.ts", "src/**/*.tsx"],
+    "references": [
+        {
+            "path": "../contracts"
+        }
+    ]
+}

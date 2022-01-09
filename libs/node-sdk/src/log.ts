@@ -1,3 +1,3 @@
 import debug from 'debug'
 
-export const debugLog = debug('featureboard-sdk')
+export const debugLog = debug('@featureboard/node-sdk')

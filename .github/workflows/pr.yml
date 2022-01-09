@@ -40,5 +40,5 @@ jobs:
       - name: Lint types and code
         run: pnpm run lint
 
-      - name: Lint types and code
+      - name: Tests
         run: pnpm run test

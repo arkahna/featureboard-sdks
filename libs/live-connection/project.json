@@ -1,0 +1,29 @@
+{
+    "root": "libs/live-connection",
+    "projectType": "library",
+    "sourceRoot": "libs/live-connection/src",
+    "targets": {
+        "lint": {
+            "executor": "@nrwl/linter:eslint",
+            "options": {
+                "lintFilePatterns": [
+                    "libs/live-connection/**/*.ts"
+                ]
+            }
+        },
+        "test": {
+            "executor": "@nrwl/workspace:run-commands",
+            "options": {
+                "command": "npx vitest --run --passWithNoTests",
+                "cwd": "libs/live-connection"
+            }
+        },
+        "package": {
+            "executor": "@wanews/nx-typescript-project-references:package",
+            "options": {
+                "main": "libs/live-connection/src/index.ts",
+                "tsConfig": "libs/live-connection/tsconfig.json"
+            }
+        }
+    }
+}

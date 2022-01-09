@@ -1,0 +1,32 @@
+{
+    "root": "libs/node-sdk",
+    "projectType": "library",
+    "sourceRoot": "libs/node-sdk/src",
+    "targets": {
+        "lint": {
+            "executor": "@nrwl/linter:eslint",
+            "options": {
+                "lintFilePatterns": [
+                    "libs/node-sdk/**/*.ts"
+                ]
+            }
+        },
+        "test": {
+            "executor": "@nrwl/workspace:run-commands",
+            "options": {
+                "command": "npx vitest --run --passWithNoTests",
+                "cwd": "libs/node-sdk"
+            }
+        },
+        "package": {
+            "executor": "@wanews/nx-typescript-project-references:package",
+            "options": {
+                "main": "libs/node-sdk/src/index.ts",
+                "tsConfig": "libs/node-sdk/tsconfig.json",
+                "external": [
+                    "node-fetch"
+                ]
+            }
+        }
+    }
+}

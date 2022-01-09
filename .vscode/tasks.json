@@ -12,6 +12,34 @@
             },
             "label": "tsc: watch - tsconfig.json",
             "isBackground": true
+        },
+        {
+            "type": "process",
+            "command": "pnpx",
+            "args": ["vitest", "run", "${relativeFile}"],
+            "group": "test",
+            "isTestCommand": true,
+            "options": {
+                "env": {
+                    "NODE_ENV": "test"
+                }
+            },
+            "problemMatcher": [],
+            "label": "Run test file"
+        },
+        {
+            "type": "process",
+            "command": "pnpx",
+            "args": ["vitest", "${relativeFile}"],
+            "group": "test",
+            "isTestCommand": true,
+            "options": {
+                "env": {
+                    "NODE_ENV": "test"
+                }
+            },
+            "problemMatcher": [],
+            "label": "Watch test file"
         }
     ]
 }

@@ -1,8 +1,7 @@
 import { EffectiveFeatureValue } from '@featureboard/contracts'
-import { createBrowserHttpClient } from './browser-http-client'
-import { createBrowserWsClient } from './browser-ws-client'
-import { createClient } from './create-client'
-import { EffectiveFeatureState } from './effective-feature-state'
+import { PromiseCompletionSource } from 'promise-completion-source'
+import { BrowserClient } from './client-connection'
+import { EffectiveFeaturesState } from './effective-feature-state'
 import {
     EffectiveFeatureStore,
     MemoryEffectiveFeatureStore,
@@ -11,13 +10,25 @@ import { FeatureBoardApiConfig } from './featureboard-api-config'
 import { featureBoardHostedService } from './featureboard-service-urls'
 import { FeatureBoardClient } from './features-client'
 import { debugLog } from './log'
-import { UpdateStrategies } from './update-strategies'
+import { resolveUpdateStrategy } from './update-strategies/resolveUpdateStrategy'
+import { UpdateStrategies } from './update-strategies/update-strategies'
+import { FetchSignature } from './utils/FetchSignature'
 
-export interface FeatureBoardServiceOptions {
+// We are not including the DOM types so we don't accidently access globals,
+// this allows us to access the global fetch
+declare const window: any
+
+export function createBrowserClient({
+    initialValues,
+    store,
+    updateStrategy,
+    environmentApiKey,
+    api,
+    audiences,
+    fetchInstance,
+}: {
     /** Connect to a self hosted instance of FeatureBoard */
     api?: FeatureBoardApiConfig
-
-    store?: EffectiveFeatureStore
 
     /**
      * The method your feature state is updated
@@ -26,75 +37,135 @@ export interface FeatureBoardServiceOptions {
      * live - uses websockets for near realtime updates
      * polling - checks with the featureboard service every 30seconds (or configured interval) for updates
      */
-    updateStrategy?: UpdateStrategies | UpdateStrategies['kind']
+    updateStrategy?: UpdateStrategies['kind'] | UpdateStrategies
 
-    /**
-     * Provide an alternate fetch implementation, only used when not in live mode
-     *
-     * @default global fetch
-     */
-    fetch?: (input: RequestInfo, init?: RequestInit) => Promise<Response>
+    store?: EffectiveFeatureStore
+    audiences: string[]
+
+    initialValues?: EffectiveFeatureValue[]
+
+    environmentApiKey: string
+
+    fetchInstance?: FetchSignature
+}): BrowserClient {
+    if (store && initialValues) {
+        throw new Error('Cannot specify both store and initialValues')
+    }
+
+    const initialisedPromise = new PromiseCompletionSource<boolean>()
+    // Ensure that the init promise doesn't cause an unhandled promise rejection
+    initialisedPromise.promise.catch(() => {})
+    const state = new EffectiveFeaturesState(
+        audiences,
+        store || new MemoryEffectiveFeatureStore(initialValues),
+    )
+
+    const updateStrategyImplementation = resolveUpdateStrategy(
+        updateStrategy,
+        environmentApiKey,
+        api || featureBoardHostedService,
+        audiences,
+        fetchInstance ?? window.fetch,
+    )
+
+    updateStrategyImplementation
+        .connect(state)
+        .then(() => {
+            if (!initialisedPromise.completed) {
+                initialisedPromise.resolve(true)
+            }
+        })
+        .catch((err) => {
+            if (!initialisedPromise.completed) {
+                initialisedPromise.reject(err)
+            }
+        })
+
+    return {
+        client: createBrowserFbClient(state),
+        get initialised() {
+            return initialisedPromise.completed
+        },
+        waitForInitialised() {
+            return new Promise((resolve) => {
+                const interval = setInterval(() => {
+                    if (initialisedPromise.completed) {
+                        clearInterval(interval)
+                        resolve(true)
+                    }
+                }, 100)
+            })
+        },
+        updateAudiences(updatedAudiences: string[]) {
+            return updateStrategyImplementation.updateAudiences(
+                state,
+                updatedAudiences,
+            )
+        },
+        updateFeatures() {
+            return updateStrategyImplementation.updateFeatures()
+        },
+        close() {
+            return updateStrategyImplementation.close()
+        },
+    }
 }
 
-export const FeatureBoardService = {
-    /** Can be used to create a client from values transferred from server side renders, or test values */
-    initStatic(
-        audiences: string[],
-        effectiveFeatureValues: EffectiveFeatureValue[],
-    ): FeatureBoardClient {
-        return createClient(
-            new EffectiveFeatureState(
-                audiences,
-                new MemoryEffectiveFeatureStore(effectiveFeatureValues),
-            ),
-        )
-    },
-    init(
-        environmentApiKey: string,
-        audiences: string[],
-        {
-            updateStrategy,
-            api,
-            store,
-            fetch: fetchImpl,
-        }: FeatureBoardServiceOptions = {},
-    ) {
-        const resolvedUpdateStrategy: UpdateStrategies = !updateStrategy
-            ? { kind: 'polling' }
-            : typeof updateStrategy === 'string'
-            ? {
-                  kind: updateStrategy,
-              }
-            : updateStrategy
-
-        debugLog('Initializing FeatureBoard client: %o', {
-            updateStrategy: resolvedUpdateStrategy,
-        })
-        const effectiveFeatureState = new EffectiveFeatureState(
-            audiences,
-            store,
-        )
-
-        if (resolvedUpdateStrategy.kind === 'live') {
-            const defaultWebsocketFactory = (address: string): any =>
-                new WebSocket(address)
-
-            return createBrowserWsClient(environmentApiKey, audiences, {
-                api: api || featureBoardHostedService,
-                liveOptions: {
-                    websocketFactory: defaultWebsocketFactory,
-                    ...resolvedUpdateStrategy.options,
-                },
-                state: effectiveFeatureState,
-                fetch: fetchImpl || fetch,
+function createBrowserFbClient(
+    state: EffectiveFeaturesState,
+): FeatureBoardClient {
+    return {
+        getEffectiveValues() {
+            const all = state.store.all()
+            return {
+                audiences: [...state.audiences],
+                effectiveValues: Object.keys(all)
+                    .filter((key) => all[key])
+                    .map<EffectiveFeatureValue>((key) => ({
+                        featureKey: key,
+                        value: all[key]!,
+                    })),
+            }
+        },
+        getFeatureValue: (featureKey, defaultValue) => {
+            const value = state.store.get(featureKey as string)
+            debugLog('getFeatureValue: %o', {
+                featureKey,
+                value,
+                defaultValue,
             })
-        }
 
-        return createBrowserHttpClient(environmentApiKey, audiences, {
-            api: api || featureBoardHostedService,
-            state: effectiveFeatureState,
-            fetch: fetchImpl || fetch,
-            updateStrategy: resolvedUpdateStrategy,
-        })
-    },
+            return value ?? defaultValue
+        },
+        subscribeToFeatureValue(
+            featureKey: string,
+            defaultValue: any,
+            onValue: (value: any) => void,
+        ) {
+            debugLog('subscribeToFeatureValue: %o', {
+                featureKey,
+            })
+
+            const callback = (updatedFeatureKey: string, value: any): void => {
+                if (featureKey === updatedFeatureKey) {
+                    debugLog('subscribeToFeatureValue update: o', {
+                        featureKey,
+                        value,
+                        defaultValue,
+                    })
+                    onValue(value ?? defaultValue)
+                }
+            }
+
+            state.on('feature-updated', callback)
+            onValue((state.store.get(featureKey) as any) ?? defaultValue)
+
+            return () => {
+                debugLog('unsubscribeToFeatureValue: %o', {
+                    featureKey,
+                })
+                state.off('feature-updated', callback)
+            }
+        },
+    }
 }

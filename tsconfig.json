@@ -4,9 +4,20 @@
         "disableSourceOfProjectReferenceRedirect": true
     },
     "references": [
-        { "path": "./libs/contracts" },
-        { "path": "./libs/js-sdk" },
-        { "path": "./libs/node-sdk" },
-        { "path": "./libs/react-sdk" }
+        {
+            "path": "./libs/contracts"
+        },
+        {
+            "path": "./libs/js-sdk"
+        },
+        {
+            "path": "./libs/live-connection"
+        },
+        {
+            "path": "./libs/node-sdk"
+        },
+        {
+            "path": "./libs/react-sdk"
+        }
     ]
 }

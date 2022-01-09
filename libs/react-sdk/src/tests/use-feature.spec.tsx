@@ -1,5 +1,6 @@
 import { FeatureBoardClient } from '@featureboard/js-sdk'
 import { act, renderHook } from '@testing-library/react-hooks'
+import { describe, expect, it } from 'vitest'
 import { FeatureBoardProvider } from '../featureboard-provider'
 import { useFeature } from '../use-feature'
 

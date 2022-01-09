@@ -1,64 +1,67 @@
-import { FeatureValues } from '@featureboard/contracts'
-import fetchMock from 'fetch-mock'
-import { FeatureBoardService } from '..'
+import { FeatureConfiguration } from '@featureboard/contracts'
+import { FetchMock } from '@featureboard/js-sdk/src/tests/fetch-mock'
+import { beforeEach, describe, expect, fn, it } from 'vitest'
 import { interval } from '../interval'
-
-let fetch: fetchMock.FetchMockSandbox
+import { createServerClient } from '../server-client'
 
 beforeEach(() => {
-    fetch = fetchMock.sandbox()
-    // Default to internal server error
-    fetch.catch(500)
     interval.set = setInterval
     interval.clear = clearInterval
 })
 
 describe('Polling update mode', () => {
     it('fetches initial values', async () => {
-        interval.set = jest.fn(() => {}) as any
-        const values: FeatureValues[] = [
+        const fetchMock = new FetchMock()
+        interval.set = fn(() => {}) as any
+        const values: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
                 audienceExceptions: [],
                 defaultValue: 'service-default-value',
             },
         ]
-        fetch.get('https://client.featureboard.app/all', {
+        fetchMock.matchOnce('get', 'https://client.featureboard.app/all', {
             status: 200,
-            body: values,
+            body: JSON.stringify(values),
         })
 
-        const client = await FeatureBoardService.init('fake-key', {
+        const client = createServerClient({
+            environmentApiKey: 'fake-key',
             updateStrategy: 'polling',
-            fetch,
+            fetchInstance: fetchMock.instance,
         })
-        expect(
-            client.request([]).getFeatureValue('my-feature', 'default-value'),
-        ).toEqual('service-default-value')
+        await client.waitForInitialised()
+
+        const value = client
+            .request([])
+            .getFeatureValue('my-feature', 'default-value')
+        expect(value).toEqual('service-default-value')
     })
 
     it('sets up interval correctly', async () => {
+        const fetchMock = new FetchMock()
         const handle = {}
-        interval.set = jest.fn(() => {
+        interval.set = fn(() => {
             return handle
         }) as any
-        interval.clear = jest.fn(() => {})
+        interval.clear = fn(() => {})
 
-        const values: FeatureValues[] = [
+        const values: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
                 audienceExceptions: [],
                 defaultValue: 'service-default-value',
             },
         ]
-        fetch.get('https://client.featureboard.app/all', {
+        fetchMock.matchOnce('get', 'https://client.featureboard.app/all', {
             status: 200,
-            body: values,
+            body: JSON.stringify(values),
         })
 
-        const client = await FeatureBoardService.init('fake-key', {
+        const client = createServerClient({
+            environmentApiKey: 'fake-key',
             updateStrategy: 'polling',
-            fetch,
+            fetchInstance: fetchMock.instance,
         })
         client.close()
 
@@ -66,49 +69,49 @@ describe('Polling update mode', () => {
         expect(interval.clear).toBeCalledWith(handle)
     })
 
-    it('fetches updates when interval fires', async () => {
-        const setMock = jest.fn(() => {})
+    it.only('fetches updates when interval fires', async () => {
+        const fetchMock = new FetchMock()
+        const setMock = fn(() => {})
         interval.set = setMock as any
 
-        const values: FeatureValues[] = [
+        const values: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
                 audienceExceptions: [],
                 defaultValue: 'service-default-value',
             },
         ]
-        fetch.get('https://client.featureboard.app/all', {
+        fetchMock.matchOnce('get', 'https://client.featureboard.app/all', {
             status: 200,
-            body: values,
+            body: JSON.stringify(values),
         })
 
-        const client = await FeatureBoardService.init('fake-key', {
+        const client = createServerClient({
+            environmentApiKey: 'fake-key',
             updateStrategy: 'polling',
-            fetch,
+            fetchInstance: fetchMock.instance,
         })
+        await client.waitForInitialised()
 
-        const newValues: FeatureValues[] = [
+        const newValues: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
                 audienceExceptions: [],
                 defaultValue: 'new-service-default-value',
             },
         ]
-        fetch.get(
-            'https://client.featureboard.app/all',
-            {
-                status: 200,
-                body: newValues,
-            },
-            { overwriteRoutes: true },
-        )
+        fetchMock.matchOnce('get', 'https://client.featureboard.app/all', {
+            status: 200,
+            body: JSON.stringify(newValues),
+        })
 
         const pollCallback = (setMock.mock.calls[0] as any)[0]
         await pollCallback()
 
-        expect(
-            client.request([]).getFeatureValue('my-feature', 'default-value'),
-        ).toEqual('new-service-default-value')
+        const value = client
+            .request([])
+            .getFeatureValue('my-feature', 'default-value')
+        expect(value).toEqual('new-service-default-value')
     })
 })
 

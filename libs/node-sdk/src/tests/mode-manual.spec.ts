@@ -1,72 +1,69 @@
-import { FeatureValues } from '@featureboard/contracts'
-import fetchMock from 'fetch-mock'
-import { FeatureBoardService } from '../'
-
-let fetch: fetchMock.FetchMockSandbox
-
-beforeEach(() => {
-    fetch = fetchMock.sandbox()
-    // Default to internal server error
-    fetch.catch(500)
-})
+import { FeatureConfiguration } from '@featureboard/contracts'
+import { FetchMock } from '@featureboard/js-sdk/src/tests/fetch-mock'
+import { describe, expect, it } from 'vitest'
+import { createServerClient } from '../server-client'
 
 describe('Manual update mode', () => {
     it('fetches initial values', async () => {
-        const values: FeatureValues[] = [
+        const fetchMock = new FetchMock()
+        const values: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
                 audienceExceptions: [],
                 defaultValue: 'service-default-value',
             },
         ]
-        fetch.getOnce('https://client.featureboard.app/all', {
+        fetchMock.matchOnce('get', 'https://client.featureboard.app/all', {
             status: 200,
-            body: values,
+            body: JSON.stringify(values),
         })
 
-        const client = await FeatureBoardService.init('fake-key', {
+        const client = createServerClient({
+            environmentApiKey: 'fake-key',
             updateStrategy: 'manual',
-            fetch,
+            fetchInstance: fetchMock.instance,
         })
+        expect(client.initialised).toBe(false)
+        await client.waitForInitialised()
 
-        expect(
-            client.request([]).getFeatureValue('my-feature', 'default-value'),
-        ).toEqual('service-default-value')
+        const value = client
+            .request([])
+            .getFeatureValue('my-feature', 'default-value')
+        expect(value).toEqual('service-default-value')
     })
 
     it('can manually update values', async () => {
-        const values: FeatureValues[] = [
+        const fetchMock = new FetchMock()
+        const values: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
                 audienceExceptions: [],
                 defaultValue: 'service-default-value',
             },
         ]
-        fetch.getOnce('https://client.featureboard.app/all', {
+        fetchMock.matchOnce('get', 'https://client.featureboard.app/all', {
             status: 200,
-            body: values,
+            body: JSON.stringify(values),
         })
 
-        const client = await FeatureBoardService.init('fake-key', {
+        const client = createServerClient({
+            environmentApiKey: 'fake-key',
             updateStrategy: 'manual',
-            fetch,
+            fetchInstance: fetchMock.instance,
         })
+        await client.waitForInitialised()
 
-        const newValues: FeatureValues[] = [
+        const newValues: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
                 audienceExceptions: [],
                 defaultValue: 'new-service-default-value',
             },
         ]
-        fetch.getOnce(
-            'https://client.featureboard.app/all',
-            {
-                status: 200,
-                body: newValues,
-            },
-            { overwriteRoutes: true },
-        )
+        fetchMock.matchOnce('get', 'https://client.featureboard.app/all', {
+            status: 200,
+            body: JSON.stringify(newValues),
+        })
         await client.updateFeatures()
 
         expect(
@@ -75,7 +72,8 @@ describe('Manual update mode', () => {
     })
 
     it('can manually update audience exception values', async () => {
-        const values: FeatureValues[] = [
+        const fetchMock = new FetchMock()
+        const values: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
                 audienceExceptions: [
@@ -84,17 +82,19 @@ describe('Manual update mode', () => {
                 defaultValue: 'service-default-value',
             },
         ]
-        fetch.getOnce('https://client.featureboard.app/all', {
+        fetchMock.matchOnce('get', 'https://client.featureboard.app/all', {
             status: 200,
-            body: values,
+            body: JSON.stringify(values),
         })
 
-        const client = await FeatureBoardService.init('fake-key', {
+        const client = createServerClient({
+            environmentApiKey: 'fake-key',
             updateStrategy: 'manual',
-            fetch,
+            fetchInstance: fetchMock.instance,
         })
+        await client.waitForInitialised()
 
-        const newValues: FeatureValues[] = [
+        const newValues: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
                 audienceExceptions: [
@@ -103,14 +103,10 @@ describe('Manual update mode', () => {
                 defaultValue: 'new-service-default-value',
             },
         ]
-        fetch.getOnce(
-            'https://client.featureboard.app/all',
-            {
-                status: 200,
-                body: newValues,
-            },
-            { overwriteRoutes: true },
-        )
+        fetchMock.matchOnce('get', 'https://client.featureboard.app/all', {
+            status: 200,
+            body: JSON.stringify(newValues),
+        })
         await client.updateFeatures()
 
         expect(
@@ -121,21 +117,23 @@ describe('Manual update mode', () => {
     })
 
     it('close', async () => {
-        const values: FeatureValues[] = [
+        const fetchMock = new FetchMock()
+        const values: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
                 audienceExceptions: [],
                 defaultValue: 'service-default-value',
             },
         ]
-        fetch.get('https://client.featureboard.app/all', {
+        fetchMock.matchOnce('get', 'https://client.featureboard.app/all', {
             status: 200,
-            body: values,
+            body: JSON.stringify(values),
         })
 
-        const client = await FeatureBoardService.init('fake-key', {
+        const client = createServerClient({
+            environmentApiKey: 'fake-key',
             updateStrategy: 'manual',
-            fetch,
+            fetchInstance: fetchMock.instance,
         })
 
         client.close()

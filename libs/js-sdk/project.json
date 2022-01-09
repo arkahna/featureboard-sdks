@@ -1,0 +1,29 @@
+{
+    "root": "libs/js-sdk",
+    "projectType": "library",
+    "sourceRoot": "libs/js-sdk/src",
+    "targets": {
+        "lint": {
+            "executor": "@nrwl/linter:eslint",
+            "options": {
+                "lintFilePatterns": [
+                    "libs/js-sdk/**/*.ts"
+                ]
+            }
+        },
+        "test": {
+            "executor": "@nrwl/workspace:run-commands",
+            "options": {
+                "command": "npx vitest --run --passWithNoTests",
+                "cwd": "libs/js-sdk"
+            }
+        },
+        "package": {
+            "executor": "@wanews/nx-typescript-project-references:package",
+            "options": {
+                "main": "libs/js-sdk/src/index.ts",
+                "tsConfig": "libs/js-sdk/tsconfig.json"
+            }
+        }
+    }
+}

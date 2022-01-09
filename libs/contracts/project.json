@@ -1,0 +1,29 @@
+{
+    "root": "libs/contracts",
+    "projectType": "library",
+    "sourceRoot": "libs/contracts/src",
+    "targets": {
+        "lint": {
+            "executor": "@nrwl/linter:eslint",
+            "options": {
+                "lintFilePatterns": [
+                    "libs/contracts/**/*.ts"
+                ]
+            }
+        },
+        "test": {
+            "executor": "@nrwl/workspace:run-commands",
+            "options": {
+                "command": "npx vitest --run --passWithNoTests",
+                "cwd": "libs/contracts"
+            }
+        },
+        "package": {
+            "executor": "@wanews/nx-typescript-project-references:package",
+            "options": {
+                "main": "libs/contracts/src/index.ts",
+                "tsConfig": "libs/contracts/tsconfig.json"
+            }
+        }
+    }
+}

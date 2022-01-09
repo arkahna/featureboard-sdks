@@ -3,8 +3,19 @@
     "compilerOptions": {
         "outDir": "./out-tsc",
         "rootDir": "./src",
-        "types": ["jest", "node"]
+        "lib": ["ES2020"],
+        "types": ["node"]
     },
     "include": ["src/**/*.ts", "src/**/*.tsx"],
-    "references": [{ "path": "../js-sdk" }, { "path": "../contracts" }]
+    "references": [
+        {
+            "path": "../js-sdk"
+        },
+        {
+            "path": "../contracts"
+        },
+        {
+            "path": "../live-connection"
+        }
+    ]
 }

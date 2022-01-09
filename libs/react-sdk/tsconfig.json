@@ -3,9 +3,13 @@
     "compilerOptions": {
         "outDir": "./out-tsc",
         "rootDir": "./src",
-        "types": ["jest", "node"],
+        "types": ["node"],
         "jsx": "react-jsx"
     },
     "include": ["src/**/*.ts", "src/**/*.tsx"],
-    "references": [{ "path": "../js-sdk" }]
+    "references": [
+        {
+            "path": "../js-sdk"
+        }
+    ]
 }

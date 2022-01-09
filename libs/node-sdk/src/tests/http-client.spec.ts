@@ -1,62 +1,115 @@
-import { FeatureValues } from '@featureboard/contracts'
+import { FeatureConfiguration } from '@featureboard/contracts'
 import { featureBoardHostedService } from '@featureboard/js-sdk'
-import fetchMock from 'fetch-mock'
-import { FeatureState } from '../feature-state'
+import { FetchMock } from '@featureboard/js-sdk/src/tests/fetch-mock'
+import { describe, expect, it } from 'vitest'
 import { MemoryFeatureStore } from '../feature-store'
-import { createNodeHttpClient } from '../server-http-client'
-
-let fetch: fetchMock.FetchMockSandbox
-
-beforeEach(() => {
-    fetch = fetchMock.sandbox()
-    // Default to internal server error
-    fetch.catch(500)
-})
+import { createServerClient } from '../server-client'
 
 describe('http client', () => {
     it('calls featureboard /all endpoint on creation', async () => {
-        const values: FeatureValues[] = [
+        const fetchMock = new FetchMock()
+        const values: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
                 audienceExceptions: [],
                 defaultValue: 'service-default-value',
             },
         ]
-        fetch.getOnce('https://client.featureboard.app/all', {
+        fetchMock.matchOnce('get', 'https://client.featureboard.app/all', {
             status: 200,
-            body: values,
+            body: JSON.stringify(values),
         })
 
-        const httpClient = await createNodeHttpClient('env-api-key', {
-            fetch,
+        const httpClient = createServerClient({
+            environmentApiKey: 'env-api-key',
+            fetchInstance: fetchMock.instance,
             api: featureBoardHostedService,
-            state: new FeatureState(),
             updateStrategy: { kind: 'manual' },
         })
 
-        const newValues: FeatureValues[] = [
+        const value = httpClient
+            .request([])
+            .getFeatureValue('my-feature', 'default-value')
+        expect(httpClient.initialised).toBe(false)
+        expect(value).toBe('default-value')
+    })
+
+    it('can wait for initialisation', async () => {
+        const fetchMock = new FetchMock()
+        const values: FeatureConfiguration[] = [
+            {
+                featureKey: 'my-feature',
+                audienceExceptions: [],
+                defaultValue: 'service-default-value',
+            },
+        ]
+        fetchMock.matchOnce('get', 'https://client.featureboard.app/all', {
+            status: 200,
+            body: JSON.stringify(values),
+        })
+
+        const httpClient = createServerClient({
+            environmentApiKey: 'env-api-key',
+            fetchInstance: fetchMock.instance,
+            api: featureBoardHostedService,
+            updateStrategy: { kind: 'manual' },
+        })
+        await httpClient.waitForInitialised()
+
+        const value = httpClient
+            .request([])
+            .getFeatureValue('my-feature', 'default-value')
+        expect(httpClient.initialised).toBe(true)
+        expect(value).toBe('service-default-value')
+    })
+
+    it('can manually fetch updates', async () => {
+        const fetchMock = new FetchMock()
+        const values: FeatureConfiguration[] = [
+            {
+                featureKey: 'my-feature',
+                audienceExceptions: [],
+                defaultValue: 'service-default-value',
+            },
+        ]
+        fetchMock.matchOnce('get', 'https://client.featureboard.app/all', {
+            status: 200,
+            body: JSON.stringify(values),
+        })
+
+        const httpClient = createServerClient({
+            environmentApiKey: 'env-api-key',
+            fetchInstance: fetchMock.instance,
+            api: featureBoardHostedService,
+            updateStrategy: { kind: 'manual' },
+        })
+        await httpClient.waitForInitialised()
+
+        const newValues: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
                 audienceExceptions: [],
                 defaultValue: 'new-service-default-value',
             },
         ]
-        fetch.getOnce(
-            'https://client.featureboard.app/all',
-            {
-                status: 200,
-                body: newValues,
-            },
-            { overwriteRoutes: true },
-        )
+        fetchMock.matchOnce('get', 'https://client.featureboard.app/all', {
+            status: 200,
+            body: JSON.stringify(newValues),
+        })
 
         await httpClient.updateFeatures()
+
+        const value = httpClient
+            .request([])
+            .getFeatureValue('my-feature', 'default-value')
+        expect(httpClient.initialised).toBe(true)
+        expect(value).toBe('new-service-default-value')
     })
 
     // Below tests are testing behaviour around https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/If-Modified-Since
-
     it('Attaches last modified header to update requests', async () => {
-        const values: FeatureValues[] = [
+        const fetchMock = new FetchMock()
+        const values: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
                 audienceExceptions: [],
@@ -64,22 +117,23 @@ describe('http client', () => {
             },
         ]
         const lastModified = new Date().toISOString()
-        fetch.getOnce('https://client.featureboard.app/all', {
+        fetchMock.matchOnce('get', 'https://client.featureboard.app/all', {
             status: 200,
-            body: values,
+            body: JSON.stringify(values),
             headers: {
                 'Last-Modified': lastModified,
             },
         })
 
-        const httpClient = await createNodeHttpClient('env-api-key', {
-            fetch,
+        const httpClient = createServerClient({
+            environmentApiKey: 'env-api-key',
+            fetchInstance: fetchMock.instance,
             api: featureBoardHostedService,
-            state: new FeatureState(),
             updateStrategy: { kind: 'manual' },
         })
 
-        fetch.getOnce(
+        fetchMock.matchOnce(
+            'get',
             {
                 url: 'https://client.featureboard.app/all',
                 headers: { 'If-Modified-Since': lastModified },
@@ -87,78 +141,33 @@ describe('http client', () => {
             {
                 status: 304,
             },
-            { overwriteRoutes: true },
         )
 
         await httpClient.updateFeatures()
-    })
-
-    it('Handles updates from server', async () => {
-        const values: FeatureValues[] = [
-            {
-                featureKey: 'my-feature',
-                audienceExceptions: [],
-                defaultValue: 'service-default-value',
-            },
-        ]
-        const lastModified = new Date().toISOString()
-        fetch.getOnce('https://client.featureboard.app/all', {
-            status: 200,
-            body: values,
-            headers: {
-                'Last-Modified': lastModified,
-            },
-        })
-
-        const httpClient = await createNodeHttpClient('env-api-key', {
-            fetch,
-            api: featureBoardHostedService,
-            state: new FeatureState(),
-            updateStrategy: { kind: 'manual' },
-        })
-
-        const newValues: FeatureValues[] = [
-            {
-                featureKey: 'my-feature',
-                audienceExceptions: [],
-                defaultValue: 'new-service-default-value',
-            },
-        ]
-        fetch.getOnce(
-            {
-                url: 'https://client.featureboard.app/all',
-                headers: { 'If-Modified-Since': lastModified },
-            },
-            {
-                status: 200,
-                body: newValues,
-            },
-            { overwriteRoutes: true },
-        )
-
-        await httpClient.updateFeatures()
-
-        expect(
-            httpClient
-                .request([])
-                .getFeatureValue('my-feature', 'default-value'),
-        ).toEqual('new-service-default-value')
     })
 
     it('can start with last known good config', async () => {
-        await createNodeHttpClient('env-api-key', {
-            fetch,
+        const fetchMock = new FetchMock()
+
+        const client = createServerClient({
+            environmentApiKey: 'env-api-key',
+            fetchInstance: fetchMock.instance,
             api: featureBoardHostedService,
-            state: new FeatureState(
-                new MemoryFeatureStore([
-                    {
-                        featureKey: 'my-feature',
-                        audienceExceptions: [],
-                        defaultValue: 'service-default-value',
-                    },
-                ]),
-            ),
+            store: new MemoryFeatureStore([
+                {
+                    featureKey: 'my-feature',
+                    audienceExceptions: [],
+                    defaultValue: 'service-default-value',
+                },
+            ]),
             updateStrategy: { kind: 'manual' },
         })
+
+        const value = client
+            .request([])
+            .getFeatureValue('my-feature', 'default-value')
+
+        expect(client.initialised).toEqual(false)
+        expect(value).toEqual('service-default-value')
     })
 })

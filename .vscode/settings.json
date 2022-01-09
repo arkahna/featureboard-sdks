@@ -1,9 +1,9 @@
 {
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "jestrunner.jestPath": "node_modules/jest/bin/jest.js",
     "typescript.preferences.importModuleSpecifier": "project-relative",
     "editor.codeActionsOnSave": {
         "source.organizeImports": true
-    }
+    },
+    "cSpell.enabled": false
 }
