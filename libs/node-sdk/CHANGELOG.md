@@ -1,5 +1,19 @@
 # @featureboard/node-sdk
 
+## 0.12.0-beta.0
+
+### Minor Changes
+
+- [#5](https://github.com/featureboard/sdks/pull/5) [`52cb569`](https://github.com/featureboard/sdks/commit/52cb5696360475987b4d8a6cacd82e0b1e237849) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - BREAKING: Major update to SDKs
+
+  - 'live' support has been temporarily dropped
+  - Creating SDK instance is no longer async, this allows the SDK to be created with existing values and used immediately
+
+### Patch Changes
+
+- Updated dependencies [[`52cb569`](https://github.com/featureboard/sdks/commit/52cb5696360475987b4d8a6cacd82e0b1e237849)]:
+  - @featureboard/js-sdk@0.10.0-beta.0
+
 ## 0.11.0
 
 ### Minor Changes

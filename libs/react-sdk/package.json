@@ -1,6 +1,6 @@
 {
     "name": "@featureboard/react-sdk",
-    "version": "0.6.0",
+    "version": "0.6.1-beta.0",
     "main": "out-tsc/index.js",
     "license": "MIT",
     "sideEffects": false,
@@ -24,7 +24,7 @@
         "react": "^16.8 || ^17.0.0"
     },
     "dependencies": {
-        "@featureboard/js-sdk": "workspace:0.9.0",
+        "@featureboard/js-sdk": "workspace:0.10.0-beta.0",
         "debug": "^4.3.3"
     }
 }
