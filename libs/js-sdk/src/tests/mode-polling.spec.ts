@@ -36,9 +36,13 @@ describe('Polling update mode', () => {
             fetchInstance: fetchMock.instance,
         })
 
-        expect(
-            connection.client.getFeatureValue('my-feature', 'default-value'),
-        ).toEqual('service-default-value')
+        await connection.waitForInitialised()
+
+        const value = connection.client.getFeatureValue(
+            'my-feature',
+            'default-value',
+        )
+        expect(value).toEqual('service-default-value')
     })
 
     it('sets up interval correctly', async () => {
@@ -76,7 +80,7 @@ describe('Polling update mode', () => {
         expect(interval.clear).toBeCalledWith(handle)
     })
 
-    it('fetches updates when interval fires', async () => {
+    it.only('fetches updates when interval fires', async () => {
         const fetchMock = new FetchMock()
 
         const setMock = fn(() => {})
@@ -103,6 +107,7 @@ describe('Polling update mode', () => {
             updateStrategy: 'polling',
             fetchInstance: fetchMock.instance,
         })
+        await client.waitForInitialised()
 
         const newValues: EffectiveFeatureValue[] = [
             {
@@ -122,9 +127,11 @@ describe('Polling update mode', () => {
         const pollCallback = (setMock.mock.calls[0] as any)[0]
         await pollCallback()
 
-        expect(
-            client.client.getFeatureValue('my-feature', 'default-value'),
-        ).toEqual('new-service-default-value')
+        const value = client.client.getFeatureValue(
+            'my-feature',
+            'default-value',
+        )
+        expect(value).toEqual('new-service-default-value')
     })
 })
 
