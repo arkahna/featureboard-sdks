@@ -43,6 +43,7 @@ export function createLiveUpdateStrategy(
                                 feature.value,
                             )
                         })
+                        connectionState = 'connected'
                         break
                     }
 
@@ -69,12 +70,10 @@ export function createLiveUpdateStrategy(
             }
 
             await liveConnection.connect(handleMessage)
-            connectionState = 'connected'
         },
         get state() {
             return connectionState
         },
-
         async close() {
             const liveConnection = await liveConnectionAsync
 

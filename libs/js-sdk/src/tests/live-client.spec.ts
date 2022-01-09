@@ -143,7 +143,7 @@ describe('live client', () => {
         )
     })
 
-    it.only('uses value from live once it reconnects', async () => {
+    it('uses value from live once it reconnects', async () => {
         const fetchMock = new FetchMock()
         let serverConnectAttempts = 0
 
@@ -201,8 +201,7 @@ describe('live client', () => {
         // Wait for timeout of sdk
         await new Promise((resolve) => setTimeout(resolve, 50))
 
-        expect(client.client.getFeatureValue('my-feature', 'default-val')).toBe(
-            'from-reconnect',
-        )
+        const value = client.client.getFeatureValue('my-feature', 'default-val')
+        expect(value).toBe('from-reconnect')
     })
 })

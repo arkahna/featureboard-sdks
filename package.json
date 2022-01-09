@@ -45,6 +45,7 @@
         "@types/ws": "^8.2.2",
         "@typescript-eslint/eslint-plugin": "^5.8.1",
         "@typescript-eslint/parser": "^5.8.1",
+        "@vitejs/plugin-react": "^1.1.4",
         "@wanews/nx-typescript-project-references": "^0.14.3",
         "dotenv": "10.0.0",
         "eslint": "^8.6.0",

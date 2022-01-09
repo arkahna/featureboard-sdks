@@ -276,7 +276,7 @@ describe('http client', () => {
         expect(value).toEqual('service-default-value')
     })
 
-    it.only('Handles updating audience', async () => {
+    it('Handles updating audience', async () => {
         const fetchMock = new FetchMock()
         const values: EffectiveFeatureValue[] = [
             {
