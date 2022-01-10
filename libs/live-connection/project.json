@@ -21,7 +21,10 @@
         "package": {
             "executor": "@wanews/nx-typescript-project-references:package",
             "options": {
-                "main": "libs/live-connection/src/index.ts",
+                "entryPoints": [
+                    "libs/live-connection/src/server.ts",
+                    "libs/live-connection/src/browser.ts"
+                ],
                 "tsConfig": "libs/live-connection/tsconfig.json"
             }
         }
