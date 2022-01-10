@@ -134,7 +134,7 @@ describe('On request update mode', () => {
         })
 
         // Ensure response has expired
-        await new Promise((resolve) => setTimeout(resolve, 2))
+        await new Promise((resolve) => setTimeout(resolve, 10))
 
         const client = await connection.request([])
         expect(client.getFeatureValue('my-feature', 'default-value')).toEqual(
