@@ -1,5 +1,11 @@
 # @featureboard/node-sdk
 
+## 0.12.0-beta.1
+
+### Patch Changes
+
+- [`4eac877`](https://github.com/featureboard/sdks/commit/4eac877565295c87205b34d7b60219f6143462df) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Downgraded node-fetch to a version which supports commonjs
+
 ## 0.12.0-beta.0
 
 ### Minor Changes
