@@ -1,5 +1,8 @@
 declare const window: any
 export const interval = {
-    set: setInterval.bind(window),
-    clear: clearInterval.bind(window),
+    set: typeof window !== 'undefined' ? setInterval.bind(window) : setInterval,
+    clear:
+        typeof window !== 'undefined'
+            ? clearInterval.bind(window)
+            : clearInterval,
 }
