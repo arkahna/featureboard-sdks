@@ -23,7 +23,7 @@
     "dependencies": {
         "@featureboard/js-sdk": "workspace:0.10.0-beta.0",
         "debug": "^4.3.3",
-        "node-fetch": "^3.1.0",
+        "node-fetch": "^2.6.6",
         "promise-completion-source": "^1.0.0"
     }
 }
