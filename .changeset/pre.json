@@ -10,6 +10,7 @@
   },
   "changesets": [
     "lazy-paws-mix",
+    "red-chairs-push",
     "rich-pandas-sip",
     "shiny-apes-attack",
     "yellow-chicken-change"

@@ -1,5 +1,11 @@
 # @featureboard/js-sdk
 
+## 0.10.0-beta.1
+
+### Patch Changes
+
+- [`f8382cf`](https://github.com/featureboard/sdks/commit/f8382cf935ef68253db1056257efc8b00f50e447) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Fixed interval not being bound to window
+
 ## 0.10.0-beta.0
 
 ### Minor Changes
