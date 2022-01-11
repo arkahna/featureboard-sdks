@@ -11,6 +11,7 @@
   "changesets": [
     "lazy-paws-mix",
     "rich-pandas-sip",
-    "shiny-apes-attack"
+    "shiny-apes-attack",
+    "yellow-chicken-change"
   ]
 }

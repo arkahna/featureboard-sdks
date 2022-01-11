@@ -1,5 +1,11 @@
 # @featureboard/node-sdk
 
+## 0.12.0-beta.2
+
+### Patch Changes
+
+- [`a22067a`](https://github.com/featureboard/sdks/commit/a22067acd8b05b2230ac6fc024bb7badeeb77726) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Fixed incorrect url
+
 ## 0.12.0-beta.1
 
 ### Patch Changes
