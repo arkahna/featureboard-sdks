@@ -68,7 +68,7 @@ export function createServerClient({
         updateStrategy,
         environmentApiKey,
         api || featureBoardHostedService,
-        fetchInstance || nodeFetch,
+        fetchInstance || (nodeFetch as any),
     )
 
     updateStrategyImplementation
