@@ -2,7 +2,7 @@ import { createEnsureSingle, FetchSignature } from '@featureboard/js-sdk'
 import nodeFetch from 'node-fetch'
 import { fetchFeaturesConfigurationViaHttp } from '../utils/fetchFeaturesConfiguration'
 import { pollingUpdates } from '../utils/pollingUpdates'
-import { getAllEndpoint } from './getEffectiveEndpoint'
+import { getAllEndpoint } from './getAllEndpoint'
 import { AllConfigUpdateStrategy } from './update-strategies'
 
 export function createPollingUpdateStrategy(

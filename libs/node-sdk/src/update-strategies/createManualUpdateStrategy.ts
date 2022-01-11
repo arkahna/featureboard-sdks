@@ -1,6 +1,6 @@
 import { createEnsureSingle, FetchSignature } from '@featureboard/js-sdk'
 import { fetchFeaturesConfigurationViaHttp } from '../utils/fetchFeaturesConfiguration'
-import { getAllEndpoint } from './getEffectiveEndpoint'
+import { getAllEndpoint } from './getAllEndpoint'
 import { AllConfigUpdateStrategy } from './update-strategies'
 
 export function createManualUpdateStrategy(
