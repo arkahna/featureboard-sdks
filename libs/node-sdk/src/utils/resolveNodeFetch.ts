@@ -10,5 +10,5 @@ export async function resolveNodeFetch(
         return fetch
     }
     const nodeFetch = await import('node-fetch')
-    return nodeFetch.default
+    return nodeFetch.default as any
 }
