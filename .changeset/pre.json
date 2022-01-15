@@ -9,6 +9,7 @@
     "@featureboard/react-sdk": "0.6.0"
   },
   "changesets": [
+    "fresh-wombats-talk",
     "lazy-paws-mix",
     "red-chairs-push",
     "rich-pandas-sip",
