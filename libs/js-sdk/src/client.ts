@@ -16,7 +16,7 @@ import { FetchSignature } from './utils/FetchSignature'
 
 // We are not including the DOM types so we don't accidently access globals,
 // this allows us to access the global fetch
-declare const fetch: any
+declare const window: any
 
 export function createBrowserClient({
     initialValues,
@@ -65,11 +65,11 @@ export function createBrowserClient({
         environmentApiKey,
         api || featureBoardHostedService,
         audiences,
-        fetchInstance ?? typeof fetch !== 'undefined'
-            ? fetch
+        fetchInstance ?? typeof window !== 'undefined'
+            ? window.fetch
             : async () => {
                   throw new Error(
-                      'Fetch not available, pass fetchInstance createBrowserClient or ensure fetch global is available',
+                      'Fetch not available, pass fetchInstance createBrowserClient or ensure window.fetch global is available',
                   )
               },
     )
