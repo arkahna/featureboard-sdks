@@ -1,5 +1,14 @@
 # @featureboard/react-sdk
 
+## 0.6.1-beta.2
+
+### Patch Changes
+
+- [`1f626a5`](https://github.com/featureboard/sdks/commit/1f626a5f75214f0dc704338a45da3d14eb7ccedd) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Better failure when fetch not defined globally
+
+- Updated dependencies [[`1f626a5`](https://github.com/featureboard/sdks/commit/1f626a5f75214f0dc704338a45da3d14eb7ccedd)]:
+  - @featureboard/js-sdk@0.10.0-beta.2
+
 ## 0.6.1-beta.1
 
 ### Patch Changes
