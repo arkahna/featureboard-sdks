@@ -1,5 +1,11 @@
 # @featureboard/contracts
 
+## 0.1.1-beta.0
+
+### Patch Changes
+
+- [`1992790`](https://github.com/featureboard/sdks/commit/1992790d52454f1bba2b60dec4fac089abab7f54) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Fixed exports
+
 ## 0.1.0
 
 ### Minor Changes

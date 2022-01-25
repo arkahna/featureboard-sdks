@@ -1,5 +1,14 @@
 # @featureboard/react-sdk
 
+## 0.6.1-beta.4
+
+### Patch Changes
+
+- [`1992790`](https://github.com/featureboard/sdks/commit/1992790d52454f1bba2b60dec4fac089abab7f54) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Fixed exports
+
+- Updated dependencies [[`1992790`](https://github.com/featureboard/sdks/commit/1992790d52454f1bba2b60dec4fac089abab7f54)]:
+  - @featureboard/js-sdk@0.10.0-beta.4
+
 ## 0.6.1-beta.3
 
 ### Patch Changes
