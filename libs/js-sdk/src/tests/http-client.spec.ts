@@ -191,6 +191,10 @@ describe('http client', () => {
                 featureKey: 'my-feature',
                 value: 'service-default-value',
             },
+            {
+                featureKey: 'my-feature-2',
+                value: 'service-default-value',
+            },
         ]
         const lastModified = new Date().toISOString()
         fetchMock.matchOnce(
@@ -239,6 +243,12 @@ describe('http client', () => {
             'default-value',
         )
         expect(value).toEqual('new-service-default-value')
+
+        const value2 = httpClient.client.getFeatureValue(
+            'my-feature-2',
+            'default-value',
+        )
+        expect(value2).toEqual('default-value')
     })
 
     it('can start with last known good config', async () => {

@@ -32,10 +32,15 @@ export async function fetchFeaturesConfigurationViaHttp(
     }
 
     const allValues: EffectiveFeatureValue[] = await response.json()
+    const existing = { ...state.store.all() }
 
     for (const featureValue of allValues) {
         state.updateFeatureValue(featureValue.featureKey, featureValue.value)
+        delete existing[featureValue.featureKey]
     }
+    Object.keys(existing).forEach((unavailableFeature) => {
+        state.updateFeatureValue(unavailableFeature, undefined)
+    })
 
     return response.headers.get('last-modified') || undefined
 }
