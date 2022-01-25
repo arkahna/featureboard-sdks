@@ -1,5 +1,12 @@
 # @featureboard/node-sdk
 
+## 0.12.0-beta.5
+
+### Patch Changes
+
+- Updated dependencies [[`84398cb`](https://github.com/featureboard/sdks/commit/84398cb8aa19b371cf2a6f68776b211c3ec4c0fb)]:
+  - @featureboard/js-sdk@0.10.0-beta.3
+
 ## 0.12.0-beta.4
 
 ### Patch Changes
