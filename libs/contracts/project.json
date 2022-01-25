@@ -22,7 +22,8 @@
             "executor": "@wanews/nx-typescript-project-references:package",
             "options": {
                 "main": "libs/contracts/src/index.ts",
-                "tsConfig": "libs/contracts/tsconfig.json"
+                "tsConfig": "libs/contracts/tsconfig.json",
+                "legacyOutput": true
             }
         }
     }

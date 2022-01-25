@@ -25,7 +25,8 @@
                 "tsConfig": "libs/node-sdk/tsconfig.json",
                 "external": [
                     "node-fetch"
-                ]
+                ],
+                "legacyOutput": true
             }
         }
     }

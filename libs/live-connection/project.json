@@ -25,7 +25,8 @@
                     "libs/live-connection/src/server.ts",
                     "libs/live-connection/src/browser.ts"
                 ],
-                "tsConfig": "libs/live-connection/tsconfig.json"
+                "tsConfig": "libs/live-connection/tsconfig.json",
+                "legacyOutput": true
             }
         }
     }
