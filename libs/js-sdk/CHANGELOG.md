@@ -1,5 +1,17 @@
 # @featureboard/js-sdk
 
+## 0.10.0-beta.5
+
+### Minor Changes
+
+- [`fd8731d`](https://github.com/featureboard/sdks/commit/fd8731d62576a1f1ddbb9b810570dfedad1de39b) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Ignore effective values for stale audience (when current audiences change while update request is in flight)
+
+* [`fd8731d`](https://github.com/featureboard/sdks/commit/fd8731d62576a1f1ddbb9b810570dfedad1de39b) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Logging updates
+
+### Patch Changes
+
+- [`fd8731d`](https://github.com/featureboard/sdks/commit/fd8731d62576a1f1ddbb9b810570dfedad1de39b) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Handle promise rejection on failed poll update
+
 ## 0.10.0-beta.4
 
 ### Patch Changes

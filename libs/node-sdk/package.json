@@ -1,6 +1,6 @@
 {
     "name": "@featureboard/node-sdk",
-    "version": "0.12.0-beta.6",
+    "version": "0.12.0-beta.7",
     "main": "out-tsc/index.js",
     "license": "MIT",
     "sideEffects": false,
@@ -21,7 +21,7 @@
         "module": "dist/esm/index.js"
     },
     "dependencies": {
-        "@featureboard/js-sdk": "workspace:0.10.0-beta.4",
+        "@featureboard/js-sdk": "workspace:0.10.0-beta.5",
         "debug": "^4.3.3",
         "node-fetch": "^2.6.6",
         "promise-completion-source": "^1.0.0"

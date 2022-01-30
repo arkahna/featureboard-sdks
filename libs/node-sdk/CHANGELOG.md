@@ -1,5 +1,14 @@
 # @featureboard/node-sdk
 
+## 0.12.0-beta.7
+
+### Patch Changes
+
+- [`fd8731d`](https://github.com/featureboard/sdks/commit/fd8731d62576a1f1ddbb9b810570dfedad1de39b) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Handle promise rejection on failed poll update
+
+- Updated dependencies [[`fd8731d`](https://github.com/featureboard/sdks/commit/fd8731d62576a1f1ddbb9b810570dfedad1de39b), [`fd8731d`](https://github.com/featureboard/sdks/commit/fd8731d62576a1f1ddbb9b810570dfedad1de39b), [`fd8731d`](https://github.com/featureboard/sdks/commit/fd8731d62576a1f1ddbb9b810570dfedad1de39b)]:
+  - @featureboard/js-sdk@0.10.0-beta.5
+
 ## 0.12.0-beta.6
 
 ### Patch Changes

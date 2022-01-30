@@ -1,5 +1,12 @@
 # @featureboard/react-sdk
 
+## 0.6.1-beta.5
+
+### Patch Changes
+
+- Updated dependencies [[`fd8731d`](https://github.com/featureboard/sdks/commit/fd8731d62576a1f1ddbb9b810570dfedad1de39b), [`fd8731d`](https://github.com/featureboard/sdks/commit/fd8731d62576a1f1ddbb9b810570dfedad1de39b), [`fd8731d`](https://github.com/featureboard/sdks/commit/fd8731d62576a1f1ddbb9b810570dfedad1de39b)]:
+  - @featureboard/js-sdk@0.10.0-beta.5
+
 ## 0.6.1-beta.4
 
 ### Patch Changes
