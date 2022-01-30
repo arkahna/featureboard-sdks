@@ -1,8 +1,10 @@
 import { createEnsureSingle } from '../ensure-single'
 import { fetchFeaturesConfigurationViaHttp } from '../utils/fetchFeaturesConfiguration'
 import { FetchSignature } from '../utils/FetchSignature'
-import { getEffectiveEndpoint } from './getEffectiveEndpoint'
 import { EffectiveConfigUpdateStrategy } from './update-strategies'
+import { updatesLog } from './updates-log'
+
+export const manualUpdatesDebugLog = updatesLog.extend('manual')
 
 export function createManualUpdateStrategy(
     environmentApiKey: string,
@@ -20,10 +22,12 @@ export function createManualUpdateStrategy(
             fetchUpdatesSingle = createEnsureSingle(async () => {
                 lastModified = await fetchFeaturesConfigurationViaHttp(
                     fetchInstance,
-                    getEffectiveEndpoint(httpEndpoint, currentAudiences),
+                    httpEndpoint,
+                    currentAudiences,
                     environmentApiKey,
                     state,
                     lastModified,
+                    () => currentAudiences,
                 )
             })
 
@@ -45,6 +49,10 @@ export function createManualUpdateStrategy(
         },
         updateAudiences(state, updatedAudiences) {
             currentAudiences = updatedAudiences
+            manualUpdatesDebugLog(
+                'Audiences updated (%o), getting new effective values',
+                updatedAudiences,
+            )
             return this.connect(state)
         },
     }

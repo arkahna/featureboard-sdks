@@ -75,15 +75,28 @@ export function createBrowserClient({
                   }),
     )
 
+    debugLog('SDK connecting in background (%o)', {
+        audiences,
+    })
     updateStrategyImplementation
         .connect(state)
         .then(() => {
             if (!initialisedPromise.completed) {
+                debugLog('SDK connected (%o)', {
+                    audiences,
+                })
                 initialisedPromise.resolve(true)
             }
         })
         .catch((err) => {
             if (!initialisedPromise.completed) {
+                debugLog(
+                    'SDK failed to connect (%o): %o',
+                    {
+                        audiences,
+                    },
+                    err,
+                )
                 initialisedPromise.reject(err)
             }
         })
@@ -104,6 +117,9 @@ export function createBrowserClient({
             })
         },
         updateAudiences(updatedAudiences: string[]) {
+            debugLog('Updating audiences: %o', {
+                updatedAudiences,
+            })
             return updateStrategyImplementation.updateAudiences(
                 state,
                 updatedAudiences,

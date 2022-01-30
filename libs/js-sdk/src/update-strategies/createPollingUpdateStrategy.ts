@@ -2,8 +2,10 @@ import { createEnsureSingle } from '../ensure-single'
 import { fetchFeaturesConfigurationViaHttp } from '../utils/fetchFeaturesConfiguration'
 import { FetchSignature } from '../utils/FetchSignature'
 import { pollingUpdates } from '../utils/pollingUpdates'
-import { getEffectiveEndpoint } from './getEffectiveEndpoint'
 import { EffectiveConfigUpdateStrategy } from './update-strategies'
+import { updatesLog } from './updates-log'
+
+export const pollingUpdatesDebugLog = updatesLog.extend('polling')
 
 export function createPollingUpdateStrategy(
     environmentApiKey: string,
@@ -21,17 +23,14 @@ export function createPollingUpdateStrategy(
         async connect(state) {
             // Ensure that we don't trigger another request while one is in flight
             fetchUpdatesSingle = createEnsureSingle(async () => {
-                const effectiveEndpoint = getEffectiveEndpoint(
-                    httpEndpoint,
-                    currentAudiences,
-                )
-
                 lastModified = await fetchFeaturesConfigurationViaHttp(
                     fetchInstance,
-                    effectiveEndpoint,
+                    httpEndpoint,
+                    currentAudiences,
                     environmentApiKey,
                     state,
                     lastModified,
+                    () => currentAudiences,
                 )
             })
 
@@ -40,7 +39,12 @@ export function createPollingUpdateStrategy(
             }
             stopPolling = pollingUpdates(() => {
                 if (fetchUpdatesSingle) {
-                    return fetchUpdatesSingle()
+                    pollingUpdatesDebugLog(
+                        'Polling for updates (%o)',
+                        currentAudiences,
+                    )
+                    // Catch errors here to ensure no unhandled promise rejections after a poll
+                    return fetchUpdatesSingle().catch(() => {})
                 }
             }, intervalMs)
 
@@ -67,6 +71,10 @@ export function createPollingUpdateStrategy(
         },
         updateAudiences(state, updatedAudiences) {
             currentAudiences = updatedAudiences
+            pollingUpdatesDebugLog(
+                'Audiences updated (%o), getting new effective values',
+                updatedAudiences,
+            )
             return this.connect(state)
         },
     }

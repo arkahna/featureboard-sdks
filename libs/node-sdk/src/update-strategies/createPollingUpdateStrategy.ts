@@ -34,7 +34,8 @@ export function createPollingUpdateStrategy(
             }
             stopPolling = pollingUpdates(() => {
                 if (fetchUpdatesSingle) {
-                    return fetchUpdatesSingle()
+                    // Catch errors here to ensure no unhandled promise rejections after a poll
+                    return fetchUpdatesSingle().catch(() => {})
                 }
             }, intervalMs)
 

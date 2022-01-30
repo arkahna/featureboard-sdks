@@ -2,6 +2,9 @@ import { NotificationType } from '@featureboard/contracts'
 import type { LiveOptions } from '@featureboard/live-connection'
 import { EffectiveFeaturesState } from '../effective-feature-state'
 import { EffectiveConfigUpdateStrategy } from './update-strategies'
+import { updatesLog } from './updates-log'
+
+export const liveDebugLog = updatesLog.extend('live')
 
 export function createLiveUpdateStrategy(
     environmentApiKey: string,
