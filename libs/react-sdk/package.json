@@ -21,10 +21,10 @@
         "module": "dist/esm/index.js"
     },
     "peerDependencies": {
-        "react": "^16.8 || ^17.0.0"
+        "react": "^16.8 || ^17.0.0 || ^18.0.0"
     },
     "dependencies": {
         "@featureboard/js-sdk": "workspace:0.10.0-beta.5",
-        "debug": "^4.3.3"
+        "debug": "^4.3.4"
     }
 }

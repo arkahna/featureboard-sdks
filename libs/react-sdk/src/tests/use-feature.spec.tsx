@@ -18,7 +18,7 @@ describe('useFeature hook', () => {
         const { result } = renderHook(
             () => useFeature('feature-key', 'default-val'),
             {
-                wrapper: ({ children }) => (
+                wrapper: ({ children }: any) => (
                     <FeatureBoardProvider client={client}>
                         {children}
                     </FeatureBoardProvider>
@@ -46,7 +46,7 @@ describe('useFeature hook', () => {
         const { result } = renderHook(
             () => useFeature('feature-key', 'default-val'),
             {
-                wrapper: ({ children }) => (
+                wrapper: ({ children }: any) => (
                     <FeatureBoardProvider client={client}>
                         {children}
                     </FeatureBoardProvider>

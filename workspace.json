@@ -1,10 +1,10 @@
 {
-    "version": 2,
-    "projects": {
-        "contracts": "libs/contracts",
-        "js-sdk": "libs/js-sdk",
-        "live-connection": "libs/live-connection",
-        "node-sdk": "libs/node-sdk",
-        "react-sdk": "libs/react-sdk"
-    }
+  "version": 2,
+  "projects": {
+    "contracts": "libs/contracts",
+    "js-sdk": "libs/js-sdk",
+    "live-connection": "libs/live-connection",
+    "node-sdk": "libs/node-sdk",
+    "react-sdk": "libs/react-sdk"
+  }
 }

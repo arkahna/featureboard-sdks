@@ -1,5 +1,5 @@
 import { EffectiveFeatureValue } from '@featureboard/contracts'
-import { beforeEach, describe, expect, fn, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createBrowserClient } from '../client'
 import { interval } from '../interval'
 import { FetchMock } from './fetch-mock'
@@ -13,7 +13,7 @@ describe('Polling update mode', () => {
     it('fetches initial values', async () => {
         const fetchMock = new FetchMock()
 
-        interval.set = fn(() => {}) as any
+        interval.set = vi.fn(() => {}) as any
         const values: EffectiveFeatureValue[] = [
             {
                 featureKey: 'my-feature',
@@ -48,10 +48,10 @@ describe('Polling update mode', () => {
     it('sets up interval correctly', async () => {
         const fetchMock = new FetchMock()
         const handle = {}
-        interval.set = fn(() => {
+        interval.set = vi.fn(() => {
             return handle
         }) as any
-        interval.clear = fn(() => {})
+        interval.clear = vi.fn(() => {})
 
         const values: EffectiveFeatureValue[] = [
             {
@@ -83,7 +83,7 @@ describe('Polling update mode', () => {
     it('fetches updates when interval fires', async () => {
         const fetchMock = new FetchMock()
 
-        const setMock = fn(() => {})
+        const setMock = vi.fn(() => {})
         interval.set = setMock as any
 
         const values: EffectiveFeatureValue[] = [

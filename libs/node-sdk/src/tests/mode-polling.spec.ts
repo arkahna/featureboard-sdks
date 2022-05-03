@@ -1,6 +1,6 @@
 import { FeatureConfiguration } from '@featureboard/contracts'
 import { FetchMock } from '@featureboard/js-sdk/src/tests/fetch-mock'
-import { beforeEach, describe, expect, fn, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { interval } from '../interval'
 import { createServerClient } from '../server-client'
 
@@ -12,7 +12,7 @@ beforeEach(() => {
 describe('Polling update mode', () => {
     it('fetches initial values', async () => {
         const fetchMock = new FetchMock()
-        interval.set = fn(() => {}) as any
+        interval.set = vi.fn(() => {}) as any
         const values: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
@@ -41,10 +41,10 @@ describe('Polling update mode', () => {
     it('sets up interval correctly', async () => {
         const fetchMock = new FetchMock()
         const handle = {}
-        interval.set = fn(() => {
+        interval.set = vi.fn(() => {
             return handle
         }) as any
-        interval.clear = fn(() => {})
+        interval.clear = vi.fn(() => {})
 
         const values: FeatureConfiguration[] = [
             {
@@ -71,7 +71,7 @@ describe('Polling update mode', () => {
 
     it.only('fetches updates when interval fires', async () => {
         const fetchMock = new FetchMock()
-        const setMock = fn(() => {})
+        const setMock = vi.fn(() => {})
         interval.set = setMock as any
 
         const values: FeatureConfiguration[] = [
