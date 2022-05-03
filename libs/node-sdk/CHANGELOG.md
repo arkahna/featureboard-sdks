@@ -1,5 +1,16 @@
 # @featureboard/node-sdk
 
+## 0.12.0-beta.8
+
+### Minor Changes
+
+- [`acc3ac1`](https://github.com/featureboard/sdks/commit/acc3ac138925f876e5e63079f9e7802f8b85e2f4) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Upgrade dependencies
+
+### Patch Changes
+
+- Updated dependencies [[`acc3ac1`](https://github.com/featureboard/sdks/commit/acc3ac138925f876e5e63079f9e7802f8b85e2f4)]:
+  - @featureboard/js-sdk@0.10.0-beta.6
+
 ## 0.12.0-beta.7
 
 ### Patch Changes

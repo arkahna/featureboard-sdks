@@ -1,5 +1,11 @@
 # @featureboard/js-sdk
 
+## 0.10.0-beta.6
+
+### Minor Changes
+
+- [`acc3ac1`](https://github.com/featureboard/sdks/commit/acc3ac138925f876e5e63079f9e7802f8b85e2f4) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Upgrade dependencies
+
 ## 0.10.0-beta.5
 
 ### Minor Changes

@@ -108,7 +108,7 @@ importers:
 
   libs/node-sdk:
     specifiers:
-      '@featureboard/js-sdk': workspace:0.10.0-beta.5
+      '@featureboard/js-sdk': workspace:0.10.0-beta.6
       debug: ^4.3.4
       node-fetch: ^2.6.7
       promise-completion-source: ^1.0.0
@@ -120,7 +120,7 @@ importers:
 
   libs/react-sdk:
     specifiers:
-      '@featureboard/js-sdk': workspace:0.10.0-beta.5
+      '@featureboard/js-sdk': workspace:0.10.0-beta.6
       debug: ^4.3.4
     dependencies:
       '@featureboard/js-sdk': link:../js-sdk
