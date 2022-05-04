@@ -5,7 +5,9 @@
             "type": "typescript",
             "tsconfig": "tsconfig.json",
             "option": "watch",
-            "problemMatcher": ["$tsc-watch"],
+            "problemMatcher": [
+                "$tsc-watch"
+            ],
             "group": {
                 "isDefault": true,
                 "kind": "build"
@@ -15,8 +17,12 @@
         },
         {
             "type": "process",
-            "command": "pnpx",
-            "args": ["vitest", "run", "${relativeFile}"],
+            "command": "pnpm",
+            "args": [
+                "vitest",
+                "run",
+                "${relativeFile}"
+            ],
             "group": "test",
             "isTestCommand": true,
             "options": {
@@ -29,8 +35,11 @@
         },
         {
             "type": "process",
-            "command": "pnpx",
-            "args": ["vitest", "${relativeFile}"],
+            "command": "pnpm",
+            "args": [
+                "vitest",
+                "${relativeFile}"
+            ],
             "group": "test",
             "isTestCommand": true,
             "options": {

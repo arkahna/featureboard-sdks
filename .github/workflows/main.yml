@@ -62,7 +62,7 @@ jobs:
           git push
 
       - name: Type check
-        run: pnpx tsc -b
+        run: pnpm tsc -b
 
       - name: Lint types and code
         run: pnpm run lint
