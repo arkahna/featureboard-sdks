@@ -1,14 +1,11 @@
 {
-    "root": "libs/live-connection",
     "projectType": "library",
     "sourceRoot": "libs/live-connection/src",
     "targets": {
         "lint": {
             "executor": "@nrwl/linter:eslint",
             "options": {
-                "lintFilePatterns": [
-                    "libs/live-connection/**/*.ts"
-                ]
+                "lintFilePatterns": ["libs/live-connection/**/*.ts"]
             }
         },
         "test": {

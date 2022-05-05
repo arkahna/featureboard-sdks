@@ -1,14 +1,11 @@
 {
-    "root": "libs/react-sdk",
     "projectType": "library",
     "sourceRoot": "libs/react-sdk/src",
     "targets": {
         "lint": {
             "executor": "@nrwl/linter:eslint",
             "options": {
-                "lintFilePatterns": [
-                    "libs/react-sdk/**/*.ts"
-                ]
+                "lintFilePatterns": ["libs/react-sdk/**/*.ts"]
             }
         },
         "test": {

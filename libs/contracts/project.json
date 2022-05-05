@@ -1,14 +1,11 @@
 {
-    "root": "libs/contracts",
     "projectType": "library",
     "sourceRoot": "libs/contracts/src",
     "targets": {
         "lint": {
             "executor": "@nrwl/linter:eslint",
             "options": {
-                "lintFilePatterns": [
-                    "libs/contracts/**/*.ts"
-                ]
+                "lintFilePatterns": ["libs/contracts/**/*.ts"]
             }
         },
         "test": {

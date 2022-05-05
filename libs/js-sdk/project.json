@@ -1,14 +1,11 @@
 {
-    "root": "libs/js-sdk",
     "projectType": "library",
     "sourceRoot": "libs/js-sdk/src",
     "targets": {
         "lint": {
             "executor": "@nrwl/linter:eslint",
             "options": {
-                "lintFilePatterns": [
-                    "libs/js-sdk/**/*.ts"
-                ]
+                "lintFilePatterns": ["libs/js-sdk/**/*.ts"]
             }
         },
         "test": {

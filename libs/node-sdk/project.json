@@ -1,14 +1,11 @@
 {
-    "root": "libs/node-sdk",
     "projectType": "library",
     "sourceRoot": "libs/node-sdk/src",
     "targets": {
         "lint": {
             "executor": "@nrwl/linter:eslint",
             "options": {
-                "lintFilePatterns": [
-                    "libs/node-sdk/**/*.ts"
-                ]
+                "lintFilePatterns": ["libs/node-sdk/**/*.ts"]
             }
         },
         "test": {
@@ -23,9 +20,7 @@
             "options": {
                 "main": "libs/node-sdk/src/index.ts",
                 "tsConfig": "libs/node-sdk/tsconfig.json",
-                "external": [
-                    "node-fetch"
-                ],
+                "external": ["node-fetch"],
                 "legacyOutput": true
             }
         }
