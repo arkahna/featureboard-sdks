@@ -69,7 +69,7 @@ describe('Polling update mode', () => {
         expect(interval.clear).toBeCalledWith(handle)
     })
 
-    it.only('fetches updates when interval fires', async () => {
+    it('fetches updates when interval fires', async () => {
         const fetchMock = new FetchMock()
         const setMock = vi.fn(() => {})
         interval.set = setMock as any
