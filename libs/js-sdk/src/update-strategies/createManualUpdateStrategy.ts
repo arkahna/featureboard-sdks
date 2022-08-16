@@ -1,6 +1,5 @@
 import { createEnsureSingle } from '../ensure-single'
 import { fetchFeaturesConfigurationViaHttp } from '../utils/fetchFeaturesConfiguration'
-import { FetchSignature } from '../utils/FetchSignature'
 import { EffectiveConfigUpdateStrategy } from './update-strategies'
 import { updatesLog } from './updates-log'
 
@@ -10,7 +9,6 @@ export function createManualUpdateStrategy(
     environmentApiKey: string,
     httpEndpoint: string,
     audiences: string[],
-    fetchInstance: FetchSignature,
 ): EffectiveConfigUpdateStrategy {
     let lastModified: undefined | string
     let fetchUpdatesSingle: undefined | (() => Promise<void>)
@@ -21,7 +19,6 @@ export function createManualUpdateStrategy(
             // Ensure that we don't trigger another request while one is in flight
             fetchUpdatesSingle = createEnsureSingle(async () => {
                 lastModified = await fetchFeaturesConfigurationViaHttp(
-                    fetchInstance,
                     httpEndpoint,
                     currentAudiences,
                     environmentApiKey,

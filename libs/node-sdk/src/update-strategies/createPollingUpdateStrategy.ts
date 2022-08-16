@@ -1,5 +1,4 @@
-import { createEnsureSingle, FetchSignature } from '@featureboard/js-sdk'
-import nodeFetch from 'node-fetch'
+import { createEnsureSingle } from '@featureboard/js-sdk'
 import { fetchFeaturesConfigurationViaHttp } from '../utils/fetchFeaturesConfiguration'
 import { pollingUpdates } from '../utils/pollingUpdates'
 import { getAllEndpoint } from './getAllEndpoint'
@@ -9,7 +8,6 @@ export function createPollingUpdateStrategy(
     environmentApiKey: string,
     httpEndpoint: string,
     intervalMs: number,
-    fetchInstance: FetchSignature,
 ): AllConfigUpdateStrategy {
     let stopPolling: undefined | (() => void)
     let lastModified: undefined | string
@@ -21,7 +19,6 @@ export function createPollingUpdateStrategy(
             fetchUpdatesSingle = createEnsureSingle(async () => {
                 const allEndpoint = getAllEndpoint(httpEndpoint)
                 lastModified = await fetchFeaturesConfigurationViaHttp(
-                    fetchInstance || (nodeFetch as any),
                     allEndpoint,
                     environmentApiKey,
                     state,

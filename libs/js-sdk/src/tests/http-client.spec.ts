@@ -1,109 +1,92 @@
 import { EffectiveFeatureValue } from '@featureboard/contracts'
+import { rest } from 'msw'
+import { setupServer } from 'msw/node'
 import { describe, expect, it } from 'vitest'
 import { createBrowserClient } from '../client'
 import { MemoryEffectiveFeatureStore } from '../effective-feature-store'
 import { featureBoardHostedService } from '../featureboard-service-urls'
-import { FetchMock } from './fetch-mock'
 
 describe('http client', () => {
     it('can wait for initialisation', async () => {
-        const fetchMock = new FetchMock()
-
         const values: EffectiveFeatureValue[] = [
             {
                 featureKey: 'my-feature',
                 value: 'service-default-value',
             },
         ]
-        fetchMock.matchOnce(
-            'get',
-            'https://client.featureboard.app/effective?audiences=',
-            {
-                status: 200,
-                body: JSON.stringify(values),
-            },
+        const server = setupServer(
+            rest.get(
+                'https://client.featureboard.app/effective',
+                (_req, res, ctx) => res(ctx.json(values), ctx.status(200)),
+            ),
         )
+        server.listen()
 
-        const httpClient = createBrowserClient({
-            environmentApiKey: 'env-api-key',
-            audiences: [],
-            fetchInstance: fetchMock.instance,
-            api: featureBoardHostedService,
-            updateStrategy: { kind: 'manual' },
-        })
+        try {
+            const httpClient = createBrowserClient({
+                environmentApiKey: 'env-api-key',
+                audiences: [],
+                api: featureBoardHostedService,
+                updateStrategy: { kind: 'manual' },
+            })
 
-        const value = httpClient.client.getFeatureValue(
-            'my-feature',
-            'default-value',
-        )
+            const value = httpClient.client.getFeatureValue(
+                'my-feature',
+                'default-value',
+            )
 
-        expect(httpClient.initialised).toEqual(false)
-        expect(value).toEqual('default-value')
+            expect(httpClient.initialised).toEqual(false)
+            expect(value).toEqual('default-value')
+        } finally {
+            server.resetHandlers()
+            server.close()
+        }
     })
 
     it('can wait for initialisation', async () => {
-        const fetchMock = new FetchMock()
-
         const values: EffectiveFeatureValue[] = [
             {
                 featureKey: 'my-feature',
                 value: 'service-default-value',
             },
         ]
-        fetchMock.matchOnce(
-            'get',
-            'https://client.featureboard.app/effective?audiences=',
-            {
-                status: 200,
-                body: JSON.stringify(values),
-            },
+        const server = setupServer(
+            rest.get(
+                'https://client.featureboard.app/effective',
+                (_req, res, ctx) => res(ctx.json(values), ctx.status(200)),
+            ),
         )
+        server.listen()
 
-        const httpClient = createBrowserClient({
-            environmentApiKey: 'env-api-key',
-            audiences: [],
-            fetchInstance: fetchMock.instance,
-            api: featureBoardHostedService,
-            updateStrategy: { kind: 'manual' },
-        })
+        try {
+            const httpClient = createBrowserClient({
+                environmentApiKey: 'env-api-key',
+                audiences: [],
+                api: featureBoardHostedService,
+                updateStrategy: { kind: 'manual' },
+            })
 
-        await httpClient.waitForInitialised()
+            await httpClient.waitForInitialised()
 
-        const value = httpClient.client.getFeatureValue(
-            'my-feature',
-            'default-value',
-        )
-        expect(httpClient.initialised).toEqual(true)
-        expect(value).toEqual('service-default-value')
+            const value = httpClient.client.getFeatureValue(
+                'my-feature',
+                'default-value',
+            )
+            expect(httpClient.initialised).toEqual(true)
+            expect(value).toEqual('service-default-value')
+        } finally {
+            server.resetHandlers()
+            server.close()
+        }
     })
 
     it('can trigger manual update', async () => {
-        const fetchMock = new FetchMock()
-
         const values: EffectiveFeatureValue[] = [
             {
                 featureKey: 'my-feature',
                 value: 'service-default-value',
             },
         ]
-        fetchMock.matchOnce(
-            'get',
-            'https://client.featureboard.app/effective?audiences=',
-            {
-                status: 200,
-                body: JSON.stringify(values),
-            },
-        )
-
-        const httpClient = createBrowserClient({
-            environmentApiKey: 'env-api-key',
-            audiences: [],
-            fetchInstance: fetchMock.instance,
-            api: featureBoardHostedService,
-            updateStrategy: { kind: 'manual' },
-        })
-
-        await httpClient.waitForInitialised()
 
         const newValues: EffectiveFeatureValue[] = [
             {
@@ -111,27 +94,43 @@ describe('http client', () => {
                 value: 'new-service-default-value',
             },
         ]
-        fetchMock.matchOnce(
-            'get',
-            'https://client.featureboard.app/effective?audiences=',
-            {
-                status: 200,
-                body: JSON.stringify(newValues),
-            },
+        const server = setupServer(
+            rest.get(
+                'https://client.featureboard.app/effective',
+                (_req, res, ctx) => res.once(ctx.json(values), ctx.status(200)),
+            ),
+            rest.get(
+                'https://client.featureboard.app/effective',
+                (_req, res, ctx) =>
+                    res.once(ctx.json(newValues), ctx.status(200)),
+            ),
         )
+        server.listen()
 
-        await httpClient.updateFeatures()
+        try {
+            const httpClient = createBrowserClient({
+                environmentApiKey: 'env-api-key',
+                audiences: [],
+                api: featureBoardHostedService,
+                updateStrategy: { kind: 'manual' },
+            })
 
-        const value = httpClient.client.getFeatureValue(
-            'my-feature',
-            'default-value',
-        )
-        expect(value).toEqual('new-service-default-value')
+            await httpClient.waitForInitialised()
+            await httpClient.updateFeatures()
+
+            const value = httpClient.client.getFeatureValue(
+                'my-feature',
+                'default-value',
+            )
+            expect(value).toEqual('new-service-default-value')
+        } finally {
+            server.resetHandlers()
+            server.close()
+        }
     })
 
     // Below tests are testing behaviour around https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/If-Modified-Since
     it('Attaches last modified header to update requests', async () => {
-        const fetchMock = new FetchMock()
         const values: EffectiveFeatureValue[] = [
             {
                 featureKey: 'my-feature',
@@ -139,53 +138,52 @@ describe('http client', () => {
             },
         ]
         const lastModified = new Date().toISOString()
-        fetchMock.matchOnce(
-            'get',
-            'https://client.featureboard.app/effective?audiences=',
-            {
-                status: 200,
-                body: JSON.stringify(values),
-                headers: {
-                    'Last-Modified': lastModified,
-                },
-            },
-        )
-
-        const httpClient = createBrowserClient({
-            environmentApiKey: 'env-api-key',
-            audiences: [],
-            fetchInstance: fetchMock.instance,
-            api: featureBoardHostedService,
-            updateStrategy: { kind: 'manual' },
-        })
-        await httpClient.waitForInitialised()
-
         let matched = false
-        fetchMock.matchOnce((path, init) => {
-            if (
-                init?.method?.toLowerCase() === 'get' &&
-                path ===
-                    'https://client.featureboard.app/effective?audiences=' &&
-                init.headers &&
-                init.headers['if-modified-since'] === lastModified
-            ) {
-                matched = true
-                return {
-                    status: 304,
-                }
-            }
+        const server = setupServer(
+            rest.get(
+                'https://client.featureboard.app/effective',
+                (_req, res, ctx) =>
+                    res.once(
+                        ctx.json(values),
+                        ctx.status(200),
+                        ctx.set({
+                            'Last-Modified': lastModified,
+                        }),
+                    ),
+            ),
+            rest.get(
+                'https://client.featureboard.app/effective',
+                (req, res, ctx) => {
+                    if (req.headers.get('if-modified-since') === lastModified) {
+                        matched = true
+                        return res.once(ctx.status(304))
+                    }
 
-            console.warn('Request Mismatch', path, init, lastModified)
-            return undefined
-        })
+                    console.warn('Request Mismatch', req.url, lastModified)
+                    return res()
+                },
+            ),
+        )
+        server.listen()
 
-        await httpClient.updateFeatures()
+        try {
+            const httpClient = createBrowserClient({
+                environmentApiKey: 'env-api-key',
+                audiences: [],
+                api: featureBoardHostedService,
+                updateStrategy: { kind: 'manual' },
+            })
+            await httpClient.waitForInitialised()
+            await httpClient.updateFeatures()
 
-        expect(matched).toEqual(true)
+            expect(matched).toEqual(true)
+        } finally {
+            server.resetHandlers()
+            server.close()
+        }
     })
 
     it('Handles updates from server', async () => {
-        const fetchMock = new FetchMock()
         const values: EffectiveFeatureValue[] = [
             {
                 featureKey: 'my-feature',
@@ -196,98 +194,103 @@ describe('http client', () => {
                 value: 'service-default-value',
             },
         ]
-        const lastModified = new Date().toISOString()
-        fetchMock.matchOnce(
-            'get',
-            'https://client.featureboard.app/effective?audiences=',
-            {
-                status: 200,
-                body: JSON.stringify(values),
-                headers: {
-                    'Last-Modified': lastModified,
-                },
-            },
-        )
-
-        const httpClient = createBrowserClient({
-            environmentApiKey: 'env-api-key',
-            audiences: [],
-            fetchInstance: fetchMock.instance,
-            api: featureBoardHostedService,
-            updateStrategy: { kind: 'manual' },
-        })
-        await httpClient.waitForInitialised()
-
         const newValues: EffectiveFeatureValue[] = [
             {
                 featureKey: 'my-feature',
                 value: 'new-service-default-value',
             },
         ]
-        fetchMock.matchOnce(
-            'get',
-            {
-                url: 'https://client.featureboard.app/effective?audiences=',
-                headers: { 'if-modified-since': lastModified },
-            },
-            {
-                status: 200,
-                body: JSON.stringify(newValues),
-            },
+        const lastModified = new Date().toISOString()
+        const server = setupServer(
+            rest.get(
+                'https://client.featureboard.app/effective',
+                (req, res, ctx) => {
+                    if (req.headers.get('if-modified-since') === lastModified) {
+                        const newLastModified = new Date().toISOString()
+                        return res(
+                            ctx.json(newValues),
+                            ctx.status(200),
+                            ctx.set({
+                                'Last-Modified': newLastModified,
+                            }),
+                        )
+                    }
+                    return res(
+                        ctx.json(values),
+                        ctx.status(200),
+                        ctx.set({
+                            'Last-Modified': lastModified,
+                        }),
+                    )
+                },
+            ),
         )
+        server.listen()
 
-        await httpClient.updateFeatures()
+        try {
+            const httpClient = createBrowserClient({
+                environmentApiKey: 'env-api-key',
+                audiences: [],
+                api: featureBoardHostedService,
+                updateStrategy: { kind: 'manual' },
+            })
 
-        const value = httpClient.client.getFeatureValue(
-            'my-feature',
-            'default-value',
-        )
-        expect(value).toEqual('new-service-default-value')
+            await httpClient.waitForInitialised()
+            await httpClient.updateFeatures()
 
-        const value2 = httpClient.client.getFeatureValue(
-            'my-feature-2',
-            'default-value',
-        )
-        expect(value2).toEqual('default-value')
+            const value = httpClient.client.getFeatureValue(
+                'my-feature',
+                'default-value',
+            )
+            expect(value).toEqual('new-service-default-value')
+
+            const value2 = httpClient.client.getFeatureValue(
+                'my-feature-2',
+                'default-value',
+            )
+            expect(value2).toEqual('default-value')
+        } finally {
+            server.resetHandlers()
+            server.close()
+        }
     })
 
     it('can start with last known good config', async () => {
-        const fetchMock = new FetchMock()
-        const lastModified = new Date().toISOString()
-        fetchMock.matchOnce(
-            'get',
-            'https://client.featureboard.app/effective?audiences=',
-            {
-                status: 500,
-                headers: {
-                    'Last-Modified': lastModified,
-                },
-            },
+        const server = setupServer(
+            rest.get(
+                'https://client.featureboard.app/effective',
+                (_req, res, ctx) => res(ctx.status(500)),
+            ),
         )
-        const client = createBrowserClient({
-            environmentApiKey: 'env-api-key',
-            audiences: [],
-            fetchInstance: fetchMock.instance,
-            api: featureBoardHostedService,
-            store: new MemoryEffectiveFeatureStore([
-                {
-                    featureKey: 'my-feature',
-                    value: 'service-default-value',
-                },
-            ]),
-            updateStrategy: { kind: 'manual' },
-        })
+        server.listen()
 
-        const value = client.client.getFeatureValue(
-            'my-feature',
-            'default-value',
-        )
-        expect(client.initialised).toEqual(false)
-        expect(value).toEqual('service-default-value')
+        try {
+            const client = createBrowserClient({
+                environmentApiKey: 'env-api-key',
+                audiences: [],
+                api: featureBoardHostedService,
+                store: new MemoryEffectiveFeatureStore([
+                    {
+                        featureKey: 'my-feature',
+                        value: 'service-default-value',
+                    },
+                ]),
+                updateStrategy: { kind: 'manual' },
+            })
+
+            const value = client.client.getFeatureValue(
+                'my-feature',
+                'default-value',
+            )
+            expect(client.initialised).toEqual(false)
+            expect(value).toEqual('service-default-value')
+        } finally {
+            server.resetHandlers()
+            server.close()
+        }
     })
 
     it('Handles updating audience', async () => {
-        const fetchMock = new FetchMock()
         const values: EffectiveFeatureValue[] = [
             {
                 featureKey: 'my-feature',
@@ -295,47 +298,59 @@ describe('http client', () => {
             },
         ]
         const lastModified = new Date().toISOString()
-        fetchMock.matchOnce(
-            'get',
-            'https://client.featureboard.app/effective?audiences=',
-            {
-                status: 200,
-                body: JSON.stringify(values),
-                headers: {
-                    'Last-Modified': lastModified,
-                },
-            },
-        )
-
-        const httpClient = createBrowserClient({
-            environmentApiKey: 'env-api-key',
-            audiences: [],
-            fetchInstance: fetchMock.instance,
-            api: featureBoardHostedService,
-            updateStrategy: { kind: 'manual' },
-        })
-
         const newValues: EffectiveFeatureValue[] = [
             {
                 featureKey: 'my-feature',
                 value: 'new-service-default-value',
             },
         ]
-        fetchMock.matchOnce(
-            'get',
-            'https://client.featureboard.app/effective?audiences=test-audience',
-            {
-                status: 200,
-                body: JSON.stringify(newValues),
-            },
+        const server = setupServer(
+            rest.get(
+                'https://client.featureboard.app/effective',
+                (req, res, ctx) => {
+                    if (
+                        req.url.searchParams.get('audiences') ===
+                        'test-audience'
+                    ) {
+                        const newLastModified = new Date().toISOString()
+                        return res(
+                            ctx.json(newValues),
+                            ctx.status(200),
+                            ctx.set({
+                                'Last-Modified': newLastModified,
+                            }),
+                        )
+                    }
+                    return res(
+                        ctx.json(values),
+                        ctx.status(200),
+                        ctx.set({
+                            'Last-Modified': lastModified,
+                        }),
+                    )
+                },
+            ),
         )
+        server.listen()
 
-        await httpClient.updateAudiences(['test-audience'])
+        try {
+            const httpClient = createBrowserClient({
+                environmentApiKey: 'env-api-key',
+                audiences: [],
+                api: featureBoardHostedService,
+                updateStrategy: { kind: 'manual' },
+            })
 
-        const value = httpClient.client.getFeatureValue(
-            'my-feature',
-            'default-value',
-        )
-        expect(value).toEqual('new-service-default-value')
+            await httpClient.updateAudiences(['test-audience'])
+
+            const value = httpClient.client.getFeatureValue(
+                'my-feature',
+                'default-value',
+            )
+            expect(value).toEqual('new-service-default-value')
+        } finally {
+            server.resetHandlers()
+            server.close()
+        }
     })
 })

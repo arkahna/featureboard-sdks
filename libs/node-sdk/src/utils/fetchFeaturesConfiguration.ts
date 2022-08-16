@@ -1,17 +1,15 @@
 import { FeatureConfiguration } from '@featureboard/contracts'
-import { FetchSignature } from '@featureboard/js-sdk'
 import { AllFeaturesState } from '../feature-state'
 import { httpClientDebug } from './http-log'
 
 export async function fetchFeaturesConfigurationViaHttp(
-    fetchInstance: FetchSignature,
     allEndpoint: string,
     environmentApiKey: string,
     state: AllFeaturesState,
     lastModified: string | undefined,
 ) {
     httpClientDebug('Fetching updates')
-    const response = await fetchInstance(allEndpoint, {
+    const response = await fetch(allEndpoint, {
         method: 'GET',
         headers: {
             'x-environment-key': environmentApiKey,

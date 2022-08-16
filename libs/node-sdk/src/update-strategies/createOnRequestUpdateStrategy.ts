@@ -1,4 +1,4 @@
-import { createEnsureSingle, FetchSignature } from '@featureboard/js-sdk'
+import { createEnsureSingle } from '@featureboard/js-sdk'
 import { fetchFeaturesConfigurationViaHttp } from '../utils/fetchFeaturesConfiguration'
 import { getAllEndpoint } from './getAllEndpoint'
 import { AllConfigUpdateStrategy } from './update-strategies'
@@ -8,9 +8,8 @@ export function createOnRequestUpdateStrategy(
     environmentApiKey: string,
     httpEndpoint: string,
     maxAgeMs: number,
-    fetchInstance: FetchSignature,
 ): AllConfigUpdateStrategy {
-    let responseExpires: number | undefined = Date.now() + maxAgeMs
+    let responseExpires: number | undefined
     let lastModified: undefined | string
     let fetchUpdatesSingle: undefined | (() => Promise<void>)
 
@@ -20,7 +19,6 @@ export function createOnRequestUpdateStrategy(
             fetchUpdatesSingle = createEnsureSingle(async () => {
                 const allEndpoint = getAllEndpoint(httpEndpoint)
                 lastModified = await fetchFeaturesConfigurationViaHttp(
-                    fetchInstance,
                     allEndpoint,
                     environmentApiKey,
                     state,
@@ -43,8 +41,9 @@ export function createOnRequestUpdateStrategy(
         },
         async onRequest() {
             if (fetchUpdatesSingle) {
-                if (!responseExpires || Date.now() > responseExpires) {
-                    responseExpires = Date.now() + maxAgeMs
+                const now = Date.now()
+                if (!responseExpires || now >= responseExpires) {
+                    responseExpires = now + maxAgeMs
                     updatesLog('Response expired, fetching updates: %o', {
                         maxAgeMs,
                         newExpiry: responseExpires,
@@ -52,6 +51,10 @@ export function createOnRequestUpdateStrategy(
                     return fetchUpdatesSingle()
                 }
 
+                updatesLog('Response not expired: %o', {
+                    responseExpires,
+                    now,
+                })
                 return Promise.resolve()
             }
         },
