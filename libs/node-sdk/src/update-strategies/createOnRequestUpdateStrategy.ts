@@ -26,7 +26,10 @@ export function createOnRequestUpdateStrategy(
                 )
             })
 
-            return fetchUpdatesSingle()
+            return fetchUpdatesSingle().then((response) => {
+                responseExpires = Date.now() + maxAgeMs
+                return response
+            })
         },
         close() {
             return Promise.resolve()
