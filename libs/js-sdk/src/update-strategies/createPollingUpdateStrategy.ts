@@ -1,6 +1,5 @@
 import { createEnsureSingle } from '../ensure-single'
 import { fetchFeaturesConfigurationViaHttp } from '../utils/fetchFeaturesConfiguration'
-import { FetchSignature } from '../utils/FetchSignature'
 import { pollingUpdates } from '../utils/pollingUpdates'
 import { EffectiveConfigUpdateStrategy } from './update-strategies'
 import { updatesLog } from './updates-log'
@@ -12,7 +11,6 @@ export function createPollingUpdateStrategy(
     httpEndpoint: string,
     intervalMs: number,
     audiences: string[],
-    fetchInstance: FetchSignature,
 ): EffectiveConfigUpdateStrategy {
     let stopPolling: undefined | (() => void)
     let lastModified: undefined | string
@@ -24,7 +22,6 @@ export function createPollingUpdateStrategy(
             // Ensure that we don't trigger another request while one is in flight
             fetchUpdatesSingle = createEnsureSingle(async () => {
                 lastModified = await fetchFeaturesConfigurationViaHttp(
-                    fetchInstance,
                     httpEndpoint,
                     currentAudiences,
                     environmentApiKey,

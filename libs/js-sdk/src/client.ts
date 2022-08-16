@@ -12,7 +12,6 @@ import { FeatureBoardClient } from './features-client'
 import { debugLog } from './log'
 import { resolveUpdateStrategy } from './update-strategies/resolveUpdateStrategy'
 import { UpdateStrategies } from './update-strategies/update-strategies'
-import { FetchSignature } from './utils/FetchSignature'
 
 // We are not including the DOM types so we don't accidently access globals,
 // this allows us to access the global fetch
@@ -25,7 +24,6 @@ export function createBrowserClient({
     environmentApiKey,
     api,
     audiences,
-    fetchInstance,
 }: {
     /** Connect to a self hosted instance of FeatureBoard */
     api?: FeatureBoardApiConfig
@@ -45,8 +43,6 @@ export function createBrowserClient({
     initialValues?: EffectiveFeatureValue[]
 
     environmentApiKey: string
-
-    fetchInstance?: FetchSignature
 }): BrowserClient {
     if (store && initialValues) {
         throw new Error('Cannot specify both store and initialValues')
@@ -65,14 +61,6 @@ export function createBrowserClient({
         environmentApiKey,
         api || featureBoardHostedService,
         audiences,
-        fetchInstance ??
-            (typeof fetch !== 'undefined'
-                ? fetch
-                : async () => {
-                      throw new Error(
-                          'Fetch not available, pass fetchInstance createBrowserClient or ensure window.fetch global is available',
-                      )
-                  }),
     )
 
     debugLog('SDK connecting in background (%o)', {

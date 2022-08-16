@@ -7,9 +7,7 @@ import {
     FeatureBoardClient,
     featureBoardHostedService,
     Features,
-    FetchSignature,
 } from '@featureboard/js-sdk'
-import nodeFetch from 'node-fetch'
 import { PromiseCompletionSource } from 'promise-completion-source'
 import {
     AllFeaturesState,
@@ -42,8 +40,6 @@ export interface CreateServerClientOptions {
     updateStrategy?: UpdateStrategies | UpdateStrategies['kind']
 
     environmentApiKey: string
-
-    fetchInstance?: FetchSignature
 }
 
 export function createServerClient({
@@ -52,7 +48,6 @@ export function createServerClient({
     store,
     updateStrategy,
     environmentApiKey,
-    fetchInstance,
 }: CreateServerClientOptions): ServerClient {
     if (store && initialValues) {
         throw new Error('Cannot specify both store and initialValues')
@@ -68,7 +63,6 @@ export function createServerClient({
         updateStrategy,
         environmentApiKey,
         api || featureBoardHostedService,
-        fetchInstance || (nodeFetch as any),
     )
 
     updateStrategyImplementation

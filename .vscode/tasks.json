@@ -27,7 +27,8 @@
             "isTestCommand": true,
             "options": {
                 "env": {
-                    "NODE_ENV": "test"
+                    "NODE_ENV": "test",
+                    // "DEBUG": "featureboard-sdk,featureboard-sdk:*,@featureboard/node-sdk,@featureboard/node-sdk:*"
                 }
             },
             "problemMatcher": [],

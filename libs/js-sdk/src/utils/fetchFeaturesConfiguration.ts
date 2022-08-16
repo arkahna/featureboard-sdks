@@ -1,11 +1,9 @@
 import { EffectiveFeatureValue } from '@featureboard/contracts'
 import { EffectiveFeaturesState } from '../effective-feature-state'
 import { getEffectiveEndpoint } from '../update-strategies/getEffectiveEndpoint'
-import { FetchSignature } from './FetchSignature'
 import { httpClientDebug } from './http-log'
 
 export async function fetchFeaturesConfigurationViaHttp(
-    fetchInstance: FetchSignature,
     featureBoardEndpoint: string,
     audiences: string[],
     environmentApiKey: string,
@@ -18,7 +16,7 @@ export async function fetchFeaturesConfigurationViaHttp(
         audiences,
     )
     httpClientDebug('Fetching effective values (%o)', audiences)
-    const response = await fetchInstance(effectiveEndpoint, {
+    const response = await fetch(effectiveEndpoint, {
         method: 'GET',
         headers: {
             'x-environment-key': environmentApiKey,

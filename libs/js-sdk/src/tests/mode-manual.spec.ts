@@ -1,67 +1,52 @@
 import { EffectiveFeatureValue } from '@featureboard/contracts'
+import { rest } from 'msw'
+import { setupServer } from 'msw/node'
 import { describe, expect, it } from 'vitest'
 import { createBrowserClient } from '../client'
-import { FetchMock } from './fetch-mock'
 
 describe('Manual update mode', () => {
     it('fetches initial values', async () => {
-        const fetchMock = new FetchMock()
-
         const values: EffectiveFeatureValue[] = [
             {
                 featureKey: 'my-feature',
                 value: 'service-default-value',
             },
         ]
-        fetchMock.matchOnce(
-            'get',
-            'https://client.featureboard.app/effective?audiences=',
-            {
-                status: 200,
-                body: JSON.stringify(values),
-            },
-        )
 
-        const client = createBrowserClient({
-            environmentApiKey: 'fake-key',
-            audiences: [],
-            updateStrategy: 'manual',
-            fetchInstance: fetchMock.instance,
-        })
-        await client.waitForInitialised()
-
-        const value = client.client.getFeatureValue(
-            'my-feature',
-            'default-value',
+        const server = setupServer(
+            rest.get(
+                'https://client.featureboard.app/effective',
+                (_req, res, ctx) => res.once(ctx.json(values), ctx.status(200)),
+            ),
         )
-        expect(value).toEqual('service-default-value')
+        server.listen()
+
+        try {
+            const client = createBrowserClient({
+                environmentApiKey: 'fake-key',
+                audiences: [],
+                updateStrategy: 'manual',
+            })
+            await client.waitForInitialised()
+
+            const value = client.client.getFeatureValue(
+                'my-feature',
+                'default-value',
+            )
+            expect(value).toEqual('service-default-value')
+        } finally {
+            server.resetHandlers()
+            server.close()
+        }
     })
 
     it('can manually update values', async () => {
-        const fetchMock = new FetchMock()
-
         const values: EffectiveFeatureValue[] = [
             {
                 featureKey: 'my-feature',
                 value: 'service-default-value',
             },
         ]
-        fetchMock.matchOnce(
-            'get',
-            'https://client.featureboard.app/effective?audiences=',
-            {
-                status: 200,
-                body: JSON.stringify(values),
-            },
-        )
-
-        const client = createBrowserClient({
-            environmentApiKey: 'fake-key',
-            audiences: [],
-            updateStrategy: 'manual',
-            fetchInstance: fetchMock.instance,
-        })
-        await client.waitForInitialised()
 
         const newValues: EffectiveFeatureValue[] = [
             {
@@ -69,49 +54,69 @@ describe('Manual update mode', () => {
                 value: 'new-service-default-value',
             },
         ]
-        fetchMock.matchOnce(
-            'get',
-            'https://client.featureboard.app/effective?audiences=',
-            {
-                status: 200,
-                body: JSON.stringify(newValues),
-            },
-        )
-        await client.updateFeatures()
+        let count = 0
+        const server = setupServer(
+            rest.get(
+                'https://client.featureboard.app/effective',
+                (_req, res, ctx) => {
+                    if (count > 0) {
+                        return res(ctx.json(newValues), ctx.status(200))
+                    }
 
-        const value = client.client.getFeatureValue(
-            'my-feature',
-            'default-value',
+                    count++
+                    return res(ctx.json(values), ctx.status(200))
+                },
+            ),
         )
-        expect(value).toEqual('new-service-default-value')
+        server.listen()
+
+        try {
+            const client = createBrowserClient({
+                environmentApiKey: 'fake-key',
+                audiences: [],
+                updateStrategy: 'manual',
+            })
+            await client.waitForInitialised()
+            await client.updateFeatures()
+
+            const value = client.client.getFeatureValue(
+                'my-feature',
+                'default-value',
+            )
+            expect(value).toEqual('new-service-default-value')
+        } finally {
+            server.resetHandlers()
+            server.close()
+        }
     })
 
     it('close', async () => {
-        const fetchMock = new FetchMock()
-
         const values: EffectiveFeatureValue[] = [
             {
                 featureKey: 'my-feature',
                 value: 'service-default-value',
             },
         ]
-        fetchMock.matchOnce(
-            'get',
-            'https://client.featureboard.app/effective?audiences=',
-            {
-                status: 200,
-                body: JSON.stringify(values),
-            },
+
+        const server = setupServer(
+            rest.get(
+                'https://client.featureboard.app/effective',
+                (_req, res, ctx) => res.once(ctx.json(values), ctx.status(200)),
+            ),
         )
+        server.listen()
+        try {
+            const client = createBrowserClient({
+                environmentApiKey: 'fake-key',
+                audiences: [],
+                updateStrategy: 'manual',
+            })
 
-        const client = createBrowserClient({
-            environmentApiKey: 'fake-key',
-            audiences: [],
-            updateStrategy: 'manual',
-            fetchInstance: fetchMock.instance,
-        })
-
-        client.close()
+            client.close()
+        } finally {
+            server.resetHandlers()
+            server.close()
+        }
     })
 })
 

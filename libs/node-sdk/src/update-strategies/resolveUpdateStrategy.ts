@@ -1,4 +1,4 @@
-import { FeatureBoardApiConfig, FetchSignature } from '@featureboard/js-sdk'
+import { FeatureBoardApiConfig } from '@featureboard/js-sdk'
 import { createManualUpdateStrategy } from './createManualUpdateStrategy'
 import { createOnRequestUpdateStrategy } from './createOnRequestUpdateStrategy'
 import { createPollingUpdateStrategy } from './createPollingUpdateStrategy'
@@ -13,7 +13,6 @@ export function resolveUpdateStrategy(
     updateStrategy: UpdateStrategies['kind'] | UpdateStrategies | undefined,
     environmentApiKey: string,
     api: FeatureBoardApiConfig,
-    fetchInstance: FetchSignature,
 ): AllConfigUpdateStrategy {
     const resolvedUpdateStrategy: UpdateStrategies =
         toUpdateStrategyOptions(updateStrategy)
@@ -33,7 +32,6 @@ export function resolveUpdateStrategy(
             api.http,
             resolvedUpdateStrategy.options?.intervalMs ||
                 pollingIntervalDefault,
-            fetchInstance,
         )
     }
     if (resolvedUpdateStrategy.kind === 'on-request') {
@@ -41,15 +39,10 @@ export function resolveUpdateStrategy(
             environmentApiKey,
             api.http,
             resolvedUpdateStrategy.options?.maxAgeMs || maxAgeDefault,
-            fetchInstance,
         )
     }
     if (resolvedUpdateStrategy.kind === 'manual') {
-        return createManualUpdateStrategy(
-            environmentApiKey,
-            api.http,
-            fetchInstance,
-        )
+        return createManualUpdateStrategy(environmentApiKey, api.http)
     }
 
     throw new Error('Unknown update strategy: ' + updateStrategy)
