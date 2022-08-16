@@ -1,5 +1,12 @@
 # @featureboard/react-sdk
 
+## 0.7.0-beta.7
+
+### Patch Changes
+
+- Updated dependencies [[`512fa7b`](https://github.com/featureboard/sdks/commit/512fa7bb097320755aa82a5390019cbea1514ac9), [`512fa7b`](https://github.com/featureboard/sdks/commit/512fa7bb097320755aa82a5390019cbea1514ac9), [`512fa7b`](https://github.com/featureboard/sdks/commit/512fa7bb097320755aa82a5390019cbea1514ac9)]:
+  - @featureboard/js-sdk@0.10.0-beta.7
+
 ## 0.7.0-beta.6
 
 ### Minor Changes

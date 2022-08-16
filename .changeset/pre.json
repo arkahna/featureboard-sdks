@@ -9,7 +9,9 @@
     "@featureboard/react-sdk": "0.6.0"
   },
   "changesets": [
+    "dirty-avocados-taste",
     "fresh-wombats-talk",
+    "grumpy-otters-doubt",
     "hip-days-refuse",
     "hungry-mayflies-fail",
     "lazy-paws-mix",
@@ -21,6 +23,7 @@
     "shiny-apes-attack",
     "sixty-fireants-grow",
     "swift-wolves-talk",
+    "violet-ducks-smell",
     "yellow-chicken-change"
   ]
 }

@@ -1,5 +1,20 @@
 # @featureboard/node-sdk
 
+## 0.12.0-beta.9
+
+### Minor Changes
+
+- [#6](https://github.com/featureboard/sdks/pull/6) [`512fa7b`](https://github.com/featureboard/sdks/commit/512fa7bb097320755aa82a5390019cbea1514ac9) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Fixed issue with /all not waiting for initial request value
+
+* [#6](https://github.com/featureboard/sdks/pull/6) [`512fa7b`](https://github.com/featureboard/sdks/commit/512fa7bb097320755aa82a5390019cbea1514ac9) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Removed fetchInstance, requires fetch global to be present for both browser and node SDKs
+
+- [#6](https://github.com/featureboard/sdks/pull/6) [`512fa7b`](https://github.com/featureboard/sdks/commit/512fa7bb097320755aa82a5390019cbea1514ac9) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Upgraded dependencies
+
+### Patch Changes
+
+- Updated dependencies [[`512fa7b`](https://github.com/featureboard/sdks/commit/512fa7bb097320755aa82a5390019cbea1514ac9), [`512fa7b`](https://github.com/featureboard/sdks/commit/512fa7bb097320755aa82a5390019cbea1514ac9), [`512fa7b`](https://github.com/featureboard/sdks/commit/512fa7bb097320755aa82a5390019cbea1514ac9)]:
+  - @featureboard/js-sdk@0.10.0-beta.7
+
 ## 0.12.0-beta.8
 
 ### Minor Changes
