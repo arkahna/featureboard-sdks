@@ -13,10 +13,6 @@ import { debugLog } from './log'
 import { resolveUpdateStrategy } from './update-strategies/resolveUpdateStrategy'
 import { UpdateStrategies } from './update-strategies/update-strategies'
 
-// We are not including the DOM types so we don't accidently access globals,
-// this allows us to access the global fetch
-declare const fetch: any
-
 export function createBrowserClient({
     initialValues,
     store,

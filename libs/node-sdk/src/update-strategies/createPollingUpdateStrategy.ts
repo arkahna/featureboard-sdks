@@ -23,6 +23,7 @@ export function createPollingUpdateStrategy(
                     environmentApiKey,
                     state,
                     lastModified,
+                    'polling',
                 )
             })
 

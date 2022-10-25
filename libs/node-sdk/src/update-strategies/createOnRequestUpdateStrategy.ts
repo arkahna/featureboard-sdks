@@ -23,6 +23,7 @@ export function createOnRequestUpdateStrategy(
                     environmentApiKey,
                     state,
                     lastModified,
+                    'on-request',
                 )
             })
 

@@ -1,7 +1,7 @@
 {
     "name": "@featureboard/react-sdk",
     "version": "0.7.0-beta.7",
-    "main": "out-tsc/index.js",
+    "main": "tsc-out/index.js",
     "license": "MIT",
     "sideEffects": false,
     "repository": {

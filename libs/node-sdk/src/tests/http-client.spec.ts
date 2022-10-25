@@ -74,6 +74,45 @@ describe('http client', () => {
         }
     })
 
+    it('Gets value using audience exceptions', async () => {
+        const values: FeatureConfiguration[] = [
+            {
+                featureKey: 'my-feature',
+                audienceExceptions: [
+                    {
+                        audienceKey: 'my-audience',
+                        value: 'audience-exception-value',
+                    },
+                ],
+                defaultValue: 'service-default-value',
+            },
+        ]
+        const server = setupServer(
+            rest.get('https://client.featureboard.app/all', (_req, res, ctx) =>
+                res.once(ctx.json(values), ctx.status(200)),
+            ),
+        )
+        server.listen()
+
+        try {
+            const httpClient = createServerClient({
+                environmentApiKey: 'env-api-key',
+                api: featureBoardHostedService,
+                updateStrategy: { kind: 'manual' },
+            })
+            await httpClient.waitForInitialised()
+
+            const value = httpClient
+                .request(['my-audience'])
+                .getFeatureValue('my-feature', 'default-value')
+            expect(httpClient.initialised).toBe(true)
+            expect(value).toBe('audience-exception-value')
+        } finally {
+            server.resetHandlers()
+            server.close()
+        }
+    })
+
     it('can manually fetch updates', async () => {
         const values: FeatureConfiguration[] = [
             {
@@ -81,10 +120,20 @@ describe('http client', () => {
                 audienceExceptions: [],
                 defaultValue: 'service-default-value',
             },
+            {
+                featureKey: 'my-feature-2',
+                audienceExceptions: [],
+                defaultValue: 'service-default-value',
+            },
         ]
         const newValues: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
+                audienceExceptions: [],
+                defaultValue: 'new-service-default-value',
+            },
+            {
+                featureKey: 'my-feature-3',
                 audienceExceptions: [],
                 defaultValue: 'new-service-default-value',
             },
@@ -118,8 +167,19 @@ describe('http client', () => {
             const value = httpClient
                 .request([])
                 .getFeatureValue('my-feature', 'default-value')
+
+            const value2 = httpClient
+                .request([])
+                .getFeatureValue('my-feature-2', 'default-value')
+
+            const value3 = httpClient
+                .request([])
+                .getFeatureValue('my-feature-3', 'default-value')
             expect(httpClient.initialised).toBe(true)
             expect(value).toBe('new-service-default-value')
+            // This was removed from the server
+            expect(value2).toBe('default-value')
+            expect(value3).toBe('new-service-default-value')
         } finally {
             server.resetHandlers()
             server.close()
