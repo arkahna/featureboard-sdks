@@ -5,5 +5,13 @@
     "editor.codeActionsOnSave": {
         "source.organizeImports": true
     },
-    "cSpell.enabled": false
+    "cSpell.enabled": false,
+    "vitest.commandLine": "pnpm vitest",
+    "vitest.exclude": [
+        "**/node_modules/**",
+        "**/tsc-out/**",
+        "**/dist/**",
+        "**/cypress/**",
+        "**/.{idea,git,cache,output,temp}/**"
+    ],
 }

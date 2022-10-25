@@ -1,7 +1,7 @@
 {
     "extends": "../../tsconfig.settings.json",
     "compilerOptions": {
-        "outDir": "./out-tsc",
+        "outDir": "./tsc-out",
         "rootDir": "./src",
         "lib": [
             "ES2020",

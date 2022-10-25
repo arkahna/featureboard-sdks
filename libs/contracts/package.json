@@ -14,7 +14,7 @@
         "url": "https://github.com/featureboard/sdks/issues"
     },
     "homepage": "https://github.com/featureboard/sdks/tree/master/libs/contracts#readme",
-    "main": "out-tsc/index.js",
+    "main": "tsc-out/index.js",
     "publishConfig": {
         "main": "dist/index.js",
         "module": "dist/esm/index.js"

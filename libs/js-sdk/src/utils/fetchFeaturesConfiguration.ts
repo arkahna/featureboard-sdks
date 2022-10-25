@@ -58,7 +58,7 @@ export async function fetchFeaturesConfigurationViaHttp(
         state.updateFeatureValue(unavailableFeature, undefined)
     })
     httpClientDebug(`Updates (%o), %o`, audiences, {
-        allValues: currentEffectiveValues,
+        effectiveValues: currentEffectiveValues,
         unavailableFeatures,
     })
 

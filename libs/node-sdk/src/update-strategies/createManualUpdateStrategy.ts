@@ -20,6 +20,7 @@ export function createManualUpdateStrategy(
                     environmentApiKey,
                     state,
                     lastModified,
+                    'manual',
                 )
             })
 

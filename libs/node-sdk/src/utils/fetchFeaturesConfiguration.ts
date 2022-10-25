@@ -7,8 +7,13 @@ export async function fetchFeaturesConfigurationViaHttp(
     environmentApiKey: string,
     state: AllFeaturesState,
     lastModified: string | undefined,
+    updateTrigger: string,
 ) {
-    httpClientDebug('Fetching updates')
+    httpClientDebug(
+        'Fetching updates: trigger=%s, lastModified=%s',
+        updateTrigger,
+        lastModified,
+    )
     const response = await fetch(allEndpoint, {
         method: 'GET',
         headers: {
@@ -35,5 +40,14 @@ export async function fetchFeaturesConfigurationViaHttp(
         await state.updateFeatureState(featureValue.featureKey, featureValue)
     }
 
-    return response.headers.get('last-modified') || undefined
+    const removed = Object.keys(state.store.all()).filter((existing) =>
+        allValues.every((v) => v.featureKey !== existing),
+    )
+    for (const removedFeature of removed) {
+        await state.updateFeatureState(removedFeature, undefined)
+    }
+
+    const newLastModified = response.headers.get('last-modified') || undefined
+    httpClientDebug('Fetching updates done, newLastModified=%s', lastModified)
+    return newLastModified
 }
