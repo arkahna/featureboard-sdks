@@ -1,5 +1,11 @@
 # @featureboard/node-sdk
 
+## 0.12.0-beta.10
+
+### Minor Changes
+
+- [#7](https://github.com/featureboard/sdks/pull/7) [`cb6742d`](https://github.com/featureboard/sdks/commit/cb6742ddb9418afc61a0cd91ba02735f49ca1eda) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Fixed an issue with an unavailable feature not being removed from the store
+
 ## 0.12.0-beta.9
 
 ### Minor Changes
