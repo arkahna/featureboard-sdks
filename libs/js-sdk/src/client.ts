@@ -47,7 +47,7 @@ export function createBrowserClient({
     const initialisedPromise = new PromiseCompletionSource<boolean>()
     // Ensure that the init promise doesn't cause an unhandled promise rejection
     initialisedPromise.promise.catch(() => {})
-    const state = new EffectiveFeaturesState(
+    const state = EffectiveFeaturesState.getInstance(
         audiences,
         store || new MemoryEffectiveFeatureStore(initialValues),
     )
@@ -155,7 +155,7 @@ function createBrowserFbClient(
 
             const callback = (updatedFeatureKey: string, value: any): void => {
                 if (featureKey === updatedFeatureKey) {
-                    debugLog('subscribeToFeatureValue update: o', {
+                    debugLog('subscribeToFeatureValue update: %o', {
                         featureKey,
                         value,
                         defaultValue,

@@ -10,14 +10,33 @@ export interface EffectiveFeatureValues {
 type FeatureValue = string | boolean | number | undefined
 
 export class EffectiveFeaturesState {
+    private static instance: EffectiveFeaturesState | null = null
     private valueUpdatedCallbacks: Array<
         (featureKey: string, value: FeatureValue) => void
     > = []
 
-    constructor(
+    private constructor(
         public audiences: string[],
         public store: EffectiveFeatureStore = new MemoryEffectiveFeatureStore(),
-    ) {}
+    ) {
+        if (EffectiveFeaturesState.instance) {
+            return EffectiveFeaturesState.instance
+        }
+        EffectiveFeaturesState.instance = this
+    }
+
+    static getInstance(
+        audiences: string[],
+        store: EffectiveFeatureStore,
+    ): EffectiveFeaturesState {
+        if (!EffectiveFeaturesState.instance) {
+            EffectiveFeaturesState.instance = new EffectiveFeaturesState(
+                audiences,
+                store,
+            )
+        }
+        return EffectiveFeaturesState.instance
+    }
 
     on(
         _event: 'feature-updated',
@@ -36,11 +55,7 @@ export class EffectiveFeaturesState {
     }
 
     updateFeatureValue(featureKey: string, value: FeatureValue) {
-        if (value === undefined) {
-            this.store.set(featureKey, undefined)
-        } else {
-            this.store.set(featureKey, value)
-        }
+        this.store.set(featureKey, value)
 
         this.valueUpdatedCallbacks.forEach((valueUpdated) =>
             valueUpdated(featureKey, value),
