@@ -10,14 +10,34 @@ export interface EffectiveFeatureValues {
 type FeatureValue = string | boolean | number | undefined
 
 export class EffectiveFeaturesState {
+    clear() {
+        throw new Error('Method not implemented.')
+    }
     private valueUpdatedCallbacks: Array<
         (featureKey: string, value: FeatureValue) => void
     > = []
+    private _audiences: string[]
 
     constructor(
-        public audiences: string[],
+        audiences: string[],
         public store: EffectiveFeatureStore = new MemoryEffectiveFeatureStore(),
-    ) {}
+    ) {
+        this._audiences = audiences
+    }
+
+    set audiences(value: string[]) {
+        this._audiences = value
+        const storeKeys = this.store.all()
+        this.store.clear()
+        Object.keys(storeKeys).forEach((key) => {
+            this.valueUpdatedCallbacks.forEach((valueUpdated) =>
+                valueUpdated(key, undefined),
+            )
+        })
+    }
+    get audiences(): string[] {
+        return [...this._audiences]
+    }
 
     on(
         _event: 'feature-updated',
@@ -25,6 +45,7 @@ export class EffectiveFeaturesState {
     ): void {
         this.valueUpdatedCallbacks.push(callback)
     }
+
     off(
         _event: 'feature-updated',
         callback: (featureKey: string, value: FeatureValue) => void,
@@ -36,11 +57,7 @@ export class EffectiveFeaturesState {
     }
 
     updateFeatureValue(featureKey: string, value: FeatureValue) {
-        if (value === undefined) {
-            this.store.set(featureKey, undefined)
-        } else {
-            this.store.set(featureKey, value)
-        }
+        this.store.set(featureKey, value)
 
         this.valueUpdatedCallbacks.forEach((valueUpdated) =>
             valueUpdated(featureKey, value),

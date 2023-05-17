@@ -1,6 +1,7 @@
 import { EffectiveFeatureValue } from '@featureboard/contracts'
 import { rest } from 'msw'
 import { setupServer } from 'msw/node'
+import { PromiseCompletionSource } from 'promise-completion-source'
 import { describe, expect, it } from 'vitest'
 import { createBrowserClient } from '../client'
 import { MemoryEffectiveFeatureStore } from '../effective-feature-store'
@@ -304,15 +305,20 @@ describe('http client', () => {
                 value: 'new-service-default-value',
             },
         ]
+
+        const audienceLoadPromise = new PromiseCompletionSource<void>()
         const server = setupServer(
             rest.get(
                 'https://client.featureboard.app/effective',
-                (req, res, ctx) => {
+                async (req, res, ctx) => {
                     if (
                         req.url.searchParams.get('audiences') ===
                         'test-audience'
                     ) {
                         const newLastModified = new Date().toISOString()
+
+                        await audienceLoadPromise.promise
+
                         return res(
                             ctx.json(newValues),
                             ctx.status(200),
@@ -341,8 +347,28 @@ describe('http client', () => {
                 updateStrategy: { kind: 'manual' },
             })
 
-            await httpClient.updateAudiences(['test-audience'])
+            await httpClient.waitForInitialised()
+            const initialValue = httpClient.client.getFeatureValue(
+                'my-feature',
+                'default-value',
+            )
+            expect(initialValue).toEqual('service-default-value')
 
+            const updatingAudiencePromise = httpClient.updateAudiences([
+                'test-audience',
+            ])
+
+            expect(httpClient.initialised).toBe(false)
+            const loadingValue = httpClient.client.getFeatureValue(
+                'my-feature',
+                'default-value',
+            )
+            expect(loadingValue).toEqual('default-value')
+
+            audienceLoadPromise.resolve()
+            await updatingAudiencePromise
+
+            expect(httpClient.initialised).toBe(true)
             const value = httpClient.client.getFeatureValue(
                 'my-feature',
                 'default-value',

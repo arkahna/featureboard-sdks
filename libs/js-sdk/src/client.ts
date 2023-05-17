@@ -44,7 +44,8 @@ export function createBrowserClient({
         throw new Error('Cannot specify both store and initialValues')
     }
 
-    const initialisedPromise = new PromiseCompletionSource<boolean>()
+    let initialisedCallback: ((initialised: boolean) => void) | undefined
+    let initialisedPromise = new PromiseCompletionSource<boolean>()
     // Ensure that the init promise doesn't cause an unhandled promise rejection
     initialisedPromise.promise.catch(() => {})
     const state = new EffectiveFeaturesState(
@@ -100,14 +101,24 @@ export function createBrowserClient({
                 }, 100)
             })
         },
+        initialisedChanged(callback: (initialised: boolean) => void) {
+            initialisedCallback = callback
+        },
         updateAudiences(updatedAudiences: string[]) {
             debugLog('Updating audiences: %o', {
                 updatedAudiences,
             })
-            return updateStrategyImplementation.updateAudiences(
-                state,
-                updatedAudiences,
-            )
+
+            initialisedPromise = new PromiseCompletionSource<boolean>()
+            initialisedCallback?.(false)
+            state.audiences = updatedAudiences
+
+            return updateStrategyImplementation
+                .updateAudiences(state, updatedAudiences)
+                .then(() => {
+                    initialisedPromise.resolve(true)
+                    initialisedCallback?.(true)
+                })
         },
         updateFeatures() {
             return updateStrategyImplementation.updateFeatures()
