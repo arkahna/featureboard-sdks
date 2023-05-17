@@ -5,13 +5,15 @@
         "lint": {
             "executor": "@nrwl/linter:eslint",
             "options": {
-                "lintFilePatterns": ["libs/js-sdk/**/*.ts"]
+                "lintFilePatterns": [
+                    "libs/js-sdk/**/*.ts"
+                ]
             }
         },
         "test": {
             "executor": "@nrwl/workspace:run-commands",
             "options": {
-                "command": "npx vitest --run --passWithNoTests",
+                "command": "pnpm vitest --run --passWithNoTests",
                 "cwd": "libs/js-sdk"
             }
         },
