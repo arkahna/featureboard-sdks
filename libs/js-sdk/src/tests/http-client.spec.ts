@@ -341,13 +341,30 @@ describe('http client', () => {
                 updateStrategy: { kind: 'manual' },
             })
 
-            await httpClient.updateAudiences(['test-audience'])
+            await httpClient.waitForInitialised()
+
+            expect(httpClient.initialised).toBeTruthy
+
+            httpClient.initialisedChanged((init: boolean) => {
+                if (!init) {
+                    expect(httpClient.initialised).toBeFalsy
+                } else {
+                    expect(httpClient.initialised).toBeTruthy
+                    const value = httpClient.client.getFeatureValue(
+                        'my-feature',
+                        'default-value',
+                    )
+                    expect(value).toEqual('new-service-default-value')
+                }
+            })
 
             const value = httpClient.client.getFeatureValue(
                 'my-feature',
                 'default-value',
             )
-            expect(value).toEqual('new-service-default-value')
+            expect(value).toEqual('service-default-value')
+
+            await httpClient.updateAudiences(['test-audience'])
         } finally {
             server.resetHandlers()
             server.close()
