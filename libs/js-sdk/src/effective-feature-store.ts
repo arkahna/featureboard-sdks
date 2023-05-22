@@ -4,6 +4,7 @@ import { debugLog } from './log'
 export interface EffectiveFeatureStore {
     /** Gets a stable copy of the feature values (will not be updated if the store is updated). */
     all(): Record<string, EffectiveFeatureValue['value'] | undefined>
+    clear(): void
     get(featureKey: string): EffectiveFeatureValue['value'] | undefined
     set(
         featureKey: string,
@@ -23,6 +24,10 @@ export class MemoryEffectiveFeatureStore implements EffectiveFeatureStore {
         for (const value of initialValues || []) {
             this._store[value.featureKey] = value.value
         }
+    }
+
+    clear(): void {
+        this._store = {}
     }
 
     all(): Record<string, EffectiveFeatureValue['value'] | undefined> {

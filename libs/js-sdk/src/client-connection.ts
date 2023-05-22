@@ -8,6 +8,8 @@ export interface BrowserClient {
 
     waitForInitialised(): Promise<boolean>
 
+    initialisedChanged(callback: (initilised: boolean) => {}): void
+
     /** Will set initialised to false until the new audiences are loaded */
     updateAudiences(audiences: string[]): PromiseLike<void>
 

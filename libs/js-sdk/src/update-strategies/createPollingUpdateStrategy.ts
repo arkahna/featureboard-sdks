@@ -36,10 +36,10 @@ export function createPollingUpdateStrategy(
             }
             stopPolling = pollingUpdates(() => {
                 if (fetchUpdatesSingle) {
-                    pollingUpdatesDebugLog(
-                        'Polling for updates (%o)',
+                    pollingUpdatesDebugLog('Polling for updates (%o)', {
                         currentAudiences,
-                    )
+                        lastModified,
+                    })
                     // Catch errors here to ensure no unhandled promise rejections after a poll
                     return fetchUpdatesSingle().catch(() => {})
                 }
@@ -66,13 +66,20 @@ export function createPollingUpdateStrategy(
         onRequest() {
             return undefined
         },
-        updateAudiences(state, updatedAudiences) {
+        async updateAudiences(state, updatedAudiences) {
+            if (updatedAudiences.sort() === currentAudiences.sort()) {
+                // No need to update audiences
+                return Promise.resolve()
+            }
             currentAudiences = updatedAudiences
+            state.audiences = updatedAudiences
             pollingUpdatesDebugLog(
                 'Audiences updated (%o), getting new effective values',
                 updatedAudiences,
             )
-            return this.connect(state)
+            // Fetch new values
+            lastModified = undefined
+            return await this.connect(state)
         },
     }
 }

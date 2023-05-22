@@ -15,7 +15,7 @@ export async function fetchFeaturesConfigurationViaHttp(
         featureBoardEndpoint,
         audiences,
     )
-    httpClientDebug('Fetching effective values (%o)', audiences)
+    httpClientDebug('Fetching effective values (%o)', {lastModified, audiences})
     const response = await fetch(effectiveEndpoint, {
         method: 'GET',
         headers: {

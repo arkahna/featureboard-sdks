@@ -44,13 +44,19 @@ export function createManualUpdateStrategy(
         onRequest() {
             return undefined
         },
-        updateAudiences(state, updatedAudiences) {
+        async updateAudiences(state, updatedAudiences) {
+            if (updatedAudiences.sort() === currentAudiences.sort()) {
+                // No need to update audiences
+                return Promise.resolve()
+            }
             currentAudiences = updatedAudiences
+            state.audiences = updatedAudiences
             manualUpdatesDebugLog(
                 'Audiences updated (%o), getting new effective values',
                 updatedAudiences,
             )
-            return this.connect(state)
+            lastModified = undefined
+            return await this.connect(state)
         },
     }
 }
