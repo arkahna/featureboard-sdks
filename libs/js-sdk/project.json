@@ -1,26 +1,35 @@
 {
+    "name": "js-sdk",
+    "$schema": "../../node_modules/nx/schemas/project-schema.json",
     "projectType": "library",
     "sourceRoot": "libs/js-sdk/src",
     "targets": {
         "lint": {
-            "executor": "@nrwl/linter:eslint",
+            "executor": "@nx/linter:eslint",
             "options": {
-                "lintFilePatterns": ["libs/js-sdk/**/*.ts"]
+                "lintFilePatterns": [
+                    "libs/js-sdk/**/*.ts"
+                ]
             }
         },
         "test": {
-            "executor": "@nrwl/workspace:run-commands",
+            "executor": "nx:run-commands",
             "options": {
-                "command": "npx vitest --run --passWithNoTests",
+                "command": "pnpm vitest --run --passWithNoTests",
                 "cwd": "libs/js-sdk"
             }
         },
         "package": {
-            "executor": "@wanews/nx-typescript-project-references:package",
+            "executor": "@nx/esbuild:esbuild",
             "options": {
                 "main": "libs/js-sdk/src/index.ts",
                 "tsConfig": "libs/js-sdk/tsconfig.json",
-                "legacyOutput": true
+                "outputPath": "libs/js-sdk/dist",
+                "skipTypeCheck": true,
+                "format": [
+                    "esm",
+                    "cjs"
+                ],
             }
         }
     }

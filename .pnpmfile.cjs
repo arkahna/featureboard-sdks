@@ -8,7 +8,7 @@ module.exports = {
 // this is a hack to get around that and insure they are not installed
 // transitively
 function readPackage(pkg) {
-  if (pkg.name === '@nrwl/workspace') {
+  if (pkg.name === '@nx/workspace') {
     delete pkg.dependencies['@nrwl/jest']
   }
   if (pkg.name === '@nrwl/linter') {
