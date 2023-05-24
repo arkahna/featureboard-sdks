@@ -291,6 +291,7 @@ describe('http client', () => {
     })
 
     it('Handles updating audience', async () => {
+        expect.assertions(5)
         const values: EffectiveFeatureValue[] = [
             {
                 featureKey: 'my-feature',
@@ -343,13 +344,13 @@ describe('http client', () => {
 
             await httpClient.waitForInitialised()
 
-            expect(httpClient.initialised).toBeTruthy
+            expect(httpClient.initialised).toBeTruthy()
 
             httpClient.initialisedChanged((init: boolean) => {
                 if (!init) {
-                    expect(httpClient.initialised).toBeFalsy
+                    expect(httpClient.initialised).toBeFalsy()
                 } else {
-                    expect(httpClient.initialised).toBeTruthy
+                    expect(httpClient.initialised).toBeTruthy()
                     const value = httpClient.client.getFeatureValue(
                         'my-feature',
                         'default-value',
