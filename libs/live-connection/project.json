@@ -15,7 +15,7 @@
         "test": {
             "executor": "nx:run-commands",
             "options": {
-                "command": "branchProtectionPrompt vitest --run --passWithNoTests",
+                "command": "pnpm vitest --run --passWithNoTests",
                 "cwd": "libs/live-connection"
             }
         },
