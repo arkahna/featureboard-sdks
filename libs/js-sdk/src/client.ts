@@ -44,7 +44,7 @@ export function createBrowserClient({
         throw new Error('Cannot specify both store and initialValues')
     }
 
-    let initialisedCallback: (initialised: boolean) => void
+    const initialisedCallbacks: ((initialsed: boolean) => void)[] = []
     const initialisedPromise = new PromiseCompletionSource<boolean>()
     let updatedPromise: PromiseCompletionSource<boolean>[] = []
 
@@ -105,8 +105,14 @@ export function createBrowserClient({
                 }, 100)
             })
         },
-        initialisedChanged(callback) {
-            initialisedCallback = callback
+        subscribeToInitialisedChanged(callback) {
+            initialisedCallbacks.push(callback)
+            return () => {
+                initialisedCallbacks.splice(
+                    initialisedCallbacks.indexOf(callback),
+                    1,
+                )
+            }
         },
         async updateAudiences(updatedAudiences: string[]) {
             debugLog('Updating audiences: %o', {
@@ -118,7 +124,7 @@ export function createBrowserClient({
 
             updatedPromise.push(promise)
             debugLog('updateAudiences: invoke initialised callback with false')
-            initialisedCallback?.(false)
+            initialisedCallbacks.forEach((c) => c(false))
 
             return updateStrategyImplementation
                 .updateAudiences(state, updatedAudiences)
@@ -128,7 +134,7 @@ export function createBrowserClient({
                         debugLog(
                             'updateAudiences: invoke initialised callback with true',
                         )
-                        initialisedCallback?.(true)
+                        initialisedCallbacks.forEach((c) => c(true))
                         updatedPromise = []
                     }
                 })
