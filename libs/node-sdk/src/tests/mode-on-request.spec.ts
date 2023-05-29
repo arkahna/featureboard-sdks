@@ -60,6 +60,8 @@ describe('On request update mode', () => {
                 updateStrategy: 'on-request',
             })
 
+            await client.waitForInitialised()
+
             expect(() =>
                 client
                     .request([])
