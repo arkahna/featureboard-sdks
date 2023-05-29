@@ -1,4 +1,5 @@
 import { createEnsureSingle } from '../ensure-single'
+import { compareArrays } from '../utils/compare-arrays'
 import { fetchFeaturesConfigurationViaHttp } from '../utils/fetchFeaturesConfiguration'
 import { EffectiveConfigUpdateStrategy } from './update-strategies'
 import { updatesLog } from './updates-log'
@@ -8,11 +9,9 @@ export const manualUpdatesDebugLog = updatesLog.extend('manual')
 export function createManualUpdateStrategy(
     environmentApiKey: string,
     httpEndpoint: string,
-    audiences: string[],
 ): EffectiveConfigUpdateStrategy {
     let lastModified: undefined | string
     let fetchUpdatesSingle: undefined | (() => Promise<void>)
-    let currentAudiences = audiences
 
     return {
         async connect(state) {
@@ -20,11 +19,11 @@ export function createManualUpdateStrategy(
             fetchUpdatesSingle = createEnsureSingle(async () => {
                 lastModified = await fetchFeaturesConfigurationViaHttp(
                     httpEndpoint,
-                    currentAudiences,
+                    state.audiences,
                     environmentApiKey,
                     state,
                     lastModified,
-                    () => currentAudiences,
+                    () => state.audiences,
                 )
             })
 
@@ -45,11 +44,10 @@ export function createManualUpdateStrategy(
             return undefined
         },
         async updateAudiences(state, updatedAudiences) {
-            if (updatedAudiences.sort() === currentAudiences.sort()) {
+            if (compareArrays(updatedAudiences, state.audiences)) {
                 // No need to update audiences
                 return Promise.resolve()
             }
-            currentAudiences = updatedAudiences
             state.audiences = updatedAudiences
             manualUpdatesDebugLog(
                 'Audiences updated (%o), getting new effective values',

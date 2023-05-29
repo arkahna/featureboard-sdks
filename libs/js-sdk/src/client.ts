@@ -59,7 +59,6 @@ export function createBrowserClient({
         updateStrategy,
         environmentApiKey,
         api || featureBoardHostedService,
-        audiences,
     )
 
     debugLog('SDK connecting in background (%o)', {

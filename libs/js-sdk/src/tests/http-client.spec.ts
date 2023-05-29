@@ -7,7 +7,7 @@ import { MemoryEffectiveFeatureStore } from '../effective-feature-store'
 import { featureBoardHostedService } from '../featureboard-service-urls'
 
 describe('http client', () => {
-    it('can wait for initialisation', async () => {
+    it('can wait for initialisation, initialised false', async () => {
         const values: EffectiveFeatureValue[] = [
             {
                 featureKey: 'my-feature',
@@ -43,7 +43,7 @@ describe('http client', () => {
         }
     })
 
-    it('can wait for initialisation', async () => {
+    it('can wait for initialisation, initialised true', async () => {
         const values: EffectiveFeatureValue[] = [
             {
                 featureKey: 'my-feature',

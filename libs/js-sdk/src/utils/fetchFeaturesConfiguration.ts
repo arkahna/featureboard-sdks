@@ -1,6 +1,7 @@
 import { EffectiveFeatureValue } from '@featureboard/contracts'
 import { EffectiveFeaturesState } from '../effective-feature-state'
 import { getEffectiveEndpoint } from '../update-strategies/getEffectiveEndpoint'
+import { compareArrays } from './compare-arrays'
 import { httpClientDebug } from './http-log'
 
 export async function fetchFeaturesConfigurationViaHttp(
@@ -15,7 +16,10 @@ export async function fetchFeaturesConfigurationViaHttp(
         featureBoardEndpoint,
         audiences,
     )
-    httpClientDebug('Fetching effective values (%o)', {lastModified, audiences})
+    httpClientDebug('Fetching effective values (%o)', {
+        lastModified,
+        audiences,
+    })
     const response = await fetch(effectiveEndpoint, {
         method: 'GET',
         headers: {
@@ -43,7 +47,7 @@ export async function fetchFeaturesConfigurationViaHttp(
     const currentEffectiveValues: EffectiveFeatureValue[] =
         await response.json()
 
-    if (getCurrentAudiences() !== audiences) {
+    if (compareArrays(getCurrentAudiences(), audiences)) {
         httpClientDebug('Audiences changed while fetching (%o)', audiences)
         return lastModified
     }

@@ -1,4 +1,5 @@
 import { createEnsureSingle } from '../ensure-single'
+import { compareArrays } from '../utils/compare-arrays'
 import { fetchFeaturesConfigurationViaHttp } from '../utils/fetchFeaturesConfiguration'
 import { pollingUpdates } from '../utils/pollingUpdates'
 import { EffectiveConfigUpdateStrategy } from './update-strategies'
@@ -10,12 +11,10 @@ export function createPollingUpdateStrategy(
     environmentApiKey: string,
     httpEndpoint: string,
     intervalMs: number,
-    audiences: string[],
 ): EffectiveConfigUpdateStrategy {
     let stopPolling: undefined | (() => void)
     let lastModified: undefined | string
     let fetchUpdatesSingle: undefined | (() => Promise<void>)
-    let currentAudiences = audiences
 
     return {
         async connect(state) {
@@ -23,11 +22,11 @@ export function createPollingUpdateStrategy(
             fetchUpdatesSingle = createEnsureSingle(async () => {
                 lastModified = await fetchFeaturesConfigurationViaHttp(
                     httpEndpoint,
-                    currentAudiences,
+                    state.audiences,
                     environmentApiKey,
                     state,
                     lastModified,
-                    () => currentAudiences,
+                    () => state.audiences,
                 )
             })
 
@@ -36,10 +35,9 @@ export function createPollingUpdateStrategy(
             }
             stopPolling = pollingUpdates(() => {
                 if (fetchUpdatesSingle) {
-                    pollingUpdatesDebugLog('Polling for updates (%o)', {
-                        currentAudiences,
+                    pollingUpdatesDebugLog('Polling for updates (%o)',
                         lastModified,
-                    })
+                    )
                     // Catch errors here to ensure no unhandled promise rejections after a poll
                     return fetchUpdatesSingle().catch(() => {})
                 }
@@ -67,11 +65,10 @@ export function createPollingUpdateStrategy(
             return undefined
         },
         async updateAudiences(state, updatedAudiences) {
-            if (updatedAudiences.sort() === currentAudiences.sort()) {
+            if (compareArrays(state.audiences, updatedAudiences)) {
                 // No need to update audiences
                 return Promise.resolve()
             }
-            currentAudiences = updatedAudiences
             state.audiences = updatedAudiences
             pollingUpdatesDebugLog(
                 'Audiences updated (%o), getting new effective values',
