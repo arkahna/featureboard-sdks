@@ -13,8 +13,7 @@
                     "test",
                     "e2e"
                 ],
-                "parallel": 1,
-                "accessToken": "MjhkYTA2NmQtMzQzZi00OGFiLThiOTMtNWQ3ZGI1ODQ3M2I5fHJlYWQtd3JpdGU="
+                "parallel": 1
             }
         }
     },
