@@ -47,7 +47,7 @@ export async function fetchFeaturesConfigurationViaHttp(
     const currentEffectiveValues: EffectiveFeatureValue[] =
         await response.json()
 
-    if (compareArrays(getCurrentAudiences(), audiences)) {
+    if (!compareArrays(getCurrentAudiences(), audiences)) {
         httpClientDebug('Audiences changed while fetching (%o)', audiences)
         return lastModified
     }

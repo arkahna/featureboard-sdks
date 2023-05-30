@@ -24,9 +24,6 @@
             "options": {
                 "main": "libs/node-sdk/src/index.ts",
                 "tsConfig": "libs/node-sdk/tsconfig.json",
-                "external": [
-                    "node-fetch"
-                ],
                 "outputPath": "libs/node-sdk/dist",
                 "skipTypeCheck": true,
                 "format": [

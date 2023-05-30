@@ -1,13 +1,18 @@
 {
     "npmScope": "featureboard-sdks",
     "affected": {
-        "defaultBase": "master"
+        "defaultBase": "main"
     },
     "tasksRunnerOptions": {
         "default": {
-            "runner": "nx-cloud",
+            "runner": "nx/tasks-runners/default",
             "options": {
-                "cacheableOperations": ["build", "lint", "test", "e2e"],
+                "cacheableOperations": [
+                    "build",
+                    "lint",
+                    "test",
+                    "e2e"
+                ],
                 "parallel": 1,
                 "accessToken": "MjhkYTA2NmQtMzQzZi00OGFiLThiOTMtNWQ3ZGI1ODQ3M2I5fHJlYWQtd3JpdGU="
             }
@@ -25,8 +30,13 @@
         "defaultCollection": "@nx/workspace"
     },
     "namedInputs": {
-        "default": ["{projectRoot}/**/*", "sharedGlobals"],
+        "default": [
+            "{projectRoot}/**/*",
+            "sharedGlobals"
+        ],
         "sharedGlobals": [],
-        "production": ["default"]
+        "production": [
+            "default"
+        ]
     }
 }

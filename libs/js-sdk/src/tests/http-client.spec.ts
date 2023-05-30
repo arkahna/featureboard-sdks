@@ -347,7 +347,7 @@ describe('http client', () => {
 
             expect(httpClient.initialised).toBeTruthy()
 
-            httpClient.subscribeToInitialisedChanged((init: boolean) => {
+            httpClient.subscribeToInitialisedChanged((init) => {
                 if (!init) {
                     expect(httpClient.initialised).toBeFalsy()
                 } else {
