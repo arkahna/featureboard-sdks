@@ -15,19 +15,24 @@ jobs:
         uses: actions/checkout@main
 
       - name: Enable node
-        uses: actions/setup-node@main
+        uses: actions/setup-node@mv3
         with:
           node-version: 18.x
 
+      - uses: pnpm/action-setup@v2
+        name: Install pnpm
+        id: pnpm-install
+        with:
+          version: 7
+
       - name: Cache .pnpm-store
-        uses: actions/cache@v1
+        uses: actions/cache@v3
         with:
           path: ~/.pnpm-store
           key: ${{ runner.os }}-node${{ matrix.node-version }}-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Install pnpm
         run: |
-          npm i -g pnpm
           pnpm set verify-store-integrity false
 
       - name: pnpm install
