@@ -12,6 +12,7 @@ import { FeatureBoardClient } from './features-client'
 import { debugLog } from './log'
 import { resolveUpdateStrategy } from './update-strategies/resolveUpdateStrategy'
 import { UpdateStrategies } from './update-strategies/update-strategies'
+import { compareArrays } from './utils/compare-arrays'
 
 export function createBrowserClient({
     initialValues,
@@ -120,24 +121,32 @@ export function createBrowserClient({
                 initialised: this.initialised,
             })
 
-            const promise = new PromiseCompletionSource<boolean>()
+            if (compareArrays(state.audiences, updatedAudiences)) {
+                // No need to update audiences
+                return Promise.resolve()
+            }
 
+            const promise = new PromiseCompletionSource<boolean>()
             updatedPromise.push(promise)
             debugLog('updateAudiences: invoke initialised callback with false')
             initialisedCallbacks.forEach((c) => c(false))
 
-            return updateStrategyImplementation
-                .updateAudiences(state, updatedAudiences)
-                .then(() => {
-                    promise?.resolve(true)
-                    if (this.initialised) {
-                        debugLog(
-                            'updateAudiences: invoke initialised callback with true',
-                        )
-                        initialisedCallbacks.forEach((c) => c(true))
-                        updatedPromise = []
-                    }
-                })
+            state.audiences = updatedAudiences
+            debugLog(
+                'updateAudiences: Audiences updated (%o), getting new effective values',
+                updatedAudiences,
+            )
+
+            return updateStrategyImplementation.connect(state).then(() => {
+                promise?.resolve(true)
+                if (this.initialised) {
+                    debugLog(
+                        'updateAudiences: invoke initialised callback with true',
+                    )
+                    initialisedCallbacks.forEach((c) => c(true))
+                    updatedPromise = []
+                }
+            })
         },
         updateFeatures() {
             return updateStrategyImplementation.updateFeatures()

@@ -1,5 +1,4 @@
 import { createEnsureSingle } from '../ensure-single'
-import { compareArrays } from '../utils/compare-arrays'
 import { fetchFeaturesConfigurationViaHttp } from '../utils/fetchFeaturesConfiguration'
 import { pollingUpdates } from '../utils/pollingUpdates'
 import { EffectiveConfigUpdateStrategy } from './update-strategies'
@@ -18,6 +17,9 @@ export function createPollingUpdateStrategy(
 
     return {
         async connect(state) {
+            // Force update
+            lastModified = undefined
+            
             // Ensure that we don't trigger another request while one is in flight
             fetchUpdatesSingle = createEnsureSingle(async () => {
                 lastModified = await fetchFeaturesConfigurationViaHttp(
@@ -63,20 +65,6 @@ export function createPollingUpdateStrategy(
         },
         onRequest() {
             return undefined
-        },
-        async updateAudiences(state, updatedAudiences) {
-            if (compareArrays(state.audiences, updatedAudiences)) {
-                // No need to update audiences
-                return Promise.resolve()
-            }
-            state.audiences = updatedAudiences
-            pollingUpdatesDebugLog(
-                'Audiences updated (%o), getting new effective values',
-                updatedAudiences,
-            )
-            // Fetch new values
-            lastModified = undefined
-            return await this.connect(state)
         },
     }
 }

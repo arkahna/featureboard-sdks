@@ -1,5 +1,4 @@
 import { createEnsureSingle } from '../ensure-single'
-import { compareArrays } from '../utils/compare-arrays'
 import { fetchFeaturesConfigurationViaHttp } from '../utils/fetchFeaturesConfiguration'
 import { EffectiveConfigUpdateStrategy } from './update-strategies'
 import { updatesLog } from './updates-log'
@@ -15,6 +14,8 @@ export function createManualUpdateStrategy(
 
     return {
         async connect(state) {
+            // Force update
+            lastModified = undefined
             // Ensure that we don't trigger another request while one is in flight
             fetchUpdatesSingle = createEnsureSingle(async () => {
                 lastModified = await fetchFeaturesConfigurationViaHttp(
@@ -42,19 +43,6 @@ export function createManualUpdateStrategy(
         },
         onRequest() {
             return undefined
-        },
-        async updateAudiences(state, updatedAudiences) {
-            if (compareArrays(updatedAudiences, state.audiences)) {
-                // No need to update audiences
-                return Promise.resolve()
-            }
-            state.audiences = updatedAudiences
-            manualUpdatesDebugLog(
-                'Audiences updated (%o), getting new effective values',
-                updatedAudiences,
-            )
-            lastModified = undefined
-            return await this.connect(state)
         },
     }
 }
