@@ -9,6 +9,5 @@ export default defineConfig({
     test: {
         include: ['**/src/**/*.{test,spec}.{ts,mts,cts,tsx}'],
         exclude: ['**/node_modules/**', '**/tsc-out/**'],
-        setupFiles: './vitest.setup.js',
     },
 })
