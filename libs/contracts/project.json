@@ -20,16 +20,14 @@
             }
         },
         "package": {
-            "executor": "@nx/esbuild:esbuild",
+            "executor": "nx:run-commands",
             "options": {
-                "main": "libs/contracts/src/index.ts",
-                "tsConfig": "libs/contracts/tsconfig.json",
-                "outputPath": "libs/contracts/dist",
-                "skipTypeCheck": true,
-                "format": [
-                    "esm",
-                    "cjs"
+                "commands": [
+                    "tsup src/index.ts -d dist --sourcemap --format esm,cjs ",
+                    "tsc --emitDeclarationOnly --declaration --outDir dist"
                 ],
+                "cwd": "libs/contracts",
+                "parallel": false
             }
         }
     }

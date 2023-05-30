@@ -20,17 +20,15 @@
             }
         },
         "package": {
-            "executor": "@nx/esbuild:esbuild",
+            "executor": "nx:run-commands",
             "options": {
-                "main": "libs/react-sdk/src/index.ts",
-                "tsConfig": "libs/react-sdk/tsconfig.json",
-                "outputPath": "libs/react-sdk/dist",
-                "skipTypeCheck": true,
-                "format": [
-                    "esm", "cjs"
+                "commands": [
+                    "tsup src/index.ts -d dist --sourcemap --format esm,cjs",
+                    "tsc --emitDeclarationOnly --declaration --outDir dist"
                 ],
+                "cwd": "libs/react-sdk",
+                "parallel": false
             }
-            
         }
     }
 }

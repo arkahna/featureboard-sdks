@@ -20,19 +20,14 @@
             }
         },
         "package": {
-            "executor": "@nx/esbuild:esbuild",
+            "executor": "nx:run-commands",
             "options": {
-                "main": "libs/live-connection/src/server.ts",
-                "additionalEntryPoints": [
-                    "libs/live-connection/src/browser.ts"
+                "commands": [
+                    "tsup src/server.ts src/browser.ts -d dist --sourcemap --format esm,cjs",
+                    "tsc --emitDeclarationOnly --declaration --outDir dist"
                 ],
-                "tsConfig": "libs/live-connection/tsconfig.json",
-                "outputPath": "libs/live-connection/dist",
-                "skipTypeCheck": true,
-                "format": [
-                    "esm",
-                    "cjs"
-                ],
+                "cwd": "libs/live-connection",
+                "parallel": false
             }
         }
     }
