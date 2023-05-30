@@ -1,4 +1,5 @@
 import { ClientMessages } from '@featureboard/contracts'
+// eslint-disable-next-line @nx/enforce-module-boundaries
 import { IWebSocket } from '@featureboard/live-connection'
 
 export function connectToWsClient(
