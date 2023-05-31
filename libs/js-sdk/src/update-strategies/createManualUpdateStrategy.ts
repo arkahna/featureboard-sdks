@@ -8,23 +8,23 @@ export const manualUpdatesDebugLog = updatesLog.extend('manual')
 export function createManualUpdateStrategy(
     environmentApiKey: string,
     httpEndpoint: string,
-    audiences: string[],
 ): EffectiveConfigUpdateStrategy {
     let lastModified: undefined | string
     let fetchUpdatesSingle: undefined | (() => Promise<void>)
-    let currentAudiences = audiences
 
     return {
         async connect(state) {
+            // Force update
+            lastModified = undefined
             // Ensure that we don't trigger another request while one is in flight
             fetchUpdatesSingle = createEnsureSingle(async () => {
                 lastModified = await fetchFeaturesConfigurationViaHttp(
                     httpEndpoint,
-                    currentAudiences,
+                    state.audiences,
                     environmentApiKey,
                     state,
                     lastModified,
-                    () => currentAudiences,
+                    () => state.audiences,
                 )
             })
 
@@ -43,14 +43,6 @@ export function createManualUpdateStrategy(
         },
         onRequest() {
             return undefined
-        },
-        updateAudiences(state, updatedAudiences) {
-            currentAudiences = updatedAudiences
-            manualUpdatesDebugLog(
-                'Audiences updated (%o), getting new effective values',
-                updatedAudiences,
-            )
-            return this.connect(state)
         },
     }
 }

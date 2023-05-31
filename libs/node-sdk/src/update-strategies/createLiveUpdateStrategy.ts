@@ -1,4 +1,5 @@
 import { NotificationType } from '@featureboard/contracts'
+// eslint-disable-next-line @nx/enforce-module-boundaries
 import { LiveOptions } from '@featureboard/live-connection'
 import { AllFeaturesState } from '../feature-state'
 import { AllConfigUpdateStrategy } from './update-strategies'

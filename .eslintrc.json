@@ -1,26 +1,14 @@
 {
     "root": true,
-    "ignorePatterns": [
-        "**/*"
-    ],
-    "plugins": [
-        "@nrwl/nx"
-    ],
+    "ignorePatterns": ["**/*"],
+    "plugins": ["@nx"],
     "overrides": [
         {
-            "files": [
-                "*.ts",
-                "*.tsx",
-                "*.js",
-                "*.jsx"
-            ],
-            "extends": [
-                "plugin:@nrwl/nx/javascript",
-                "plugin:@nrwl/nx/typescript"
-            ],
+            "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
+            "extends": ["plugin:@nx/javascript", "plugin:@nx/typescript"],
             "parserOptions": {},
             "rules": {
-                "@nrwl/nx/enforce-module-boundaries": [
+                "@nx/enforce-module-boundaries": [
                     "error",
                     {
                         "enforceBuildableLibDependency": true,
@@ -28,9 +16,7 @@
                         "depConstraints": [
                             {
                                 "sourceTag": "*",
-                                "onlyDependOnLibsWithTags": [
-                                    "*"
-                                ]
+                                "onlyDependOnLibsWithTags": ["*"]
                             }
                         ]
                     }

@@ -1,5 +1,5 @@
 {
-  "mode": "pre",
+  "mode": "exit",
   "tag": "beta",
   "initialVersions": {
     "@featureboard/contracts": "0.1.0",

@@ -12,7 +12,7 @@ export function createLiveUpdateStrategy(
     audiences: string[],
     options: LiveOptions,
 ): EffectiveConfigUpdateStrategy {
-    let currentAudiences = audiences
+    const currentAudiences = audiences
     const liveConnectionLib = import('@featureboard/live-connection')
     const liveConnectionAsync = liveConnectionLib.then(({ LiveConnection }) => {
         return new LiveConnection(
@@ -88,9 +88,9 @@ export function createLiveUpdateStrategy(
         onRequest() {
             return undefined
         },
-        updateAudiences(state, updatedAudiences) {
-            currentAudiences = updatedAudiences
-            return this.connect(state)
-        },
+        // updateAudiences(state, updatedAudiences) {
+        //     currentAudiences = updatedAudiences
+        //     return this.connect(state)
+        // },
     }
 }

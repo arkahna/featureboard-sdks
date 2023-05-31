@@ -1,38 +1,41 @@
 {
-  "npmScope": "featureboard-sdks",
-  "affected": {
-    "defaultBase": "master"
-  },
-  "implicitDependencies": {
-    "package.json": {
-      "dependencies": "*",
-      "devDependencies": "*"
+    "npmScope": "featureboard-sdks",
+    "affected": {
+        "defaultBase": "main"
     },
-    ".eslintrc.json": "*"
-  },
-  "tasksRunnerOptions": {
-    "default": {
-      "runner": "nx/tasks-runners/default",
-      "options": {
-        "cacheableOperations": [
-          "build",
-          "lint",
-          "test",
-          "e2e"
+    "tasksRunnerOptions": {
+        "default": {
+            "runner": "nx/tasks-runners/default",
+            "options": {
+                "cacheableOperations": [
+                    "build",
+                    "lint",
+                    "test",
+                    "e2e"
+                ],
+                "parallel": 1
+            }
+        }
+    },
+    "targetDependencies": {
+        "build": [
+            {
+                "target": "build",
+                "projects": "dependencies"
+            }
+        ]
+    },
+    "cli": {
+        "defaultCollection": "@nx/workspace"
+    },
+    "namedInputs": {
+        "default": [
+            "{projectRoot}/**/*",
+            "sharedGlobals"
         ],
-        "parallel": 1
-      }
+        "sharedGlobals": [],
+        "production": [
+            "default"
+        ]
     }
-  },
-  "targetDependencies": {
-    "build": [
-      {
-        "target": "build",
-        "projects": "dependencies"
-      }
-    ]
-  },
-  "cli": {
-    "defaultCollection": "@nrwl/workspace"
-  }
 }

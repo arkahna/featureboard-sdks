@@ -11,7 +11,6 @@ export function resolveUpdateStrategy(
     updateStrategy: UpdateStrategies['kind'] | UpdateStrategies | undefined,
     environmentApiKey: string,
     api: FeatureBoardApiConfig,
-    audiences: string[],
 ): EffectiveConfigUpdateStrategy {
     const resolvedUpdateStrategy: UpdateStrategies =
         toUpdateStrategyOptions(updateStrategy)
@@ -32,16 +31,11 @@ export function resolveUpdateStrategy(
             api.http,
             resolvedUpdateStrategy.options?.intervalMs ||
                 pollingIntervalDefault,
-            audiences,
         )
     }
 
     if (resolvedUpdateStrategy.kind === 'manual') {
-        return createManualUpdateStrategy(
-            environmentApiKey,
-            api.http,
-            audiences,
-        )
+        return createManualUpdateStrategy(environmentApiKey, api.http)
     }
 
     throw new Error('Unknown update strategy: ' + updateStrategy)

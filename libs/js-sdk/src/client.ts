@@ -12,6 +12,7 @@ import { FeatureBoardClient } from './features-client'
 import { debugLog } from './log'
 import { resolveUpdateStrategy } from './update-strategies/resolveUpdateStrategy'
 import { UpdateStrategies } from './update-strategies/update-strategies'
+import { compareArrays } from './utils/compare-arrays'
 
 export function createBrowserClient({
     initialValues,
@@ -44,7 +45,10 @@ export function createBrowserClient({
         throw new Error('Cannot specify both store and initialValues')
     }
 
+    const initialisedCallbacks: ((initialsed: boolean) => void)[] = []
     const initialisedPromise = new PromiseCompletionSource<boolean>()
+    let updatedPromise: PromiseCompletionSource<boolean>[] = []
+
     // Ensure that the init promise doesn't cause an unhandled promise rejection
     initialisedPromise.promise.catch(() => {})
     const state = new EffectiveFeaturesState(
@@ -56,7 +60,6 @@ export function createBrowserClient({
         updateStrategy,
         environmentApiKey,
         api || featureBoardHostedService,
-        audiences,
     )
 
     debugLog('SDK connecting in background (%o)', {
@@ -88,26 +91,62 @@ export function createBrowserClient({
     return {
         client: createBrowserFbClient(state),
         get initialised() {
-            return initialisedPromise.completed
+            return (
+                initialisedPromise.completed &&
+                updatedPromise.every((p) => p.completed)
+            )
         },
         waitForInitialised() {
             return new Promise((resolve) => {
                 const interval = setInterval(() => {
-                    if (initialisedPromise.completed) {
+                    if (this.initialised) {
                         clearInterval(interval)
                         resolve(true)
                     }
                 }, 100)
             })
         },
-        updateAudiences(updatedAudiences: string[]) {
+        subscribeToInitialisedChanged(callback) {
+            initialisedCallbacks.push(callback)
+            return () => {
+                initialisedCallbacks.splice(
+                    initialisedCallbacks.indexOf(callback),
+                    1,
+                )
+            }
+        },
+        async updateAudiences(updatedAudiences: string[]) {
             debugLog('Updating audiences: %o', {
                 updatedAudiences,
+                initialised: this.initialised,
             })
-            return updateStrategyImplementation.updateAudiences(
-                state,
+
+            if (compareArrays(state.audiences, updatedAudiences)) {
+                // No need to update audiences
+                return Promise.resolve()
+            }
+
+            const promise = new PromiseCompletionSource<boolean>()
+            updatedPromise.push(promise)
+            debugLog('updateAudiences: invoke initialised callback with false')
+            initialisedCallbacks.forEach((c) => c(false))
+
+            state.audiences = updatedAudiences
+            debugLog(
+                'updateAudiences: Audiences updated (%o), getting new effective values',
                 updatedAudiences,
             )
+
+            return updateStrategyImplementation.connect(state).then(() => {
+                promise?.resolve(true)
+                if (this.initialised) {
+                    debugLog(
+                        'updateAudiences: invoke initialised callback with true',
+                    )
+                    initialisedCallbacks.forEach((c) => c(true))
+                    updatedPromise = []
+                }
+            })
         },
         updateFeatures() {
             return updateStrategyImplementation.updateFeatures()
@@ -149,17 +188,19 @@ function createBrowserFbClient(
             defaultValue: any,
             onValue: (value: any) => void,
         ) {
-            debugLog('subscribeToFeatureValue: %o', {
-                featureKey,
-            })
+            debugLog('subscribeToFeatureValue: %s', featureKey)
 
             const callback = (updatedFeatureKey: string, value: any): void => {
                 if (featureKey === updatedFeatureKey) {
-                    debugLog('subscribeToFeatureValue update: o', {
+                    debugLog(
+                        'subscribeToFeatureValue: %s update: %o',
                         featureKey,
-                        value,
-                        defaultValue,
-                    })
+                        {
+                            featureKey,
+                            value,
+                            defaultValue,
+                        },
+                    )
                     onValue(value ?? defaultValue)
                 }
             }
@@ -168,9 +209,7 @@ function createBrowserFbClient(
             onValue((state.store.get(featureKey) as any) ?? defaultValue)
 
             return () => {
-                debugLog('unsubscribeToFeatureValue: %o', {
-                    featureKey,
-                })
+                debugLog('unsubscribeToFeatureValue: %s', featureKey)
                 state.off('feature-updated', callback)
             }
         },

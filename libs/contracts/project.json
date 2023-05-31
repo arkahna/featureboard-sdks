@@ -1,26 +1,33 @@
 {
+    "name": "contracts",
+    "$schema": "../../node_modules/nx/schemas/project-schema.json",
     "projectType": "library",
     "sourceRoot": "libs/contracts/src",
     "targets": {
         "lint": {
-            "executor": "@nrwl/linter:eslint",
+            "executor": "@nx/linter:eslint",
             "options": {
-                "lintFilePatterns": ["libs/contracts/**/*.ts"]
+                "lintFilePatterns": [
+                    "libs/contracts/**/*.ts"
+                ]
             }
         },
         "test": {
-            "executor": "@nrwl/workspace:run-commands",
+            "executor": "nx:run-commands",
             "options": {
-                "command": "npx vitest --run --passWithNoTests",
+                "command": "pnpm vitest --run --passWithNoTests",
                 "cwd": "libs/contracts"
             }
         },
         "package": {
-            "executor": "@wanews/nx-typescript-project-references:package",
+            "executor": "nx:run-commands",
             "options": {
-                "main": "libs/contracts/src/index.ts",
-                "tsConfig": "libs/contracts/tsconfig.json",
-                "legacyOutput": true
+                "commands": [
+                    "tsup src/index.ts -d dist --sourcemap --format esm,cjs ",
+                    "tsc --emitDeclarationOnly --declaration --outDir dist"
+                ],
+                "cwd": "libs/contracts",
+                "parallel": false
             }
         }
     }

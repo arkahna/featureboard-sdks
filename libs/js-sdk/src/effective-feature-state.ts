@@ -13,11 +13,29 @@ export class EffectiveFeaturesState {
     private valueUpdatedCallbacks: Array<
         (featureKey: string, value: FeatureValue) => void
     > = []
+    private _audiences: string[] = []
 
     constructor(
-        public audiences: string[],
+        audiences: string[],
         public store: EffectiveFeatureStore = new MemoryEffectiveFeatureStore(),
-    ) {}
+    ) {
+        this._audiences = audiences
+    }
+
+    set audiences(value: string[]) {
+        this._audiences = value
+        const storeRecords = this.store.all()
+        this.store.clear()
+        Object.keys(storeRecords).forEach((key) => {
+            this.valueUpdatedCallbacks.forEach((valueUpdated) =>
+                valueUpdated(key, undefined),
+            )
+        })
+    }
+
+    get audiences(): string[] {
+        return [...this._audiences]
+    }
 
     on(
         _event: 'feature-updated',
@@ -36,11 +54,7 @@ export class EffectiveFeaturesState {
     }
 
     updateFeatureValue(featureKey: string, value: FeatureValue) {
-        if (value === undefined) {
-            this.store.set(featureKey, undefined)
-        } else {
-            this.store.set(featureKey, value)
-        }
+        this.store.set(featureKey, value)
 
         this.valueUpdatedCallbacks.forEach((valueUpdated) =>
             valueUpdated(featureKey, value),

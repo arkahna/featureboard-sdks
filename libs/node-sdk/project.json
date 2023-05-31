@@ -1,27 +1,33 @@
 {
+    "name": "node-sdk",
+    "$schema": "../../node_modules/nx/schemas/project-schema.json",
     "projectType": "library",
     "sourceRoot": "libs/node-sdk/src",
     "targets": {
         "lint": {
-            "executor": "@nrwl/linter:eslint",
+            "executor": "@nx/linter:eslint",
             "options": {
-                "lintFilePatterns": ["libs/node-sdk/**/*.ts"]
+                "lintFilePatterns": [
+                    "libs/node-sdk/**/*.ts"
+                ]
             }
         },
         "test": {
-            "executor": "@nrwl/workspace:run-commands",
+            "executor": "nx:run-commands",
             "options": {
-                "command": "npx vitest --run --passWithNoTests",
+                "command": "pnpm vitest --run --passWithNoTests",
                 "cwd": "libs/node-sdk"
             }
         },
         "package": {
-            "executor": "@wanews/nx-typescript-project-references:package",
+            "executor": "nx:run-commands",
             "options": {
-                "main": "libs/node-sdk/src/index.ts",
-                "tsConfig": "libs/node-sdk/tsconfig.json",
-                "external": ["node-fetch"],
-                "legacyOutput": true
+                "commands": [
+                    "tsup src/index.ts -d dist --sourcemap --format esm,cjs",
+                    "tsc --emitDeclarationOnly --declaration --outDir dist"
+                ],
+                "cwd": "libs/node-sdk",
+                "parallel": false
             }
         }
     }

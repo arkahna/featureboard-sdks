@@ -10,24 +10,25 @@ export function createPollingUpdateStrategy(
     environmentApiKey: string,
     httpEndpoint: string,
     intervalMs: number,
-    audiences: string[],
 ): EffectiveConfigUpdateStrategy {
     let stopPolling: undefined | (() => void)
     let lastModified: undefined | string
     let fetchUpdatesSingle: undefined | (() => Promise<void>)
-    let currentAudiences = audiences
 
     return {
         async connect(state) {
+            // Force update
+            lastModified = undefined
+            
             // Ensure that we don't trigger another request while one is in flight
             fetchUpdatesSingle = createEnsureSingle(async () => {
                 lastModified = await fetchFeaturesConfigurationViaHttp(
                     httpEndpoint,
-                    currentAudiences,
+                    state.audiences,
                     environmentApiKey,
                     state,
                     lastModified,
-                    () => currentAudiences,
+                    () => state.audiences,
                 )
             })
 
@@ -36,9 +37,8 @@ export function createPollingUpdateStrategy(
             }
             stopPolling = pollingUpdates(() => {
                 if (fetchUpdatesSingle) {
-                    pollingUpdatesDebugLog(
-                        'Polling for updates (%o)',
-                        currentAudiences,
+                    pollingUpdatesDebugLog('Polling for updates (%o)',
+                        lastModified,
                     )
                     // Catch errors here to ensure no unhandled promise rejections after a poll
                     return fetchUpdatesSingle().catch(() => {})
@@ -65,14 +65,6 @@ export function createPollingUpdateStrategy(
         },
         onRequest() {
             return undefined
-        },
-        updateAudiences(state, updatedAudiences) {
-            currentAudiences = updatedAudiences
-            pollingUpdatesDebugLog(
-                'Audiences updated (%o), getting new effective values',
-                updatedAudiences,
-            )
-            return this.connect(state)
         },
     }
 }
