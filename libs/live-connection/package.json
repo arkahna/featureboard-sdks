@@ -1,7 +1,7 @@
 {
     "name": "@featureboard/live-connection",
     "private": true,
-    "version": "0.1.0-beta.3",
+    "version": "0.1.0",
     "main": "tsc-out/server.js",
     "module": "src/server.ts",
     "browser": "src/browser.ts",
@@ -11,7 +11,7 @@
         "browser": "dist/esm/browser.js"
     },
     "dependencies": {
-        "@featureboard/contracts": "workspace:0.1.1-beta.0",
+        "@featureboard/contracts": "workspace:0.2.0",
         "debug": "^4.3.4",
         "promise-completion-source": "^1.0.0",
         "ws": "^8.13.0"

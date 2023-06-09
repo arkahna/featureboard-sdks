@@ -1,5 +1,44 @@
 # @featureboard/js-sdk
 
+## 0.10.0
+
+### Minor Changes
+
+- [#9](https://github.com/arkahna/featureboard-sdks/pull/9) [`ae67725`](https://github.com/arkahna/featureboard-sdks/commit/ae67725494742c9225ef9420a98775ff218e4dd6) Thanks [@idadaniels](https://github.com/idadaniels)! - Fixed issues around caching and instance management in React
+
+- [#6](https://github.com/arkahna/featureboard-sdks/pull/6) [`512fa7b`](https://github.com/arkahna/featureboard-sdks/commit/512fa7bb097320755aa82a5390019cbea1514ac9) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Fixed issue with /all not waiting for initial request value
+
+- [#6](https://github.com/arkahna/featureboard-sdks/pull/6) [`512fa7b`](https://github.com/arkahna/featureboard-sdks/commit/512fa7bb097320755aa82a5390019cbea1514ac9) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Removed fetchInstance, requires fetch global to be present for both browser and node SDKs
+
+- [`acc3ac1`](https://github.com/arkahna/featureboard-sdks/commit/acc3ac138925f876e5e63079f9e7802f8b85e2f4) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Upgrade dependencies
+
+- [`fd8731d`](https://github.com/arkahna/featureboard-sdks/commit/fd8731d62576a1f1ddbb9b810570dfedad1de39b) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Ignore effective values for stale audience (when current audiences change while update request is in flight)
+
+- [`fd8731d`](https://github.com/arkahna/featureboard-sdks/commit/fd8731d62576a1f1ddbb9b810570dfedad1de39b) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Logging updates
+
+- [#5](https://github.com/arkahna/featureboard-sdks/pull/5) [`52cb569`](https://github.com/arkahna/featureboard-sdks/commit/52cb5696360475987b4d8a6cacd82e0b1e237849) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - BREAKING: Major update to SDKs:
+
+  - 'live' support has been temporarily dropped
+  - Creating SDK instance is no longer async, this allows the SDK to be created with existing values and used immediately
+  - Much nicer support for initialising the SDK with existing values (for example from SSR)
+
+- [#6](https://github.com/arkahna/featureboard-sdks/pull/6) [`512fa7b`](https://github.com/arkahna/featureboard-sdks/commit/512fa7bb097320755aa82a5390019cbea1514ac9) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Upgraded dependencies
+
+### Patch Changes
+
+- [`1f626a5`](https://github.com/arkahna/featureboard-sdks/commit/1f626a5f75214f0dc704338a45da3d14eb7ccedd) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Better failure when fetch not defined globally
+
+- [`84398cb`](https://github.com/arkahna/featureboard-sdks/commit/84398cb8aa19b371cf2a6f68776b211c3ec4c0fb) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Fixed not removing unavailable feature
+
+- [`f8382cf`](https://github.com/arkahna/featureboard-sdks/commit/f8382cf935ef68253db1056257efc8b00f50e447) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Fixed interval not being bound to window
+
+- [`fd8731d`](https://github.com/arkahna/featureboard-sdks/commit/fd8731d62576a1f1ddbb9b810570dfedad1de39b) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Handle promise rejection on failed poll update
+
+- [`1992790`](https://github.com/arkahna/featureboard-sdks/commit/1992790d52454f1bba2b60dec4fac089abab7f54) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Fixed exports
+
+- Updated dependencies [[`ae67725`](https://github.com/arkahna/featureboard-sdks/commit/ae67725494742c9225ef9420a98775ff218e4dd6), [`1992790`](https://github.com/arkahna/featureboard-sdks/commit/1992790d52454f1bba2b60dec4fac089abab7f54)]:
+  - @featureboard/contracts@0.2.0
+
 ## 0.10.0-beta.7
 
 ### Minor Changes

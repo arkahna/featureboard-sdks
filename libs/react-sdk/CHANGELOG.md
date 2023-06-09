@@ -1,5 +1,20 @@
 # @featureboard/react-sdk
 
+## 0.7.0
+
+### Minor Changes
+
+- [#9](https://github.com/arkahna/featureboard-sdks/pull/9) [`ae67725`](https://github.com/arkahna/featureboard-sdks/commit/ae67725494742c9225ef9420a98775ff218e4dd6) Thanks [@idadaniels](https://github.com/idadaniels)! - Fixed issues around caching and instance management in React
+
+- [`acc3ac1`](https://github.com/arkahna/featureboard-sdks/commit/acc3ac138925f876e5e63079f9e7802f8b85e2f4) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Upgrade dependencies
+
+### Patch Changes
+
+- [`1992790`](https://github.com/arkahna/featureboard-sdks/commit/1992790d52454f1bba2b60dec4fac089abab7f54) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Fixed exports
+
+- Updated dependencies [[`ae67725`](https://github.com/arkahna/featureboard-sdks/commit/ae67725494742c9225ef9420a98775ff218e4dd6), [`512fa7b`](https://github.com/arkahna/featureboard-sdks/commit/512fa7bb097320755aa82a5390019cbea1514ac9), [`512fa7b`](https://github.com/arkahna/featureboard-sdks/commit/512fa7bb097320755aa82a5390019cbea1514ac9), [`acc3ac1`](https://github.com/arkahna/featureboard-sdks/commit/acc3ac138925f876e5e63079f9e7802f8b85e2f4), [`fd8731d`](https://github.com/arkahna/featureboard-sdks/commit/fd8731d62576a1f1ddbb9b810570dfedad1de39b), [`fd8731d`](https://github.com/arkahna/featureboard-sdks/commit/fd8731d62576a1f1ddbb9b810570dfedad1de39b), [`1f626a5`](https://github.com/arkahna/featureboard-sdks/commit/1f626a5f75214f0dc704338a45da3d14eb7ccedd), [`84398cb`](https://github.com/arkahna/featureboard-sdks/commit/84398cb8aa19b371cf2a6f68776b211c3ec4c0fb), [`f8382cf`](https://github.com/arkahna/featureboard-sdks/commit/f8382cf935ef68253db1056257efc8b00f50e447), [`52cb569`](https://github.com/arkahna/featureboard-sdks/commit/52cb5696360475987b4d8a6cacd82e0b1e237849), [`fd8731d`](https://github.com/arkahna/featureboard-sdks/commit/fd8731d62576a1f1ddbb9b810570dfedad1de39b), [`1992790`](https://github.com/arkahna/featureboard-sdks/commit/1992790d52454f1bba2b60dec4fac089abab7f54), [`512fa7b`](https://github.com/arkahna/featureboard-sdks/commit/512fa7bb097320755aa82a5390019cbea1514ac9)]:
+  - @featureboard/js-sdk@0.10.0
+
 ## 0.7.0-beta.7
 
 ### Patch Changes
