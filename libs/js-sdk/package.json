@@ -1,6 +1,6 @@
 {
     "name": "@featureboard/js-sdk",
-    "version": "0.10.0",
+    "version": "0.11.0",
     "main": "tsc-out/index.js",
     "license": "MIT",
     "sideEffects": false,
@@ -21,7 +21,7 @@
         "module": "dist/esm/index.js"
     },
     "dependencies": {
-        "@featureboard/contracts": "workspace:0.2.0",
+        "@featureboard/contracts": "workspace:0.3.0",
         "debug": "^4.3.4",
         "promise-completion-source": "^1.0.0"
     }

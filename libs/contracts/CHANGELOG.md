@@ -1,5 +1,11 @@
 # @featureboard/contracts
 
+## 0.3.0
+
+### Minor Changes
+
+- [#10](https://github.com/arkahna/featureboard-sdks/pull/10) [`a77deec`](https://github.com/arkahna/featureboard-sdks/commit/a77deec3dc8321d28f02533284a4e55a7125d931) Thanks [@idadaniels](https://github.com/idadaniels)! - Fix package command
+
 ## 0.2.0
 
 ### Minor Changes

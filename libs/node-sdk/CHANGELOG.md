@@ -1,5 +1,16 @@
 # @featureboard/node-sdk
 
+## 0.13.0
+
+### Minor Changes
+
+- [#10](https://github.com/arkahna/featureboard-sdks/pull/10) [`a77deec`](https://github.com/arkahna/featureboard-sdks/commit/a77deec3dc8321d28f02533284a4e55a7125d931) Thanks [@idadaniels](https://github.com/idadaniels)! - Fix package command
+
+### Patch Changes
+
+- Updated dependencies [[`a77deec`](https://github.com/arkahna/featureboard-sdks/commit/a77deec3dc8321d28f02533284a4e55a7125d931)]:
+  - @featureboard/js-sdk@0.11.0
+
 ## 0.12.0
 
 ### Minor Changes
