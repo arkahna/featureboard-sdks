@@ -23,7 +23,7 @@
             "executor": "nx:run-commands",
             "options": {
                 "commands": [
-                    "tsup src/index.ts -d dist --sourcemap --format esm,cjs ",
+                    "tsup src/index.ts -d dist --sourcemap --format esm,cjs --legacy-output",
                     "tsc --emitDeclarationOnly --declaration --outDir dist"
                 ],
                 "cwd": "libs/contracts",
