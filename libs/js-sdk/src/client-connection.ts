@@ -8,13 +8,13 @@ export interface BrowserClient {
 
     waitForInitialised(): Promise<boolean>
 
-    /** Subscribe to initialised changes, will call back with initilised boolean value
+    /** Subscribe to initialised changes, will call back with initialised boolean value
      * Recommended to be used in conjuction with updateAudiences()
      *
      * @returns unsubscribe function
      */
     subscribeToInitialisedChanged(
-        callback: (initilised: boolean) => void,
+        callback: (initialised: boolean) => void,
     ): () => void
 
     /** Will set initialised to false until the new audiences are loaded */

@@ -87,19 +87,22 @@ export function createBrowserClient({
                 initialisedPromise.reject(err)
             }
         })
+    const isInitialised = () => {
+        return (
+            initialisedPromise.completed &&
+            updatedPromise.every((p) => p.completed)
+        )
+    }
 
     return {
         client: createBrowserFbClient(state),
         get initialised() {
-            return (
-                initialisedPromise.completed &&
-                updatedPromise.every((p) => p.completed)
-            )
+            return isInitialised()
         },
         waitForInitialised() {
             return new Promise((resolve) => {
                 const interval = setInterval(() => {
-                    if (this.initialised) {
+                    if (isInitialised()) {
                         clearInterval(interval)
                         resolve(true)
                     }
@@ -118,7 +121,7 @@ export function createBrowserClient({
         async updateAudiences(updatedAudiences: string[]) {
             debugLog('Updating audiences: %o', {
                 updatedAudiences,
-                initialised: this.initialised,
+                initialised: isInitialised(),
             })
 
             if (compareArrays(state.audiences, updatedAudiences)) {
@@ -139,7 +142,7 @@ export function createBrowserClient({
 
             return updateStrategyImplementation.connect(state).then(() => {
                 promise?.resolve(true)
-                if (this.initialised) {
+                if (isInitialised()) {
                     debugLog(
                         'updateAudiences: invoke initialised callback with true',
                     )
