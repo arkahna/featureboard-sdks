@@ -1,5 +1,11 @@
 # @featureboard/js-sdk
 
+## 0.11.1
+
+### Patch Changes
+
+- [#11](https://github.com/arkahna/featureboard-sdks/pull/11) [`0c64eea`](https://github.com/arkahna/featureboard-sdks/commit/0c64eeaa2dba2cdc0d6c6a7482dc02b819654f61) Thanks [@idadaniels](https://github.com/idadaniels)! - Fix for 'initialised undefined' bug
+
 ## 0.11.0
 
 ### Minor Changes

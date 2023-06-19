@@ -1,5 +1,12 @@
 # @featureboard/react-sdk
 
+## 0.8.1
+
+### Patch Changes
+
+- Updated dependencies [[`0c64eea`](https://github.com/arkahna/featureboard-sdks/commit/0c64eeaa2dba2cdc0d6c6a7482dc02b819654f61)]:
+  - @featureboard/js-sdk@0.11.1
+
 ## 0.8.0
 
 ### Minor Changes
