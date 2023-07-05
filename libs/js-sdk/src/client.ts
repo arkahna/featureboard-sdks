@@ -52,6 +52,16 @@ export function createBrowserClient({
         initialisedCallbacks: [],
         initialisedPromise: initialPromise,
     }
+    initialisedState.initialisedPromise.promise.then(() => {
+        // If the promise has changed, then we don't want to invoke the callback
+        if (initialPromise !== initialisedState.initialisedPromise) {
+            return
+        }
+
+        // Get the value from the function, just incase it has changed
+        const initialised = isInitialised()
+        initialisedState.initialisedCallbacks.forEach((c) => c(initialised))
+    })
 
     // Ensure that the init promise doesn't cause an unhandled promise rejection
     initialisedState.initialisedPromise.promise.catch(() => {})
