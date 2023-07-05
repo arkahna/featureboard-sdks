@@ -102,7 +102,10 @@ export function createBrowserClient({
                     },
                     err,
                 )
-                initialisedState.initialisedPromise.reject(err)
+                console.error('FeatureBoard SDK failed to connect', err)
+
+                // TODO Need to handle retries when connect fails
+                initialisedState.initialisedPromise.resolve(true)
             }
         })
     const isInitialised = () => {
