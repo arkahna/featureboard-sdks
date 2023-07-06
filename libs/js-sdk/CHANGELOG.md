@@ -1,5 +1,11 @@
 # @featureboard/js-sdk
 
+## 0.11.2
+
+### Patch Changes
+
+- [#12](https://github.com/arkahna/featureboard-sdks/pull/12) [`7cfb2ae`](https://github.com/arkahna/featureboard-sdks/commit/7cfb2aea5ed8e3eb25690e8a978df5d7aabe649d) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Fixed initialisation issue when audiences are updated
+
 ## 0.11.1
 
 ### Patch Changes
