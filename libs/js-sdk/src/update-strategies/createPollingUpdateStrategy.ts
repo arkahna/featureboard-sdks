@@ -19,7 +19,7 @@ export function createPollingUpdateStrategy(
         async connect(state) {
             // Force update
             lastModified = undefined
-            
+
             // Ensure that we don't trigger another request while one is in flight
             fetchUpdatesSingle = createEnsureSingle(async () => {
                 lastModified = await fetchFeaturesConfigurationViaHttp(
@@ -37,7 +37,8 @@ export function createPollingUpdateStrategy(
             }
             stopPolling = pollingUpdates(() => {
                 if (fetchUpdatesSingle) {
-                    pollingUpdatesDebugLog('Polling for updates (%o)',
+                    pollingUpdatesDebugLog(
+                        'Polling for updates (%o)',
                         lastModified,
                     )
                     // Catch errors here to ensure no unhandled promise rejections after a poll
@@ -45,7 +46,7 @@ export function createPollingUpdateStrategy(
                 }
             }, intervalMs)
 
-            return fetchUpdatesSingle()
+            return await fetchUpdatesSingle()
         },
         async close() {
             if (stopPolling) {

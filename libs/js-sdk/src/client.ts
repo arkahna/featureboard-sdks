@@ -44,13 +44,27 @@ export function createBrowserClient({
     if (store && initialValues) {
         throw new Error('Cannot specify both store and initialValues')
     }
+    const initialPromise = new PromiseCompletionSource<boolean>()
+    const initialisedState: {
+        initialisedCallbacks: Array<(initialsed: boolean) => void>
+        initialisedPromise: PromiseCompletionSource<boolean>
+    } = {
+        initialisedCallbacks: [],
+        initialisedPromise: initialPromise,
+    }
+    initialisedState.initialisedPromise.promise.then(() => {
+        // If the promise has changed, then we don't want to invoke the callback
+        if (initialPromise !== initialisedState.initialisedPromise) {
+            return
+        }
 
-    const initialisedCallbacks: ((initialsed: boolean) => void)[] = []
-    const initialisedPromise = new PromiseCompletionSource<boolean>()
-    let updatedPromise: PromiseCompletionSource<boolean>[] = []
+        // Get the value from the function, just incase it has changed
+        const initialised = isInitialised()
+        initialisedState.initialisedCallbacks.forEach((c) => c(initialised))
+    })
 
     // Ensure that the init promise doesn't cause an unhandled promise rejection
-    initialisedPromise.promise.catch(() => {})
+    initialisedState.initialisedPromise.promise.catch(() => {})
     const state = new EffectiveFeaturesState(
         audiences,
         store || new MemoryEffectiveFeatureStore(initialValues),
@@ -68,15 +82,19 @@ export function createBrowserClient({
     updateStrategyImplementation
         .connect(state)
         .then(() => {
-            if (!initialisedPromise.completed) {
+            if (initialPromise !== initialisedState.initialisedPromise) {
+                return
+            }
+
+            if (!initialPromise.completed) {
                 debugLog('SDK connected (%o)', {
                     audiences,
                 })
-                initialisedPromise.resolve(true)
+                initialPromise.resolve(true)
             }
         })
         .catch((err) => {
-            if (!initialisedPromise.completed) {
+            if (!initialisedState.initialisedPromise.completed) {
                 debugLog(
                     'SDK failed to connect (%o): %o',
                     {
@@ -84,14 +102,14 @@ export function createBrowserClient({
                     },
                     err,
                 )
-                initialisedPromise.reject(err)
+                console.error('FeatureBoard SDK failed to connect', err)
+
+                // TODO Need to handle retries when connect fails
+                initialisedState.initialisedPromise.resolve(true)
             }
         })
     const isInitialised = () => {
-        return (
-            initialisedPromise.completed &&
-            updatedPromise.every((p) => p.completed)
-        )
+        return initialisedState.initialisedPromise.completed
     }
 
     return {
@@ -110,29 +128,52 @@ export function createBrowserClient({
             })
         },
         subscribeToInitialisedChanged(callback) {
-            initialisedCallbacks.push(callback)
+            debugLog('Subscribing to initialised changed: %o', {
+                initialised: isInitialised(),
+            })
+
+            initialisedState.initialisedCallbacks.push(callback)
             return () => {
-                initialisedCallbacks.splice(
-                    initialisedCallbacks.indexOf(callback),
+                initialisedState.initialisedCallbacks.splice(
+                    initialisedState.initialisedCallbacks.indexOf(callback),
                     1,
                 )
             }
         },
         async updateAudiences(updatedAudiences: string[]) {
-            debugLog('Updating audiences: %o', {
-                updatedAudiences,
-                initialised: isInitialised(),
-            })
-
             if (compareArrays(state.audiences, updatedAudiences)) {
+                debugLog('Skipped updating audiences, no change: %o', {
+                    updatedAudiences,
+                    currentAudiences: state.audiences,
+                    initialised: isInitialised(),
+                })
                 // No need to update audiences
                 return Promise.resolve()
             }
 
-            const promise = new PromiseCompletionSource<boolean>()
-            updatedPromise.push(promise)
+            debugLog('Updating audiences: %o', {
+                updatedAudiences,
+                currentAudiences: state.audiences,
+                initialised: isInitialised(),
+            })
+
+            const newPromise = new PromiseCompletionSource<boolean>()
+            initialisedState.initialisedPromise = newPromise
+            initialisedState.initialisedPromise.promise.catch(() => {})
+            initialisedState.initialisedPromise.promise.then(() => {
+                // If the promise has changed, then we don't want to invoke the callback
+                if (newPromise !== initialisedState.initialisedPromise) {
+                    return
+                }
+
+                // Get the value from the function, just incase it has changed
+                const initialised = isInitialised()
+                initialisedState.initialisedCallbacks.forEach((c) =>
+                    c(initialised),
+                )
+            })
             debugLog('updateAudiences: invoke initialised callback with false')
-            initialisedCallbacks.forEach((c) => c(false))
+            initialisedState.initialisedCallbacks.forEach((c) => c(false))
 
             state.audiences = updatedAudiences
             debugLog(
@@ -140,15 +181,13 @@ export function createBrowserClient({
                 updatedAudiences,
             )
 
-            return updateStrategyImplementation.connect(state).then(() => {
-                promise?.resolve(true)
-                if (isInitialised()) {
-                    debugLog(
-                        'updateAudiences: invoke initialised callback with true',
-                    )
-                    initialisedCallbacks.forEach((c) => c(true))
-                    updatedPromise = []
-                }
+            updateStrategyImplementation.connect(state).then(() => {
+                newPromise?.resolve(true)
+                debugLog('Audiences updated: %o', {
+                    updatedAudiences,
+                    currentAudiences: state.audiences,
+                    initialised: isInitialised(),
+                })
             })
         },
         updateFeatures() {

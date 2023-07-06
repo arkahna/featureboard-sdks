@@ -37,6 +37,8 @@ describe('http client', () => {
 
             expect(httpClient.initialised).toEqual(false)
             expect(value).toEqual('default-value')
+            await httpClient.waitForInitialised()
+            expect(httpClient.initialised).toEqual(true)
         } finally {
             server.resetHandlers()
             server.close()
@@ -284,6 +286,8 @@ describe('http client', () => {
             )
             expect(client.initialised).toEqual(false)
             expect(value).toEqual('service-default-value')
+            await client.waitForInitialised()
+            expect(client.initialised).toEqual(true)
         } finally {
             server.resetHandlers()
             server.close()
@@ -367,6 +371,7 @@ describe('http client', () => {
             expect(value).toEqual('service-default-value')
 
             await httpClient.updateAudiences(['test-audience'])
+            await httpClient.waitForInitialised()
         } finally {
             server.resetHandlers()
             server.close()
