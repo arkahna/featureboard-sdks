@@ -1,0 +1,49 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33815.320
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FeatureBoard.DotnetSdk", "libs\dotnet-sdk\FeatureBoard.DotnetSdk.csproj", "{06CE61C0-98A0-4480-AF70-5C6789D5802F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "libs", "libs", "{F49D3264-C590-4757-A81D-538FDC3D4621}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FeatureBoard.DotnetSdk.Test", "libs\dotnet-sdk-test\FeatureBoard.DotnetSdk.Test.csproj", "{84A978B8-25F4-477F-AEDE-6F81B7A925AD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "apps", "apps", "{80295D85-0E0F-4A63-9173-5F4016E6CBB5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{E89AFEBD-4D34-4053-A4BF-AE043316130F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FeatureBoardSdk.Examples.DotnetApi", "apps\examples\dotnet-api\FeatureBoardSdk.Examples.DotnetApi.csproj", "{A57CF28E-C335-4F39-AFD3-80ACEC1B3DC1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{06CE61C0-98A0-4480-AF70-5C6789D5802F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{06CE61C0-98A0-4480-AF70-5C6789D5802F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{06CE61C0-98A0-4480-AF70-5C6789D5802F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{06CE61C0-98A0-4480-AF70-5C6789D5802F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{84A978B8-25F4-477F-AEDE-6F81B7A925AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{84A978B8-25F4-477F-AEDE-6F81B7A925AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{84A978B8-25F4-477F-AEDE-6F81B7A925AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{84A978B8-25F4-477F-AEDE-6F81B7A925AD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A57CF28E-C335-4F39-AFD3-80ACEC1B3DC1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A57CF28E-C335-4F39-AFD3-80ACEC1B3DC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A57CF28E-C335-4F39-AFD3-80ACEC1B3DC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A57CF28E-C335-4F39-AFD3-80ACEC1B3DC1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{06CE61C0-98A0-4480-AF70-5C6789D5802F} = {F49D3264-C590-4757-A81D-538FDC3D4621}
+		{84A978B8-25F4-477F-AEDE-6F81B7A925AD} = {F49D3264-C590-4757-A81D-538FDC3D4621}
+		{E89AFEBD-4D34-4053-A4BF-AE043316130F} = {80295D85-0E0F-4A63-9173-5F4016E6CBB5}
+		{A57CF28E-C335-4F39-AFD3-80ACEC1B3DC1} = {E89AFEBD-4D34-4053-A4BF-AE043316130F}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E8386015-092A-4918-9E96-0BAA07888982}
+	EndGlobalSection
+EndGlobal

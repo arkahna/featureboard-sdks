@@ -1,0 +1,47 @@
+{
+    "name": "examples-dotnet-api",
+    "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+    "projectType": "application",
+    "sourceRoot": "apps/examples/dotnet-api",
+    "targets": {
+        "build": {
+            "executor": "@nx-dotnet/core:build",
+            "outputs": [
+                "{workspaceRoot}/dist/apps/examples/dotnet-api",
+                "{workspaceRoot}/dist/intermediates/apps/examples/dotnet-api"
+            ],
+            "options": {
+                "configuration": "Debug",
+                "noDependencies": true
+            },
+            "configurations": {
+                "production": {
+                    "configuration": "Release"
+                }
+            }
+        },
+        "serve": {
+            "executor": "@nx-dotnet/core:serve",
+            "options": {
+                "configuration": "Debug"
+            },
+            "configurations": {
+                "production": {
+                    "configuration": "Release"
+                }
+            }
+        },
+        "lint": {
+            "executor": "@nx-dotnet/core:format"
+        },
+        "swagger": {
+            "executor": "@nx-dotnet/core:update-swagger",
+            "outputs": ["options.output"],
+            "options": {
+                "output": "libs/generated/dotnet-api-swagger/swagger.json"
+            },
+            "dependsOn": ["build"]
+        }
+    },
+    "tags": []
+}

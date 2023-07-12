@@ -11,7 +11,9 @@
                     "build",
                     "lint",
                     "test",
-                    "e2e"
+                    "e2e",
+                    "codegen",
+                    "swagger"
                 ],
                 "parallel": 1
             }
@@ -29,13 +31,26 @@
         "defaultCollection": "@nx/workspace"
     },
     "namedInputs": {
-        "default": [
-            "{projectRoot}/**/*",
-            "sharedGlobals"
-        ],
+        "default": ["{projectRoot}/**/*", "sharedGlobals"],
         "sharedGlobals": [],
         "production": [
-            "default"
+            "default",
+            "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
+            "!{projectRoot}/tsconfig.spec.json",
+            "!{projectRoot}/jest.config.[jt]s"
         ]
+    },
+    "plugins": ["@nx-dotnet/core"],
+    "targetDefaults": {
+        "test": {
+            "inputs": [
+                "default",
+                "^production",
+                "{workspaceRoot}/jest.preset.js"
+            ]
+        },
+        "build": {
+            "dependsOn": ["codegen", "^codegen"]
+        }
     }
 }

@@ -9,34 +9,20 @@
         "allowSyntheticDefaultImports": true,
         "target": "es2018",
         "module": "esnext",
-        "lib": [
-            "es2018",
-            "dom"
-        ],
+        "lib": ["es2018", "dom"],
         "skipLibCheck": true,
         "skipDefaultLibCheck": true,
         "baseUrl": ".",
         "strict": true,
         "paths": {
-            "@featureboard/contracts": [
-                "libs/contracts/src/index.ts"
-            ],
-            "@featureboard/js-sdk": [
-                "libs/js-sdk/src/index.ts"
-            ],
+            "@featureboard/contracts": ["libs/contracts/src/index.ts"],
+            "@featureboard/js-sdk": ["libs/js-sdk/src/index.ts"],
             "@featureboard/live-connection": [
                 "libs/live-connection/src/server.ts"
             ],
-            "@featureboard/node-sdk": [
-                "libs/node-sdk/src/index.ts"
-            ],
-            "@featureboard/react-sdk": [
-                "libs/react-sdk/src/index.ts"
-            ]
+            "@featureboard/node-sdk": ["libs/node-sdk/src/index.ts"],
+            "@featureboard/react-sdk": ["libs/react-sdk/src/index.ts"]
         }
     },
-    "exclude": [
-        "node_modules",
-        "tmp"
-    ]
+    "exclude": ["node_modules", "tmp"]
 }

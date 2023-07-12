@@ -24,6 +24,12 @@ node_modules
 !.vscode/launch.json
 !.vscode/extensions.json
 
+# IDE - Visual studio
+**/.vs/*
+
+# Resharper
+/*.sln.DotSettings.user
+
 # misc
 /.sass-cache
 /connect.lock

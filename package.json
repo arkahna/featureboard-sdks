@@ -24,7 +24,8 @@
         "update": "nx migrate latest",
         "workspace-generator": "nx workspace-generator",
         "dep-graph": "nx dep-graph",
-        "help": "nx help"
+        "help": "nx help",
+        "prepare": "nx g @nx-dotnet/core:restore"
     },
     "private": true,
     "dependencies": {
@@ -34,6 +35,8 @@
     "devDependencies": {
         "@changesets/changelog-github": "^0.4.8",
         "@changesets/cli": "^2.26.1",
+        "@nrwl/js": "16.2.1",
+        "@nx-dotnet/core": "^1.22.0",
         "@nx/devkit": "16.2.1",
         "@nx/esbuild": "^16.2.2",
         "@nx/eslint-plugin": "16.2.1",
