@@ -1,5 +1,11 @@
 # @featureboard/react-sdk
 
+## 0.9.0
+
+### Minor Changes
+
+- [#15](https://github.com/arkahna/featureboard-sdks/pull/15) [`d290f3a`](https://github.com/arkahna/featureboard-sdks/commit/d290f3ae1b843e72a8f001119d99d4bb98a5af2e) Thanks [@idadaniels](https://github.com/idadaniels)! - Added useClient hook
+
 ## 0.8.2
 
 ### Patch Changes
