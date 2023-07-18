@@ -46,3 +46,6 @@ jobs:
 
       - name: Tests
         run: pnpm run test
+  
+      - name: Package libs
+        run: pnpm package
