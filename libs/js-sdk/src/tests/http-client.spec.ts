@@ -4,7 +4,7 @@ import { setupServer } from 'msw/node'
 import { describe, expect, it } from 'vitest'
 import { createBrowserClient } from '../client'
 import { featureBoardHostedService } from '../featureboard-service-urls'
-import { TestExternalStateStore } from './test-external-state-store'
+import { MockExternalStateStore } from './mock-external-state-store'
 
 describe('http client', () => {
     it('can wait for initialisation, initialised false', async () => {
@@ -534,7 +534,7 @@ describe('http client', () => {
                 environmentApiKey: 'env-api-key',
                 audiences: [],
                 api: featureBoardHostedService,
-                externalStateStore: new TestExternalStateStore(
+                externalStateStore: new MockExternalStateStore(
                     () =>
                         Promise.resolve({
                             'my-feature': 'external-state-store-value',
@@ -580,7 +580,7 @@ describe('http client', () => {
                     environmentApiKey: 'env-api-key',
                     audiences: [],
                     api: featureBoardHostedService,
-                    externalStateStore: new TestExternalStateStore(
+                    externalStateStore: new MockExternalStateStore(
                         () => {
                             countExternalStateStoreRequest++
                             return Promise.reject({
@@ -630,7 +630,7 @@ describe('http client', () => {
                 environmentApiKey: 'env-api-key',
                 audiences: [],
                 api: featureBoardHostedService,
-                externalStateStore: new TestExternalStateStore(
+                externalStateStore: new MockExternalStateStore(
                     () =>
                         Promise.resolve({
                             'my-feature': 'external-state-store-value',
@@ -716,7 +716,7 @@ describe('http client', () => {
                 audiences: [],
                 api: featureBoardHostedService,
                 updateStrategy: { kind: 'manual' },
-                externalStateStore: new TestExternalStateStore(
+                externalStateStore: new MockExternalStateStore(
                     async () =>
                         Promise.resolve({
                             'my-feature': 'external-state-store-value',

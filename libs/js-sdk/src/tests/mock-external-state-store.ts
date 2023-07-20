@@ -1,11 +1,13 @@
-import { ExternalStateStore } from "../effective-feature-store"
+import { ExternalStateStore } from '../external-state-store'
 
-export class TestExternalStateStore implements ExternalStateStore {
+export class MockExternalStateStore implements ExternalStateStore {
     constructor(
         private allCallback: () => Promise<
             Record<string, string | number | boolean | undefined>
-        >, 
-        private updateCallback: (store: Record<string, string | number | boolean | undefined>) => void
+        >,
+        private updateCallback: (
+            store: Record<string, string | number | boolean | undefined>,
+        ) => void,
     ) {}
 
     all(): Promise<Record<string, string | number | boolean | undefined>> {
