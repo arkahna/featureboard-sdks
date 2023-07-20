@@ -1,7 +1,4 @@
-import {
-    EffectiveFeatureStore,
-    MemoryEffectiveFeatureStore,
-} from './effective-feature-store'
+import { MemoryEffectiveFeatureStore } from './effective-feature-store'
 
 export interface EffectiveFeatureValues {
     [featureKey: string]: string | boolean | number
@@ -17,7 +14,7 @@ export class EffectiveFeaturesState {
 
     constructor(
         audiences: string[],
-        public store: EffectiveFeatureStore = new MemoryEffectiveFeatureStore(),
+        public store: MemoryEffectiveFeatureStore = new MemoryEffectiveFeatureStore(),
     ) {
         this._audiences = audiences
     }
@@ -59,5 +56,15 @@ export class EffectiveFeaturesState {
         this.valueUpdatedCallbacks.forEach((valueUpdated) =>
             valueUpdated(featureKey, value),
         )
+    }
+
+    async initialiseExternalStateStore() {
+        const storeRecords = await this.store.initialiseExternalStateStore()
+        
+        Object.keys(storeRecords).forEach((key) => {
+            this.valueUpdatedCallbacks.forEach((valueUpdated) =>
+                valueUpdated(key, storeRecords[key]),
+            )
+        })
     }
 }

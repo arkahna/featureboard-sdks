@@ -2,10 +2,8 @@ import { EffectiveFeatureValue } from '@featureboard/contracts'
 import { PromiseCompletionSource } from 'promise-completion-source'
 import { BrowserClient } from './client-connection'
 import { EffectiveFeaturesState } from './effective-feature-state'
-import {
-    EffectiveFeatureStore,
-    MemoryEffectiveFeatureStore,
-} from './effective-feature-store'
+import { MemoryEffectiveFeatureStore } from './effective-feature-store'
+import { ExternalStateStore } from './external-state-store'
 import { FeatureBoardApiConfig } from './featureboard-api-config'
 import { featureBoardHostedService } from './featureboard-service-urls'
 import { FeatureBoardClient } from './features-client'
@@ -13,10 +11,10 @@ import { debugLog } from './log'
 import { resolveUpdateStrategy } from './update-strategies/resolveUpdateStrategy'
 import { UpdateStrategies } from './update-strategies/update-strategies'
 import { compareArrays } from './utils/compare-arrays'
+import { retry } from './utils/retry'
 
 export function createBrowserClient({
-    initialValues,
-    store,
+    externalStateStore,
     updateStrategy,
     environmentApiKey,
     api,
@@ -34,16 +32,16 @@ export function createBrowserClient({
      */
     updateStrategy?: UpdateStrategies['kind'] | UpdateStrategies
 
-    store?: EffectiveFeatureStore
+    /**
+     * External state store is used to initialise the internal state store if retreving the effective feature values from the API would fail.
+     * After initialisation the external state store will be updated but otherwise not used again.
+     *
+     */
+    externalStateStore?: ExternalStateStore
     audiences: string[]
-
-    initialValues?: EffectiveFeatureValue[]
 
     environmentApiKey: string
 }): BrowserClient {
-    if (store && initialValues) {
-        throw new Error('Cannot specify both store and initialValues')
-    }
     const initialPromise = new PromiseCompletionSource<boolean>()
     const initialisedState: {
         initialisedCallbacks: Array<(initialsed: boolean) => void>
@@ -65,9 +63,10 @@ export function createBrowserClient({
 
     // Ensure that the init promise doesn't cause an unhandled promise rejection
     initialisedState.initialisedPromise.promise.catch(() => {})
+
     const state = new EffectiveFeaturesState(
         audiences,
-        store || new MemoryEffectiveFeatureStore(initialValues),
+        new MemoryEffectiveFeatureStore(externalStateStore),
     )
 
     const updateStrategyImplementation = resolveUpdateStrategy(
@@ -79,8 +78,18 @@ export function createBrowserClient({
     debugLog('SDK connecting in background (%o)', {
         audiences,
     })
-    updateStrategyImplementation
-        .connect(state)
+
+    retry(async () => {
+        try {
+            return await updateStrategyImplementation.connect(state)
+        } catch (error) {
+            if (state.store.hasExternalStateStore) {
+                // Initialise using the external state store instead
+                return await state.initialiseExternalStateStore()
+            }
+            throw error
+        }
+    }, 0)
         .then(() => {
             if (initialPromise !== initialisedState.initialisedPromise) {
                 return
@@ -102,9 +111,10 @@ export function createBrowserClient({
                     },
                     err,
                 )
-                console.error('FeatureBoard SDK failed to connect', err)
-
-                // TODO Need to handle retries when connect fails
+                console.error(
+                    'FeatureBoard SDK failed to connect after 5 retries',
+                    err,
+                )
                 initialisedState.initialisedPromise.resolve(true)
             }
         })

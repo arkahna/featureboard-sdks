@@ -1,29 +1,41 @@
 import { EffectiveFeatureValue } from '@featureboard/contracts'
 import { debugLog } from './log'
-
-export interface EffectiveFeatureStore {
-    /** Gets a stable copy of the feature values (will not be updated if the store is updated). */
-    all(): Record<string, EffectiveFeatureValue['value'] | undefined>
-    clear(): void
-    get(featureKey: string): EffectiveFeatureValue['value'] | undefined
-    set(
-        featureKey: string,
-        value: EffectiveFeatureValue['value'] | undefined,
-    ): void | PromiseLike<any>
-}
+import { ExternalStateStore } from './external-state-store'
 
 const storeDebug = debugLog.extend('store')
 const memoryStoreDebug = storeDebug.extend('memory')
 
-export class MemoryEffectiveFeatureStore implements EffectiveFeatureStore {
+export class MemoryEffectiveFeatureStore {
     private _store: Record<string, EffectiveFeatureValue['value'] | undefined> =
         {}
 
-    constructor(initialValues?: EffectiveFeatureValue[]) {
-        memoryStoreDebug('initialising: %o', initialValues)
-        for (const value of initialValues || []) {
-            this._store[value.featureKey] = value.value
+    private _externalStore: ExternalStateStore | undefined
+    hasExternalStateStore: boolean
+
+    constructor(
+        externalStateStore?: ExternalStateStore,
+    ) {
+        this._externalStore = externalStateStore
+        this.hasExternalStateStore = !!externalStateStore
+    }
+
+    async initialiseExternalStateStore(): Promise<Record<string, EffectiveFeatureValue['value'] | undefined>> {
+        if (!this._externalStore) {
+            throw new Error('External state store is undefined')
         }
+        memoryStoreDebug('Initialising external state store',)
+
+        try {
+            this._store = await this._externalStore.all()
+        } catch (error: any) {
+            memoryStoreDebug(
+                'Initialse memory store with external store failed',
+                error,
+            )
+            throw error
+        }
+
+        return Promise.resolve({...this._store})
     }
 
     clear(): void {
@@ -43,5 +55,9 @@ export class MemoryEffectiveFeatureStore implements EffectiveFeatureStore {
     set(featureKey: string, value: EffectiveFeatureValue['value'] | undefined) {
         memoryStoreDebug("set '%s': %o", featureKey, value)
         this._store[featureKey] = value
+
+        if (this._externalStore) {
+            this._externalStore.update(this._store)
+        }
     }
 }
