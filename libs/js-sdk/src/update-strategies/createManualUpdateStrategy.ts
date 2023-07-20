@@ -13,18 +13,18 @@ export function createManualUpdateStrategy(
     let fetchUpdatesSingle: undefined | (() => Promise<void>)
 
     return {
-        async connect(state) {
+        async connect(stateStore) {
             // Force update
             lastModified = undefined
             // Ensure that we don't trigger another request while one is in flight
             fetchUpdatesSingle = createEnsureSingle(async () => {
                 lastModified = await fetchFeaturesConfigurationViaHttp(
                     httpEndpoint,
-                    state.audiences,
+                    stateStore.audiences,
                     environmentApiKey,
-                    state,
+                    stateStore,
                     lastModified,
-                    () => state.audiences,
+                    () => stateStore.audiences,
                 )
             })
 

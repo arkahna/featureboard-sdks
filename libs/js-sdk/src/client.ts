@@ -1,8 +1,7 @@
 import { EffectiveFeatureValue } from '@featureboard/contracts'
 import { PromiseCompletionSource } from 'promise-completion-source'
 import { BrowserClient } from './client-connection'
-import { EffectiveFeaturesState } from './effective-feature-state'
-import { MemoryEffectiveFeatureStore } from './effective-feature-store'
+import { EffectiveFeatureStateStore } from './effective-feature-state-store'
 import { ExternalStateStore } from './external-state-store'
 import { FeatureBoardApiConfig } from './featureboard-api-config'
 import { featureBoardHostedService } from './featureboard-service-urls'
@@ -64,9 +63,9 @@ export function createBrowserClient({
     // Ensure that the init promise doesn't cause an unhandled promise rejection
     initialisedState.initialisedPromise.promise.catch(() => {})
 
-    const state = new EffectiveFeaturesState(
+    const stateStore = new EffectiveFeatureStateStore(
         audiences,
-        new MemoryEffectiveFeatureStore(externalStateStore),
+        externalStateStore,
     )
 
     const updateStrategyImplementation = resolveUpdateStrategy(
@@ -81,13 +80,15 @@ export function createBrowserClient({
 
     retry(async () => {
         try {
-            return await updateStrategyImplementation.connect(state)
+            return await updateStrategyImplementation.connect(stateStore)
         } catch (error) {
-            if (state.store.hasExternalStateStore) {
-                // Initialise using the external state store instead
-                return await state.initialiseExternalStateStore()
+            // Try initialise using the external state store
+            const result = await stateStore.initialiseExternalStateStore()
+            if (!result) {
+                // No external state store, throw orignial error
+                throw error
             }
-            throw error
+            return Promise.resolve()
         }
     }, 0)
         .then(() => {
@@ -123,7 +124,7 @@ export function createBrowserClient({
     }
 
     return {
-        client: createBrowserFbClient(state),
+        client: createBrowserFbClient(stateStore),
         get initialised() {
             return isInitialised()
         },
@@ -151,10 +152,10 @@ export function createBrowserClient({
             }
         },
         async updateAudiences(updatedAudiences: string[]) {
-            if (compareArrays(state.audiences, updatedAudiences)) {
+            if (compareArrays(stateStore.audiences, updatedAudiences)) {
                 debugLog('Skipped updating audiences, no change: %o', {
                     updatedAudiences,
-                    currentAudiences: state.audiences,
+                    currentAudiences: stateStore.audiences,
                     initialised: isInitialised(),
                 })
                 // No need to update audiences
@@ -163,7 +164,7 @@ export function createBrowserClient({
 
             debugLog('Updating audiences: %o', {
                 updatedAudiences,
-                currentAudiences: state.audiences,
+                currentAudiences: stateStore.audiences,
                 initialised: isInitialised(),
             })
 
@@ -185,17 +186,17 @@ export function createBrowserClient({
             debugLog('updateAudiences: invoke initialised callback with false')
             initialisedState.initialisedCallbacks.forEach((c) => c(false))
 
-            state.audiences = updatedAudiences
+            stateStore.audiences = updatedAudiences
             debugLog(
                 'updateAudiences: Audiences updated (%o), getting new effective values',
                 updatedAudiences,
             )
 
-            updateStrategyImplementation.connect(state).then(() => {
+            updateStrategyImplementation.connect(stateStore).then(() => {
                 newPromise?.resolve(true)
                 debugLog('Audiences updated: %o', {
                     updatedAudiences,
-                    currentAudiences: state.audiences,
+                    currentAudiences: stateStore.audiences,
                     initialised: isInitialised(),
                 })
             })
@@ -210,13 +211,13 @@ export function createBrowserClient({
 }
 
 function createBrowserFbClient(
-    state: EffectiveFeaturesState,
+    stateStore: EffectiveFeatureStateStore,
 ): FeatureBoardClient {
     return {
         getEffectiveValues() {
-            const all = state.store.all()
+            const all = stateStore.all()
             return {
-                audiences: [...state.audiences],
+                audiences: [...stateStore.audiences],
                 effectiveValues: Object.keys(all)
                     .filter((key) => all[key])
                     .map<EffectiveFeatureValue>((key) => ({
@@ -226,7 +227,7 @@ function createBrowserFbClient(
             }
         },
         getFeatureValue: (featureKey, defaultValue) => {
-            const value = state.store.get(featureKey as string)
+            const value = stateStore.get(featureKey as string)
             debugLog('getFeatureValue: %o', {
                 featureKey,
                 value,
@@ -257,12 +258,12 @@ function createBrowserFbClient(
                 }
             }
 
-            state.on('feature-updated', callback)
-            onValue((state.store.get(featureKey) as any) ?? defaultValue)
+            stateStore.on('feature-updated', callback)
+            onValue((stateStore.get(featureKey) as any) ?? defaultValue)
 
             return () => {
                 debugLog('unsubscribeToFeatureValue: %s', featureKey)
-                state.off('feature-updated', callback)
+                stateStore.off('feature-updated', callback)
             }
         },
     }
