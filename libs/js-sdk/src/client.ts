@@ -32,7 +32,7 @@ export function createBrowserClient({
     updateStrategy?: UpdateStrategies['kind'] | UpdateStrategies
 
     /**
-     * External state store is used to initialise the internal state store if retreving the effective feature values from the API would fail.
+     * External state store is used to initialise the internal state store if retrieving the effective feature values from the API would fail.
      * After initialisation the external state store will be updated but otherwise not used again.
      *
      */
@@ -43,7 +43,7 @@ export function createBrowserClient({
 }): BrowserClient {
     const initialPromise = new PromiseCompletionSource<boolean>()
     const initialisedState: {
-        initialisedCallbacks: Array<(initialsed: boolean) => void>
+        initialisedCallbacks: Array<(initialised: boolean) => void>
         initialisedPromise: PromiseCompletionSource<boolean>
     } = {
         initialisedCallbacks: [],
@@ -82,10 +82,10 @@ export function createBrowserClient({
         try {
             return await updateStrategyImplementation.connect(stateStore)
         } catch (error) {
-            // Try initialise using the external state store
+            // Try initialise the external state store
             const result = await stateStore.initialiseExternalStateStore()
             if (!result) {
-                // No external state store, throw orignial error
+                // No external state store, throw original error
                 throw error
             }
             return Promise.resolve()

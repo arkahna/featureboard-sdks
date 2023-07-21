@@ -502,7 +502,7 @@ describe('http client', () => {
                 })
 
                 await httpClient.waitForInitialised()
-                expect(count).toEqual(5 + 1) // inital request and 5 retry
+                expect(count).toEqual(5 + 1) // initial request and 5 retry
                 const value = httpClient.client.getFeatureValue(
                     'my-feature',
                     'default-value',
@@ -650,7 +650,7 @@ describe('http client', () => {
         }
     })
 
-    it('Feature value subscription called during initalisation', async () => {
+    it('Feature value subscription called during initialisation', async () => {
         let count = 0
         expect.assertions(2)
         const values: EffectiveFeatureValue[] = [
@@ -695,7 +695,7 @@ describe('http client', () => {
         }
     })
 
-    it('Feature value subscription called during initalisation with external state store', async () => {
+    it('Feature value subscription called during initialisation with external state store', async () => {
         let count = 0
         expect.assertions(2)
         const server = setupServer(
