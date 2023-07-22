@@ -5,19 +5,16 @@ import {
 import {
     FeatureBoardApiConfig,
     FeatureBoardClient,
-    featureBoardHostedService,
     Features,
+    featureBoardHostedService,
 } from '@featureboard/js-sdk'
 import { PromiseCompletionSource } from 'promise-completion-source'
-import {
-    AllFeaturesState,
-    FeatureStore,
-    MemoryFeatureStore,
-    ServerClient,
-} from '.'
+import { ExternalStateStore, ServerClient } from '.'
+import { AllFeatureStateStore } from './feature-state-store'
 import { debugLog } from './log'
 import { resolveUpdateStrategy } from './update-strategies/resolveUpdateStrategy'
 import { UpdateStrategies } from './update-strategies/update-strategies'
+import { retry } from './utils/retry'
 
 const serverConnectionDebug = debugLog.extend('server-connection')
 
@@ -25,9 +22,12 @@ export interface CreateServerClientOptions {
     /** Connect to a self hosted instance of FeatureBoard */
     api?: FeatureBoardApiConfig
 
-    store?: FeatureStore
-
-    initialValues?: FeatureConfiguration[]
+    /**
+     * External state store is used to initialise the internal state store if retrieving the effective feature values from the API would fail.
+     * After initialisation the external state store will be updated but otherwise not used again.
+     *
+     */
+    externalStateStore?: ExternalStateStore
 
     /**
      * The method your feature state is updated
@@ -44,29 +44,34 @@ export interface CreateServerClientOptions {
 
 export function createServerClient({
     api,
-    initialValues,
-    store,
+    externalStateStore,
     updateStrategy,
     environmentApiKey,
 }: CreateServerClientOptions): ServerClient {
-    if (store && initialValues) {
-        throw new Error('Cannot specify both store and initialValues')
-    }
 
     const initialisedPromise = new PromiseCompletionSource<boolean>()
     // Ensure that the init promise doesn't cause an unhandled promise rejection
     initialisedPromise.promise.catch(() => {})
-    const state = new AllFeaturesState(
-        store || new MemoryFeatureStore(initialValues),
-    )
+    const stateStore = new AllFeatureStateStore(externalStateStore)
     const updateStrategyImplementation = resolveUpdateStrategy(
         updateStrategy,
         environmentApiKey,
         api || featureBoardHostedService,
     )
 
-    updateStrategyImplementation
-        .connect(state)
+    retry(async () => {
+        try {
+            return await updateStrategyImplementation.connect(stateStore)
+        } catch (error) {
+            // Try initialise external state store
+            const result = await stateStore.initialiseExternalStateStore()
+            if (!result) {
+                // No external state store, throw original error
+                throw error
+            }
+            return Promise.resolve()
+        }
+    }, 0)
         .then(() => {
             if (!initialisedPromise.completed) {
                 initialisedPromise.resolve(true)
@@ -94,9 +99,9 @@ export function createServerClient({
             )
             return request
                 ? addUserWarnings(
-                      request.then(() => syncRequest(state, audienceKeys)),
+                      request.then(() => syncRequest(stateStore, audienceKeys)),
                   )
-                : addSyncUserWarnings(syncRequest(state, audienceKeys))
+                : addSyncUserWarnings(syncRequest(stateStore, audienceKeys))
         },
         updateFeatures() {
             return updateStrategyImplementation.updateFeatures()
@@ -131,15 +136,15 @@ function addSyncUserWarnings(
 }
 
 function syncRequest(
-    state: AllFeaturesState,
+    stateStore: AllFeatureStateStore,
     audienceKeys: string[],
 ): FeatureBoardClient {
     // Shallow copy the feature state so requests are stable
-    const featuresState = state.store.all()
+    const featuresState = stateStore.all()
 
     const client: FeatureBoardClient = {
         getEffectiveValues: () => {
-            const all = state.store.all()
+            const all = stateStore.all()
             return {
                 audiences: audienceKeys,
                 effectiveValues: Object.keys(all)

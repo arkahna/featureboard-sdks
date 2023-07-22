@@ -14,14 +14,14 @@ export function createOnRequestUpdateStrategy(
     let fetchUpdatesSingle: undefined | (() => Promise<void>)
 
     return {
-        async connect(state) {
+        async connect(stateStore) {
             // Ensure that we don't trigger another request while one is in flight
             fetchUpdatesSingle = createEnsureSingle(async () => {
                 const allEndpoint = getAllEndpoint(httpEndpoint)
                 lastModified = await fetchFeaturesConfigurationViaHttp(
                     allEndpoint,
                     environmentApiKey,
-                    state,
+                    stateStore,
                     lastModified,
                     'on-request',
                 )
