@@ -75,7 +75,7 @@ export function createServerClient({
             serverConnectionDebug('Initialised from external state store')
             return Promise.resolve()
         }
-    }, 0)
+    })
         .then(() => {
             if (!initialisedPromise.completed) {
                 serverConnectionDebug('Server client is initialised')

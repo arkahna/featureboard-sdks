@@ -4,7 +4,7 @@ const backoffFactor = 2
 
 export async function retry<T>(
     fn: () => Promise<T>,
-    retryAttempt: number,
+    retryAttempt = 0,
 ): Promise<T> {
     try {
         return await fn()

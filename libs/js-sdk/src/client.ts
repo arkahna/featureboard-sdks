@@ -93,7 +93,7 @@ export function createBrowserClient({
             debugLog('Initialised from external state store')
             return Promise.resolve()
         }
-    }, 0)
+    })
         .then(() => {
             if (initialPromise !== initialisedState.initialisedPromise) {
                 return
