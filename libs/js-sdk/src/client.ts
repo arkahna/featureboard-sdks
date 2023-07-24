@@ -214,18 +214,6 @@ function createBrowserFbClient(
     stateStore: EffectiveFeatureStateStore,
 ): FeatureBoardClient {
     return {
-        getEffectiveValues() {
-            const all = stateStore.all()
-            return {
-                audiences: [...stateStore.audiences],
-                effectiveValues: Object.keys(all)
-                    .filter((key) => all[key])
-                    .map<EffectiveFeatureValue>((key) => ({
-                        featureKey: key,
-                        value: all[key]!,
-                    })),
-            }
-        },
         getFeatureValue: (featureKey, defaultValue) => {
             const value = stateStore.get(featureKey as string)
             debugLog('getFeatureValue: %o', {

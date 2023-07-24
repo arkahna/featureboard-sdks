@@ -143,21 +143,6 @@ function syncRequest(
     const featuresState = stateStore.all()
 
     const client: FeatureBoardClient = {
-        getEffectiveValues: () => {
-            const all = stateStore.all()
-            return {
-                audiences: audienceKeys,
-                effectiveValues: Object.keys(all)
-                    .map<EffectiveFeatureValue>((key) => ({
-                        featureKey: key,
-                        // We will filter the invalid undefined in the next filter
-                        value: getFeatureValue(key, undefined!),
-                    }))
-                    .filter(
-                        (effectiveValue) => effectiveValue.value !== undefined,
-                    ),
-            }
-        },
         getFeatureValue,
         subscribeToFeatureValue: (
             featureKey: string,
