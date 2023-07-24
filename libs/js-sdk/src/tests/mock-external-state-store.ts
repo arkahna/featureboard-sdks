@@ -1,13 +1,15 @@
 import { ExternalStateStore } from '../external-state-store'
 
-export class MockExternalStateStore implements ExternalStateStore {
+export class MockExternalStateStore
+    implements ExternalStateStore<string | number | boolean | undefined>
+{
     constructor(
         private allCallback: () => Promise<
             Record<string, string | number | boolean | undefined>
         >,
         private updateCallback: (
             store: Record<string, string | number | boolean | undefined>,
-        ) => void,
+        ) => PromiseLike<any>,
     ) {}
 
     all(): Promise<Record<string, string | number | boolean | undefined>> {
@@ -15,7 +17,7 @@ export class MockExternalStateStore implements ExternalStateStore {
     }
     update(
         store: Record<string, string | number | boolean | undefined>,
-    ): void | PromiseLike<any> {
-        this.updateCallback(store)
+    ): PromiseLike<any> {
+        return this.updateCallback(store)
     }
 }

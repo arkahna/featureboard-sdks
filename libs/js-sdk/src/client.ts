@@ -1,4 +1,4 @@
-import { EffectiveFeatureValue } from '@featureboard/contracts'
+import type { EffectiveFeatureValue } from '@featureboard/contracts'
 import { PromiseCompletionSource } from 'promise-completion-source'
 import { BrowserClient } from './client-connection'
 import { EffectiveFeatureStateStore } from './effective-feature-state-store'
@@ -36,7 +36,9 @@ export function createBrowserClient({
      * After initialisation the external state store will be updated but otherwise not used again.
      *
      */
-    externalStateStore?: ExternalStateStore
+    externalStateStore?: ExternalStateStore<
+        EffectiveFeatureValue['value'] | undefined
+    >
     audiences: string[]
 
     environmentApiKey: string

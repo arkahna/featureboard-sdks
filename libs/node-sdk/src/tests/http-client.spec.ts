@@ -343,7 +343,9 @@ describe('http client', () => {
                                 audienceExceptions: [],
                             },
                         }),
-                    () => {},
+                    () => {
+                        return Promise.resolve()
+                    },
                 ),
             })
 
@@ -392,7 +394,9 @@ describe('http client', () => {
                                 message: 'Test External State Store Error',
                             })
                         },
-                        () => {},
+                        () => {
+                            return Promise.resolve()
+                        },
                     ),
                 })
 
@@ -445,6 +449,7 @@ describe('http client', () => {
                         expect(store['my-feature']?.defaultValue).toEqual(
                             'service-value',
                         )
+                        return Promise.resolve()
                     },
                 ),
             })

@@ -1,6 +1,6 @@
-import { EffectiveFeatureValue } from "@featureboard/contracts"
-import { ExternalStateStore } from "./external-state-store"
-import { debugLog } from "./log"
+import { EffectiveFeatureValue } from '@featureboard/contracts'
+import { ExternalStateStore } from './external-state-store'
+import { debugLog } from './log'
 
 type FeatureValue = EffectiveFeatureValue['value'] | undefined
 
@@ -8,19 +8,23 @@ const stateStoreDebug = debugLog.extend('state-store')
 
 export class EffectiveFeatureStateStore {
     private _audiences: string[] = []
-    private _store: Record<string, FeatureValue> =
-        {}
-    private _externalStore: ExternalStateStore | undefined
-    private valueUpdatedCallbacks: Array<(featureKey: string, value: FeatureValue) => void> = []
+    private _store: Record<string, FeatureValue> = {}
+    private _externalStore: ExternalStateStore<FeatureValue> | undefined
+    private valueUpdatedCallbacks: Array<
+        (featureKey: string, value: FeatureValue) => void
+    > = []
 
-    constructor(audiences: string[], externalStateStore?: ExternalStateStore) {
+    constructor(
+        audiences: string[],
+        externalStateStore?: ExternalStateStore<FeatureValue>,
+    ) {
         this._audiences = audiences
         this._externalStore = externalStateStore
     }
 
     set audiences(value: string[]) {
         this._audiences = value
-        const storeRecords = {...this._store }
+        const storeRecords = { ...this._store }
         this._store = {}
         Object.keys(storeRecords).forEach((key) => {
             this.valueUpdatedCallbacks.forEach((valueUpdated) =>
@@ -42,7 +46,7 @@ export class EffectiveFeatureStateStore {
         try {
             const externalStore = await this._externalStore.all()
 
-            this._store = { ...externalStore}
+            this._store = { ...externalStore }
             Object.keys(externalStore).forEach((key) => {
                 this.valueUpdatedCallbacks.forEach((valueUpdated) =>
                     valueUpdated(key, externalStore[key]),
@@ -58,13 +62,15 @@ export class EffectiveFeatureStateStore {
         return Promise.resolve(true)
     }
 
-    on(_event: 'feature-updated',
+    on(
+        _event: 'feature-updated',
         callback: (featureKey: string, value: FeatureValue) => void,
     ): void {
         this.valueUpdatedCallbacks.push(callback)
     }
 
-    off(_event: 'feature-updated',
+    off(
+        _event: 'feature-updated',
         callback: (featureKey: string, value: FeatureValue) => void,
     ): void {
         this.valueUpdatedCallbacks.splice(

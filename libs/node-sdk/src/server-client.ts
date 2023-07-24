@@ -1,15 +1,13 @@
+import type { FeatureConfiguration } from '@featureboard/contracts'
 import {
-    EffectiveFeatureValue,
-    FeatureConfiguration,
-} from '@featureboard/contracts'
-import {
+    ExternalStateStore,
     FeatureBoardApiConfig,
     FeatureBoardClient,
     Features,
     featureBoardHostedService,
 } from '@featureboard/js-sdk'
 import { PromiseCompletionSource } from 'promise-completion-source'
-import { ExternalStateStore, ServerClient } from '.'
+import { ServerClient } from '.'
 import { AllFeatureStateStore } from './feature-state-store'
 import { debugLog } from './log'
 import { resolveUpdateStrategy } from './update-strategies/resolveUpdateStrategy'
@@ -27,7 +25,7 @@ export interface CreateServerClientOptions {
      * After initialisation the external state store will be updated but otherwise not used again.
      *
      */
-    externalStateStore?: ExternalStateStore
+    externalStateStore?: ExternalStateStore<FeatureConfiguration | undefined>
 
     /**
      * The method your feature state is updated

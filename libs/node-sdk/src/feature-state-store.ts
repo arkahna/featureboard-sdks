@@ -1,17 +1,17 @@
 import { FeatureConfiguration } from '@featureboard/contracts'
-import { ExternalStateStore } from './external-state-store'
+import { ExternalStateStore } from '@featureboard/js-sdk'
 import { debugLog } from './log'
 
 const stateStoreDebug = debugLog.extend('state-store')
 
 export class AllFeatureStateStore {
     private _store: Record<string, FeatureConfiguration | undefined> = {}
-    private _externalStateStore: ExternalStateStore | undefined
+    private _externalStateStore: ExternalStateStore<FeatureConfiguration | undefined> | undefined
     private featureUpdatedCallbacks: Array<
         (featureKey: string, values: FeatureConfiguration | undefined) => void
     > = []
 
-    constructor(externalStateStore?: ExternalStateStore) {
+    constructor(externalStateStore?: ExternalStateStore<FeatureConfiguration | undefined>) {
         this._externalStateStore = externalStateStore
     }
 

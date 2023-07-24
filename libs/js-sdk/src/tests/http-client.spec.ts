@@ -539,7 +539,9 @@ describe('http client', () => {
                         Promise.resolve({
                             'my-feature': 'external-state-store-value',
                         }),
-                    () => {},
+                    () => {
+                        return Promise.resolve()
+                    },
                 ),
                 updateStrategy: { kind: 'manual' },
             })
@@ -587,7 +589,9 @@ describe('http client', () => {
                                 message: 'Test External State Store Error',
                             })
                         },
-                        () => {},
+                        () => {
+                            return Promise.resolve()
+                        },
                     ),
                     updateStrategy: { kind: 'manual' },
                 })
@@ -638,6 +642,7 @@ describe('http client', () => {
                     (store) => {
                         expect(store['my-feature']).toEqual('service-value')
                         expect(store['my-feature2']).toEqual('service-value2')
+                        return Promise.resolve()
                     },
                 ),
                 updateStrategy: { kind: 'manual' },
@@ -721,7 +726,9 @@ describe('http client', () => {
                         Promise.resolve({
                             'my-feature': 'external-state-store-value',
                         }),
-                    () => {},
+                    () => {
+                        return Promise.resolve()
+                    },
                 ),
             })
 
