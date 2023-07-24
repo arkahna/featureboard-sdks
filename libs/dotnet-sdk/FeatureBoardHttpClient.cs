@@ -1,6 +1,5 @@
 using FeatureBoard.DotnetSdk.Models;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using System.Net;
 using System.Net.Http.Json;
 
@@ -11,13 +10,9 @@ internal class FeatureBoardHttpClient : IFeatureBoardHttpClient
   private readonly HttpClient _httpClient;
   private readonly ILogger<FeatureBoardHttpClient> _logger;
 
-  public FeatureBoardHttpClient(HttpClient httpClient, IOptions<FeatureBoardOptions> options, ILogger<FeatureBoardHttpClient> logger)
+  public FeatureBoardHttpClient(HttpClient httpClient, ILogger<FeatureBoardHttpClient> logger)
   {
     _httpClient = httpClient;
-    _httpClient.BaseAddress = options.Value.HttpEndpoint;
-    _httpClient.DefaultRequestHeaders.Add("x-environment-key", options.Value.EnvironmentApiKey);
-    _httpClient.Timeout = TimeSpan.FromMilliseconds(options.Value.MaxAgeMs - 3); //prevent multiple requests running at the same time.
-
     _logger = logger;
   }
 
