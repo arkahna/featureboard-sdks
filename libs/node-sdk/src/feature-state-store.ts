@@ -57,6 +57,10 @@ export class AllFeatureStateStore {
         this.featureUpdatedCallbacks.forEach((valueUpdated) =>
             valueUpdated(featureKey, value),
         )
+
+        if (this._externalStateStore) {
+            this._externalStateStore.update(this._store)
+        }
     }
 
     on(
