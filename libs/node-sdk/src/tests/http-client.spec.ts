@@ -352,7 +352,7 @@ describe('http client', () => {
     })
 
     it(
-        'Initialisation retries 5 time then throws an error, no external state store',
+        'Initialisation retries 5 time then throws an error with external state store',
         async () => {
             let countAPIRequest = 0
             let countExternalStateStoreRequest = 0
@@ -441,6 +441,62 @@ describe('http client', () => {
                 ),
             })
             await client.waitForInitialised()
+        } finally {
+            server.resetHandlers()
+            server.close()
+        }
+    })
+
+    it('Subscription to feature value immediately return current value but will not be called again', async () => {
+        let count = 0
+        expect.assertions(2)
+
+        const values: FeatureConfiguration[] = [
+            {
+                featureKey: 'my-feature',
+                audienceExceptions: [],
+                defaultValue: 'service-value',
+            }
+        ]
+
+        const values2ndRequest: FeatureConfiguration[] = [
+            {
+                featureKey: 'my-feature',
+                audienceExceptions: [],
+                defaultValue: 'service-value2',
+            }
+        ]
+        const server = setupServer(
+            rest.get('https://client.featureboard.app/all', (_req, res, ctx) =>
+                res.once(ctx.json(values), ctx.status(200)),
+            ),
+            rest.get('https://client.featureboard.app/all', (_req, res, ctx) =>
+                res(ctx.json(values2ndRequest), ctx.status(200)),
+            ),
+        )
+        server.listen()
+
+        try {
+            const client = createServerClient({
+                environmentApiKey: 'env-api-key',
+                api: featureBoardHostedService,
+                updateStrategy: { kind: 'manual' },
+            })
+
+            await client.waitForInitialised()
+
+            client.request([]).subscribeToFeatureValue(
+                'my-feature',
+                'default-value',
+                (value) => {
+                    count++
+                    expect(value).toEqual('service-value')
+                },
+            )
+
+            await client.updateFeatures()
+
+            expect(count).toEqual(1)
         } finally {
             server.resetHandlers()
             server.close()
