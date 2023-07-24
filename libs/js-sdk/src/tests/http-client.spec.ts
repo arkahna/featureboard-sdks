@@ -513,7 +513,7 @@ describe('http client', () => {
                 server.close()
             }
         },
-        { timeout: 600000 },
+        { timeout: 60000 },
     )
 
     it('Use external state store when service request fails', async () => {

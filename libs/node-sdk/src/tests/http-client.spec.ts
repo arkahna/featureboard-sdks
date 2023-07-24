@@ -312,7 +312,7 @@ describe('http client', () => {
                 server.close()
             }
         },
-        { timeout: 600000 },
+        { timeout: 60000 },
     )
 
     it('Use external state store when API request fails', async () => {
@@ -406,7 +406,7 @@ describe('http client', () => {
                 server.close()
             }
         },
-        { timeout: 600000 },
+        { timeout: 60000 },
     )
 
     it('Update external state store when internal store updates', async () => {
