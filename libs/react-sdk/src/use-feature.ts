@@ -20,7 +20,7 @@ export function useFeature<T extends keyof Features>(
         return fbContext.client.subscribeToFeatureValue(
             featureKey,
             defaultValue,
-            (value) => setValue(value),
+            (newValue) => newValue !== value && setValue(newValue),
         )
     })
 
