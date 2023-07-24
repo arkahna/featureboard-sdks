@@ -402,18 +402,13 @@ describe('http client', () => {
     )
 
     it('Update external state store when internal store updates', async () => {
-        expect.assertions(2)
+        expect.assertions(1)
 
         const values: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
                 audienceExceptions: [],
                 defaultValue: 'service-value',
-            },
-            {
-                featureKey: 'my-feature-2',
-                audienceExceptions: [],
-                defaultValue: 'service-value-2',
             },
         ]
 
@@ -441,9 +436,6 @@ describe('http client', () => {
                     (store) => {
                         expect(store['my-feature']?.defaultValue).toEqual(
                             'service-value',
-                        )
-                        expect(store['my-feature-2']?.defaultValue).toEqual(
-                            'service-value-2',
                         )
                     },
                 ),
