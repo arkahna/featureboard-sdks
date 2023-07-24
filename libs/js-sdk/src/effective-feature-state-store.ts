@@ -37,7 +37,7 @@ export class EffectiveFeatureStateStore {
         return [...this._audiences]
     }
 
-    async initialiseExternalStateStore(): Promise<boolean> {
+    async initialiseFromExternalStateStore(): Promise<boolean> {
         if (!this._externalStore) {
             return Promise.resolve(false)
         }

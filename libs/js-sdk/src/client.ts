@@ -84,7 +84,7 @@ export function createBrowserClient({
             return await updateStrategyImplementation.connect(stateStore)
         } catch (error) {
             // Try initialise the external state store
-            const result = await stateStore.initialiseExternalStateStore()
+            const result = await stateStore.initialiseFromExternalStateStore()
             if (!result) {
                 // No external state store, throw original error
                 console.error('Failed to connect to FeatureBoard SDK', error)

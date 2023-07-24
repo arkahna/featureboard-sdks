@@ -15,7 +15,7 @@ export class AllFeatureStateStore {
         this._externalStateStore = externalStateStore
     }
 
-    async initialiseExternalStateStore(): Promise<boolean> {
+    async initialiseFromExternalStateStore(): Promise<boolean> {
         if (!this._externalStateStore) {
             return Promise.resolve(false)
         }

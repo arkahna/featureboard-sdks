@@ -66,7 +66,7 @@ export function createServerClient({
                 error,
             )
             // Try initialise external state store
-            const result = await stateStore.initialiseExternalStateStore()
+            const result = await stateStore.initialiseFromExternalStateStore()
             if (!result) {
                 // No external state store, throw original error
                 console.error('Failed to connect to SDK', error)
