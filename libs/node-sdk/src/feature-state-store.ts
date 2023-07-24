@@ -62,27 +62,4 @@ export class AllFeatureStateStore {
             this._externalStateStore.update(this._store)
         }
     }
-
-    on(
-        _event: 'feature-updated',
-        callback: (
-            featureKey: string,
-            values: FeatureConfiguration | undefined,
-        ) => void,
-    ): void {
-        this.featureUpdatedCallbacks.push(callback)
-    }
-
-    off(
-        _event: 'feature-updated',
-        callback: (
-            featureKey: string,
-            values: FeatureConfiguration | undefined,
-        ) => void,
-    ): void {
-        this.featureUpdatedCallbacks.splice(
-            this.featureUpdatedCallbacks.indexOf(callback),
-            1,
-        )
-    }
 }
