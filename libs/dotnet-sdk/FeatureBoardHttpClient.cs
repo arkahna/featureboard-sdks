@@ -8,7 +8,7 @@ namespace FeatureBoard.DotnetSdk;
 internal class FeatureBoardHttpClient : IFeatureBoardHttpClient
 {
   private readonly HttpClient _httpClient;
-  private readonly ILogger<FeatureBoardHttpClient> _logger;
+  private readonly ILogger _logger;
 
   public FeatureBoardHttpClient(HttpClient httpClient, ILogger<FeatureBoardHttpClient> logger)
   {
@@ -18,9 +18,8 @@ internal class FeatureBoardHttpClient : IFeatureBoardHttpClient
 
   public async Task<(List<FeatureConfiguration>? features, DateTimeOffset? lastModified)> FetchUpdates(DateTimeOffset? lastModified, CancellationToken cancellationToken)
   {
-    var request = new HttpRequestMessage(HttpMethod.Get, "all");
-    if (lastModified is not null)
-      request.Headers.IfModifiedSince = lastModified;
+    using var request = new HttpRequestMessage(HttpMethod.Get, "all");
+    request.Headers.IfModifiedSince = lastModified;
 
     using var response = await _httpClient.SendAsync(request, cancellationToken);
 
@@ -35,8 +34,7 @@ internal class FeatureBoardHttpClient : IFeatureBoardHttpClient
       var features = await response.Content.ReadFromJsonAsync<List<FeatureConfiguration>>(cancellationToken: cancellationToken)
                      ?? throw new ApplicationException("Unable to retrieve decode response content");
 
-      if (response.Content.Headers.LastModified is not null)
-        lastModified = response.Content.Headers.LastModified;
+      lastModified = response.Content.Headers.LastModified ?? lastModified; // if didn't get last-modified header just report previous last modified
 
       _logger.LogDebug("Fetching updates done, newLastModified={newLastModified}", lastModified);
       return (features, lastModified);
