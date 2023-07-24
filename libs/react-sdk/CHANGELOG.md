@@ -1,5 +1,11 @@
 # @featureboard/react-sdk
 
+## 0.9.1
+
+### Patch Changes
+
+- [#18](https://github.com/arkahna/featureboard-sdks/pull/18) [`9d45762`](https://github.com/arkahna/featureboard-sdks/commit/9d457624a805a006faf3aaf54c6cd2af8e5d747f) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Check to see if value has changed before setting state
+
 ## 0.9.0
 
 ### Minor Changes
