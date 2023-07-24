@@ -32,9 +32,10 @@ export class AllFeatureStateStore {
             })
         } catch (error: any) {
             stateStoreDebug(
-                'Initialise effective state store with external state store failed',
+                'Failed to initialise all feature state store with external state store',
                 error,
             )
+            console.error('Failed to initialise from external state store', error)
             throw error
         }
         return Promise.resolve(true)

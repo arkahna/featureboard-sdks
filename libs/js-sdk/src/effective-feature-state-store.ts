@@ -54,7 +54,11 @@ export class EffectiveFeatureStateStore {
             })
         } catch (error: any) {
             stateStoreDebug(
-                'Initialise effective state store with external state store failed',
+                'Failed to initialise effective state store from external state store',
+                error,
+            )
+            console.error(
+                'Failed to initialise from external state store',
                 error,
             )
             throw error

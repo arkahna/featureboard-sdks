@@ -76,20 +76,21 @@ export function createBrowserClient({
         api || featureBoardHostedService,
     )
 
-    debugLog('SDK connecting in background (%o)', {
-        audiences,
-    })
-
     retry(async () => {
         try {
+            debugLog('SDK connecting in background (%o)', {
+                audiences,
+            })
             return await updateStrategyImplementation.connect(stateStore)
         } catch (error) {
             // Try initialise the external state store
             const result = await stateStore.initialiseExternalStateStore()
             if (!result) {
                 // No external state store, throw original error
+                console.error('Failed to connect to FeatureBoard SDK', error)
                 throw error
             }
+            debugLog('Initialised from external state store')
             return Promise.resolve()
         }
     }, 0)
@@ -194,14 +195,19 @@ export function createBrowserClient({
                 updatedAudiences,
             )
 
-            updateStrategyImplementation.connect(stateStore).then(() => {
-                newPromise?.resolve(true)
-                debugLog('Audiences updated: %o', {
-                    updatedAudiences,
-                    currentAudiences: stateStore.audiences,
-                    initialised: isInitialised(),
+            updateStrategyImplementation
+                .connect(stateStore)
+                .then(() => {
+                    newPromise?.resolve(true)
+                    debugLog('Audiences updated: %o', {
+                        updatedAudiences,
+                        currentAudiences: stateStore.audiences,
+                        initialised: isInitialised(),
+                    })
                 })
-            })
+                .catch((error) => {
+                    console.error('Failed to connect to SDK', error)
+                })
         },
         updateFeatures() {
             return updateStrategyImplementation.updateFeatures()

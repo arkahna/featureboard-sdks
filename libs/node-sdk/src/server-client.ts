@@ -46,7 +46,6 @@ export function createServerClient({
     updateStrategy,
     environmentApiKey,
 }: CreateServerClientOptions): ServerClient {
-
     const initialisedPromise = new PromiseCompletionSource<boolean>()
     // Ensure that the init promise doesn't cause an unhandled promise rejection
     initialisedPromise.promise.catch(() => {})
@@ -59,24 +58,36 @@ export function createServerClient({
 
     retry(async () => {
         try {
+            serverConnectionDebug('Connecting to SDK...')
             return await updateStrategyImplementation.connect(stateStore)
         } catch (error) {
+            serverConnectionDebug(
+                'Failed to connect to SDK, try to initialise form external state store',
+                error,
+            )
             // Try initialise external state store
             const result = await stateStore.initialiseExternalStateStore()
             if (!result) {
                 // No external state store, throw original error
+                console.error('Failed to connect to SDK', error)
                 throw error
             }
+            serverConnectionDebug('Initialised from external state store')
             return Promise.resolve()
         }
     }, 0)
         .then(() => {
             if (!initialisedPromise.completed) {
+                serverConnectionDebug('Server client is initialised')
                 initialisedPromise.resolve(true)
             }
         })
         .catch((err) => {
             if (!initialisedPromise.completed) {
+                console.error(
+                    'FeatureBoard SDK failed to connect after 5 retries',
+                    err,
+                )
                 initialisedPromise.reject(err)
             }
         })
