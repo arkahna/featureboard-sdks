@@ -29,11 +29,19 @@ describe('http client', () => {
                 updateStrategy: { kind: 'manual' },
             })
 
-            const value = httpClient
+            const valueBeforeInit = httpClient
                 .request([])
                 .getFeatureValue('my-feature', 'default-value')
             expect(httpClient.initialised).toBe(false)
-            expect(value).toBe('default-value')
+            expect(valueBeforeInit).toBe('default-value')
+
+            await httpClient.waitForInitialised()
+
+            const valueAfterInit = httpClient
+                .request([])
+                .getFeatureValue('my-feature', 'default-value')
+            expect(httpClient.initialised).toBe(true)
+            expect(valueAfterInit).toBe('service-default-value')
         } finally {
             server.resetHandlers()
             server.close()
@@ -228,7 +236,7 @@ describe('http client', () => {
         }
     })
 
-    it('Initialisation fails and retries, no external state store', async () => {
+    it('Initialisation fails, reties and succeeds, no external state store', async () => {
         const values: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
@@ -456,7 +464,7 @@ describe('http client', () => {
                 featureKey: 'my-feature',
                 audienceExceptions: [],
                 defaultValue: 'service-value',
-            }
+            },
         ]
 
         const values2ndRequest: FeatureConfiguration[] = [
@@ -464,7 +472,7 @@ describe('http client', () => {
                 featureKey: 'my-feature',
                 audienceExceptions: [],
                 defaultValue: 'service-value2',
-            }
+            },
         ]
         const server = setupServer(
             rest.get('https://client.featureboard.app/all', (_req, res, ctx) =>
@@ -485,14 +493,16 @@ describe('http client', () => {
 
             await client.waitForInitialised()
 
-            client.request([]).subscribeToFeatureValue(
-                'my-feature',
-                'default-value',
-                (value) => {
-                    count++
-                    expect(value).toEqual('service-value')
-                },
-            )
+            client
+                .request([])
+                .subscribeToFeatureValue(
+                    'my-feature',
+                    'default-value',
+                    (value) => {
+                        count++
+                        expect(value).toEqual('service-value')
+                    },
+                )
 
             await client.updateFeatures()
 
