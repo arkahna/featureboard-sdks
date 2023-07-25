@@ -47,9 +47,11 @@ export function createBrowserClient({
     const initialisedState: {
         initialisedCallbacks: Array<(initialised: boolean) => void>
         initialisedPromise: PromiseCompletionSource<boolean>
+        initialisedError: any
     } = {
         initialisedCallbacks: [],
         initialisedPromise: initialPromise,
+        initialisedError: undefined,
     }
     initialisedState.initialisedPromise.promise.then(() => {
         // If the promise has changed, then we don't want to invoke the callback
@@ -76,6 +78,7 @@ export function createBrowserClient({
         api || featureBoardHostedService,
     )
 
+    const retryCancellationToken = { cancel: false }
     retry(async () => {
         try {
             debugLog('SDK connecting in background (%o)', {
@@ -93,7 +96,7 @@ export function createBrowserClient({
             debugLog('Initialised from external state store')
             return Promise.resolve()
         }
-    })
+    }, retryCancellationToken)
         .then(() => {
             if (initialPromise !== initialisedState.initialisedPromise) {
                 return
@@ -119,6 +122,7 @@ export function createBrowserClient({
                     'FeatureBoard SDK failed to connect after 5 retries',
                     err,
                 )
+                initialisedState.initialisedError = err
                 initialisedState.initialisedPromise.resolve(true)
             }
         })
@@ -132,9 +136,12 @@ export function createBrowserClient({
             return isInitialised()
         },
         waitForInitialised() {
-            return new Promise((resolve) => {
+            return new Promise((resolve, reject) => {
                 const interval = setInterval(() => {
-                    if (isInitialised()) {
+                    if (initialisedState.initialisedError) {
+                        clearInterval(interval)
+                        reject(initialisedState.initialisedError)
+                    } else if (isInitialised()) {
                         clearInterval(interval)
                         resolve(true)
                     }
@@ -171,8 +178,13 @@ export function createBrowserClient({
                 initialised: isInitialised(),
             })
 
+            // Close connection and cancel retry
+            updateStrategyImplementation.close()
+            retryCancellationToken.cancel = true
+
             const newPromise = new PromiseCompletionSource<boolean>()
             initialisedState.initialisedPromise = newPromise
+            initialisedState.initialisedError = undefined
             initialisedState.initialisedPromise.promise.catch(() => {})
             initialisedState.initialisedPromise.promise.then(() => {
                 // If the promise has changed, then we don't want to invoke the callback
@@ -207,6 +219,8 @@ export function createBrowserClient({
                 })
                 .catch((error) => {
                     console.error('Failed to connect to SDK', error)
+                    initialisedState.initialisedError = error
+                    newPromise?.resolve(true)
                 })
         },
         updateFeatures() {

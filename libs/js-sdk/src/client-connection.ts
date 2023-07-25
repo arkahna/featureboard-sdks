@@ -6,10 +6,15 @@ export interface BrowserClient {
     /** Returns true once the FeatureBoard SDK has a valid set of values */
     initialised: boolean
 
+    /**
+     * Waits for BrowserClient to be initialised
+     * 
+     * @throws {Error} If the initialisation process fails an error is thrown
+     */
     waitForInitialised(): Promise<boolean>
 
     /** Subscribe to initialised changes, will call back with initialised boolean value
-     * Recommended to be used in conjuction with updateAudiences()
+     * Recommended to be used in conjunction with updateAudiences()
      *
      * @returns unsubscribe function
      */
