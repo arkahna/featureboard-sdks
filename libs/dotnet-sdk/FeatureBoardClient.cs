@@ -1,10 +1,10 @@
+using FeatureBoard.DotnetSdk.Helpers;
 using FeatureBoard.DotnetSdk.Models;
 using FeatureBoard.DotnetSdk.State;
 using Microsoft.Extensions.Logging;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.Json.Serialization;
-using System.Text.RegularExpressions;
 
 namespace FeatureBoard.DotnetSdk;
 
@@ -30,7 +30,7 @@ public class FeatureBoardClient<TFeatures> : IFeatureBoardClient<TFeatures> wher
     var attr = memberExpression.Member.GetCustomAttribute<JsonPropertyNameAttribute>(); //Caching this value offers no performance improvement
     return GetFeatureValue(
       attr?.Name
-        ?? Regex.Replace(memberExpression.Member.Name, "(\\G(?!^)|\\b[a-zA-Z][a-z]*)([A-Z][a-z]*|\\d+)", "$1-$2", RegexOptions.Compiled).ToLower(), //Pascal to Kebab case
+        ?? memberExpression.Member.Name.ToFeatureBoardKey(), //Pascal to Kebab case
       defaultValue);
   }
 
