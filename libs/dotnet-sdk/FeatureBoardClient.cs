@@ -2,6 +2,9 @@ using FeatureBoard.DotnetSdk.Models;
 using FeatureBoard.DotnetSdk.State;
 using Microsoft.Extensions.Logging;
 using System.Linq.Expressions;
+using System.Reflection;
+using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 
 namespace FeatureBoard.DotnetSdk;
 
@@ -23,7 +26,17 @@ public class FeatureBoardClient<TFeatures> : IFeatureBoardClient<TFeatures> wher
     if (expr.Body is not MemberExpression memberExpression)
       throw new ArgumentException($"The provided expression contains a {expr.GetType().Name} which is not supported. Only simple member accessors (fields, properties) of an object are supported.");
 
-    var feature = _state.Get(memberExpression.Member.Name);
+
+    var attr = memberExpression.Member.GetCustomAttribute<JsonPropertyNameAttribute>(); //Caching this value offers no performance improvement
+    return GetFeatureValue(
+      attr?.Name
+        ?? Regex.Replace(memberExpression.Member.Name, "(\\G(?!^)|\\b[a-zA-Z][a-z]*)([A-Z][a-z]*|\\d+)", "$1-$2", RegexOptions.Compiled).ToLower(), //Pascal to Kebab case
+      defaultValue);
+  }
+
+  public TProp GetFeatureValue<TProp>(string featureKey, TProp defaultValue)
+  {
+    var feature = _state.Get(featureKey);
     var audienceKeys = _audienceProvider.AudienceKeys;
     if (feature == null)
     {
@@ -44,4 +57,5 @@ public class FeatureBoardClient<TFeatures> : IFeatureBoardClient<TFeatures> wher
     _logger.LogDebug("GetFeatureValue: {{audienceExceptionValue: {audienceExceptionValue}, defaultValue: {defaultValue}, value: {value}}}", audienceException?.Value, feature.DefaultValue, value);
     return value;
   }
+
 }

@@ -188,4 +188,36 @@ public class FeatureBoardClientTests : SdkTestsBase
 
     result.ShouldBe(defaultAudienceValue);
   }
+
+  [Fact]
+  public void ItReturnsAnEnum()
+  {
+    var faker = new Faker();
+    var defaultAudienceValue = faker.PickRandom<TestEnum>();
+    var featureBoardMock = Services.Resolve<Mock<IFeatureBoardState>>();
+    featureBoardMock
+      .Setup(x => x.GetSnapshot())
+      .Returns(new FeatureBoardStateSnapshot(new Dictionary<string, FeatureConfiguration>
+      {
+        {
+          nameof(TestFeatures.EnumFeature), new FeatureConfiguration
+          {
+            DefaultValue = JsonValue.Create(faker.PickRandomWithout(defaultAudienceValue))!,
+            FeatureKey = nameof(TestFeatures.EnumFeature),
+            AudienceExceptions = new AudienceExceptionValue[]{
+              new()
+              {
+                Value = JsonValue.Create(defaultAudienceValue)!,
+                AudienceKey = "an-audience"
+              }
+            }
+          }
+        }
+      }));
+
+    var client = Services.Resolve<IFeatureBoardClient<TestFeatures>>();
+    var result = client.GetFeatureValue(x => x.EnumFeature, faker.PickRandomWithout(defaultAudienceValue));
+
+    result.ShouldBe(defaultAudienceValue);
+  }
 }

@@ -22,8 +22,8 @@ public class FeatureBoardStateTests : SdkTestsBase
 
     var featureBoardExternalStateMock = Services.Resolve<Mock<IFeatureBoardExternalState>>();
     featureBoardExternalStateMock.Setup(x => x.GetState(It.IsAny<CancellationToken>()))
-      .Returns(Task.FromResult(new Dictionary<string, FeatureConfiguration>
-        { { featureConfiguration.FeatureKey, featureConfiguration } }));
+      .Returns(Task.FromResult(new List<FeatureConfiguration>
+        { featureConfiguration }));
 
 
     var featureBoardState = Services.Resolve<IFeatureBoardState>();
@@ -40,8 +40,8 @@ public class FeatureBoardStateTests : SdkTestsBase
     var featureConfiguration = CreateFeature();
 
     var featureBoardState = Services.Resolve<IFeatureBoardState>();
-    featureBoardState.InitialiseState(new Dictionary<string, FeatureConfiguration>
-        { { featureConfiguration.FeatureKey, featureConfiguration } }, DateTimeOffset.UtcNow,
+    featureBoardState.InitialiseState(new List<FeatureConfiguration>
+        { featureConfiguration }, DateTimeOffset.UtcNow,
       CancellationToken.None);
     var resolvedFeature = featureBoardState.GetSnapshot().Get(featureConfiguration.FeatureKey);
 
@@ -57,8 +57,8 @@ public class FeatureBoardStateTests : SdkTestsBase
     var featureConfiguration = CreateFeature();
 
     var featureBoardState = Services.Resolve<IFeatureBoardState>();
-    featureBoardState.InitialiseState(new Dictionary<string, FeatureConfiguration>
-        { { featureConfiguration.FeatureKey, featureConfiguration } }, DateTimeOffset.UtcNow,
+    featureBoardState.InitialiseState(new List<FeatureConfiguration>
+        { featureConfiguration }, DateTimeOffset.UtcNow,
       CancellationToken.None);
 
     featureBoardState.LastUpdated.ShouldNotBeNull();
@@ -72,8 +72,8 @@ public class FeatureBoardStateTests : SdkTestsBase
     var lastModified = DateTimeOffset.UtcNow;
 
     var featureBoardState = Services.Resolve<IFeatureBoardState>();
-    featureBoardState.InitialiseState(new Dictionary<string, FeatureConfiguration>
-        { { featureConfiguration.FeatureKey, featureConfiguration } }, lastModified,
+    featureBoardState.InitialiseState(new List<FeatureConfiguration>
+        {featureConfiguration }, lastModified,
       CancellationToken.None);
 
     featureBoardState.LastModified.ShouldNotBeNull();
@@ -86,8 +86,8 @@ public class FeatureBoardStateTests : SdkTestsBase
     var featureConfiguration = CreateFeature();
 
     var featureBoardState = Services.Resolve<IFeatureBoardState>();
-    featureBoardState.UpdateState(new Dictionary<string, FeatureConfiguration>
-        { { featureConfiguration.FeatureKey, featureConfiguration } }, DateTimeOffset.UtcNow,
+    featureBoardState.UpdateState(new List<FeatureConfiguration>
+        { featureConfiguration }, DateTimeOffset.UtcNow,
       CancellationToken.None);
 
     featureBoardState.LastUpdated.ShouldNotBeNull();
@@ -112,8 +112,8 @@ public class FeatureBoardStateTests : SdkTestsBase
     var lastModifiedSecond = DateTimeOffset.UtcNow;
 
     var featureBoardState = Services.Resolve<IFeatureBoardState>();
-    featureBoardState.UpdateState(new Dictionary<string, FeatureConfiguration>
-        { { featureConfiguration.FeatureKey, featureConfiguration } }, lastModifiedFirst,
+    featureBoardState.UpdateState(new List<FeatureConfiguration>
+        {featureConfiguration  }, lastModifiedFirst,
       CancellationToken.None);
 
 
@@ -129,8 +129,8 @@ public class FeatureBoardStateTests : SdkTestsBase
     var lastModified = DateTimeOffset.UtcNow;
 
     var featureBoardState = Services.Resolve<IFeatureBoardState>();
-    featureBoardState.UpdateState(new Dictionary<string, FeatureConfiguration>
-        { { featureConfiguration.FeatureKey, featureConfiguration } }, lastModified,
+    featureBoardState.UpdateState(new List<FeatureConfiguration>
+        { featureConfiguration }, lastModified,
       CancellationToken.None);
 
     featureBoardState.LastModified.ShouldNotBeNull();
@@ -144,7 +144,7 @@ public class FeatureBoardStateTests : SdkTestsBase
   {
     var featureConfiguration = CreateFeature();
     var featureBoardState = Services.Resolve<IFeatureBoardState>();
-    featureBoardState.UpdateState(new Dictionary<string, FeatureConfiguration> { { featureConfiguration.FeatureKey, featureConfiguration } }, DateTimeOffset.UtcNow, CancellationToken.None);
+    featureBoardState.UpdateState(new List<FeatureConfiguration> { featureConfiguration }, DateTimeOffset.UtcNow, CancellationToken.None);
 
     var resolvedFeature = featureBoardState.GetSnapshot().Get(featureConfiguration.FeatureKey);
     resolvedFeature.ShouldBe(featureConfiguration);
@@ -155,11 +155,11 @@ public class FeatureBoardStateTests : SdkTestsBase
   {
     var featureConfiguration = CreateFeature();
     var featureBoardState = Services.Resolve<IFeatureBoardState>();
-    featureBoardState.UpdateState(new Dictionary<string, FeatureConfiguration> { { featureConfiguration.FeatureKey, featureConfiguration } }, DateTimeOffset.UtcNow, CancellationToken.None);
+    featureBoardState.UpdateState(new List<FeatureConfiguration> { featureConfiguration }, DateTimeOffset.UtcNow, CancellationToken.None);
 
 
     var featureBoardExternalStateMock = Services.Resolve<Mock<IFeatureBoardExternalState>>();
-    featureBoardExternalStateMock.Verify(x => x.UpdateState(It.IsAny<Dictionary<string, FeatureConfiguration>>(), It.IsAny<CancellationToken>()), Times.Once);
+    featureBoardExternalStateMock.Verify(x => x.UpdateState(It.IsAny<List<FeatureConfiguration>>(), It.IsAny<CancellationToken>()), Times.Once);
   }
 
   [Fact]
@@ -167,7 +167,7 @@ public class FeatureBoardStateTests : SdkTestsBase
   {
     var featureConfiguration = CreateFeature();
     var featureBoardState = Services.Resolve<IFeatureBoardState>();
-    featureBoardState.InitialiseState(new Dictionary<string, FeatureConfiguration> { { featureConfiguration.FeatureKey, featureConfiguration } }, DateTimeOffset.UtcNow, CancellationToken.None);
+    featureBoardState.InitialiseState(new List<FeatureConfiguration> { featureConfiguration }, DateTimeOffset.UtcNow, CancellationToken.None);
     featureBoardState.UpdateState(null, null, CancellationToken.None);
 
     var resolvedFeature = featureBoardState.GetSnapshot().Get(featureConfiguration.FeatureKey);
@@ -179,12 +179,12 @@ public class FeatureBoardStateTests : SdkTestsBase
   {
     var featureConfiguration = CreateFeature();
     var featureBoardState = Services.Resolve<IFeatureBoardState>();
-    featureBoardState.InitialiseState(new Dictionary<string, FeatureConfiguration> { { featureConfiguration.FeatureKey, featureConfiguration } }, DateTimeOffset.UtcNow, CancellationToken.None);
+    featureBoardState.InitialiseState(new List<FeatureConfiguration> { featureConfiguration }, DateTimeOffset.UtcNow, CancellationToken.None);
     featureBoardState.UpdateState(null, null, CancellationToken.None);
 
 
     var featureBoardExternalStateMock = Services.Resolve<Mock<IFeatureBoardExternalState>>();
-    featureBoardExternalStateMock.Verify(x => x.UpdateState(It.IsAny<Dictionary<string, FeatureConfiguration>>(), It.IsAny<CancellationToken>()), Times.Never);
+    featureBoardExternalStateMock.Verify(x => x.UpdateState(It.IsAny<List<FeatureConfiguration>>(), It.IsAny<CancellationToken>()), Times.Never);
   }
 
   private static FeatureConfiguration CreateFeature()

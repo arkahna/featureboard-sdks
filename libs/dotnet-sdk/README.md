@@ -10,11 +10,13 @@ dotnet add package FeatureBoard.DotnetSdk
 ## Setup
 
 1) Create a Features model
+Note that JsonPropertyName can be used here to apply the correct feature key to a property, otherwize feature board will do it's best to convert the property to a Kebab case key.
 ```csharp
 using FeatureBoard.DotnetSdk.Models;
 
 public class WeatherFeatures : IFeatures
 {
+  [JsonPropertyName("weather-imperial")]
   public bool WeatherImperial { get; set; }
 }
 ```

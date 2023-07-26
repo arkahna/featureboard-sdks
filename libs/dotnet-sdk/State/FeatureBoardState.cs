@@ -9,42 +9,41 @@ public class FeatureBoardState : IFeatureBoardState
   public DateTimeOffset? LastUpdated { get; private set; }
   public DateTimeOffset? LastModified { get; private set; }
   private readonly IFeatureBoardExternalState? _externalState;
-
   private static readonly ConcurrentDictionary<string, FeatureConfiguration> _cache = new(StringComparer.OrdinalIgnoreCase);
 
-  public FeatureBoardState(IFeatureBoardExternalState? externalState)
+  public FeatureBoardState(IFeatureBoardExternalState? externalState = null)
   {
     _externalState = externalState;
   }
 
   public FeatureBoardStateSnapshot GetSnapshot() => new(_cache);
 
-  public async Task InitialiseState(Dictionary<string, FeatureConfiguration>? features, DateTimeOffset? lastModified, CancellationToken cancellationToken)
+  public async Task InitialiseState(List<FeatureConfiguration>? features, DateTimeOffset? lastModified, CancellationToken cancellationToken)
   {
     if (features is null && _externalState is not null)
     {
       features = await _externalState.GetState(cancellationToken);
     }
 
-    foreach (var featureConfiguration in features ?? new Dictionary<string, FeatureConfiguration>())
+    foreach (var feature in features ?? new List<FeatureConfiguration>())
     {
-      _cache[featureConfiguration.Key] = featureConfiguration.Value;
+      _cache[feature.FeatureKey] = feature;
     }
 
     LastUpdated = DateTimeOffset.UtcNow;
     LastModified = lastModified;
   }
 
-  public async Task UpdateState(Dictionary<string, FeatureConfiguration>? features, DateTimeOffset? lastModified, CancellationToken cancellationToken)
+  public async Task UpdateState(List<FeatureConfiguration>? features, DateTimeOffset? lastModified, CancellationToken cancellationToken)
   {
     if (features is not null)
     {
-      foreach (var featureConfiguration in features)
+      foreach (var feature in features)
       {
-        _cache[featureConfiguration.Key] = featureConfiguration.Value;
+        _cache[feature.FeatureKey] = feature;
       }
 
-      var newKeys = features.Keys;
+      var newKeys = features.Select(x => x.FeatureKey);
       var unusedKeys = _cache.Keys.Where(x => !newKeys.Contains(x));
       foreach (var unusedKey in unusedKeys)
       {
@@ -52,7 +51,7 @@ public class FeatureBoardState : IFeatureBoardState
       }
 
       if (_externalState is not null)
-        await _externalState.UpdateState(new Dictionary<string, FeatureConfiguration>(_cache), cancellationToken);
+        await _externalState.UpdateState(new List<FeatureConfiguration>(_cache.Values), cancellationToken);
 
       LastModified = lastModified;
     }
