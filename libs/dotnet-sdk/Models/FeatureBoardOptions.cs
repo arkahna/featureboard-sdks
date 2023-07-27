@@ -4,15 +4,15 @@ namespace FeatureBoard.DotnetSdk.Models;
 
 public class FeatureBoardOptions
 {
-  public Uri HttpEndpoint { get; init; } = new("https://client.featureboard.app");
+  public Uri HttpEndpoint { get; init; } = new("https://client.featureboard.app", UriKind.Absolute);
   [Required]
   public string EnvironmentApiKey { get; init; } = null!;
 
 
-  private readonly int _maxAgeMs = 60000; // 1 minute
-  public int MaxAgeMs
+  private readonly TimeSpan _maxAge = TimeSpan.FromMinutes(1);
+  public TimeSpan MaxAge
   {
-    get => _maxAgeMs;
-    init => _maxAgeMs = Math.Max(1000, value); //Max age shouldn't be less than one second
+    get => _maxAge;
+    init => _maxAge = TimeSpan.FromSeconds(1) < value ? value : TimeSpan.FromSeconds(1); //Max age shouldn't be less than one second
   }
 }

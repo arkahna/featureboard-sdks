@@ -21,7 +21,7 @@ public static class RegisterFeatureBoard
       var options = serviceProvider.GetRequiredService<IOptions<FeatureBoardOptions>>();
       client.BaseAddress = options.Value.HttpEndpoint;
       client.DefaultRequestHeaders.Add("x-environment-key", options.Value.EnvironmentApiKey);
-      client.Timeout = TimeSpan.FromMilliseconds(options.Value.MaxAgeMs - 3); //prevent multiple requests running at the same time.
+      client.Timeout = options.Value.MaxAge - TimeSpan.FromMilliseconds(3); //prevent multiple requests running at the same time.
     });
 
     services.AddScoped<IFeatureBoardClient<TFeatures>, FeatureBoardClient<TFeatures>>();
@@ -36,7 +36,6 @@ public static class RegisterFeatureBoard
   {
     if (_updateStrategy != UpdateStrategy.None)
       throw new ApplicationException("You can only have one update strategy registered");
-    builder.Services.AddTransient<OnRequestUpdateStrategyMiddleware>();
 
     _updateStrategy = UpdateStrategy.OnRequest;
 
@@ -65,48 +64,6 @@ public static class RegisterFeatureBoard
   {
     return _updateStrategy switch
     {
-<<<<<<< HEAD
-        if ( _updateStrategy != UpdateStrategy.None )
-            throw new ApplicationException("You can only have one update strategy registered");
-        _updateStrategy = UpdateStrategy.OnRequest;
-
-        return builder;
-    }
-
-    public static FeatureBoardBuilder WithPollingUpdateStrategy(this FeatureBoardBuilder builder)
-    {
-        if ( _updateStrategy != UpdateStrategy.None )
-            throw new ApplicationException("You can only have one update strategy registered");
-        builder.Services.AddHostedService<PollingUpdateStrategyBackgroundService>();
-
-        _updateStrategy = UpdateStrategy.Polling;
-
-        return builder;
-    }
-
-    public static FeatureBoardBuilder WithExternalState<TStateStore>(this FeatureBoardBuilder builder) where TStateStore : class, IFeatureBoardExternalState
-    {
-        builder.Services.AddSingleton<IFeatureBoardExternalState, TStateStore>();
-
-        return builder;
-    }
-
-    public static IApplicationBuilder UseFeatureBoard(this IApplicationBuilder builder)
-    {
-        return _updateStrategy switch
-        {
-            UpdateStrategy.OnRequest => builder.UseMiddleware<OnRequestUpdateStrategyMiddleware>(),
-            _ => builder
-        };
-    }
-
-    private enum UpdateStrategy
-    {
-        None,
-        Polling,
-        OnRequest
-    }
-=======
       UpdateStrategy.OnRequest => builder.UseMiddleware<OnRequestUpdateStrategyMiddleware>(),
       _ => builder
     };
@@ -118,5 +75,4 @@ public static class RegisterFeatureBoard
     Polling,
     OnRequest
   }
->>>>>>> 8687636 (fixup 92b6e8e1340bfcfae8a28a8edbb68b95511a8412)
 }

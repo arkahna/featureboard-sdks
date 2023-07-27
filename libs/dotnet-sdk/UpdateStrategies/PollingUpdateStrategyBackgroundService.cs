@@ -31,7 +31,7 @@ public class PollingUpdateStrategyBackgroundService : BackgroundService
     // When the timer should have no due-time, then do the work once now.
     await UpdateState(stoppingToken);
 
-    using PeriodicTimer timer = new(TimeSpan.FromMilliseconds(_options.Value.MaxAgeMs));
+    using PeriodicTimer timer = new(_options.Value.MaxAge);
 
     try
     {
