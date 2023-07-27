@@ -203,12 +203,12 @@ public class FeatureBoardClientTests : SdkTestsBase
         {
           nameof(TestFeatures.EnumFeature).ToFeatureBoardKey(), new FeatureConfiguration
           {
-            DefaultValue = JsonValue.Create(faker.PickRandomWithout(defaultAudienceValue))!,
+            DefaultValue = JsonValue.Create(faker.PickRandomWithout(defaultAudienceValue).ToString().ToLower())!,
             FeatureKey = nameof(TestFeatures.EnumFeature),
             AudienceExceptions = new AudienceExceptionValue[]{
               new()
               {
-                Value = JsonValue.Create(defaultAudienceValue)!,
+                Value = JsonValue.Create(defaultAudienceValue.ToString().ToLower())!,
                 AudienceKey = "an-audience"
               }
             }
@@ -224,7 +224,7 @@ public class FeatureBoardClientTests : SdkTestsBase
 
 
   [Fact]
-  public void ItLooksUpTheFeatureKeyWithJsonPropertyName()
+  public void ItLooksUpTheFeatureKeyWithFeatureKeyNameAttribute()
   {
     var faker = new Faker();
     var defaultAudienceValue = Guid.NewGuid().ToString();

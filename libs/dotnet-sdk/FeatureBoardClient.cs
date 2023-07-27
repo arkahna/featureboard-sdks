@@ -1,10 +1,10 @@
+using FeatureBoard.DotnetSdk.Attributes;
 using FeatureBoard.DotnetSdk.Helpers;
 using FeatureBoard.DotnetSdk.Models;
 using FeatureBoard.DotnetSdk.State;
 using Microsoft.Extensions.Logging;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text.Json.Serialization;
 
 namespace FeatureBoard.DotnetSdk;
 
@@ -27,7 +27,7 @@ public class FeatureBoardClient<TFeatures> : IFeatureBoardClient<TFeatures> wher
       throw new ArgumentException($"The provided expression contains a {expr.GetType().Name} which is not supported. Only simple member accessors (fields, properties) of an object are supported.");
 
 
-    var attr = memberExpression.Member.GetCustomAttribute<JsonPropertyNameAttribute>(); //Caching this value offers no performance improvement
+    var attr = memberExpression.Member.GetCustomAttribute<FeatureKeyNameAttribute>(); //Caching this value offers no performance improvement
     return GetFeatureValue(
       attr?.Name
         ?? memberExpression.Member.Name.ToFeatureBoardKey(), //Pascal to Kebab case
