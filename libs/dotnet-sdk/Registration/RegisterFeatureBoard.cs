@@ -36,6 +36,7 @@ public static class RegisterFeatureBoard
   {
     if (_updateStrategy != UpdateStrategy.None)
       throw new ApplicationException("You can only have one update strategy registered");
+    builder.Services.AddTransient<OnRequestUpdateStrategyMiddleware>();
 
     _updateStrategy = UpdateStrategy.OnRequest;
 

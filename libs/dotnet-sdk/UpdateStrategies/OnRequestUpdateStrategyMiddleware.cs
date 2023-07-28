@@ -6,13 +6,13 @@ using Microsoft.Extensions.Options;
 
 namespace FeatureBoard.DotnetSdk.UpdateStrategies;
 
-public class OnRequestUpdateStrategyMiddleware
+public class OnRequestUpdateStrategyMiddleware : IMiddleware
 {
   private readonly IFeatureBoardState _state;
   private readonly IOptions<FeatureBoardOptions> _options;
   private readonly IFeatureBoardHttpClient _featureBoardHttpClient;
   private readonly ILogger<OnRequestUpdateStrategyMiddleware> _logger;
-  private readonly SemaphoreSlim _semaphore = new(1, 1);
+  private static readonly SemaphoreSlim _semaphore = new(1, 1);
 
   public OnRequestUpdateStrategyMiddleware(IFeatureBoardState state, IOptions<FeatureBoardOptions> options, IFeatureBoardHttpClient featureBoardHttpClient, ILogger<OnRequestUpdateStrategyMiddleware> logger)
   {
