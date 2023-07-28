@@ -1,5 +1,6 @@
 using FeatureBoard.DotnetSdk.Models;
 using FeatureBoard.DotnetSdk.State;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -8,21 +9,17 @@ namespace FeatureBoard.DotnetSdk.UpdateStrategies;
 
 public class PollingUpdateStrategyBackgroundService : BackgroundService
 {
-  private readonly IFeatureBoardState _state;
   private readonly IOptions<FeatureBoardOptions> _options;
-  private readonly IFeatureBoardHttpClient _featureBoardHttpClient;
+  private readonly IServiceScopeFactory _scopeFactory;
   private readonly ILogger<PollingUpdateStrategyBackgroundService> _logger;
   private bool _initialised = false;
 
-  public PollingUpdateStrategyBackgroundService(IFeatureBoardState state, IOptions<FeatureBoardOptions> options, IFeatureBoardHttpClient featureBoardHttpClient, ILogger<PollingUpdateStrategyBackgroundService> logger)
+  public PollingUpdateStrategyBackgroundService(IOptions<FeatureBoardOptions> options, IServiceScopeFactory scopeFactory, ILogger<PollingUpdateStrategyBackgroundService> logger)
   {
-    _state = state;
     _options = options;
-    _featureBoardHttpClient = featureBoardHttpClient;
+    _scopeFactory = scopeFactory;
     _logger = logger;
   }
-
-
 
   protected override async Task ExecuteAsync(CancellationToken stoppingToken)
   {
@@ -51,16 +48,19 @@ public class PollingUpdateStrategyBackgroundService : BackgroundService
     try
     {
       _logger.LogDebug("Fetching updates");
-      var (features, lastModified) = await _featureBoardHttpClient.FetchUpdates(_state.LastModified, cancellationToken);
+      using var scope = _scopeFactory.CreateScope();
+      var featureBoardHttpClient = scope.ServiceProvider.GetRequiredService<IFeatureBoardHttpClient>();
+      var state = scope.ServiceProvider.GetRequiredService<IFeatureBoardState>();
+      var (features, lastModified) = await featureBoardHttpClient.FetchUpdates(state.LastModified, cancellationToken);
       if (_initialised)
       {
         _logger.LogDebug("Updating State");
-        await _state.UpdateState(features, lastModified ?? _state.LastModified, cancellationToken);
+        await state.UpdateState(features, lastModified ?? state.LastModified, cancellationToken);
         return;
       }
 
       _logger.LogDebug("Initialising State");
-      await _state.InitialiseState(features, lastModified ?? _state.LastModified, cancellationToken);
+      await state.InitialiseState(features, lastModified ?? state.LastModified, cancellationToken);
       _initialised = true;
     }
     catch (Exception exception)
