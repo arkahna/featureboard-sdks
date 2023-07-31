@@ -1,7 +1,10 @@
+using FeatureBoard.DotnetSdk.Attributes;
+using FeatureBoard.DotnetSdk.Helpers;
 using FeatureBoard.DotnetSdk.Models;
 using FeatureBoard.DotnetSdk.State;
 using Microsoft.Extensions.Logging;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace FeatureBoard.DotnetSdk;
 
@@ -23,7 +26,17 @@ public class FeatureBoardClient<TFeatures> : IFeatureBoardClient<TFeatures> wher
     if (expr.Body is not MemberExpression memberExpression)
       throw new ArgumentException($"The provided expression contains a {expr.GetType().Name} which is not supported. Only simple member accessors (fields, properties) of an object are supported.");
 
-    var feature = _state.Get(memberExpression.Member.Name);
+
+    var attr = memberExpression.Member.GetCustomAttribute<FeatureKeyNameAttribute>(); //Caching this value offers no performance improvement
+    return GetFeatureValue(
+      attr?.Name
+        ?? memberExpression.Member.Name.ToFeatureBoardKey(), //Pascal to Kebab case
+      defaultValue);
+  }
+
+  public TProp GetFeatureValue<TProp>(string featureKey, TProp defaultValue)
+  {
+    var feature = _state.Get(featureKey);
     var audienceKeys = _audienceProvider.AudienceKeys;
     if (feature == null)
     {
@@ -35,7 +48,18 @@ public class FeatureBoardClient<TFeatures> : IFeatureBoardClient<TFeatures> wher
       audienceKeys.Contains(a.AudienceKey)
     );
 
-    if (!(audienceException?.Value ?? feature.DefaultValue).TryGetValue(out TProp? value))
+    if (typeof(TProp).IsEnum)
+    {
+      if (!(audienceException?.Value ?? feature.DefaultValue).TryGetValue<string>(out var strValue) || !Enum.TryParse(typeof(TProp), strValue, true, out var enumValue))
+      {
+        _logger.LogError("The unable to decode the value to the expected type:  {{audienceExceptionValue: {audienceExceptionValue}, defaultValue: {defaultValue}, value: {expectedType}}}", audienceException?.Value, feature.DefaultValue, typeof(TProp).Name);
+        return defaultValue;
+      }
+
+      return enumValue != null ? (TProp)enumValue : defaultValue;
+    }
+
+    if (!(audienceException?.Value ?? feature.DefaultValue).TryGetValue<TProp>(out var value))
     {
       _logger.LogError("The unable to decode the value to the expected type:  {{audienceExceptionValue: {audienceExceptionValue}, defaultValue: {defaultValue}, value: {expectedType}}}", audienceException?.Value, feature.DefaultValue, typeof(TProp).Name);
       return defaultValue;
@@ -44,4 +68,5 @@ public class FeatureBoardClient<TFeatures> : IFeatureBoardClient<TFeatures> wher
     _logger.LogDebug("GetFeatureValue: {{audienceExceptionValue: {audienceExceptionValue}, defaultValue: {defaultValue}, value: {value}}}", audienceException?.Value, feature.DefaultValue, value);
     return value;
   }
+
 }

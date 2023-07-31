@@ -9,7 +9,7 @@ namespace FeatureBoard.DotnetSdk.Registration;
 
 public static class RegisterFeatureBoard
 {
-  private static UpdateStrategy updateStrategy = UpdateStrategy.None;
+  private static UpdateStrategy _updateStrategy = UpdateStrategy.None;
   public static FeatureBoardBuilder AddFeatureBoard<TFeatures, TAudienceProvider>(this IServiceCollection services) where TFeatures : class, IFeatures where TAudienceProvider : class, IAudienceProvider
   {
     var configuration = services.BuildServiceProvider().GetRequiredService<IConfiguration>();
@@ -18,6 +18,7 @@ public static class RegisterFeatureBoard
     services.AddHttpClient<IFeatureBoardHttpClient, FeatureBoardHttpClient>();
 
     services.AddScoped<IFeatureBoardClient<TFeatures>, FeatureBoardClient<TFeatures>>();
+    services.AddScoped<IFeatureBoardClient>(c => c.GetRequiredService<IFeatureBoardClient<TFeatures>>());
     services.AddScoped<IAudienceProvider, TAudienceProvider>();
     services.AddSingleton<IFeatureBoardState, FeatureBoardState>();
 
@@ -26,22 +27,22 @@ public static class RegisterFeatureBoard
 
   public static FeatureBoardBuilder WithOnRequestUpdateStrategy(this FeatureBoardBuilder builder)
   {
-    if (updateStrategy != UpdateStrategy.None)
+    if (_updateStrategy != UpdateStrategy.None)
       throw new ApplicationException("You can only have one update strategy registered");
     builder.Services.AddSingleton<IFeatureBoardHttpClient, FeatureBoardHttpClient>();
-    updateStrategy = UpdateStrategy.OnRequest;
+    _updateStrategy = UpdateStrategy.OnRequest;
 
     return builder;
   }
 
   public static FeatureBoardBuilder WithPollingUpdateStrategy(this FeatureBoardBuilder builder)
   {
-    if (updateStrategy != UpdateStrategy.None)
+    if (_updateStrategy != UpdateStrategy.None)
       throw new ApplicationException("You can only have one update strategy registered");
     builder.Services.AddSingleton<IFeatureBoardHttpClient, FeatureBoardHttpClient>();
     builder.Services.AddHostedService<PollingUpdateStrategyBackgroundService>();
 
-    updateStrategy = UpdateStrategy.Polling;
+    _updateStrategy = UpdateStrategy.Polling;
 
     return builder;
   }
@@ -55,7 +56,7 @@ public static class RegisterFeatureBoard
 
   public static IApplicationBuilder UseFeatureBoard(this IApplicationBuilder builder)
   {
-    return updateStrategy switch
+    return _updateStrategy switch
     {
       UpdateStrategy.OnRequest => builder.UseMiddleware<OnRequestUpdateStrategyMiddleware>(),
       _ => builder

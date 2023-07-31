@@ -21,7 +21,7 @@ internal class FeatureBoardHttpClient : IFeatureBoardHttpClient
     _logger = logger;
   }
 
-  public async Task<(Dictionary<string, FeatureConfiguration>? features, DateTimeOffset? lastModified)> FetchUpdates(DateTimeOffset? lastModified, CancellationToken cancellationToken)
+  public async Task<(List<FeatureConfiguration>? features, DateTimeOffset? lastModified)> FetchUpdates(DateTimeOffset? lastModified, CancellationToken cancellationToken)
   {
     var request = new HttpRequestMessage(HttpMethod.Get, "all");
     if (lastModified is not null)
@@ -37,13 +37,11 @@ internal class FeatureBoardHttpClient : IFeatureBoardHttpClient
 
     if (response.IsSuccessStatusCode)
     {
-      var features = await response.Content.ReadFromJsonAsync<Dictionary<string, FeatureConfiguration>>(cancellationToken: cancellationToken)
+      var features = await response.Content.ReadFromJsonAsync<List<FeatureConfiguration>>(cancellationToken: cancellationToken)
                      ?? throw new ApplicationException("Unable to retrieve decode response content");
 
       if (response.Content.Headers.LastModified is not null)
-      {
         lastModified = response.Content.Headers.LastModified;
-      }
 
       _logger.LogDebug("Fetching updates done, newLastModified={newLastModified}", lastModified);
       return (features, lastModified);

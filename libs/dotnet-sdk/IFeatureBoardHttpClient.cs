@@ -4,6 +4,5 @@ namespace FeatureBoard.DotnetSdk;
 
 public interface IFeatureBoardHttpClient
 {
-  Task<(Dictionary<string, FeatureConfiguration>? features, DateTimeOffset? lastModified)> FetchUpdates(
-    DateTimeOffset? lastModified, CancellationToken cancellationToken);
+  Task<(List<FeatureConfiguration>? features, DateTimeOffset? lastModified)> FetchUpdates(DateTimeOffset? lastModified, CancellationToken cancellationToken);
 }

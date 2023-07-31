@@ -1,4 +1,5 @@
 using Bogus;
+using FeatureBoard.DotnetSdk.Helpers;
 using FeatureBoard.DotnetSdk.Models;
 using FeatureBoard.DotnetSdk.State;
 using Moq;
@@ -45,7 +46,7 @@ public class FeatureBoardClientTests : SdkTestsBase
       .Returns(new FeatureBoardStateSnapshot(new Dictionary<string, FeatureConfiguration>
       {
         {
-          nameof(TestFeatures.StringFeature), new FeatureConfiguration
+          nameof(TestFeatures.StringFeature).ToFeatureBoardKey(), new FeatureConfiguration
           {
             DefaultValue = JsonValue.Create(defaultFeatureValue)!,
             FeatureKey = nameof(TestFeatures.StringFeature),
@@ -71,7 +72,7 @@ public class FeatureBoardClientTests : SdkTestsBase
       .Returns(new FeatureBoardStateSnapshot(new Dictionary<string, FeatureConfiguration>
       {
         {
-          nameof(TestFeatures.StringFeature), new FeatureConfiguration
+          nameof(TestFeatures.StringFeature).ToFeatureBoardKey(), new FeatureConfiguration
           {
             DefaultValue = JsonValue.Create(faker.Lorem.Paragraph())!,
             FeatureKey = nameof(TestFeatures.StringFeature),
@@ -103,7 +104,7 @@ public class FeatureBoardClientTests : SdkTestsBase
       .Returns(new FeatureBoardStateSnapshot(new Dictionary<string, FeatureConfiguration>
       {
         {
-          nameof(TestFeatures.NumberFeature), new FeatureConfiguration
+          nameof(TestFeatures.NumberFeature).ToFeatureBoardKey(), new FeatureConfiguration
           {
             DefaultValue = JsonValue.Create(faker.Random.Decimal()),
             FeatureKey = nameof(TestFeatures.NumberFeature),
@@ -136,7 +137,7 @@ public class FeatureBoardClientTests : SdkTestsBase
       .Returns(new FeatureBoardStateSnapshot(new Dictionary<string, FeatureConfiguration>
       {
         {
-          nameof(TestFeatures.BoolFeature), new FeatureConfiguration
+          nameof(TestFeatures.BoolFeature).ToFeatureBoardKey(), new FeatureConfiguration
           {
             DefaultValue = JsonValue.Create(!defaultAudienceValue),
             FeatureKey = nameof(TestFeatures.BoolFeature),
@@ -168,7 +169,7 @@ public class FeatureBoardClientTests : SdkTestsBase
       .Returns(new FeatureBoardStateSnapshot(new Dictionary<string, FeatureConfiguration>
       {
         {
-          nameof(TestFeatures.StringFeature), new FeatureConfiguration
+          nameof(TestFeatures.StringFeature).ToFeatureBoardKey(), new FeatureConfiguration
           {
             DefaultValue = JsonValue.Create(faker.Lorem.Paragraph())!,
             FeatureKey = nameof(TestFeatures.StringFeature),
@@ -185,6 +186,71 @@ public class FeatureBoardClientTests : SdkTestsBase
 
     var client = Services.Resolve<IFeatureBoardClient<TestFeatures>>();
     var result = client.GetFeatureValue(x => x.StringFeature, Guid.NewGuid().ToString());
+
+    result.ShouldBe(defaultAudienceValue);
+  }
+
+  [Fact]
+  public void ItReturnsAnEnum()
+  {
+    var faker = new Faker();
+    var defaultAudienceValue = faker.PickRandom<TestEnum>();
+    var featureBoardMock = Services.Resolve<Mock<IFeatureBoardState>>();
+    featureBoardMock
+      .Setup(x => x.GetSnapshot())
+      .Returns(new FeatureBoardStateSnapshot(new Dictionary<string, FeatureConfiguration>
+      {
+        {
+          nameof(TestFeatures.EnumFeature).ToFeatureBoardKey(), new FeatureConfiguration
+          {
+            DefaultValue = JsonValue.Create(faker.PickRandomWithout(defaultAudienceValue).ToString().ToLower())!,
+            FeatureKey = nameof(TestFeatures.EnumFeature),
+            AudienceExceptions = new AudienceExceptionValue[]{
+              new()
+              {
+                Value = JsonValue.Create(defaultAudienceValue.ToString().ToLower())!,
+                AudienceKey = "an-audience"
+              }
+            }
+          }
+        }
+      }));
+
+    var client = Services.Resolve<IFeatureBoardClient<TestFeatures>>();
+    var result = client.GetFeatureValue(x => x.EnumFeature, faker.PickRandomWithout(defaultAudienceValue));
+
+    result.ShouldBe(defaultAudienceValue);
+  }
+
+
+  [Fact]
+  public void ItLooksUpTheFeatureKeyWithFeatureKeyNameAttribute()
+  {
+    var faker = new Faker();
+    var defaultAudienceValue = Guid.NewGuid().ToString();
+    var featureBoardMock = Services.Resolve<Mock<IFeatureBoardState>>();
+    featureBoardMock
+      .Setup(x => x.GetSnapshot())
+      .Returns(new FeatureBoardStateSnapshot(new Dictionary<string, FeatureConfiguration>
+      {
+        {
+          "a-strange-name", new FeatureConfiguration
+          {
+            DefaultValue = JsonValue.Create(faker.Lorem.Paragraph())!,
+            FeatureKey = nameof(TestFeatures.StringFeature),
+            AudienceExceptions = new AudienceExceptionValue[]{
+              new()
+              {
+                Value = JsonValue.Create(defaultAudienceValue)!,
+                AudienceKey = "an-audience"
+              }
+            }
+          }
+        }
+      }));
+
+    var client = Services.Resolve<IFeatureBoardClient<TestFeatures>>();
+    var result = client.GetFeatureValue(x => x.StrangeName, Guid.NewGuid().ToString());
 
     result.ShouldBe(defaultAudienceValue);
   }

@@ -10,6 +10,6 @@ public interface IFeatureBoardState
 
   FeatureBoardStateSnapshot GetSnapshot();
 
-  Task InitialiseState(Dictionary<string, FeatureConfiguration>? features, DateTimeOffset? lastModified, CancellationToken cancellationToken);
-  Task UpdateState(Dictionary<string, FeatureConfiguration>? features, DateTimeOffset? lastModified, CancellationToken cancellationToken);
+  Task InitialiseState(List<FeatureConfiguration>? features, DateTimeOffset? lastModified, CancellationToken cancellationToken);
+  Task UpdateState(List<FeatureConfiguration>? features, DateTimeOffset? lastModified, CancellationToken cancellationToken);
 }
