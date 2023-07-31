@@ -460,6 +460,54 @@ describe('http client', () => {
         }
     })
 
+
+    it.only('Catch error when update external state store throws error', async () => {
+        expect.assertions(1)
+
+        const values: FeatureConfiguration[] = [
+            {
+                featureKey: 'my-feature',
+                audienceExceptions: [],
+                defaultValue: 'service-value',
+            },
+        ]
+
+        const server = setupServer(
+            rest.get('https://client.featureboard.app/all', (_req, res, ctx) =>
+                res.once(ctx.json(values), ctx.status(200)),
+            ),
+        )
+        server.listen()
+
+        try {
+            const client = createServerClient({
+                environmentApiKey: 'env-api-key',
+                api: featureBoardHostedService,
+                updateStrategy: { kind: 'manual' },
+                externalStateStore: new MockExternalStateStore(
+                    () =>
+                        Promise.resolve({
+                            'my-feature': {
+                                featureKey: 'my-feature',
+                                defaultValue: 'external-state-store-value',
+                                audienceExceptions: [],
+                            },
+                        }),
+                    (store) => {
+                        expect(store['my-feature']?.defaultValue).toEqual(
+                            'service-value',
+                        )
+                        return Promise.reject()
+                    },
+                ),
+            })
+            await client.waitForInitialised()
+        } finally {
+            server.resetHandlers()
+            server.close()
+        }
+    })
+
     it('Subscription to feature value immediately return current value but will not be called again', async () => {
         let count = 0
         expect.assertions(2)

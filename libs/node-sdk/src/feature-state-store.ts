@@ -67,7 +67,7 @@ export class AllFeatureStateStore {
         )
 
         if (this._externalStateStore) {
-            this._externalStateStore.update(this._store)
+            this._externalStateStore.update(this._store).then(result => {}, error => {})
         }
     }
 }
