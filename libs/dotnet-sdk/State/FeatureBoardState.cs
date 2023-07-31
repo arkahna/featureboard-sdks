@@ -20,6 +20,10 @@ public class FeatureBoardState : IFeatureBoardState
 
   public async Task InitialiseState(List<FeatureConfiguration>? features, DateTimeOffset? lastModified, CancellationToken cancellationToken)
   {
+
+    if (_cache.Any())
+      throw new InvalidOperationException("Cache has already been initialised");
+
     if (features is null && _externalState is not null)
     {
       features = await _externalState.GetState(cancellationToken);

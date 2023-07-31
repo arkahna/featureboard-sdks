@@ -48,7 +48,18 @@ public class FeatureBoardClient<TFeatures> : IFeatureBoardClient<TFeatures> wher
       audienceKeys.Contains(a.AudienceKey)
     );
 
-    if (!(audienceException?.Value ?? feature.DefaultValue).TryGetValue(out TProp? value))
+    if (typeof(TProp).IsEnum)
+    {
+      if (!(audienceException?.Value ?? feature.DefaultValue).TryGetValue<string>(out var strValue) || !Enum.TryParse(typeof(TProp), strValue, true, out var enumValue))
+      {
+        _logger.LogError("The unable to decode the value to the expected type:  {{audienceExceptionValue: {audienceExceptionValue}, defaultValue: {defaultValue}, value: {expectedType}}}", audienceException?.Value, feature.DefaultValue, typeof(TProp).Name);
+        return defaultValue;
+      }
+
+      return enumValue != null ? (TProp)enumValue : defaultValue;
+    }
+
+    if (!(audienceException?.Value ?? feature.DefaultValue).TryGetValue<TProp>(out var value))
     {
       _logger.LogError("The unable to decode the value to the expected type:  {{audienceExceptionValue: {audienceExceptionValue}, defaultValue: {defaultValue}, value: {expectedType}}}", audienceException?.Value, feature.DefaultValue, typeof(TProp).Name);
       return defaultValue;

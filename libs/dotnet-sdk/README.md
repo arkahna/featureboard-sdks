@@ -10,7 +10,7 @@ dotnet add package FeatureBoard.DotnetSdk
 ## Setup
 
 1) Create a Features model
-Note that FeatureKeyName can be used here to apply the correct feature key to a property, otherwize feature board will do it's best to convert the property to a kebab case key.
+Note that FeatureKeyName can be used here to apply the correct feature key to a property, otherwise feature board will do it's best to convert the property to a kebab case key.
 ```csharp
 using FeatureBoard.DotnetSdk.Models;
 
