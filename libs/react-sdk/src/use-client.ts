@@ -33,6 +33,10 @@ export function useClient({
     )
 
     useEffect(() => {
+        // Check if initialised has changed
+        if (isInitialising === browserClient.initialised) {
+            setInitialising(!browserClient.initialised)
+        }
         return browserClient.subscribeToInitialisedChanged(
             (initialised: boolean) => {
                 if (isInitialising === initialised) {
@@ -41,7 +45,9 @@ export function useClient({
                 }
             },
         )
-    })
+        // Empty dependency array => browserClient.subscribeToInitialisedChanged is called once after initial render
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
 
     useEffect(() => {
         const update = async () => {
