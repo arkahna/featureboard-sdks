@@ -11,6 +11,7 @@ import { debugLog } from './log'
 import { resolveUpdateStrategy } from './update-strategies/resolveUpdateStrategy'
 import { UpdateStrategies } from './update-strategies/update-strategies'
 import { retry } from './utils/retry'
+import { EffectiveFeatureValue } from '@featureboard/contracts'
 
 const serverConnectionDebug = debugLog.extend('server-connection')
 
@@ -150,6 +151,20 @@ function syncRequest(
     const featuresState = stateStore.all()
 
     const client: FeatureBoardClient = {
+        getEffectiveValues: () => {
+            return {
+                audiences: audienceKeys,
+                effectiveValues: Object.keys(featuresState)
+                    .map<EffectiveFeatureValue>((key) => ({
+                        featureKey: key,
+                        // We will filter the invalid undefined in the next filter
+                        value: getFeatureValue(key, undefined!),
+                    }))
+                    .filter(
+                        (effectiveValue) => effectiveValue.value !== undefined,
+                    ),
+            }
+        },
         getFeatureValue,
         subscribeToFeatureValue: (
             featureKey: string,

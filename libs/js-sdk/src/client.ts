@@ -9,12 +9,14 @@ import { resolveUpdateStrategy } from './update-strategies/resolveUpdateStrategy
 import { UpdateStrategies } from './update-strategies/update-strategies'
 import { compareArrays } from './utils/compare-arrays'
 import { retry } from './utils/retry'
+import { EffectiveFeatureValue } from '@featureboard/contracts'
 
 export function createBrowserClient({
     updateStrategy,
     environmentApiKey,
     api,
     audiences,
+    initialValues,
 }: {
     /** Connect to a self hosted instance of FeatureBoard */
     api?: FeatureBoardApiConfig
@@ -29,6 +31,8 @@ export function createBrowserClient({
     updateStrategy?: UpdateStrategies['kind'] | UpdateStrategies
 
     audiences: string[]
+
+    initialValues?: EffectiveFeatureValue[]
 
     environmentApiKey: string
 }): BrowserClient {
@@ -56,7 +60,7 @@ export function createBrowserClient({
     // Ensure that the init promise doesn't cause an unhandled promise rejection
     initialisedState.initialisedPromise.promise.catch(() => {})
 
-    const stateStore = new EffectiveFeatureStateStore(audiences)
+    const stateStore = new EffectiveFeatureStateStore(audiences, initialValues)
 
     const updateStrategyImplementation = resolveUpdateStrategy(
         updateStrategy,
@@ -210,6 +214,18 @@ function createBrowserFbClient(
     stateStore: EffectiveFeatureStateStore,
 ): FeatureBoardClient {
     return {
+        getEffectiveValues() {
+            const all = stateStore.all()
+            return {
+                audiences: [...stateStore.audiences],
+                effectiveValues: Object.keys(all)
+                    .filter((key) => all[key])
+                    .map<EffectiveFeatureValue>((key) => ({
+                        featureKey: key,
+                        value: all[key]!,
+                    })),
+            }
+        },
         getFeatureValue: (featureKey, defaultValue) => {
             const value = stateStore.get(featureKey as string)
             debugLog('getFeatureValue: %o', {

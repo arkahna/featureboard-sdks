@@ -256,6 +256,45 @@ describe('http client', () => {
         }
     })
 
+    it('can start with last known good config', async () => {
+        const server = setupServer(
+            rest.get(
+                'https://client.featureboard.app/effective',
+                (_req, res, ctx) => res(ctx.status(500)),
+            ),
+        )
+        server.listen()
+
+        try {
+            const client = createBrowserClient({
+                environmentApiKey: 'env-api-key',
+                api: featureBoardHostedService,
+                audiences: ['audience1'],
+                initialValues: [
+                    {
+                        featureKey: 'my-feature',
+                        value: 'service-default-value',
+                    },
+                ],
+                updateStrategy: { kind: 'manual' },
+            })
+
+            const value = client.client.getFeatureValue(
+                'my-feature',
+                'default-value',
+            )
+            expect(client.initialised).toEqual(false)
+            expect(value).toEqual('service-default-value')
+            await expect(async () => {
+                await client.waitForInitialised()
+            }).rejects.toThrowError('500')
+            expect(client.initialised).toEqual(true)
+        } finally {
+            server.resetHandlers()
+            server.close()
+        }
+    }, { timeout: 60000 })
+
     it('Handles updating audience', async () => {
         const values: EffectiveFeatureValue[] = [
             {

@@ -14,8 +14,13 @@ export class EffectiveFeatureStateStore {
 
     constructor(
         audiences: string[],
+        initialValues?: EffectiveFeatureValue[],
     ) {
         this._audiences = audiences
+        
+        for (const value of initialValues || []) {
+            this._store[value.featureKey] = value.value
+        }
     }
 
     set audiences(value: string[]) {
