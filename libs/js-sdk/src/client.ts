@@ -205,6 +205,7 @@ export function createBrowserClient({
             return updateStrategyImplementation.updateFeatures()
         },
         close() {
+            retryCancellationToken.cancel = true
             return updateStrategyImplementation.close()
         },
     }

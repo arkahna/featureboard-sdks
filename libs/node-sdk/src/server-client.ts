@@ -3,6 +3,7 @@ import {
     FeatureBoardClient,
     Features,
     featureBoardHostedService,
+    retry,
 } from '@featureboard/js-sdk'
 import { PromiseCompletionSource } from 'promise-completion-source'
 import { ExternalStateStore, ServerClient } from '.'
@@ -10,7 +11,6 @@ import { AllFeatureStateStore } from './feature-state-store'
 import { debugLog } from './log'
 import { resolveUpdateStrategy } from './update-strategies/resolveUpdateStrategy'
 import { UpdateStrategies } from './update-strategies/update-strategies'
-import { retry } from './utils/retry'
 import { EffectiveFeatureValue } from '@featureboard/contracts'
 
 const serverConnectionDebug = debugLog.extend('server-connection')
@@ -55,6 +55,7 @@ export function createServerClient({
         api || featureBoardHostedService,
     )
 
+    const retryCancellationToken = { cancel: false }
     retry(async () => {
         try {
             serverConnectionDebug('Connecting to SDK...')
@@ -74,7 +75,7 @@ export function createServerClient({
             serverConnectionDebug('Initialised from external state store')
             return Promise.resolve()
         }
-    })
+    }, retryCancellationToken)
         .then(() => {
             if (!initialisedPromise.completed) {
                 serverConnectionDebug('Server client is initialised')
@@ -96,6 +97,7 @@ export function createServerClient({
             return initialisedPromise.completed
         },
         close() {
+            retryCancellationToken.cancel = true
             return updateStrategyImplementation.close()
         },
         request: (audienceKeys: string[]) => {

@@ -461,7 +461,7 @@ describe('http client', () => {
     })
 
 
-    it.only('Catch error when update external state store throws error', async () => {
+    it('Catch error when update external state store throws error', async () => {
         expect.assertions(1)
 
         const values: FeatureConfiguration[] = [
