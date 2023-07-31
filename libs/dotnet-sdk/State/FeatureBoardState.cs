@@ -20,25 +20,20 @@ public class FeatureBoardState : IFeatureBoardState
 
   public async Task InitialiseState(List<FeatureConfiguration>? features, DateTimeOffset? lastModified, CancellationToken cancellationToken)
   {
-
-    if (_cache.Any())
-      throw new InvalidOperationException("Cache has already been initialised");
-
     if (features is null && _externalState is not null)
     {
       features = await _externalState.GetState(cancellationToken);
     }
 
-    foreach (var feature in features ?? new List<FeatureConfiguration>())
-    {
-      _cache[feature.FeatureKey] = feature;
-    }
-
-    LastUpdated = DateTimeOffset.UtcNow;
-    LastModified = lastModified;
+    await UpdateStateInternal(features ?? new List<FeatureConfiguration>(), lastModified, cancellationToken);
   }
 
   public async Task UpdateState(List<FeatureConfiguration>? features, DateTimeOffset? lastModified, CancellationToken cancellationToken)
+  {
+    await UpdateStateInternal(features, lastModified, cancellationToken);
+  }
+
+  private async Task UpdateStateInternal(List<FeatureConfiguration>? features, DateTimeOffset? lastModified, CancellationToken cancellationToken)
   {
     if (features is not null)
     {

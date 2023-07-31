@@ -105,17 +105,14 @@ public class FeatureBoardStateTests : SdkTestsBase
   }
 
   [Fact]
-  public void UpdateStateDoesNotSetLastModifiedFeaturesAreNotProvided()
+  public void UpdateStateDoesNotSetLastModifiedIfFeaturesAreNotProvided()
   {
     var featureConfiguration = CreateFeature();
     var lastModifiedFirst = DateTimeOffset.UtcNow;
-    var lastModifiedSecond = DateTimeOffset.UtcNow;
+    var lastModifiedSecond = DateTimeOffset.UtcNow.AddSeconds(1);
 
     var featureBoardState = Services.Resolve<IFeatureBoardState>();
-    featureBoardState.UpdateState(new List<FeatureConfiguration>
-        {featureConfiguration  }, lastModifiedFirst,
-      CancellationToken.None);
-
+    featureBoardState.UpdateState(new List<FeatureConfiguration> { featureConfiguration }, lastModifiedFirst, CancellationToken.None);
 
     featureBoardState.UpdateState(null, lastModifiedSecond, CancellationToken.None);
 
@@ -180,10 +177,12 @@ public class FeatureBoardStateTests : SdkTestsBase
     var featureConfiguration = CreateFeature();
     var featureBoardState = Services.Resolve<IFeatureBoardState>();
     featureBoardState.InitialiseState(new List<FeatureConfiguration> { featureConfiguration }, DateTimeOffset.UtcNow, CancellationToken.None);
-    featureBoardState.UpdateState(null, null, CancellationToken.None);
-
 
     var featureBoardExternalStateMock = Services.Resolve<Mock<IFeatureBoardExternalState>>();
+    featureBoardExternalStateMock.Invocations.Clear();
+
+    featureBoardState.UpdateState(null, null, CancellationToken.None);
+
     featureBoardExternalStateMock.Verify(x => x.UpdateState(It.IsAny<List<FeatureConfiguration>>(), It.IsAny<CancellationToken>()), Times.Never);
   }
 
