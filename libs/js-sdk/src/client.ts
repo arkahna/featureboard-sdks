@@ -36,7 +36,7 @@ export function createBrowserClient({
     const initialisedState: {
         initialisedCallbacks: Array<(initialised: boolean) => void>
         initialisedPromise: PromiseCompletionSource<boolean>
-        initialisedError: any
+        initialisedError: Error | undefined
     } = {
         initialisedCallbacks: [],
         initialisedPromise: initialPromise,
