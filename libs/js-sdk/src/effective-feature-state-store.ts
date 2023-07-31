@@ -1,5 +1,4 @@
 import { EffectiveFeatureValue } from '@featureboard/contracts'
-import { ExternalStateStore } from './external-state-store'
 import { debugLog } from './log'
 
 type FeatureValue = EffectiveFeatureValue['value'] | undefined
@@ -9,17 +8,14 @@ const stateStoreDebug = debugLog.extend('state-store')
 export class EffectiveFeatureStateStore {
     private _audiences: string[] = []
     private _store: Record<string, FeatureValue> = {}
-    private _externalStore: ExternalStateStore<FeatureValue> | undefined
     private valueUpdatedCallbacks: Array<
         (featureKey: string, value: FeatureValue) => void
     > = []
 
     constructor(
         audiences: string[],
-        externalStateStore?: ExternalStateStore<FeatureValue>,
     ) {
         this._audiences = audiences
-        this._externalStore = externalStateStore
     }
 
     set audiences(value: string[]) {
@@ -35,35 +31,6 @@ export class EffectiveFeatureStateStore {
 
     get audiences(): string[] {
         return [...this._audiences]
-    }
-
-    async initialiseFromExternalStateStore(): Promise<boolean> {
-        if (!this._externalStore) {
-            return Promise.resolve(false)
-        }
-        stateStoreDebug('Initialising external state store')
-
-        try {
-            const externalStore = await this._externalStore.all()
-
-            this._store = { ...externalStore }
-            Object.keys(externalStore).forEach((key) => {
-                this.valueUpdatedCallbacks.forEach((valueUpdated) =>
-                    valueUpdated(key, externalStore[key]),
-                )
-            })
-        } catch (error: any) {
-            stateStoreDebug(
-                'Failed to initialise effective state store from external state store',
-                error,
-            )
-            console.error(
-                'Failed to initialise from external state store',
-                error,
-            )
-            throw error
-        }
-        return Promise.resolve(true)
     }
 
     on(
@@ -94,10 +61,6 @@ export class EffectiveFeatureStateStore {
         this.valueUpdatedCallbacks.forEach((valueUpdated) =>
             valueUpdated(featureKey, value),
         )
-
-        if (this._externalStore) {
-            this._externalStore.update(this._store)
-        }
     }
 
     get(featureKey: string): FeatureValue {

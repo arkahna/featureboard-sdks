@@ -1,8 +1,6 @@
-import type { EffectiveFeatureValue } from '@featureboard/contracts'
 import { PromiseCompletionSource } from 'promise-completion-source'
 import { BrowserClient } from './client-connection'
 import { EffectiveFeatureStateStore } from './effective-feature-state-store'
-import { ExternalStateStore } from './external-state-store'
 import { FeatureBoardApiConfig } from './featureboard-api-config'
 import { featureBoardHostedService } from './featureboard-service-urls'
 import { FeatureBoardClient } from './features-client'
@@ -13,7 +11,6 @@ import { compareArrays } from './utils/compare-arrays'
 import { retry } from './utils/retry'
 
 export function createBrowserClient({
-    externalStateStore,
     updateStrategy,
     environmentApiKey,
     api,
@@ -31,14 +28,6 @@ export function createBrowserClient({
      */
     updateStrategy?: UpdateStrategies['kind'] | UpdateStrategies
 
-    /**
-     * External state store is used to initialise the internal state store if retrieving the effective feature values from the API would fail.
-     * After initialisation the external state store will be updated but otherwise not used again.
-     *
-     */
-    externalStateStore?: ExternalStateStore<
-        EffectiveFeatureValue['value'] | undefined
-    >
     audiences: string[]
 
     environmentApiKey: string
@@ -67,10 +56,7 @@ export function createBrowserClient({
     // Ensure that the init promise doesn't cause an unhandled promise rejection
     initialisedState.initialisedPromise.promise.catch(() => {})
 
-    const stateStore = new EffectiveFeatureStateStore(
-        audiences,
-        externalStateStore,
-    )
+    const stateStore = new EffectiveFeatureStateStore(audiences)
 
     const updateStrategyImplementation = resolveUpdateStrategy(
         updateStrategy,
@@ -80,22 +66,10 @@ export function createBrowserClient({
 
     const retryCancellationToken = { cancel: false }
     retry(async () => {
-        try {
-            debugLog('SDK connecting in background (%o)', {
-                audiences,
-            })
-            return await updateStrategyImplementation.connect(stateStore)
-        } catch (error) {
-            // Try initialise the external state store
-            const result = await stateStore.initialiseFromExternalStateStore()
-            if (!result) {
-                // No external state store, throw original error
-                console.error('Failed to connect to FeatureBoard SDK', error)
-                throw error
-            }
-            debugLog('Initialised from external state store')
-            return Promise.resolve()
-        }
+        debugLog('SDK connecting in background (%o)', {
+            audiences,
+        })
+        return await updateStrategyImplementation.connect(stateStore)
     }, retryCancellationToken)
         .then(() => {
             if (initialPromise !== initialisedState.initialisedPromise) {

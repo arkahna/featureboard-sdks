@@ -1,17 +1,21 @@
 import { FeatureConfiguration } from '@featureboard/contracts'
-import { ExternalStateStore } from '@featureboard/js-sdk'
+import { ExternalStateStore } from './external-state-store'
 import { debugLog } from './log'
 
 const stateStoreDebug = debugLog.extend('state-store')
 
 export class AllFeatureStateStore {
     private _store: Record<string, FeatureConfiguration | undefined> = {}
-    private _externalStateStore: ExternalStateStore<FeatureConfiguration | undefined> | undefined
+    private _externalStateStore:
+        | ExternalStateStore
+        | undefined
     private featureUpdatedCallbacks: Array<
         (featureKey: string, values: FeatureConfiguration | undefined) => void
     > = []
 
-    constructor(externalStateStore?: ExternalStateStore<FeatureConfiguration | undefined>) {
+    constructor(
+        externalStateStore?: ExternalStateStore,
+    ) {
         this._externalStateStore = externalStateStore
     }
 
@@ -35,7 +39,10 @@ export class AllFeatureStateStore {
                 'Failed to initialise all feature state store with external state store',
                 error,
             )
-            console.error('Failed to initialise from external state store', error)
+            console.error(
+                'Failed to initialise from external state store',
+                error,
+            )
             throw error
         }
         return Promise.resolve(true)

@@ -1,9 +1,7 @@
 import { FeatureConfiguration } from '@featureboard/contracts'
-import { ExternalStateStore } from '@featureboard/js-sdk'
+import { ExternalStateStore } from '../external-state-store'
 
-export class MockExternalStateStore
-    implements ExternalStateStore<FeatureConfiguration | undefined>
-{
+export class MockExternalStateStore implements ExternalStateStore {
     constructor(
         private allCallback: () => Promise<
             Record<string, FeatureConfiguration | undefined>

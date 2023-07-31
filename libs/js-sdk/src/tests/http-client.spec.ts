@@ -4,7 +4,6 @@ import { setupServer } from 'msw/node'
 import { describe, expect, it } from 'vitest'
 import { createBrowserClient } from '../client'
 import { featureBoardHostedService } from '../featureboard-service-urls'
-import { MockExternalStateStore } from './mock-external-state-store'
 
 describe('http client', () => {
     it('can wait for initialisation, initialised false', async () => {
@@ -612,7 +611,7 @@ describe('http client', () => {
     })
 
     it(
-        'Initialisation retries 5 times then throws an error, no external state store',
+        'Initialisation retries 5 times then throws an error',
         async () => {
             let count = 0
             const server = setupServer(
@@ -654,147 +653,6 @@ describe('http client', () => {
         { timeout: 60000 },
     )
 
-    it('Use external state store when service request fails', async () => {
-        const server = setupServer(
-            rest.get(
-                'https://client.featureboard.app/effective',
-                (_req, res, ctx) =>
-                    res(
-                        ctx.json({ message: 'Test Server Request Error' }),
-                        ctx.status(500),
-                    ),
-            ),
-        )
-        server.listen()
-
-        try {
-            const client = createBrowserClient({
-                environmentApiKey: 'env-api-key',
-                audiences: [],
-                api: featureBoardHostedService,
-                externalStateStore: new MockExternalStateStore(
-                    () =>
-                        Promise.resolve({
-                            'my-feature': 'external-state-store-value',
-                        }),
-                    () => {
-                        return Promise.resolve()
-                    },
-                ),
-                updateStrategy: { kind: 'manual' },
-            })
-
-            await client.waitForInitialised()
-            expect(client.initialised).toEqual(true)
-            const value = client.client.getFeatureValue(
-                'my-feature',
-                'default-value',
-            )
-            expect(value).toEqual('external-state-store-value')
-        } finally {
-            server.resetHandlers()
-            server.close()
-        }
-    })
-
-    it(
-        'Throws an error after initialisation retried 5 times, SDK fails and external state store fails',
-        async () => {
-            let countServiceRequest = 0
-            let countExternalStateStoreRequest = 0
-            const server = setupServer(
-                rest.get(
-                    'https://client.featureboard.app/effective',
-                    (_req, res, ctx) => {
-                        countServiceRequest++
-                        return res(
-                            ctx.json({ message: 'Test Server Request Error' }),
-                            ctx.status(500),
-                        )
-                    },
-                ),
-            )
-            server.listen()
-            try {
-                const client = createBrowserClient({
-                    environmentApiKey: 'env-api-key',
-                    audiences: [],
-                    api: featureBoardHostedService,
-                    externalStateStore: new MockExternalStateStore(
-                        () => {
-                            countExternalStateStoreRequest++
-                            return Promise.reject({
-                                message: 'Test External State Store Error',
-                            })
-                        },
-                        () => {
-                            return Promise.resolve()
-                        },
-                    ),
-                    updateStrategy: { kind: 'manual' },
-                })
-
-                await expect(async () => {
-                    await client.waitForInitialised()
-                }).rejects.toThrowError('Test External State Store Error')
-
-                // 5 retry and initial call
-                expect(countServiceRequest).toEqual(5 + 1)
-                expect(countExternalStateStoreRequest).toEqual(5 + 1)
-            } finally {
-                server.resetHandlers()
-                server.close()
-            }
-        },
-        { timeout: 60000 },
-    )
-
-    it('Update external state store', async () => {
-        expect.assertions(2)
-
-        const values: EffectiveFeatureValue[] = [
-            {
-                featureKey: 'my-feature',
-                value: 'service-value',
-            },
-            {
-                featureKey: 'my-feature2',
-                value: 'service-value2',
-            },
-        ]
-        const server = setupServer(
-            rest.get(
-                'https://client.featureboard.app/effective',
-                (_req, res, ctx) => res(ctx.json(values), ctx.status(200)),
-            ),
-        )
-        server.listen()
-        try {
-            const client = createBrowserClient({
-                environmentApiKey: 'env-api-key',
-                audiences: [],
-                api: featureBoardHostedService,
-                externalStateStore: new MockExternalStateStore(
-                    () =>
-                        Promise.resolve({
-                            'my-feature': 'external-state-store-value',
-                        }),
-                    (store) => {
-                        expect(store['my-feature']).toEqual('service-value')
-                        expect(store['my-feature2']).toEqual('service-value2')
-                        return Promise.resolve()
-                    },
-                ),
-                updateStrategy: { kind: 'manual' },
-            })
-
-            await client.waitForInitialised()
-        } finally {
-            server.resetHandlers()
-            server.close()
-        }
-    })
-
     it('Feature value subscription called during initialisation', async () => {
         let count = 0
         expect.assertions(2)
@@ -829,58 +687,6 @@ describe('http client', () => {
                         expect(value).toEqual('default-value')
                     } else {
                         expect(value).toEqual('service-value')
-                    }
-                },
-            )
-
-            await httpClient.waitForInitialised()
-        } finally {
-            server.resetHandlers()
-            server.close()
-        }
-    })
-
-    it('Feature value subscription called during initialisation with external state store', async () => {
-        let count = 0
-        expect.assertions(2)
-        const server = setupServer(
-            rest.get(
-                'https://client.featureboard.app/effective',
-                (_req, res, ctx) =>
-                    res(
-                        ctx.json({ message: 'Test Server Request Error' }),
-                        ctx.status(500),
-                    ),
-            ),
-        )
-        server.listen()
-
-        try {
-            const httpClient = createBrowserClient({
-                environmentApiKey: 'env-api-key',
-                audiences: [],
-                api: featureBoardHostedService,
-                updateStrategy: { kind: 'manual' },
-                externalStateStore: new MockExternalStateStore(
-                    async () =>
-                        Promise.resolve({
-                            'my-feature': 'external-state-store-value',
-                        }),
-                    () => {
-                        return Promise.resolve()
-                    },
-                ),
-            })
-
-            httpClient.client.subscribeToFeatureValue(
-                'my-feature',
-                'default-value',
-                (value) => {
-                    if (count == 0) {
-                        count++
-                        expect(value).toEqual('default-value')
-                    } else {
-                        expect(value).toEqual('external-state-store-value')
                     }
                 },
             )
