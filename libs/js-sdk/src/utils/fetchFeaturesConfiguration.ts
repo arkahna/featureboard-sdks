@@ -1,14 +1,14 @@
 import { EffectiveFeatureValue } from '@featureboard/contracts'
-import { EffectiveFeaturesState } from '../effective-feature-state'
 import { getEffectiveEndpoint } from '../update-strategies/getEffectiveEndpoint'
 import { compareArrays } from './compare-arrays'
 import { httpClientDebug } from './http-log'
+import { EffectiveFeatureStateStore } from '../effective-feature-state-store'
 
 export async function fetchFeaturesConfigurationViaHttp(
     featureBoardEndpoint: string,
     audiences: string[],
     environmentApiKey: string,
-    state: EffectiveFeaturesState,
+    stateStore: EffectiveFeatureStateStore,
     lastModified: string | undefined,
     getCurrentAudiences: () => string[],
 ) {
@@ -51,15 +51,15 @@ export async function fetchFeaturesConfigurationViaHttp(
         httpClientDebug('Audiences changed while fetching (%o)', audiences)
         return lastModified
     }
-    const existing = { ...state.store.all() }
+    const existing = { ...stateStore.all() }
 
     for (const featureValue of currentEffectiveValues) {
-        state.updateFeatureValue(featureValue.featureKey, featureValue.value)
+        stateStore.set(featureValue.featureKey, featureValue.value)
         delete existing[featureValue.featureKey]
     }
     const unavailableFeatures = Object.keys(existing)
     unavailableFeatures.forEach((unavailableFeature) => {
-        state.updateFeatureValue(unavailableFeature, undefined)
+        stateStore.set(unavailableFeature, undefined)
     })
     httpClientDebug(`Updates (%o), %o`, audiences, {
         effectiveValues: currentEffectiveValues,

@@ -3,7 +3,6 @@ import { rest } from 'msw'
 import { setupServer } from 'msw/node'
 import { describe, expect, it } from 'vitest'
 import { createBrowserClient } from '../client'
-import { MemoryEffectiveFeatureStore } from '../effective-feature-store'
 import { featureBoardHostedService } from '../featureboard-service-urls'
 
 describe('http client', () => {
@@ -269,14 +268,14 @@ describe('http client', () => {
         try {
             const client = createBrowserClient({
                 environmentApiKey: 'env-api-key',
-                audiences: [],
                 api: featureBoardHostedService,
-                store: new MemoryEffectiveFeatureStore([
+                audiences: ['audience1'],
+                initialValues: [
                     {
                         featureKey: 'my-feature',
                         value: 'service-default-value',
                     },
-                ]),
+                ],
                 updateStrategy: { kind: 'manual' },
             })
 
@@ -286,13 +285,15 @@ describe('http client', () => {
             )
             expect(client.initialised).toEqual(false)
             expect(value).toEqual('service-default-value')
-            await client.waitForInitialised()
+            await expect(async () => {
+                await client.waitForInitialised()
+            }).rejects.toThrowError('500')
             expect(client.initialised).toEqual(true)
         } finally {
             server.resetHandlers()
             server.close()
         }
-    })
+    }, { timeout: 60000 })
 
     it('Handles updating audience', async () => {
         const values: EffectiveFeatureValue[] = [
@@ -349,13 +350,13 @@ describe('http client', () => {
 
             await httpClient.waitForInitialised()
 
-            expect(httpClient.initialised).toBeTruthy()
+            expect(httpClient.initialised).toEqual(true)
 
             httpClient.subscribeToInitialisedChanged((init) => {
                 if (!init) {
-                    expect(httpClient.initialised).toBeFalsy()
+                    expect(httpClient.initialised).toEqual(false)
                 } else {
-                    expect(httpClient.initialised).toBeTruthy()
+                    expect(httpClient.initialised).toEqual(true)
                     const value = httpClient.client.getFeatureValue(
                         'my-feature',
                         'default-value',
@@ -414,7 +415,7 @@ describe('http client', () => {
                         lastModified = new Date().toISOString()
                     }
 
-                    count = count + 1
+                    count++
                     return res(
                         ctx.json(values),
                         ctx.status(200),
@@ -439,14 +440,14 @@ describe('http client', () => {
 
             await httpClient.waitForInitialised()
 
-            expect(httpClient.initialised).toBeTruthy()
+            expect(httpClient.initialised).toEqual(true)
 
             const unsubscribe = httpClient.subscribeToInitialisedChanged(
                 (init: boolean) => {
                     if (!init) {
-                        expect(httpClient.initialised).toBeFalsy()
+                        expect(httpClient.initialised).toEqual(false)
                     } else {
-                        expect(httpClient.initialised).toBeTruthy()
+                        expect(httpClient.initialised).toEqual(true)
                     }
                 },
             )
@@ -462,6 +463,274 @@ describe('http client', () => {
             await httpClient.waitForInitialised()
 
             expect(count).equal(2)
+        } finally {
+            server.resetHandlers()
+            server.close()
+        }
+    })
+
+    it('Handles updating audience with initialised false', async () => {
+        const values: EffectiveFeatureValue[] = [
+            {
+                featureKey: 'my-feature',
+                value: 'service-default-value',
+            },
+        ]
+        const lastModified = new Date().toISOString()
+        const newValues: EffectiveFeatureValue[] = [
+            {
+                featureKey: 'my-feature',
+                value: 'new-service-default-value',
+            },
+        ]
+        const server = setupServer(
+            rest.get(
+                'https://client.featureboard.app/effective',
+                (req, res, ctx) => {
+                    if (
+                        req.url.searchParams.get('audiences') ===
+                        'test-audience'
+                    ) {
+                        const newLastModified = new Date().toISOString()
+                        return res(
+                            ctx.json(newValues),
+                            ctx.status(200),
+                            ctx.set({
+                                'Last-Modified': newLastModified,
+                            }),
+                        )
+                    }
+                    return res(
+                        ctx.json(values),
+                        ctx.status(200),
+                        ctx.set({
+                            'Last-Modified': lastModified,
+                        }),
+                    )
+                },
+            ),
+        )
+        server.listen()
+
+        try {
+            expect.assertions(5)
+
+            const httpClient = createBrowserClient({
+                environmentApiKey: 'env-api-key',
+                audiences: [],
+                api: featureBoardHostedService,
+                updateStrategy: { kind: 'manual' },
+            })
+
+            expect(httpClient.initialised).toEqual(false)
+
+            httpClient.subscribeToInitialisedChanged((init) => {
+                if (!init) {
+                    expect(httpClient.initialised).toEqual(false)
+                } else {
+                    expect(httpClient.initialised).toEqual(true)
+                    const value = httpClient.client.getFeatureValue(
+                        'my-feature',
+                        'default-value',
+                    )
+                    expect(value).toEqual('new-service-default-value')
+                }
+            })
+
+            const value = httpClient.client.getFeatureValue(
+                'my-feature',
+                'default-value',
+            )
+            expect(value).toEqual('default-value')
+
+            httpClient.updateAudiences(['test-audience'])
+            await httpClient.waitForInitialised()
+        } finally {
+            server.resetHandlers()
+            server.close()
+        }
+    })
+
+    it('Throw error updating audience when SDK connection fails', async () => {
+        const server = setupServer(
+            rest.get(
+                'https://client.featureboard.app/effective',
+                (_req, res, ctx) =>
+                    res(
+                        ctx.json({ message: 'Test Server Request Error' }),
+                        ctx.status(500),
+                    ),
+            ),
+        )
+        server.listen()
+
+        try {
+            expect.assertions(6)
+
+            const httpClient = createBrowserClient({
+                environmentApiKey: 'env-api-key',
+                audiences: [],
+                api: featureBoardHostedService,
+                updateStrategy: { kind: 'manual' },
+            })
+
+            expect(httpClient.initialised).toEqual(false)
+
+            httpClient.subscribeToInitialisedChanged((init) => {
+                if (!init) {
+                    expect(httpClient.initialised).toEqual(false)
+                } else {
+                    expect(httpClient.initialised).toEqual(true)
+                    const value = httpClient.client.getFeatureValue(
+                        'my-feature',
+                        'default-value',
+                    )
+                    expect(value).toEqual('default-value')
+                }
+            })
+
+            const value = httpClient.client.getFeatureValue(
+                'my-feature',
+                'default-value',
+            )
+            expect(value).toEqual('default-value')
+
+            httpClient.updateAudiences(['test-audience'])
+            await expect(async () => {
+                await httpClient.waitForInitialised()
+            }).rejects.toThrowError('500')
+        } finally {
+            server.resetHandlers()
+            server.close()
+        }
+    })
+
+    it('Initialisation fails and retries, no external state store', async () => {
+        const values: EffectiveFeatureValue[] = [
+            {
+                featureKey: 'my-feature',
+                value: 'service-value',
+            },
+        ]
+        const server = setupServer(
+            rest.get(
+                'https://client.featureboard.app/effective',
+                (_req, res, ctx) =>
+                    res.once(
+                        ctx.json({ message: 'Test Server Request Error' }),
+                        ctx.status(500),
+                    ),
+            ),
+            rest.get(
+                'https://client.featureboard.app/effective',
+                (_req, res, ctx) => res(ctx.json(values), ctx.status(200)),
+            ),
+        )
+        server.listen()
+
+        try {
+            const httpClient = createBrowserClient({
+                environmentApiKey: 'env-api-key',
+                audiences: [],
+                api: featureBoardHostedService,
+                updateStrategy: { kind: 'manual' },
+            })
+
+            await httpClient.waitForInitialised()
+            expect(httpClient.initialised).toEqual(true)
+            const value = httpClient.client.getFeatureValue(
+                'my-feature',
+                'default-value',
+            )
+            expect(value).toEqual('service-value')
+        } finally {
+            server.resetHandlers()
+            server.close()
+        }
+    })
+
+    it(
+        'Initialisation retries 5 times then throws an error',
+        async () => {
+            let count = 0
+            const server = setupServer(
+                rest.get(
+                    'https://client.featureboard.app/effective',
+                    (_req, res, ctx) => {
+                        count++
+                        return res(
+                            ctx.json({ message: 'Test Server Request Error' }),
+                            ctx.status(500),
+                        )
+                    },
+                ),
+            )
+            server.listen()
+
+            try {
+                const httpClient = createBrowserClient({
+                    environmentApiKey: 'env-api-key',
+                    audiences: [],
+                    api: featureBoardHostedService,
+                    updateStrategy: { kind: 'manual' },
+                })
+
+                await expect(async () => {
+                    await httpClient.waitForInitialised()
+                }).rejects.toThrowError('500')
+                expect(count).toEqual(5 + 1) // initial request and 5 retry
+                const value = httpClient.client.getFeatureValue(
+                    'my-feature',
+                    'default-value',
+                )
+                expect(value).toEqual('default-value')
+            } finally {
+                server.resetHandlers()
+                server.close()
+            }
+        },
+        { timeout: 60000 },
+    )
+
+    it('Feature value subscription called during initialisation', async () => {
+        let count = 0
+        expect.assertions(2)
+        const values: EffectiveFeatureValue[] = [
+            {
+                featureKey: 'my-feature',
+                value: 'service-value',
+            },
+        ]
+        const server = setupServer(
+            rest.get(
+                'https://client.featureboard.app/effective',
+                (_req, res, ctx) => res(ctx.json(values), ctx.status(200)),
+            ),
+        )
+        server.listen()
+
+        try {
+            const httpClient = createBrowserClient({
+                environmentApiKey: 'env-api-key',
+                audiences: [],
+                api: featureBoardHostedService,
+                updateStrategy: { kind: 'manual' },
+            })
+
+            httpClient.client.subscribeToFeatureValue(
+                'my-feature',
+                'default-value',
+                (value) => {
+                    if (count == 0) {
+                        count++
+                        expect(value).toEqual('default-value')
+                    } else {
+                        expect(value).toEqual('service-value')
+                    }
+                },
+            )
+
+            await httpClient.waitForInitialised()
         } finally {
             server.resetHandlers()
             server.close()

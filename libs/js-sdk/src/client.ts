@@ -1,11 +1,6 @@
-import { EffectiveFeatureValue } from '@featureboard/contracts'
 import { PromiseCompletionSource } from 'promise-completion-source'
 import { BrowserClient } from './client-connection'
-import { EffectiveFeaturesState } from './effective-feature-state'
-import {
-    EffectiveFeatureStore,
-    MemoryEffectiveFeatureStore,
-} from './effective-feature-store'
+import { EffectiveFeatureStateStore } from './effective-feature-state-store'
 import { FeatureBoardApiConfig } from './featureboard-api-config'
 import { featureBoardHostedService } from './featureboard-service-urls'
 import { FeatureBoardClient } from './features-client'
@@ -13,14 +8,15 @@ import { debugLog } from './log'
 import { resolveUpdateStrategy } from './update-strategies/resolveUpdateStrategy'
 import { UpdateStrategies } from './update-strategies/update-strategies'
 import { compareArrays } from './utils/compare-arrays'
+import { retry } from './utils/retry'
+import { EffectiveFeatureValue } from '@featureboard/contracts'
 
 export function createBrowserClient({
-    initialValues,
-    store,
     updateStrategy,
     environmentApiKey,
     api,
     audiences,
+    initialValues,
 }: {
     /** Connect to a self hosted instance of FeatureBoard */
     api?: FeatureBoardApiConfig
@@ -34,23 +30,21 @@ export function createBrowserClient({
      */
     updateStrategy?: UpdateStrategies['kind'] | UpdateStrategies
 
-    store?: EffectiveFeatureStore
     audiences: string[]
 
     initialValues?: EffectiveFeatureValue[]
 
     environmentApiKey: string
 }): BrowserClient {
-    if (store && initialValues) {
-        throw new Error('Cannot specify both store and initialValues')
-    }
     const initialPromise = new PromiseCompletionSource<boolean>()
     const initialisedState: {
-        initialisedCallbacks: Array<(initialsed: boolean) => void>
+        initialisedCallbacks: Array<(initialised: boolean) => void>
         initialisedPromise: PromiseCompletionSource<boolean>
+        initialisedError: Error | undefined
     } = {
         initialisedCallbacks: [],
         initialisedPromise: initialPromise,
+        initialisedError: undefined,
     }
     initialisedState.initialisedPromise.promise.then(() => {
         // If the promise has changed, then we don't want to invoke the callback
@@ -65,10 +59,8 @@ export function createBrowserClient({
 
     // Ensure that the init promise doesn't cause an unhandled promise rejection
     initialisedState.initialisedPromise.promise.catch(() => {})
-    const state = new EffectiveFeaturesState(
-        audiences,
-        store || new MemoryEffectiveFeatureStore(initialValues),
-    )
+
+    const stateStore = new EffectiveFeatureStateStore(audiences, initialValues)
 
     const updateStrategyImplementation = resolveUpdateStrategy(
         updateStrategy,
@@ -76,11 +68,13 @@ export function createBrowserClient({
         api || featureBoardHostedService,
     )
 
-    debugLog('SDK connecting in background (%o)', {
-        audiences,
-    })
-    updateStrategyImplementation
-        .connect(state)
+    const retryCancellationToken = { cancel: false }
+    retry(async () => {
+        debugLog('SDK connecting in background (%o)', {
+            audiences,
+        })
+        return await updateStrategyImplementation.connect(stateStore)
+    }, retryCancellationToken)
         .then(() => {
             if (initialPromise !== initialisedState.initialisedPromise) {
                 return
@@ -102,9 +96,11 @@ export function createBrowserClient({
                     },
                     err,
                 )
-                console.error('FeatureBoard SDK failed to connect', err)
-
-                // TODO Need to handle retries when connect fails
+                console.error(
+                    'FeatureBoard SDK failed to connect after 5 retries',
+                    err,
+                )
+                initialisedState.initialisedError = err
                 initialisedState.initialisedPromise.resolve(true)
             }
         })
@@ -113,14 +109,17 @@ export function createBrowserClient({
     }
 
     return {
-        client: createBrowserFbClient(state),
+        client: createBrowserFbClient(stateStore),
         get initialised() {
             return isInitialised()
         },
         waitForInitialised() {
-            return new Promise((resolve) => {
+            return new Promise((resolve, reject) => {
                 const interval = setInterval(() => {
-                    if (isInitialised()) {
+                    if (initialisedState.initialisedError) {
+                        clearInterval(interval)
+                        reject(initialisedState.initialisedError)
+                    } else if (isInitialised()) {
                         clearInterval(interval)
                         resolve(true)
                     }
@@ -141,10 +140,10 @@ export function createBrowserClient({
             }
         },
         async updateAudiences(updatedAudiences: string[]) {
-            if (compareArrays(state.audiences, updatedAudiences)) {
+            if (compareArrays(stateStore.audiences, updatedAudiences)) {
                 debugLog('Skipped updating audiences, no change: %o', {
                     updatedAudiences,
-                    currentAudiences: state.audiences,
+                    currentAudiences: stateStore.audiences,
                     initialised: isInitialised(),
                 })
                 // No need to update audiences
@@ -153,12 +152,17 @@ export function createBrowserClient({
 
             debugLog('Updating audiences: %o', {
                 updatedAudiences,
-                currentAudiences: state.audiences,
+                currentAudiences: stateStore.audiences,
                 initialised: isInitialised(),
             })
 
+            // Close connection and cancel retry
+            updateStrategyImplementation.close()
+            retryCancellationToken.cancel = true
+
             const newPromise = new PromiseCompletionSource<boolean>()
             initialisedState.initialisedPromise = newPromise
+            initialisedState.initialisedError = undefined
             initialisedState.initialisedPromise.promise.catch(() => {})
             initialisedState.initialisedPromise.promise.then(() => {
                 // If the promise has changed, then we don't want to invoke the callback
@@ -175,38 +179,46 @@ export function createBrowserClient({
             debugLog('updateAudiences: invoke initialised callback with false')
             initialisedState.initialisedCallbacks.forEach((c) => c(false))
 
-            state.audiences = updatedAudiences
+            stateStore.audiences = updatedAudiences
             debugLog(
                 'updateAudiences: Audiences updated (%o), getting new effective values',
                 updatedAudiences,
             )
 
-            updateStrategyImplementation.connect(state).then(() => {
-                newPromise?.resolve(true)
-                debugLog('Audiences updated: %o', {
-                    updatedAudiences,
-                    currentAudiences: state.audiences,
-                    initialised: isInitialised(),
+            updateStrategyImplementation
+                .connect(stateStore)
+                .then(() => {
+                    newPromise?.resolve(true)
+                    debugLog('Audiences updated: %o', {
+                        updatedAudiences,
+                        currentAudiences: stateStore.audiences,
+                        initialised: isInitialised(),
+                    })
                 })
-            })
+                .catch((error) => {
+                    console.error('Failed to connect to SDK', error)
+                    initialisedState.initialisedError = error
+                    newPromise?.resolve(true)
+                })
         },
         updateFeatures() {
             return updateStrategyImplementation.updateFeatures()
         },
         close() {
+            retryCancellationToken.cancel = true
             return updateStrategyImplementation.close()
         },
     }
 }
 
 function createBrowserFbClient(
-    state: EffectiveFeaturesState,
+    stateStore: EffectiveFeatureStateStore,
 ): FeatureBoardClient {
     return {
         getEffectiveValues() {
-            const all = state.store.all()
+            const all = stateStore.all()
             return {
-                audiences: [...state.audiences],
+                audiences: [...stateStore.audiences],
                 effectiveValues: Object.keys(all)
                     .filter((key) => all[key])
                     .map<EffectiveFeatureValue>((key) => ({
@@ -216,7 +228,7 @@ function createBrowserFbClient(
             }
         },
         getFeatureValue: (featureKey, defaultValue) => {
-            const value = state.store.get(featureKey as string)
+            const value = stateStore.get(featureKey as string)
             debugLog('getFeatureValue: %o', {
                 featureKey,
                 value,
@@ -247,12 +259,12 @@ function createBrowserFbClient(
                 }
             }
 
-            state.on('feature-updated', callback)
-            onValue((state.store.get(featureKey) as any) ?? defaultValue)
+            stateStore.on('feature-updated', callback)
+            onValue((stateStore.get(featureKey) as any) ?? defaultValue)
 
             return () => {
                 debugLog('unsubscribeToFeatureValue: %s', featureKey)
-                state.off('feature-updated', callback)
+                stateStore.off('feature-updated', callback)
             }
         },
     }

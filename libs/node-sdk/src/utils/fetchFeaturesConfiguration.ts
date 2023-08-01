@@ -1,11 +1,11 @@
 import { FeatureConfiguration } from '@featureboard/contracts'
-import { AllFeaturesState } from '../feature-state'
 import { httpClientDebug } from './http-log'
+import { AllFeatureStateStore } from '../feature-state-store'
 
 export async function fetchFeaturesConfigurationViaHttp(
     allEndpoint: string,
     environmentApiKey: string,
-    state: AllFeaturesState,
+    stateStore: AllFeatureStateStore,
     lastModified: string | undefined,
     updateTrigger: string,
 ) {
@@ -37,14 +37,14 @@ export async function fetchFeaturesConfigurationViaHttp(
     const allValues: FeatureConfiguration[] = await response.json()
 
     for (const featureValue of allValues) {
-        await state.updateFeatureState(featureValue.featureKey, featureValue)
+        stateStore.set(featureValue.featureKey, featureValue)
     }
 
-    const removed = Object.keys(state.store.all()).filter((existing) =>
+    const removed = Object.keys(stateStore.all()).filter((existing) =>
         allValues.every((v) => v.featureKey !== existing),
     )
     for (const removedFeature of removed) {
-        await state.updateFeatureState(removedFeature, undefined)
+        stateStore.set(removedFeature, undefined)
     }
 
     const newLastModified = response.headers.get('last-modified') || undefined

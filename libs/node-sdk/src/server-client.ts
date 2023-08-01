@@ -1,23 +1,17 @@
 import {
-    EffectiveFeatureValue,
-    FeatureConfiguration,
-} from '@featureboard/contracts'
-import {
     FeatureBoardApiConfig,
     FeatureBoardClient,
-    featureBoardHostedService,
     Features,
+    featureBoardHostedService,
+    retry,
 } from '@featureboard/js-sdk'
 import { PromiseCompletionSource } from 'promise-completion-source'
-import {
-    AllFeaturesState,
-    FeatureStore,
-    MemoryFeatureStore,
-    ServerClient,
-} from '.'
+import { ExternalStateStore, ServerClient } from '.'
+import { AllFeatureStateStore } from './feature-state-store'
 import { debugLog } from './log'
 import { resolveUpdateStrategy } from './update-strategies/resolveUpdateStrategy'
 import { UpdateStrategies } from './update-strategies/update-strategies'
+import { EffectiveFeatureValue } from '@featureboard/contracts'
 
 const serverConnectionDebug = debugLog.extend('server-connection')
 
@@ -25,9 +19,12 @@ export interface CreateServerClientOptions {
     /** Connect to a self hosted instance of FeatureBoard */
     api?: FeatureBoardApiConfig
 
-    store?: FeatureStore
-
-    initialValues?: FeatureConfiguration[]
+    /**
+     * External state store is used to initialise the internal state store if retrieving the effective feature values from the API would fail.
+     * After initialisation the external state store will be updated but otherwise not used again.
+     *
+     */
+    externalStateStore?: ExternalStateStore
 
     /**
      * The method your feature state is updated
@@ -44,36 +41,53 @@ export interface CreateServerClientOptions {
 
 export function createServerClient({
     api,
-    initialValues,
-    store,
+    externalStateStore,
     updateStrategy,
     environmentApiKey,
 }: CreateServerClientOptions): ServerClient {
-    if (store && initialValues) {
-        throw new Error('Cannot specify both store and initialValues')
-    }
-
     const initialisedPromise = new PromiseCompletionSource<boolean>()
     // Ensure that the init promise doesn't cause an unhandled promise rejection
     initialisedPromise.promise.catch(() => {})
-    const state = new AllFeaturesState(
-        store || new MemoryFeatureStore(initialValues),
-    )
+    const stateStore = new AllFeatureStateStore(externalStateStore)
     const updateStrategyImplementation = resolveUpdateStrategy(
         updateStrategy,
         environmentApiKey,
         api || featureBoardHostedService,
     )
 
-    updateStrategyImplementation
-        .connect(state)
+    const retryCancellationToken = { cancel: false }
+    retry(async () => {
+        try {
+            serverConnectionDebug('Connecting to SDK...')
+            return await updateStrategyImplementation.connect(stateStore)
+        } catch (error) {
+            serverConnectionDebug(
+                'Failed to connect to SDK, try to initialise form external state store',
+                error,
+            )
+            // Try initialise external state store
+            const result = await stateStore.initialiseFromExternalStateStore()
+            if (!result) {
+                // No external state store, throw original error
+                console.error('Failed to connect to SDK', error)
+                throw error
+            }
+            serverConnectionDebug('Initialised from external state store')
+            return Promise.resolve()
+        }
+    }, retryCancellationToken)
         .then(() => {
             if (!initialisedPromise.completed) {
+                serverConnectionDebug('Server client is initialised')
                 initialisedPromise.resolve(true)
             }
         })
         .catch((err) => {
             if (!initialisedPromise.completed) {
+                console.error(
+                    'FeatureBoard SDK failed to connect after 5 retries',
+                    err,
+                )
                 initialisedPromise.reject(err)
             }
         })
@@ -83,6 +97,7 @@ export function createServerClient({
             return initialisedPromise.completed
         },
         close() {
+            retryCancellationToken.cancel = true
             return updateStrategyImplementation.close()
         },
         request: (audienceKeys: string[]) => {
@@ -94,9 +109,9 @@ export function createServerClient({
             )
             return request
                 ? addUserWarnings(
-                      request.then(() => syncRequest(state, audienceKeys)),
+                      request.then(() => syncRequest(stateStore, audienceKeys)),
                   )
-                : addSyncUserWarnings(syncRequest(state, audienceKeys))
+                : addSyncUserWarnings(syncRequest(stateStore, audienceKeys))
         },
         updateFeatures() {
             return updateStrategyImplementation.updateFeatures()
@@ -131,18 +146,17 @@ function addSyncUserWarnings(
 }
 
 function syncRequest(
-    state: AllFeaturesState,
+    stateStore: AllFeatureStateStore,
     audienceKeys: string[],
 ): FeatureBoardClient {
     // Shallow copy the feature state so requests are stable
-    const featuresState = state.store.all()
+    const featuresState = stateStore.all()
 
     const client: FeatureBoardClient = {
         getEffectiveValues: () => {
-            const all = state.store.all()
             return {
                 audiences: audienceKeys,
-                effectiveValues: Object.keys(all)
+                effectiveValues: Object.keys(featuresState)
                     .map<EffectiveFeatureValue>((key) => ({
                         featureKey: key,
                         // We will filter the invalid undefined in the next filter

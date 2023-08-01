@@ -3,8 +3,8 @@ import { featureBoardHostedService } from '@featureboard/js-sdk'
 import { rest } from 'msw'
 import { setupServer } from 'msw/node'
 import { describe, expect, it } from 'vitest'
-import { MemoryFeatureStore } from '../feature-store'
 import { createServerClient } from '../server-client'
+import { MockExternalStateStore } from './mock-external-state-store'
 
 describe('http client', () => {
     it('calls featureboard /all endpoint on creation', async () => {
@@ -29,11 +29,19 @@ describe('http client', () => {
                 updateStrategy: { kind: 'manual' },
             })
 
-            const value = httpClient
+            const valueBeforeInit = httpClient
                 .request([])
                 .getFeatureValue('my-feature', 'default-value')
             expect(httpClient.initialised).toBe(false)
-            expect(value).toBe('default-value')
+            expect(valueBeforeInit).toBe('default-value')
+
+            await httpClient.waitForInitialised()
+
+            const valueAfterInit = httpClient
+                .request([])
+                .getFeatureValue('my-feature', 'default-value')
+            expect(httpClient.initialised).toBe(true)
+            expect(valueAfterInit).toBe('service-default-value')
         } finally {
             server.resetHandlers()
             server.close()
@@ -228,10 +236,23 @@ describe('http client', () => {
         }
     })
 
-    it('can start with last known good config', async () => {
+    it('Initialisation fails, reties and succeeds, no external state store', async () => {
+        const values: FeatureConfiguration[] = [
+            {
+                featureKey: 'my-feature',
+                audienceExceptions: [],
+                defaultValue: 'service-value',
+            },
+        ]
         const server = setupServer(
             rest.get('https://client.featureboard.app/all', (_req, res, ctx) =>
-                res.once(ctx.status(500)),
+                res.once(
+                    ctx.json({ message: 'Test FeatureBoard API Error' }),
+                    ctx.status(500),
+                ),
+            ),
+            rest.get('https://client.featureboard.app/all', (_req, res, ctx) =>
+                res.once(ctx.json(values), ctx.status(200)),
             ),
         )
         server.listen()
@@ -240,22 +261,305 @@ describe('http client', () => {
             const client = createServerClient({
                 environmentApiKey: 'env-api-key',
                 api: featureBoardHostedService,
-                store: new MemoryFeatureStore([
-                    {
-                        featureKey: 'my-feature',
-                        audienceExceptions: [],
-                        defaultValue: 'service-default-value',
-                    },
-                ]),
                 updateStrategy: { kind: 'manual' },
             })
 
+            await client.waitForInitialised()
+            expect(client.initialised).toEqual(true)
             const value = client
                 .request([])
                 .getFeatureValue('my-feature', 'default-value')
+            expect(value).toEqual('service-value')
+        } finally {
+            server.resetHandlers()
+            server.close()
+        }
+    })
 
-            expect(client.initialised).toEqual(false)
-            expect(value).toEqual('service-default-value')
+    it(
+        'Initialisation retries 5 time then throws an error, no external state store',
+        async () => {
+            let count = 0
+            const server = setupServer(
+                rest.get(
+                    'https://client.featureboard.app/all',
+                    (_req, res, ctx) => {
+                        count++
+                        return res(
+                            ctx.json({
+                                message: 'Test FeatureBoard API Error',
+                            }),
+                            ctx.status(500),
+                        )
+                    },
+                ),
+            )
+            server.listen()
+
+            try {
+                const client = createServerClient({
+                    environmentApiKey: 'env-api-key',
+                    api: featureBoardHostedService,
+                    updateStrategy: { kind: 'manual' },
+                })
+
+                await expect(async () => {
+                    await client.waitForInitialised()
+                }).rejects.toThrowError('500')
+                expect(count).toEqual(5 + 1) // initial request and 5 retry
+            } finally {
+                server.resetHandlers()
+                server.close()
+            }
+        },
+        { timeout: 60000 },
+    )
+
+    it('Use external state store when API request fails', async () => {
+        const server = setupServer(
+            rest.get(
+                'https://client.featureboard.app/all',
+                (_req, res, ctx) => {
+                    return res(
+                        ctx.json({ message: 'Test FeatureBoard API Error' }),
+                        ctx.status(500),
+                    )
+                },
+            ),
+        )
+        server.listen()
+
+        try {
+            const client = createServerClient({
+                environmentApiKey: 'env-api-key',
+                api: featureBoardHostedService,
+                updateStrategy: { kind: 'manual' },
+                externalStateStore: new MockExternalStateStore(
+                    () =>
+                        Promise.resolve({
+                            'my-feature': {
+                                featureKey: 'my-feature',
+                                defaultValue: 'external-state-store-value',
+                                audienceExceptions: [],
+                            },
+                        }),
+                    () => {
+                        return Promise.resolve()
+                    },
+                ),
+            })
+
+            await client.waitForInitialised()
+            expect(client.initialised).toEqual(true)
+            const value = client
+                .request([])
+                .getFeatureValue('my-feature', 'default-value')
+            expect(value).toEqual('external-state-store-value')
+        } finally {
+            server.resetHandlers()
+            server.close()
+        }
+    })
+
+    it(
+        'Initialisation retries 5 time then throws an error with external state store',
+        async () => {
+            let countAPIRequest = 0
+            let countExternalStateStoreRequest = 0
+            const server = setupServer(
+                rest.get(
+                    'https://client.featureboard.app/all',
+                    (_req, res, ctx) => {
+                        countAPIRequest++
+                        return res(
+                            ctx.json({
+                                message: 'Test FeatureBoard API Error',
+                            }),
+                            ctx.status(500),
+                        )
+                    },
+                ),
+            )
+            server.listen()
+
+            try {
+                const client = createServerClient({
+                    environmentApiKey: 'env-api-key',
+                    api: featureBoardHostedService,
+                    updateStrategy: { kind: 'manual' },
+                    externalStateStore: new MockExternalStateStore(
+                        () => {
+                            countExternalStateStoreRequest++
+                            return Promise.reject({
+                                message: 'Test External State Store Error',
+                            })
+                        },
+                        () => {
+                            return Promise.resolve()
+                        },
+                    ),
+                })
+
+                await expect(async () => {
+                    await client.waitForInitialised()
+                }).rejects.toThrowError('Test External State Store Error')
+                expect(countAPIRequest).toEqual(5 + 1) // initial request and 5 retry
+                expect(countExternalStateStoreRequest).toEqual(5 + 1) // initial request and 5 retry
+            } finally {
+                server.resetHandlers()
+                server.close()
+            }
+        },
+        { timeout: 60000 },
+    )
+
+    it('Update external state store when internal store updates', async () => {
+        expect.assertions(1)
+
+        const values: FeatureConfiguration[] = [
+            {
+                featureKey: 'my-feature',
+                audienceExceptions: [],
+                defaultValue: 'service-value',
+            },
+        ]
+
+        const server = setupServer(
+            rest.get('https://client.featureboard.app/all', (_req, res, ctx) =>
+                res.once(ctx.json(values), ctx.status(200)),
+            ),
+        )
+        server.listen()
+
+        try {
+            const client = createServerClient({
+                environmentApiKey: 'env-api-key',
+                api: featureBoardHostedService,
+                updateStrategy: { kind: 'manual' },
+                externalStateStore: new MockExternalStateStore(
+                    () =>
+                        Promise.resolve({
+                            'my-feature': {
+                                featureKey: 'my-feature',
+                                defaultValue: 'external-state-store-value',
+                                audienceExceptions: [],
+                            },
+                        }),
+                    (store) => {
+                        expect(store['my-feature']?.defaultValue).toEqual(
+                            'service-value',
+                        )
+                        return Promise.resolve()
+                    },
+                ),
+            })
+            await client.waitForInitialised()
+        } finally {
+            server.resetHandlers()
+            server.close()
+        }
+    })
+
+
+    it('Catch error when update external state store throws error', async () => {
+        expect.assertions(1)
+
+        const values: FeatureConfiguration[] = [
+            {
+                featureKey: 'my-feature',
+                audienceExceptions: [],
+                defaultValue: 'service-value',
+            },
+        ]
+
+        const server = setupServer(
+            rest.get('https://client.featureboard.app/all', (_req, res, ctx) =>
+                res.once(ctx.json(values), ctx.status(200)),
+            ),
+        )
+        server.listen()
+
+        try {
+            const client = createServerClient({
+                environmentApiKey: 'env-api-key',
+                api: featureBoardHostedService,
+                updateStrategy: { kind: 'manual' },
+                externalStateStore: new MockExternalStateStore(
+                    () =>
+                        Promise.resolve({
+                            'my-feature': {
+                                featureKey: 'my-feature',
+                                defaultValue: 'external-state-store-value',
+                                audienceExceptions: [],
+                            },
+                        }),
+                    (store) => {
+                        expect(store['my-feature']?.defaultValue).toEqual(
+                            'service-value',
+                        )
+                        return Promise.reject()
+                    },
+                ),
+            })
+            await client.waitForInitialised()
+        } finally {
+            server.resetHandlers()
+            server.close()
+        }
+    })
+
+    it('Subscription to feature value immediately return current value but will not be called again', async () => {
+        let count = 0
+        expect.assertions(2)
+
+        const values: FeatureConfiguration[] = [
+            {
+                featureKey: 'my-feature',
+                audienceExceptions: [],
+                defaultValue: 'service-value',
+            },
+        ]
+
+        const values2ndRequest: FeatureConfiguration[] = [
+            {
+                featureKey: 'my-feature',
+                audienceExceptions: [],
+                defaultValue: 'service-value2',
+            },
+        ]
+        const server = setupServer(
+            rest.get('https://client.featureboard.app/all', (_req, res, ctx) =>
+                res.once(ctx.json(values), ctx.status(200)),
+            ),
+            rest.get('https://client.featureboard.app/all', (_req, res, ctx) =>
+                res(ctx.json(values2ndRequest), ctx.status(200)),
+            ),
+        )
+        server.listen()
+
+        try {
+            const client = createServerClient({
+                environmentApiKey: 'env-api-key',
+                api: featureBoardHostedService,
+                updateStrategy: { kind: 'manual' },
+            })
+
+            await client.waitForInitialised()
+
+            client
+                .request([])
+                .subscribeToFeatureValue(
+                    'my-feature',
+                    'default-value',
+                    (value) => {
+                        count++
+                        expect(value).toEqual('service-value')
+                    },
+                )
+
+            await client.updateFeatures()
+
+            expect(count).toEqual(1)
         } finally {
             server.resetHandlers()
             server.close()

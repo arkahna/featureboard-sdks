@@ -16,7 +16,7 @@ export function createPollingUpdateStrategy(
     let fetchUpdatesSingle: undefined | (() => Promise<void>)
 
     return {
-        async connect(state) {
+        async connect(stateStore) {
             // Force update
             lastModified = undefined
 
@@ -24,11 +24,11 @@ export function createPollingUpdateStrategy(
             fetchUpdatesSingle = createEnsureSingle(async () => {
                 lastModified = await fetchFeaturesConfigurationViaHttp(
                     httpEndpoint,
-                    state.audiences,
+                    stateStore.audiences,
                     environmentApiKey,
-                    state,
+                    stateStore,
                     lastModified,
-                    () => state.audiences,
+                    () => stateStore.audiences,
                 )
             })
 

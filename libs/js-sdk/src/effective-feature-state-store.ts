@@ -1,31 +1,32 @@
-import {
-    EffectiveFeatureStore,
-    MemoryEffectiveFeatureStore,
-} from './effective-feature-store'
+import { EffectiveFeatureValue } from '@featureboard/contracts'
+import { debugLog } from './log'
 
-export interface EffectiveFeatureValues {
-    [featureKey: string]: string | boolean | number
-}
+type FeatureValue = EffectiveFeatureValue['value'] | undefined
 
-type FeatureValue = string | boolean | number | undefined
+const stateStoreDebug = debugLog.extend('state-store')
 
-export class EffectiveFeaturesState {
+export class EffectiveFeatureStateStore {
+    private _audiences: string[] = []
+    private _store: Record<string, FeatureValue> = {}
     private valueUpdatedCallbacks: Array<
         (featureKey: string, value: FeatureValue) => void
     > = []
-    private _audiences: string[] = []
 
     constructor(
         audiences: string[],
-        public store: EffectiveFeatureStore = new MemoryEffectiveFeatureStore(),
+        initialValues?: EffectiveFeatureValue[],
     ) {
         this._audiences = audiences
+        
+        for (const value of initialValues || []) {
+            this._store[value.featureKey] = value.value
+        }
     }
 
     set audiences(value: string[]) {
         this._audiences = value
-        const storeRecords = this.store.all()
-        this.store.clear()
+        const storeRecords = { ...this._store }
+        this._store = {}
         Object.keys(storeRecords).forEach((key) => {
             this.valueUpdatedCallbacks.forEach((valueUpdated) =>
                 valueUpdated(key, undefined),
@@ -43,6 +44,7 @@ export class EffectiveFeaturesState {
     ): void {
         this.valueUpdatedCallbacks.push(callback)
     }
+
     off(
         _event: 'feature-updated',
         callback: (featureKey: string, value: FeatureValue) => void,
@@ -53,11 +55,22 @@ export class EffectiveFeaturesState {
         )
     }
 
-    updateFeatureValue(featureKey: string, value: FeatureValue) {
-        this.store.set(featureKey, value)
+    all(): Record<string, FeatureValue> {
+        return { ...this._store }
+    }
+
+    set(featureKey: string, value: FeatureValue) {
+        stateStoreDebug("set '%s': %o", featureKey, value)
+        this._store[featureKey] = value
 
         this.valueUpdatedCallbacks.forEach((valueUpdated) =>
             valueUpdated(featureKey, value),
         )
+    }
+
+    get(featureKey: string): FeatureValue {
+        const value = this._store[featureKey]
+        stateStoreDebug("get '%s': %o", featureKey, value)
+        return value
     }
 }

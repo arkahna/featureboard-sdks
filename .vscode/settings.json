@@ -5,7 +5,7 @@
     "editor.codeActionsOnSave": {
         "source.organizeImports": true
     },
-    "cSpell.enabled": false,
+    "cSpell.enabled": true,
     "vitest.commandLine": "pnpm vitest",
     "vitest.exclude": [
         "**/node_modules/**",

@@ -1,8 +1,8 @@
 import { NotificationType } from '@featureboard/contracts'
 // eslint-disable-next-line @nx/enforce-module-boundaries
 import { LiveOptions } from '@featureboard/live-connection'
-import { AllFeaturesState } from '../feature-state'
 import { AllConfigUpdateStrategy } from './update-strategies'
+import { AllFeatureStateStore } from '../feature-state-store'
 
 export function createLiveUpdateStrategy(
     environmentApiKey: string,
@@ -22,7 +22,7 @@ export function createLiveUpdateStrategy(
     let connectionState: 'connected' | 'disconnected' = 'disconnected'
 
     return {
-        async connect(state: AllFeaturesState) {
+        async connect(stateStore: AllFeatureStateStore) {
             const liveConnection = await liveConnectionAsync
 
             function handleMessage(message: NotificationType) {
@@ -30,7 +30,7 @@ export function createLiveUpdateStrategy(
                 switch (message.kind) {
                     case 'feature-updated':
                     case 'feature-available': {
-                        state.updateFeatureState(message.featureKey, {
+                        stateStore.set(message.featureKey, {
                             featureKey: message.featureKey,
                             defaultValue: message.defaultValue,
                             audienceExceptions: message.audienceExceptions,
@@ -39,13 +39,13 @@ export function createLiveUpdateStrategy(
                     }
 
                     case 'feature-unavailable': {
-                        state.updateFeatureState(message.featureKey, undefined)
+                        stateStore.set(message.featureKey, undefined)
                         break
                     }
 
                     case 'state-of-the-world': {
                         message.features.forEach((feature) => {
-                            state.updateFeatureState(feature.featureKey, {
+                            stateStore.set(feature.featureKey, {
                                 featureKey: feature.featureKey,
                                 defaultValue: feature.defaultValue,
                                 audienceExceptions: feature.audienceExceptions,
