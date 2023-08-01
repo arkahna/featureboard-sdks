@@ -1,5 +1,14 @@
 # @featureboard/js-sdk
 
+## 0.12.0
+
+### Minor Changes
+
+- [#16](https://github.com/arkahna/featureboard-sdks/pull/16) [`0441b3a`](https://github.com/arkahna/featureboard-sdks/commit/0441b3a776b11d1f4298657f2acad7d37926c98d) Thanks [@idadaniels](https://github.com/idadaniels)! - - Added External State Store to Node SDK.
+  - Added retry functionality to browser client and server client.
+  - Added error handling during initialisation stage.
+  - Updated useClient() to include error handling
+
 ## 0.11.2
 
 ### Patch Changes
