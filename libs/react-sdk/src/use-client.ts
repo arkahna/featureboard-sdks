@@ -47,7 +47,7 @@ export function useClient({
         )
         // Empty dependency array => browserClient.subscribeToInitialisedChanged is called once after initial render
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    }, [browserClient, isInitialising])
 
     useEffect(() => {
         const update = async () => {
