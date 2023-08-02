@@ -1,0 +1,423 @@
+{
+    "features": [
+        {
+            "key": "api-key-management",
+            "name": "Project API Key Management",
+            "categoryIds": ["cm8v6p0p9x87mc4phzxq3o9o"],
+            "created": "2023-07-14T14:25:59.386Z",
+            "description": "Can create and manage project API keys",
+            "dataType": {
+                "kind": "boolean"
+            },
+            "audienceExceptions": [
+                {
+                    "audienceId": "wik6l5b21a5qh7nzkhp7acns",
+                    "value": true
+                }
+            ],
+            "defaultValue": false
+        },
+        {
+            "key": "audiences-write",
+            "name": "Audiences write",
+            "categoryIds": ["cm8v6p0p9x87mc4phzxq3o9o"],
+            "created": "2023-07-14T14:25:58.593Z",
+            "description": "Can create and update audiences",
+            "dataType": {
+                "kind": "boolean"
+            },
+            "audienceExceptions": [
+                {
+                    "audienceId": "sxrd26dxsl71hheydygdocn2",
+                    "value": false
+                },
+                {
+                    "audienceId": "wik6l5b21a5qh7nzkhp7acns",
+                    "value": true
+                },
+                {
+                    "audienceId": "aqclmc3hl1yazcu4usbtsprg",
+                    "value": true
+                }
+            ],
+            "defaultValue": false
+        },
+        {
+            "key": "cache-ttl",
+            "name": "Cache TTL",
+            "categoryIds": ["wzd4rtxx7oun2mp8sll6tos4"],
+            "created": "2023-07-14T14:26:00.393Z",
+            "description": "Cache TTL in seconds",
+            "dataType": {
+                "kind": "number"
+            },
+            "audienceExceptions": [
+                {
+                    "audienceId": "sxrd26dxsl71hheydygdocn2",
+                    "value": 300
+                },
+                {
+                    "audienceId": "wf4hax6mb0n9vn216shwlabw",
+                    "value": 1
+                },
+                {
+                    "audienceId": "b9gy7t8ua3nz3wm43we0rbun",
+                    "value": 5
+                },
+                {
+                    "audienceId": "x1v71g9hz7vk64ejjmsfokph",
+                    "value": 30
+                }
+            ],
+            "defaultValue": 60
+        },
+        {
+            "key": "delete-organization",
+            "name": "Delete Organization",
+            "categoryIds": ["cm8v6p0p9x87mc4phzxq3o9o"],
+            "created": "2023-07-14T14:25:59.274Z",
+            "description": "",
+            "dataType": {
+                "kind": "boolean"
+            },
+            "audienceExceptions": [
+                {
+                    "audienceId": "hx47adpt9njmeuanifxt0azw",
+                    "value": true
+                }
+            ],
+            "defaultValue": false
+        },
+        {
+            "key": "environments-write",
+            "name": "Environments write",
+            "categoryIds": ["cm8v6p0p9x87mc4phzxq3o9o"],
+            "created": "2023-07-14T14:25:58.366Z",
+            "description": "Can create and update environments",
+            "dataType": {
+                "kind": "boolean"
+            },
+            "audienceExceptions": [
+                {
+                    "audienceId": "sxrd26dxsl71hheydygdocn2",
+                    "value": false
+                },
+                {
+                    "audienceId": "wik6l5b21a5qh7nzkhp7acns",
+                    "value": true
+                },
+                {
+                    "audienceId": "aqclmc3hl1yazcu4usbtsprg",
+                    "value": true
+                }
+            ],
+            "defaultValue": false
+        },
+        {
+            "key": "features-value-write",
+            "name": "Feature Values Write",
+            "categoryIds": ["cm8v6p0p9x87mc4phzxq3o9o"],
+            "created": "2023-07-14T14:25:59.151Z",
+            "description": "Can create and update features default value and audience exceptions",
+            "dataType": {
+                "kind": "boolean"
+            },
+            "audienceExceptions": [
+                {
+                    "audienceId": "wik6l5b21a5qh7nzkhp7acns",
+                    "value": true
+                },
+                {
+                    "audienceId": "aqclmc3hl1yazcu4usbtsprg",
+                    "value": true
+                },
+                {
+                    "audienceId": "ms4akesw43rtyxexyz4fqt8d",
+                    "value": true
+                }
+            ],
+            "defaultValue": false
+        },
+        {
+            "key": "features-write",
+            "name": "Features write",
+            "categoryIds": ["cm8v6p0p9x87mc4phzxq3o9o"],
+            "created": "2023-07-14T14:25:58.481Z",
+            "description": "Can create and update features",
+            "dataType": {
+                "kind": "boolean"
+            },
+            "audienceExceptions": [
+                {
+                    "audienceId": "sxrd26dxsl71hheydygdocn2",
+                    "value": false
+                },
+                {
+                    "audienceId": "wik6l5b21a5qh7nzkhp7acns",
+                    "value": true
+                },
+                {
+                    "audienceId": "aqclmc3hl1yazcu4usbtsprg",
+                    "value": true
+                }
+            ],
+            "defaultValue": false
+        },
+        {
+            "key": "live-updates-enabled",
+            "name": "Live updates enabled",
+            "categoryIds": ["wzd4rtxx7oun2mp8sll6tos4"],
+            "created": "2023-07-14T14:26:00.518Z",
+            "description": "Allows live=true to be set in SDK",
+            "dataType": {
+                "kind": "boolean"
+            },
+            "audienceExceptions": [
+                {
+                    "audienceId": "i1lqygs1r6jqil4efqpx1ths",
+                    "value": true
+                },
+                {
+                    "audienceId": "sxrd26dxsl71hheydygdocn2",
+                    "value": true
+                },
+                {
+                    "audienceId": "wf4hax6mb0n9vn216shwlabw",
+                    "value": true
+                }
+            ],
+            "defaultValue": false
+        },
+        {
+            "key": "max-full-users",
+            "name": "Max full users",
+            "categoryIds": ["wzd4rtxx7oun2mp8sll6tos4"],
+            "created": "2023-07-14T14:26:00.647Z",
+            "description": "Users with admin or writer roles",
+            "dataType": {
+                "kind": "number"
+            },
+            "audienceExceptions": [
+                {
+                    "audienceId": "wf4hax6mb0n9vn216shwlabw",
+                    "value": 25
+                },
+                {
+                    "audienceId": "b9gy7t8ua3nz3wm43we0rbun",
+                    "value": 10
+                },
+                {
+                    "audienceId": "x1v71g9hz7vk64ejjmsfokph",
+                    "value": 3
+                }
+            ],
+            "defaultValue": 1
+        },
+        {
+            "key": "max-limited-users",
+            "name": "Max limited users",
+            "categoryIds": ["wzd4rtxx7oun2mp8sll6tos4"],
+            "created": "2023-07-14T14:26:00.759Z",
+            "description": "Users with read or support roles",
+            "dataType": {
+                "kind": "number"
+            },
+            "audienceExceptions": [
+                {
+                    "audienceId": "wf4hax6mb0n9vn216shwlabw",
+                    "value": 50
+                },
+                {
+                    "audienceId": "b9gy7t8ua3nz3wm43we0rbun",
+                    "value": 25
+                },
+                {
+                    "audienceId": "x1v71g9hz7vk64ejjmsfokph",
+                    "value": 10
+                }
+            ],
+            "defaultValue": 1
+        },
+        {
+            "key": "max-projects",
+            "name": "Max projects",
+            "categoryIds": ["wzd4rtxx7oun2mp8sll6tos4"],
+            "created": "2023-07-14T14:26:00.867Z",
+            "description": "0 means unlimited",
+            "dataType": {
+                "kind": "number"
+            },
+            "audienceExceptions": [
+                {
+                    "audienceId": "wf4hax6mb0n9vn216shwlabw",
+                    "value": 0
+                },
+                {
+                    "audienceId": "b9gy7t8ua3nz3wm43we0rbun",
+                    "value": 5
+                },
+                {
+                    "audienceId": "x1v71g9hz7vk64ejjmsfokph",
+                    "value": 2
+                }
+            ],
+            "defaultValue": 1
+        },
+        {
+            "key": "organization-management",
+            "name": "Organization management",
+            "categoryIds": ["cm8v6p0p9x87mc4phzxq3o9o"],
+            "created": "2023-07-14T14:25:58.048Z",
+            "description": "Enables management of organization users and settings",
+            "dataType": {
+                "kind": "boolean"
+            },
+            "audienceExceptions": [
+                {
+                    "audienceId": "wik6l5b21a5qh7nzkhp7acns",
+                    "value": true
+                }
+            ],
+            "defaultValue": false
+        },
+        {
+            "key": "projects-write",
+            "name": "Projects write",
+            "categoryIds": ["cm8v6p0p9x87mc4phzxq3o9o"],
+            "created": "2023-07-14T14:25:58.193Z",
+            "description": "Can create and update projects",
+            "dataType": {
+                "kind": "boolean"
+            },
+            "audienceExceptions": [
+                {
+                    "audienceId": "sxrd26dxsl71hheydygdocn2",
+                    "value": false
+                },
+                {
+                    "audienceId": "wik6l5b21a5qh7nzkhp7acns",
+                    "value": true
+                },
+                {
+                    "audienceId": "aqclmc3hl1yazcu4usbtsprg",
+                    "value": true
+                }
+            ],
+            "defaultValue": false
+        },
+        {
+            "key": "service-administration",
+            "name": "FeatureBoard service administration",
+            "categoryIds": ["cm8v6p0p9x87mc4phzxq3o9o"],
+            "created": "2023-07-14T14:25:58.870Z",
+            "description": "Enables administration of the FeatureBoard service",
+            "dataType": {
+                "kind": "boolean"
+            },
+            "audienceExceptions": [
+                {
+                    "audienceId": "dryzn53bhk26mclatolvltrw",
+                    "value": true
+                }
+            ],
+            "defaultValue": false
+        },
+        {
+            "key": "set-feature-availability",
+            "name": "Set environments feature availability",
+            "categoryIds": ["cm8v6p0p9x87mc4phzxq3o9o"],
+            "created": "2023-07-14T14:25:58.709Z",
+            "description": "Can update feature availability for any environment",
+            "dataType": {
+                "kind": "boolean"
+            },
+            "audienceExceptions": [
+                {
+                    "audienceId": "wik6l5b21a5qh7nzkhp7acns",
+                    "value": true
+                },
+                {
+                    "audienceId": "aqclmc3hl1yazcu4usbtsprg",
+                    "value": true
+                },
+                {
+                    "audienceId": "ms4akesw43rtyxexyz4fqt8d",
+                    "value": true
+                }
+            ],
+            "defaultValue": false
+        },
+        {
+            "key": "webhook-type",
+            "name": "Available webhook types ",
+            "categoryIds": ["wzd4rtxx7oun2mp8sll6tos4"],
+            "created": "2023-07-14T14:26:00.973Z",
+            "description": "",
+            "dataType": {
+                "kind": "options",
+                "options": ["none", "basic", "advanced"]
+            },
+            "audienceExceptions": [
+                {
+                    "audienceId": "i1lqygs1r6jqil4efqpx1ths",
+                    "value": "basic"
+                },
+                {
+                    "audienceId": "sxrd26dxsl71hheydygdocn2",
+                    "value": "basic"
+                },
+                {
+                    "audienceId": "wf4hax6mb0n9vn216shwlabw",
+                    "value": "advanced"
+                },
+                {
+                    "audienceId": "b9gy7t8ua3nz3wm43we0rbun",
+                    "value": "basic"
+                },
+                {
+                    "audienceId": "x1v71g9hz7vk64ejjmsfokph",
+                    "value": "basic"
+                }
+            ],
+            "defaultValue": "none"
+        },
+        {
+            "key": "webhooks",
+            "name": "Webhooks Feature",
+            "categoryIds": ["doxxizl8wvx0j9r9jpf5yky9"],
+            "created": "2023-07-14T14:25:59.615Z",
+            "description": "Controls the availability of the webhook feature",
+            "dataType": {
+                "kind": "boolean"
+            },
+            "audienceExceptions": [
+                {
+                    "audienceId": "dryzn53bhk26mclatolvltrw",
+                    "value": true
+                }
+            ],
+            "defaultValue": false
+        },
+        {
+            "key": "webhooks-write",
+            "name": "Webhooks write",
+            "categoryIds": ["cm8v6p0p9x87mc4phzxq3o9o"],
+            "created": "2023-07-14T14:25:59.017Z",
+            "description": "Can create and update webhooks",
+            "dataType": {
+                "kind": "boolean"
+            },
+            "audienceExceptions": [
+                {
+                    "audienceId": "sxrd26dxsl71hheydygdocn2",
+                    "value": false
+                },
+                {
+                    "audienceId": "wik6l5b21a5qh7nzkhp7acns",
+                    "value": true
+                }
+            ],
+            "defaultValue": false
+        }
+    ]
+}

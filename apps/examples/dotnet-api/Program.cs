@@ -1,5 +1,5 @@
 using FeatureBoard.DotnetSdk.Registration;
-using FeatureBoardSdk.Examples.DotnetApi.Models;
+using FeatureBoardSdk.Examples.DotnetApi;
 using FeatureBoardSdk.Examples.DotnetApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,9 +12,10 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Register featureBoard
-builder.Services.AddHttpContextAccessor(); // dependency of QueryStringAudienceProvider
-builder.Services.AddFeatureBoard<WeatherFeatures, QueryStringAudienceProvider>()
+builder.Services.AddFeatureBoard<Features, QueryStringAudienceProvider>()
   .WithPollingUpdateStrategy();
+
+builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 

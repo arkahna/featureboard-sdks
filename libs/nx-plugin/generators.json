@@ -1,0 +1,9 @@
+{
+    "generators": {
+        "code-gen": {
+            "factory": "./src/generators/code-gen/generator",
+            "schema": "./src/generators/code-gen/schema.json",
+            "description": "code-gen generator"
+        }
+    }
+}

@@ -1,0 +1,120 @@
+using FeatureBoard.DotnetSdk.Attributes;
+using FeatureBoard.DotnetSdk.Models;
+using System.Runtime.Serialization;
+
+namespace <%= namespace %>;
+
+// Features
+public class Features : IFeatures
+{<%
+for(let i = 0; i < features.length; i++) {
+  const feature = features[i]
+%>
+  [FeatureKeyName("<%= feature.key %>")]
+  public <%= toDotNetType(feature) %> <%= toPascalCase(feature.key) %> { get; set; }<%
+} %>
+}
+
+
+// Options Enums
+
+<% for(let i = 0; i < features.length; i++) {
+  const feature = features[i]
+  if(feature.dataType.kind !== 'options') continue
+%>//<%= feature.name %>
+public enum <%= toPascalCase(feature.key) %>
+{
+<%
+  for(let j = 0; j < feature.dataType.options.length; j++){
+%>  [EnumMember(Value = "<%= feature.dataType.options[j] %>")]
+%>  <%= toPascalCase(feature.dataType.options[j]) %>,
+<%
+}
+%>}<%
+} %>
+
+// Type Enums
+public enum BooleanFeature
+{<%
+for(let i = 0; i < features.length; i++) {
+  const feature = features[i]
+  if(feature.dataType.kind !== 'boolean') continue
+%>
+  <%= toPascalCase(feature.key) %>,<%
+} %>
+}
+public enum NumberFeature
+{<%
+for(let i = 0; i < features.length; i++) {
+  const feature = features[i]
+  if(feature.dataType.kind !== 'number') continue
+%>
+  <%= toPascalCase(feature.key) %>,<%
+} %>
+}
+public enum StringFeature
+{<%
+for(let i = 0; i < features.length; i++) {
+  const feature = features[i]
+  if(feature.dataType.kind !== 'string') continue
+%>
+  <%= toPascalCase(feature.key) %>,<%
+} %>
+}
+
+// Feature Gate attribute
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
+public class FeatureFilterAttribute : FeatureFilterAttributeBase
+{
+  protected override string Feature { get; }
+  protected override object DefaultValue { get; }
+  protected override object? IsEqualTo { get; }
+  private readonly Dictionary<string, string> _featureKeyLookup = new()
+  {<%
+for(let i = 0; i < features.length; i++) {
+  const feature = features[i]
+  if(feature.dataType.kind === 'options') continue
+%>
+    { "<%= toPascalCase(feature.key) %>", "<%= feature.key %>" },<%
+} %>
+  };
+
+  public FeatureFilterAttribute(BooleanFeature feature, bool defaultValue)
+  {
+    Feature = _featureKeyLookup.GetValueOrDefault(feature.ToString()) ?? feature.ToString();
+    DefaultValue = defaultValue;
+  }
+
+  public FeatureFilterAttribute(BooleanFeature feature, bool isEqualTo, bool defaultValue)
+  {
+    Feature = _featureKeyLookup.GetValueOrDefault(feature.ToString()) ?? feature.ToString();
+    IsEqualTo = isEqualTo;
+    DefaultValue = defaultValue;
+  }
+
+    public FeatureFilterAttribute(StringFeature feature, string isEqualTo, string defaultValue)
+  {
+    Feature = _featureKeyLookup.GetValueOrDefault(feature.ToString()) ?? feature.ToString();
+    IsEqualTo = isEqualTo;
+    DefaultValue = defaultValue;
+  }
+
+  public FeatureFilterAttribute(NumberFeature feature, decimal isEqualTo, decimal defaultValue)
+  {
+    Feature = _featureKeyLookup.GetValueOrDefault(feature.ToString()) ?? feature.ToString();
+    IsEqualTo = isEqualTo;
+    DefaultValue = defaultValue;
+  }
+
+<% for(let i = 0; i < features.length; i++) {
+  const feature = features[i]
+  if(feature.dataType.kind !== 'options') continue
+%>  public FeatureFilterAttribute(<%= toPascalCase(feature.key) %> isEqualTo, <%= toPascalCase(feature.key) %> defaultValue)
+  {
+    Feature = "<%= feature.key %>";
+    IsEqualTo = isEqualTo;
+    DefaultValue = defaultValue;
+  }<%
+} %>
+
+}
