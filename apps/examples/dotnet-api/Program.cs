@@ -12,6 +12,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Register featureBoard
+builder.Services.AddHttpContextAccessor(); // dependency of QueryStringAudienceProvider
 builder.Services.AddFeatureBoard<WeatherFeatures, QueryStringAudienceProvider>()
   .WithPollingUpdateStrategy();
 
