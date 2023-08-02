@@ -1,1 +1,1 @@
-export { CodeGenerator, TemplateType } from './code-generator'
+export { TemplateType, codeGenerator } from './code-generator'

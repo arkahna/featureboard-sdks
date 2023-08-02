@@ -11,7 +11,7 @@ import {
 
 export type TemplateType = 'dotnet-api'
 
-export async function CodeGenerator(options: {
+export async function codeGenerator(options: {
     templateType: TemplateType
     outputPath: string
     organizationName: string
@@ -51,8 +51,6 @@ export async function CodeGenerator(options: {
 
     SaveChanges(tree, options)
 }
-
-export default CodeGenerator
 
 async function getFeatures({
     organizationName,

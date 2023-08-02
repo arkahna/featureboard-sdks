@@ -1,5 +1,5 @@
 // eslint-disable-next-line @nx/enforce-module-boundaries
-import { CodeGenerator } from '@featureboard/cli'
+import { codeGenerator } from '@featureboard/cli'
 import { Tree, readProjectConfiguration } from '@nx/devkit'
 import * as path from 'path'
 import * as prompts from 'prompts'
@@ -32,7 +32,7 @@ export async function codeGenGenerator(
         featureBoardBearerToken = result.bearerToken
     }
 
-    await CodeGenerator({
+    await codeGenerator({
         outputPath: path.join(tree.root, project.root, options.subFolder),
         interactive: true,
         featureBoardBearerToken,

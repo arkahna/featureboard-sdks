@@ -4,7 +4,7 @@ import fs from 'fs/promises'
 import path from 'path'
 import { exit } from 'process'
 import prompts from 'prompts'
-import CodeGenerator, { TemplateType } from './code-generator'
+import { TemplateType, codeGenerator } from './code-generator'
 
 const titleText = figlet.textSync('Feature Board CLI')
 
@@ -89,8 +89,7 @@ const codeGenCommand = program
         if (!options.featureBoardKey && !bearerToken)
             throw new Error('Feature Board Key is not set')
 
-        console.log(options)
-        CodeGenerator({
+        codeGenerator({
             templateType: options.templateType as TemplateType,
             outputPath: outputPath,
             organizationName: options.organization,
@@ -104,28 +103,4 @@ const codeGenCommand = program
         })
     })
 
-// const bobCommand = program
-//     .command('bob')
-//     .description('A Code generator for feature board')
-//     // .option('-o, --output', 'Output location')
-//     .option('-d, --dryRun', 'Dry run show what files have changed', false)
-//     .option('-q, --quite', 'No output', false)
-//     //
-//     // .option(
-//     //     '-t, --templateType <value>',
-//     //     'Select the template type [dotnet-api]',
-//     //     'dotnet-api',
-//     // )
-//     .action((a, b, c, d) => console.log(a, b, c, d))
-
-//const programOptions = program.opts()
-
-// if (!programOptions.quite) console.log(figlet.textSync('Feature Board CLI'))
-
-console.log(
-    program.opts(),
-    codeGenCommand.opts(),
-    // bobCommand.opts(),
-    process.argv,
-)
 program.parse()
