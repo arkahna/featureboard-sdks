@@ -136,7 +136,7 @@ public class FeatureFilterAttribute : FeatureFilterAttributeBase
     DefaultValue = defaultValue;
   }
 
-    public FeatureFilterAttribute(StringFeature feature, string isEqualTo, string defaultValue)
+  public FeatureFilterAttribute(StringFeature feature, string isEqualTo, string defaultValue)
   {
     Feature = _featureKeyLookup.GetValueOrDefault(feature.ToString()) ?? feature.ToString();
     IsEqualTo = isEqualTo;
