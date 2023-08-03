@@ -1,3 +1,4 @@
+import { Tree } from '@nx/devkit'
 import * as fs from 'fs/promises'
 import * as path from 'path'
 import { FeatureDto } from '../feature-dto'
@@ -28,6 +29,23 @@ export function toDotNetType(feature: FeatureDto) {
 
 export async function getDotNetNameSpace(filePath: string): Promise<any> {
     const files = await fs.readdir(filePath)
+    console.log('FILES: ', filePath, files)
+    const namespace = files
+        .find((x) => x.endsWith('.csproj'))
+        ?.replace('.csproj', '')
+
+    if (namespace) return namespace
+
+    const parentDir = path.resolve(filePath, '..')
+    if (parentDir == filePath) throw new Error("Can't find .net project file")
+    return `${getDotNetNameSpace(parentDir)}.${path.dirname(filePath)}`
+}
+
+export async function getDotNetNameSpaceFromNx(
+    tree: Tree,
+    filePath: string,
+): Promise<any> {
+    const files = tree.children(filePath)
     const namespace = files
         .find((x) => x.endsWith('.csproj'))
         ?.replace('.csproj', '')

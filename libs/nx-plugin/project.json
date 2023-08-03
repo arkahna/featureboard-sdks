@@ -1,5 +1,5 @@
 {
-    "name": "nx-plugin",
+    "name": "@featureboard/nx-plugin",
     "$schema": "../../node_modules/nx/schemas/project-schema.json",
     "sourceRoot": "libs/nx-plugin/src",
     "projectType": "library",

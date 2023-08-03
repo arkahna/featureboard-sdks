@@ -51,7 +51,6 @@
                 "buildTarget": "@featureboard/cli:build",
                 "args": [
                     "code-gen",
-                    "--quite",
                     "--output-path",
                     "./apps/examples/dotnet-api",
                     "--organization",
@@ -72,6 +71,20 @@
             "outputs": ["{options.outputFile}"],
             "options": {
                 "lintFilePatterns": ["apps/cli/**/*.ts"]
+            }
+        },
+        "test": {
+            "executor": "@nx/jest:jest",
+            "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+            "options": {
+                "jestConfig": "apps/cli/jest.config.ts",
+                "passWithNoTests": true
+            },
+            "configurations": {
+                "ci": {
+                    "ci": true,
+                    "codeCoverage": true
+                }
             }
         }
     },

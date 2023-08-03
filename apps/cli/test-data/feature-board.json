@@ -1,0 +1,574 @@
+{
+    "projects": [
+        {
+            "id": "r1atp4ox1mazxcya1fkobr39",
+            "name": "FeatureBoard Service",
+            "environments": [
+                {
+                    "id": "ff5mha9joweh5tpoq9g1svxj",
+                    "name": "Current",
+                    "availableFeatures": [
+                        "organization-management",
+                        "projects-write",
+                        "environments-write",
+                        "features-write",
+                        "audiences-write",
+                        "set-feature-availability",
+                        "service-administration",
+                        "webhooks-write",
+                        "features-value-write",
+                        "delete-organization",
+                        "api-key-management",
+                        "webhooks",
+                        "cache-ttl",
+                        "live-updates-enabled",
+                        "max-full-users",
+                        "max-limited-users",
+                        "max-projects",
+                        "webhook-type",
+                        "organization-creation",
+                        "environments-key-read"
+                    ]
+                }
+            ],
+            "features": [
+                {
+                    "key": "organization-management",
+                    "name": "Organization management",
+                    "categoryIds": ["jdho0kmj4j41ygs7ob5szn05"],
+                    "created": "2023-07-26T09:16:41.552Z",
+                    "description": "Enables management of organization users and settings",
+                    "dataType": {
+                        "kind": "boolean"
+                    },
+                    "audienceExceptions": [
+                        {
+                            "audienceId": "by6jgtpr2kqtg5drycymzkx8",
+                            "value": true
+                        }
+                    ],
+                    "defaultValue": false
+                },
+                {
+                    "key": "projects-write",
+                    "name": "Projects write",
+                    "categoryIds": ["jdho0kmj4j41ygs7ob5szn05"],
+                    "created": "2023-07-26T09:16:41.823Z",
+                    "description": "Can create and update projects",
+                    "dataType": {
+                        "kind": "boolean"
+                    },
+                    "audienceExceptions": [
+                        {
+                            "audienceId": "qu8sw0y793ggrgrcbk1huk07",
+                            "value": false
+                        },
+                        {
+                            "audienceId": "by6jgtpr2kqtg5drycymzkx8",
+                            "value": true
+                        },
+                        {
+                            "audienceId": "x35vmpvmqu99qckd4ibkxnrw",
+                            "value": true
+                        }
+                    ],
+                    "defaultValue": false
+                },
+                {
+                    "key": "environments-write",
+                    "name": "Environments write",
+                    "categoryIds": ["jdho0kmj4j41ygs7ob5szn05"],
+                    "created": "2023-07-26T09:16:42.163Z",
+                    "description": "Can create and update environments",
+                    "dataType": {
+                        "kind": "boolean"
+                    },
+                    "audienceExceptions": [
+                        {
+                            "audienceId": "qu8sw0y793ggrgrcbk1huk07",
+                            "value": false
+                        },
+                        {
+                            "audienceId": "by6jgtpr2kqtg5drycymzkx8",
+                            "value": true
+                        },
+                        {
+                            "audienceId": "x35vmpvmqu99qckd4ibkxnrw",
+                            "value": true
+                        }
+                    ],
+                    "defaultValue": false
+                },
+                {
+                    "key": "features-write",
+                    "name": "Features write",
+                    "categoryIds": ["jdho0kmj4j41ygs7ob5szn05"],
+                    "created": "2023-07-26T09:16:42.262Z",
+                    "description": "Can create and update features",
+                    "dataType": {
+                        "kind": "boolean"
+                    },
+                    "audienceExceptions": [
+                        {
+                            "audienceId": "qu8sw0y793ggrgrcbk1huk07",
+                            "value": false
+                        },
+                        {
+                            "audienceId": "by6jgtpr2kqtg5drycymzkx8",
+                            "value": true
+                        },
+                        {
+                            "audienceId": "x35vmpvmqu99qckd4ibkxnrw",
+                            "value": true
+                        }
+                    ],
+                    "defaultValue": false
+                },
+                {
+                    "key": "audiences-write",
+                    "name": "Audiences write",
+                    "categoryIds": ["jdho0kmj4j41ygs7ob5szn05"],
+                    "created": "2023-07-26T09:16:42.379Z",
+                    "description": "Can create and update audiences",
+                    "dataType": {
+                        "kind": "boolean"
+                    },
+                    "audienceExceptions": [
+                        {
+                            "audienceId": "qu8sw0y793ggrgrcbk1huk07",
+                            "value": false
+                        },
+                        {
+                            "audienceId": "by6jgtpr2kqtg5drycymzkx8",
+                            "value": true
+                        },
+                        {
+                            "audienceId": "x35vmpvmqu99qckd4ibkxnrw",
+                            "value": true
+                        }
+                    ],
+                    "defaultValue": false
+                },
+                {
+                    "key": "set-feature-availability",
+                    "name": "Set environments feature availability",
+                    "categoryIds": ["jdho0kmj4j41ygs7ob5szn05"],
+                    "created": "2023-07-26T09:16:42.480Z",
+                    "description": "Can update feature availability for any environment",
+                    "dataType": {
+                        "kind": "boolean"
+                    },
+                    "audienceExceptions": [
+                        {
+                            "audienceId": "by6jgtpr2kqtg5drycymzkx8",
+                            "value": true
+                        },
+                        {
+                            "audienceId": "vfxjj8vfj9nqstew8v5uzfja",
+                            "value": true
+                        },
+                        {
+                            "audienceId": "x35vmpvmqu99qckd4ibkxnrw",
+                            "value": true
+                        }
+                    ],
+                    "defaultValue": false
+                },
+                {
+                    "key": "service-administration",
+                    "name": "FeatureBoard service administration",
+                    "categoryIds": ["jdho0kmj4j41ygs7ob5szn05"],
+                    "created": "2023-07-26T09:16:42.734Z",
+                    "description": "Enables administration of the FeatureBoard service",
+                    "dataType": {
+                        "kind": "boolean"
+                    },
+                    "audienceExceptions": [
+                        {
+                            "audienceId": "v40ot0qx308ju5k2fjhqttfa",
+                            "value": true
+                        }
+                    ],
+                    "defaultValue": false
+                },
+                {
+                    "key": "webhooks-write",
+                    "name": "Webhooks write",
+                    "categoryIds": ["jdho0kmj4j41ygs7ob5szn05"],
+                    "created": "2023-07-26T09:16:42.838Z",
+                    "description": "Can create and update webhooks",
+                    "dataType": {
+                        "kind": "boolean"
+                    },
+                    "audienceExceptions": [
+                        {
+                            "audienceId": "qu8sw0y793ggrgrcbk1huk07",
+                            "value": false
+                        },
+                        {
+                            "audienceId": "by6jgtpr2kqtg5drycymzkx8",
+                            "value": true
+                        }
+                    ],
+                    "defaultValue": false
+                },
+                {
+                    "key": "features-value-write",
+                    "name": "Feature Values Write",
+                    "categoryIds": ["jdho0kmj4j41ygs7ob5szn05"],
+                    "created": "2023-07-26T09:16:42.959Z",
+                    "description": "Can create and update features default value and audience exceptions",
+                    "dataType": {
+                        "kind": "boolean"
+                    },
+                    "audienceExceptions": [
+                        {
+                            "audienceId": "vfxjj8vfj9nqstew8v5uzfja",
+                            "value": true
+                        },
+                        {
+                            "audienceId": "by6jgtpr2kqtg5drycymzkx8",
+                            "value": true
+                        },
+                        {
+                            "audienceId": "x35vmpvmqu99qckd4ibkxnrw",
+                            "value": true
+                        }
+                    ],
+                    "defaultValue": false
+                },
+                {
+                    "key": "delete-organization",
+                    "name": "Delete Organization",
+                    "categoryIds": ["jdho0kmj4j41ygs7ob5szn05"],
+                    "created": "2023-07-26T09:16:43.101Z",
+                    "description": "",
+                    "dataType": {
+                        "kind": "boolean"
+                    },
+                    "audienceExceptions": [
+                        {
+                            "audienceId": "rb4rn905ggupz1hyu0c342yv",
+                            "value": true
+                        }
+                    ],
+                    "defaultValue": false
+                },
+                {
+                    "key": "api-key-management",
+                    "name": "Organization API Key Management",
+                    "categoryIds": ["jdho0kmj4j41ygs7ob5szn05"],
+                    "created": "2023-07-26T09:16:43.208Z",
+                    "description": "Can create and manage Organization API keys",
+                    "dataType": {
+                        "kind": "boolean"
+                    },
+                    "audienceExceptions": [
+                        {
+                            "audienceId": "by6jgtpr2kqtg5drycymzkx8",
+                            "value": true
+                        }
+                    ],
+                    "defaultValue": false
+                },
+                {
+                    "key": "webhooks",
+                    "name": "Webhooks Feature",
+                    "categoryIds": ["qgolkhl02vq6h2bvyz3vvx3t"],
+                    "created": "2023-07-26T09:16:43.447Z",
+                    "description": "Controls the availability of the webhook feature",
+                    "dataType": {
+                        "kind": "boolean"
+                    },
+                    "audienceExceptions": [
+                        {
+                            "audienceId": "v40ot0qx308ju5k2fjhqttfa",
+                            "value": true
+                        }
+                    ],
+                    "defaultValue": false
+                },
+                {
+                    "key": "cache-ttl",
+                    "name": "Cache TTL",
+                    "categoryIds": ["d5diw6vynv2mcxhsvo4osa85"],
+                    "created": "2023-07-26T09:16:44.261Z",
+                    "description": "Cache TTL in seconds",
+                    "dataType": {
+                        "kind": "number"
+                    },
+                    "audienceExceptions": [
+                        {
+                            "audienceId": "hgm7tmwm1g9coyxqnw44rhbq",
+                            "value": 5
+                        },
+                        {
+                            "audienceId": "r59zl54q5qktyswxrkpuwitv",
+                            "value": 30
+                        },
+                        {
+                            "audienceId": "fxfsam0cs8l7rywf6lk8k1rt",
+                            "value": 1
+                        },
+                        {
+                            "audienceId": "qu8sw0y793ggrgrcbk1huk07",
+                            "value": 300
+                        }
+                    ],
+                    "defaultValue": 60
+                },
+                {
+                    "key": "live-updates-enabled",
+                    "name": "Live updates enabled",
+                    "categoryIds": ["d5diw6vynv2mcxhsvo4osa85"],
+                    "created": "2023-07-26T09:16:44.509Z",
+                    "description": "Allows live=true to be set in SDK",
+                    "dataType": {
+                        "kind": "boolean"
+                    },
+                    "audienceExceptions": [
+                        {
+                            "audienceId": "odzrmw8z0pzhq2zur21d0hhf",
+                            "value": true
+                        },
+                        {
+                            "audienceId": "qu8sw0y793ggrgrcbk1huk07",
+                            "value": true
+                        },
+                        {
+                            "audienceId": "fxfsam0cs8l7rywf6lk8k1rt",
+                            "value": true
+                        }
+                    ],
+                    "defaultValue": false
+                },
+                {
+                    "key": "max-full-users",
+                    "name": "Max full users",
+                    "categoryIds": ["d5diw6vynv2mcxhsvo4osa85"],
+                    "created": "2023-07-26T09:16:44.618Z",
+                    "description": "Users with admin or writer roles",
+                    "dataType": {
+                        "kind": "number"
+                    },
+                    "audienceExceptions": [
+                        {
+                            "audienceId": "fxfsam0cs8l7rywf6lk8k1rt",
+                            "value": 25
+                        },
+                        {
+                            "audienceId": "r59zl54q5qktyswxrkpuwitv",
+                            "value": 3
+                        },
+                        {
+                            "audienceId": "hgm7tmwm1g9coyxqnw44rhbq",
+                            "value": 10
+                        }
+                    ],
+                    "defaultValue": 1
+                },
+                {
+                    "key": "max-limited-users",
+                    "name": "Max limited users",
+                    "categoryIds": ["d5diw6vynv2mcxhsvo4osa85"],
+                    "created": "2023-07-26T09:16:44.733Z",
+                    "description": "Users with read or support roles",
+                    "dataType": {
+                        "kind": "number"
+                    },
+                    "audienceExceptions": [
+                        {
+                            "audienceId": "fxfsam0cs8l7rywf6lk8k1rt",
+                            "value": 50
+                        },
+                        {
+                            "audienceId": "r59zl54q5qktyswxrkpuwitv",
+                            "value": 10
+                        },
+                        {
+                            "audienceId": "hgm7tmwm1g9coyxqnw44rhbq",
+                            "value": 25
+                        }
+                    ],
+                    "defaultValue": 1
+                },
+                {
+                    "key": "max-projects",
+                    "name": "Max projects",
+                    "categoryIds": ["d5diw6vynv2mcxhsvo4osa85"],
+                    "created": "2023-07-26T09:16:44.837Z",
+                    "description": "0 means unlimited",
+                    "dataType": {
+                        "kind": "number"
+                    },
+                    "audienceExceptions": [
+                        {
+                            "audienceId": "fxfsam0cs8l7rywf6lk8k1rt",
+                            "value": 0
+                        },
+                        {
+                            "audienceId": "r59zl54q5qktyswxrkpuwitv",
+                            "value": 2
+                        },
+                        {
+                            "audienceId": "hgm7tmwm1g9coyxqnw44rhbq",
+                            "value": 5
+                        }
+                    ],
+                    "defaultValue": 1
+                },
+                {
+                    "key": "webhook-type",
+                    "name": "Available webhook types ",
+                    "categoryIds": ["d5diw6vynv2mcxhsvo4osa85"],
+                    "created": "2023-07-26T09:16:44.936Z",
+                    "description": "",
+                    "dataType": {
+                        "kind": "options",
+                        "options": ["none", "basic", "advanced"]
+                    },
+                    "audienceExceptions": [
+                        {
+                            "audienceId": "qu8sw0y793ggrgrcbk1huk07",
+                            "value": "basic"
+                        },
+                        {
+                            "audienceId": "fxfsam0cs8l7rywf6lk8k1rt",
+                            "value": "advanced"
+                        },
+                        {
+                            "audienceId": "r59zl54q5qktyswxrkpuwitv",
+                            "value": "basic"
+                        },
+                        {
+                            "audienceId": "odzrmw8z0pzhq2zur21d0hhf",
+                            "value": "basic"
+                        },
+                        {
+                            "audienceId": "hgm7tmwm1g9coyxqnw44rhbq",
+                            "value": "basic"
+                        }
+                    ],
+                    "defaultValue": "none"
+                },
+                {
+                    "key": "organization-creation",
+                    "name": "Organization Creation (in app)",
+                    "categoryIds": ["qgolkhl02vq6h2bvyz3vvx3t"],
+                    "created": "2023-07-26T09:16:46.119Z",
+                    "description": "Allows organizations to be created from within the application",
+                    "dataType": {
+                        "kind": "boolean"
+                    },
+                    "audienceExceptions": [
+                        {
+                            "audienceId": "v40ot0qx308ju5k2fjhqttfa",
+                            "value": true
+                        }
+                    ],
+                    "defaultValue": false
+                },
+                {
+                    "key": "environments-key-read",
+                    "name": "Environment Key Read",
+                    "categoryIds": ["jdho0kmj4j41ygs7ob5szn05"],
+                    "created": "2023-07-26T09:16:46.348Z",
+                    "description": "Can read environment api keys",
+                    "dataType": {
+                        "kind": "boolean"
+                    },
+                    "audienceExceptions": [
+                        {
+                            "audienceId": "by6jgtpr2kqtg5drycymzkx8",
+                            "value": true
+                        },
+                        {
+                            "audienceId": "x35vmpvmqu99qckd4ibkxnrw",
+                            "value": true
+                        }
+                    ],
+                    "defaultValue": false
+                }
+            ],
+            "audiences": [
+                {
+                    "id": "v40ot0qx308ju5k2fjhqttfa",
+                    "categoryId": "whrkhpglz3xghtomup8uczwy",
+                    "key": "role-service-admin",
+                    "name": "Service Admin",
+                    "description": "Can manage the FeatureBoard service"
+                },
+                {
+                    "id": "rb4rn905ggupz1hyu0c342yv",
+                    "categoryId": "whrkhpglz3xghtomup8uczwy",
+                    "key": "role-owner",
+                    "name": "Organization Owner",
+                    "description": ""
+                },
+                {
+                    "id": "by6jgtpr2kqtg5drycymzkx8",
+                    "categoryId": "whrkhpglz3xghtomup8uczwy",
+                    "key": "role-admin",
+                    "name": "Admin",
+                    "description": ""
+                },
+                {
+                    "id": "x35vmpvmqu99qckd4ibkxnrw",
+                    "categoryId": "whrkhpglz3xghtomup8uczwy",
+                    "key": "role-writer",
+                    "name": "Writer",
+                    "description": ""
+                },
+                {
+                    "id": "vfxjj8vfj9nqstew8v5uzfja",
+                    "categoryId": "whrkhpglz3xghtomup8uczwy",
+                    "key": "role-support",
+                    "name": "Support",
+                    "description": ""
+                },
+                {
+                    "id": "ec9u97zkpjhwflo22a78jmg1",
+                    "categoryId": "whrkhpglz3xghtomup8uczwy",
+                    "key": "role-reader",
+                    "name": "Reader",
+                    "description": ""
+                },
+                {
+                    "id": "r59zl54q5qktyswxrkpuwitv",
+                    "categoryId": "r51t3kwifdfeeo0lzflnxt9t",
+                    "key": "plan-small",
+                    "name": "Small Plan",
+                    "description": ""
+                },
+                {
+                    "id": "hgm7tmwm1g9coyxqnw44rhbq",
+                    "categoryId": "r51t3kwifdfeeo0lzflnxt9t",
+                    "key": "plan-medium",
+                    "name": "Medium Plan",
+                    "description": ""
+                },
+                {
+                    "id": "fxfsam0cs8l7rywf6lk8k1rt",
+                    "categoryId": "r51t3kwifdfeeo0lzflnxt9t",
+                    "key": "plan-large",
+                    "name": "Large Plan",
+                    "description": ""
+                },
+                {
+                    "id": "odzrmw8z0pzhq2zur21d0hhf",
+                    "categoryId": "r51t3kwifdfeeo0lzflnxt9t",
+                    "key": "plan-active-trial",
+                    "name": "Plan is an active trial",
+                    "description": ""
+                },
+                {
+                    "id": "qu8sw0y793ggrgrcbk1huk07",
+                    "categoryId": "r51t3kwifdfeeo0lzflnxt9t",
+                    "key": "plan-expired-trial",
+                    "name": "Plan is an expired trial",
+                    "description": ""
+                }
+            ]
+        }
+    ]
+}

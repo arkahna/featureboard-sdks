@@ -1,19 +1,20 @@
-import { formatFiles, generateFiles } from '@nx/devkit'
+import { Tree, formatFiles, generateFiles } from '@nx/devkit'
 import { printChanges } from 'nx/src/command-line/generate/generate'
 import { FsTree, flushChanges } from 'nx/src/generators/tree'
 import * as path from 'path'
 import prompts from 'prompts'
+import { FeatureDto } from './feature-dto'
 import {
     getDotNetNameSpace,
+    getDotNetNameSpaceFromNx,
     toDotNetType,
     toPascalCase,
 } from './templates/functions'
 
 export type TemplateType = 'dotnet-api'
 
-export async function codeGenerator(options: {
+type CodeGeneratorOptions = {
     templateType: TemplateType
-    outputPath: string
     organizationName: string
     featureBoardKey?: string
     featureBoardBearerToken?: string
@@ -23,23 +24,55 @@ export async function codeGenerator(options: {
     quiet: boolean
     verbose: boolean
     interactive: boolean
-}): Promise<void> {
+}
+
+export type CodeGeneratorOptionsPath = CodeGeneratorOptions & {
+    outputPath: string
+}
+export type CodeGeneratorOptionsTree = CodeGeneratorOptions & {
+    tree: Tree
+    realitiveFilePath: string
+}
+
+export async function codeGenerator(
+    options: CodeGeneratorOptionsTree,
+): Promise<void>
+export async function codeGenerator(
+    options: CodeGeneratorOptionsTree,
+): Promise<void>
+export async function codeGenerator(
+    options: CodeGeneratorOptionsPath | CodeGeneratorOptionsTree,
+): Promise<void> {
     const features = await getFeatures(options)
 
-    const templateSpecificOptions: any = {}
-
-    switch (options.templateType) {
-        case 'dotnet-api':
-            templateSpecificOptions.namespace = await getDotNetNameSpace(
-                options.outputPath,
-            )
+    let tree: Tree | undefined
+    let srcFolder = './'
+    let runSaveChanges = true
+    if ('tree' in options) {
+        tree = options.tree
+        srcFolder = options.realitiveFilePath
+        runSaveChanges = false
+    } else {
+        tree = new FsTree(options.outputPath, options.verbose)
+        runSaveChanges = true
     }
 
-    const tree = new FsTree(options.outputPath, options.verbose)
+    const templateSpecificOptions: any = {}
+    switch (options.templateType) {
+        case 'dotnet-api':
+            templateSpecificOptions.namespace =
+                'tree' in options
+                    ? await getDotNetNameSpaceFromNx(
+                          tree,
+                          options.realitiveFilePath,
+                      )
+                    : getDotNetNameSpace(options.outputPath)
+    }
+
     generateFiles(
         tree,
         path.join(__dirname, 'templates', options.templateType),
-        './',
+        srcFolder,
         {
             toPascalCase,
             toDotNetType,
@@ -47,14 +80,14 @@ export async function codeGenerator(options: {
             features: features,
         },
     )
-    await formatFiles(tree)
 
-    SaveChanges(tree, options)
+    await formatFiles(tree)
+    if (runSaveChanges) saveChanges(tree, options)
 }
 
 async function getFeatures({
     organizationName,
-    projectName,
+    featureBoardprojectName,
     featureBoardKey,
     featureBoardBearerToken,
     interactive,
@@ -63,15 +96,15 @@ async function getFeatures({
     interactive: boolean
     featureBoardKey?: string
     featureBoardBearerToken?: string
-    projectName?: string
-}) {
+    featureBoardprojectName?: string
+}): Promise<FeatureDto[]> {
     const headers: HeadersInit = {
         'X-Organization': organizationName,
     }
 
-    if (featureBoardBearerToken)
+    if (featureBoardKey) headers['x-api-key'] = featureBoardKey
+    else if (featureBoardBearerToken)
         headers.Authorization = `Bearer ${featureBoardBearerToken}`
-    else if (featureBoardKey) headers['x-api-key'] = featureBoardKey
     else throw new Error('Auth token not set')
 
     const result = await fetch(
@@ -91,13 +124,15 @@ async function getFeatures({
     })
 
     let project = result.projects.find(
-        (x: any) => x.name.toLowerCase() === projectName?.toLocaleLowerCase(),
+        (x: any) =>
+            x.name.toLowerCase() ===
+            featureBoardprojectName?.toLocaleLowerCase(),
     )
     if (!project && interactive) {
         if (result.projects.length === 1) {
             project = result.projects[0]
             console.log(
-                `One project found setting feature board project to ${project.name}`,
+                `One project found. Setting feature board project to ${project.name}`,
             )
         } else {
             const promptResult = await prompts({
@@ -120,8 +155,8 @@ async function getFeatures({
     return project.features
 }
 
-function SaveChanges(
-    tree: FsTree,
+function saveChanges(
+    tree: Tree,
     options: {
         dryRun: boolean
         quiet: boolean

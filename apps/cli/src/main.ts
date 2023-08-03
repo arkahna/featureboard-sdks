@@ -18,8 +18,9 @@ if (!process.argv.slice(2).length) {
     exit(0)
 }
 
+// Code Gen
 const templateTypeChoices = ['dotnet-api']
-const codeGenCommand = program
+program
     .command('code-gen')
     .description('A Code generator for feature board')
     .requiredOption('-p, --output-path <path>', 'Output location')
@@ -35,6 +36,8 @@ const codeGenCommand = program
     .option('-q, --verbose', 'Verbose output', false)
     .option('-n, --nonInteractive', "Don't prompt for missing options", false)
     .action(async (options) => {
+        if (!options.quite) console.log(titleText)
+
         const outputPath = path.join(process.cwd(), options.outputPath)
         try {
             await fs.access(outputPath)
@@ -81,7 +84,6 @@ const codeGenCommand = program
             options.templateType = options.templateType ?? result.templateType
             options.organization = options.organization ?? result.organization
             bearerToken = result.bearerToken
-            console.log(result, options.templateType)
         }
 
         if (!options.templateType) throw new Error('Template type is not set')
