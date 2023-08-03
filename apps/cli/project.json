@@ -19,7 +19,7 @@
                     "apps/cli/*.md",
                     {
                         "input": "./apps/cli/src",
-                        "glob": "**/!(*.ts)",
+                        "glob": "**/!(*.template)",
                         "output": "./apps/cli/src"
                     }
                 ],
