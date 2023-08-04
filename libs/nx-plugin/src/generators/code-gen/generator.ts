@@ -8,6 +8,7 @@ export async function codeGenGenerator(
     tree: Tree,
     {
         projectName,
+        dryRun,
         ...options
     }: CodeGenGeneratorSchema & {
         help: boolean
@@ -16,10 +17,11 @@ export async function codeGenGenerator(
         verbose: boolean
     },
 ): Promise<void> {
+    console.log(options)
     const project = readProjectConfiguration(tree, projectName)
 
     let featureBoardBearerToken: string | undefined
-    if (!options.featureBoardKey) {
+    if (!dryRun && !options.featureBoardKey) {
         const result = await prompts([
             {
                 type: 'password',
@@ -34,7 +36,7 @@ export async function codeGenGenerator(
     await codeGenerator({
         tree: tree,
         realitiveFilePath: joinPathFragments(project.root, options.subFolder),
-        interactive: true,
+        interactive: !dryRun,
         featureBoardBearerToken,
         ...options,
     })

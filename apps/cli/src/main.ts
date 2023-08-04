@@ -29,7 +29,6 @@ program
             // .default('dotnet-api')
             .choices(templateTypeChoices),
     )
-    .option('-o, --organization <organization>', 'Feature board Organization')
     .option('-k, --featureBoardKey <key>', 'Feature board key')
     .option('-d, --dryRun', 'Dry run show what files have changed', false)
     .option('-q, --quite', 'No output', false)
@@ -60,14 +59,6 @@ program
                     })),
                 })
         }
-        if (!options.organization) {
-            promptsSet.push({
-                type: 'text',
-                name: 'organization',
-                message: `Enter your feature board organization:`,
-                validate: (x) => !!x,
-            })
-        }
         if (!options.featureBoardKey) {
             promptsSet.push({
                 type: 'password',
@@ -82,19 +73,16 @@ program
             const result = await prompts(promptsSet)
 
             options.templateType = options.templateType ?? result.templateType
-            options.organization = options.organization ?? result.organization
             bearerToken = result.bearerToken
         }
 
         if (!options.templateType) throw new Error('Template type is not set')
-        if (!options.organization) throw new Error('Organization is not set')
         if (!options.featureBoardKey && !bearerToken)
             throw new Error('Feature Board Key is not set')
 
         codeGenerator({
             templateType: options.templateType as TemplateType,
             outputPath: outputPath,
-            organizationName: options.organization,
             featureBoardKey: options.featureBoardKey,
             featureBoardBearerToken: bearerToken,
             dryRun: options.dryRun,

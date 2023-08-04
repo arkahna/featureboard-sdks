@@ -1,7 +1,7 @@
 import { Tree } from '@nx/devkit'
 import * as fs from 'fs/promises'
 import * as path from 'path'
-import { FeatureDto } from '../feature-dto'
+import { FeatureDto } from '../models/feature-dto'
 
 export function toPascalCase(str: string) {
     return (

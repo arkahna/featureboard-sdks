@@ -3,7 +3,9 @@ import { printChanges } from 'nx/src/command-line/generate/generate'
 import { FsTree, flushChanges } from 'nx/src/generators/tree'
 import * as path from 'path'
 import prompts from 'prompts'
-import { FeatureDto } from './feature-dto'
+import { FeatureDto } from './models/feature-dto'
+import { OrganizationDto } from './models/organization-dto'
+import { ProjectExtendedDto } from './models/project-extended-dto'
 import {
     getDotNetNameSpace,
     getDotNetNameSpaceFromNx,
@@ -13,20 +15,20 @@ import {
 
 export type TemplateType = 'dotnet-api'
 
-type CodeGeneratorOptions = {
+export type CodeGeneratorOptions = {
     templateType: TemplateType
-    organizationName: string
+    organizationId?: string
     featureBoardKey?: string
     featureBoardBearerToken?: string
     featureBoardprojectName?: string
 
-    dryRun: boolean
     quiet: boolean
     verbose: boolean
     interactive: boolean
 }
 
 export type CodeGeneratorOptionsPath = CodeGeneratorOptions & {
+    dryRun: boolean
     outputPath: string
 }
 export type CodeGeneratorOptionsTree = CodeGeneratorOptions & {
@@ -35,7 +37,7 @@ export type CodeGeneratorOptionsTree = CodeGeneratorOptions & {
 }
 
 export async function codeGenerator(
-    options: CodeGeneratorOptionsTree,
+    options: CodeGeneratorOptionsPath,
 ): Promise<void>
 export async function codeGenerator(
     options: CodeGeneratorOptionsTree,
@@ -47,14 +49,17 @@ export async function codeGenerator(
 
     let tree: Tree | undefined
     let srcFolder = './'
-    let runSaveChanges = true
+    let runSaveChanges: boolean
+    let dryRun: boolean
     if ('tree' in options) {
         tree = options.tree
         srcFolder = options.realitiveFilePath
         runSaveChanges = false
+        dryRun = false
     } else {
         tree = new FsTree(options.outputPath, options.verbose)
         runSaveChanges = true
+        dryRun = options.dryRun
     }
 
     const templateSpecificOptions: any = {}
@@ -82,55 +87,72 @@ export async function codeGenerator(
     )
 
     await formatFiles(tree)
-    if (runSaveChanges) saveChanges(tree, options)
+    if (runSaveChanges) saveChanges(tree, { quiet: options.quiet, dryRun })
 }
 
 async function getFeatures({
-    organizationName,
     featureBoardprojectName,
     featureBoardKey,
     featureBoardBearerToken,
     interactive,
 }: {
-    organizationName: string
     interactive: boolean
     featureBoardKey?: string
     featureBoardBearerToken?: string
     featureBoardprojectName?: string
 }): Promise<FeatureDto[]> {
-    const headers: HeadersInit = {
-        'X-Organization': organizationName,
-    }
+    const headers: HeadersInit = {}
 
     if (featureBoardKey) headers['x-api-key'] = featureBoardKey
-    else if (featureBoardBearerToken)
+    else if (featureBoardBearerToken) {
         headers.Authorization = `Bearer ${featureBoardBearerToken}`
-    else throw new Error('Auth token not set')
 
-    const result = await fetch(
-        'https://api.featureboard.dev/projects?deep=true',
-        {
-            headers: headers,
-        },
-    ).then(async (response) => {
-        if (response.ok) {
-            return await response.json()
+        let organizationId: string | undefined
+        if (interactive) {
+            const orgnisationResults = await queryFeatureBoard<{
+                organizations: OrganizationDto[]
+            }>('my-organizations', headers)
+
+            if (orgnisationResults.organizations.length === 1) {
+                organizationId = orgnisationResults.organizations[0].id
+                console.log(
+                    `One orgnization found. Setting feature board orgnization to ${organizationId}`,
+                )
+            } else {
+                const promptResult = await prompts({
+                    type: 'select',
+                    name: 'organizations',
+                    message: `Pick your feature board orgnisation?`,
+                    validate: (x) =>
+                        orgnisationResults.organizations
+                            .map((x) => x.name)
+                            .includes(x),
+                    choices: orgnisationResults.organizations.map((x) => ({
+                        title: x.name,
+                        value: x.id,
+                    })),
+                })
+
+                organizationId = promptResult.organizations
+            }
         }
-        throw new Error(
-            `Unable to reretrieve roject data from feature board. Status Code: ${
-                response.status
-            } (${response.statusText}), Content: ${await response.text()}`,
-        )
-    })
+        if (!organizationId) throw new Error("organizationId isn't set")
 
-    let project = result.projects.find(
+        headers['X-Organization'] = organizationId
+    } else throw new Error('Auth token not set')
+
+    const projectResults = await queryFeatureBoard<{
+        projects: ProjectExtendedDto[]
+    }>('projects?deep=true', headers)
+
+    let project = projectResults.projects.find(
         (x: any) =>
             x.name.toLowerCase() ===
             featureBoardprojectName?.toLocaleLowerCase(),
     )
     if (!project && interactive) {
-        if (result.projects.length === 1) {
-            project = result.projects[0]
+        if (projectResults.projects.length === 1) {
+            project = projectResults.projects[0]
             console.log(
                 `One project found. Setting feature board project to ${project.name}`,
             )
@@ -140,8 +162,8 @@ async function getFeatures({
                 name: 'project',
                 message: `Pick feature board project?`,
                 validate: (x) =>
-                    result.projects.map((x: any) => x.name).includes(x),
-                choices: result.projects.map((x: any) => ({
+                    projectResults.projects.map((x) => x.name).includes(x),
+                choices: projectResults.projects.map((x) => ({
                     title: x.name,
                     value: x,
                 })),
@@ -153,6 +175,21 @@ async function getFeatures({
     if (!project) throw new Error('Unable to locate Project')
 
     return project.features
+}
+
+async function queryFeatureBoard<T>(endpoint: string, headers: HeadersInit) {
+    return fetch(`https://api.featureboard.dev/${endpoint}`, {
+        headers: headers,
+    }).then(async (response) => {
+        if (response.ok) {
+            return (await response.json()) as T
+        }
+        throw new Error(
+            `Unable to reretrieve roject data from feature board. Status Code: ${
+                response.status
+            } (${response.statusText}), Content: ${await response.text()}`,
+        )
+    })
 }
 
 function saveChanges(

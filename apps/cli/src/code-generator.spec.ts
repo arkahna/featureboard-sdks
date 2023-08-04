@@ -34,10 +34,8 @@ describe('code-generator', () => {
             )
 
             options = {
-                organizationName: 'featureboard',
                 subFolder: './',
                 templateType: 'dotnet-api',
-                dryRun: false,
                 quiet: false,
                 verbose: true,
                 interactive: false,

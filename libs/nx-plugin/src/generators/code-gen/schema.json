@@ -19,11 +19,6 @@
                 ]
             }
         },
-        "organizationName": {
-            "type": "string",
-            "description": "The name of your featureboard organization",
-            "alias": "o"
-        },
 
         "projectName": {
             "type": "string",
@@ -51,5 +46,5 @@
             "default": "./"
         }
     },
-    "required": ["templateType", "organizationName", "projectName"]
+    "required": ["templateType", "projectName"]
 }
