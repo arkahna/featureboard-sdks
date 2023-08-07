@@ -28,11 +28,31 @@ public class PollingUpdateStrategyBackgroundService : BackgroundService
     // When the timer should have no due-time, then do the work once now.
     await UpdateState(stoppingToken);
 
-    using PeriodicTimer timer = new(_options.Value.MaxAge);
+#if NET6_0_OR_GREATER
+    using var timer = new PeriodicTimer(_options.Value.MaxAge);
+    async Task<bool> WaitForNextTickAsync(CancellationToken cancellation) => await timer.WaitForNextTickAsync(stoppingToken);
+#else
+    var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+    async Task<bool> WaitForNextTickAsync(CancellationToken cancellation)
+    {
+      try
+      {
+        var elapsedFraction = stopwatch.Elapsed.Ticks % _options.Value.MaxAge.Ticks;
+        var delayFor = _options.Value.MaxAge - TimeSpan.FromTicks(elapsedFraction);
+        await Task.Delay(delayFor, cancellation);
+        stopwatch.Restart();
+        return true;
+      }
+      catch ( TaskCanceledException e )
+      {
+        throw new OperationCanceledException(null, e, cancellation);
+      }
+    }
+#endif
 
     try
     {
-      while (await timer.WaitForNextTickAsync(stoppingToken))
+      while (await WaitForNextTickAsync(stoppingToken))
       {
         await UpdateState(stoppingToken);
       }

@@ -6,7 +6,7 @@ public class FeatureBoardStateSnapshot
 {
   private readonly Dictionary<string, FeatureConfiguration> _snapshot;
 
-  public FeatureBoardStateSnapshot(IEnumerable<KeyValuePair<string, FeatureConfiguration>> state)
+  public FeatureBoardStateSnapshot(IDictionary<string, FeatureConfiguration> state)
   {
     _snapshot = new Dictionary<string, FeatureConfiguration>(state, StringComparer.OrdinalIgnoreCase);
   }

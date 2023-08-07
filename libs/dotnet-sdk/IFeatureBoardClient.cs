@@ -5,10 +5,22 @@ namespace FeatureBoard.DotnetSdk;
 
 public interface IFeatureBoardClient<TFeatures> : IFeatureBoardClient where TFeatures : IFeatures
 {
-  TProp GetFeatureValue<TProp>(Expression<Func<TFeatures, TProp>> func, TProp defaultValue);
+  bool GetFeatureValue(Expression<Func<TFeatures, bool>> expr, bool defaultValue);
+
+  decimal GetFeatureValue(Expression<Func<TFeatures, decimal>> expr, decimal defaultValue);
+
+  string GetFeatureValue(Expression<Func<TFeatures, string>> expr, string defaultValue);
+
+  TProp GetFeatureValue<TProp>(Expression<Func<TFeatures, TProp>> func, TProp defaultValue) where TProp : struct, Enum;
 }
 
 public interface IFeatureBoardClient
 {
-  internal TProp GetFeatureValue<TProp>(string featureKey, TProp defaultValue);
+  internal bool GetFeatureValue(string featureKey, bool defaultValue);
+
+  internal decimal GetFeatureValue(string featureKey, decimal defaultValue);
+
+  internal string GetFeatureValue(string featureKey, string defaultValue);
+
+  internal TProp GetFeatureValue<TProp>(string featureKey, TProp defaultValue) where TProp : struct, Enum;
 }
