@@ -47,7 +47,7 @@ describe('code-generator', () => {
                 /^https?:\/\/api.featureboard.dev.*$/,
                 async (req) => {
                     const file = await fs.readFile(
-                        path.join(__dirname, '../test-data/feature-board.json'),
+                        path.join(__dirname, '../test-data/featureboard.json'),
                         {
                             encoding: 'utf8',
                         },

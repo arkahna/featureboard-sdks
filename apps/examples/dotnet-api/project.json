@@ -36,7 +36,7 @@
         },
         "swagger": {
             "executor": "@nx-dotnet/core:update-swagger",
-            "outputs": ["options.output"],
+            "outputs": ["{workspaceRoot}/options.output"],
             "options": {
                 "output": "libs/generated/dotnet-api-swagger/swagger.json"
             },

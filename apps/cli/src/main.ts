@@ -4,14 +4,15 @@ import fs from 'fs/promises'
 import path from 'path'
 import { exit } from 'process'
 import prompts from 'prompts'
+import packageJson from '../package.json'
 import { TemplateType, codeGenerator } from './code-generator'
 
-const titleText = figlet.textSync('Feature Board CLI')
+const titleText = figlet.textSync('FeatureBoard CLI')
 
 const program = new Command()
-    .description(`${titleText}\nA Code generator for feature board`)
-    .version('1.0.0') // how do we set this dynamicly
-    .option('-q, --quite', 'No output', false)
+    .description(`${titleText}\nA Code generator for FeatureBoard`)
+    .version(packageJson.version) // how do we set this dynamicly
+    .option('-q, --quiet', 'No output', false)
 
 if (!process.argv.slice(2).length) {
     program.outputHelp()
@@ -29,13 +30,17 @@ program
             // .default('dotnet-api')
             .choices(templateTypeChoices),
     )
-    .option('-k, --featureBoardKey <key>', 'Feature board key')
+    .option('-k, --featureBoardKey <key>', 'FeatureBoard api key')
     .option('-d, --dryRun', 'Dry run show what files have changed', false)
-    .option('-q, --quite', 'No output', false)
+    .option('-q, --quiet', 'No output', false)
     .option('-q, --verbose', 'Verbose output', false)
-    .option('-n, --nonInteractive', "Don't prompt for missing options", false)
+    .option(
+        '-n, --nonInteractive',
+        "Don't prompt for missing options",
+        !!process.env.CI,
+    )
     .action(async (options) => {
-        if (!options.quite) console.log(titleText)
+        if (!options.quiet) console.log(titleText)
 
         const outputPath = path.join(process.cwd(), options.outputPath)
         try {
@@ -45,9 +50,9 @@ program
         }
         const promptsSet: Array<prompts.PromptObject<string>> = []
         if (!options.templateType) {
-            if (templateTypeChoices.length == 1 && !options.nonInteractive)
+            if (templateTypeChoices.length == 1 && !options.nonInteractive) {
                 options.templateType = templateTypeChoices[0]
-            else
+            } else {
                 promptsSet.push({
                     type: 'select',
                     name: 'templateType',
@@ -58,6 +63,7 @@ program
                         value: x,
                     })),
                 })
+            }
         }
         if (!options.featureBoardKey) {
             promptsSet.push({
@@ -80,13 +86,13 @@ program
         if (!options.featureBoardKey && !bearerToken)
             throw new Error('Feature Board Key is not set')
 
-        codeGenerator({
+        await codeGenerator({
             templateType: options.templateType as TemplateType,
             outputPath: outputPath,
             featureBoardKey: options.featureBoardKey,
             featureBoardBearerToken: bearerToken,
             dryRun: options.dryRun,
-            quiet: options.quite,
+            quiet: options.quiet,
 
             verbose: options.verbose,
             interactive: !options.nonInteractive,
