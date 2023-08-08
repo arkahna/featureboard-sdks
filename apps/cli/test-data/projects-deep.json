@@ -1,0 +1,408 @@
+{
+    "projects": [
+        {
+            "id": "ivu5ntxbxeeorm248jl25bs6",
+            "name": "SaaSy Icons",
+            "environments": [
+                {
+                    "id": "rgxlfvc6yik8jf01wlo23p30",
+                    "name": "Dev",
+                    "availableFeatures": [
+                        "allow-edits",
+                        "number-custom-collections",
+                        "requires-attribution",
+                        "team-management",
+                        "custom-collections",
+                        "view-subscribers"
+                    ]
+                },
+                {
+                    "id": "ai2d6zmcef0vnekxazx2ergn",
+                    "name": "Prd",
+                    "availableFeatures": [
+                        "allow-edits",
+                        "number-custom-collections",
+                        "requires-attribution",
+                        "team-management",
+                        "custom-collections",
+                        "view-subscribers"
+                    ]
+                }
+            ],
+            "features": [
+                {
+                    "key": "requires-attribution",
+                    "name": "Requires attribution",
+                    "categoryIds": ["q6eqzh6tpenvxd0jdwm0honn"],
+                    "created": "2023-07-27T13:09:21.971Z",
+                    "description": "",
+                    "dataType": {
+                        "kind": "boolean"
+                    },
+                    "audienceExceptions": [
+                        {
+                            "audienceId": "ixlassftgjlfcc1q3ae53pv7",
+                            "value": true
+                        }
+                    ],
+                    "defaultValue": false
+                },
+                {
+                    "key": "allow-edits",
+                    "name": "Allow edits",
+                    "categoryIds": ["q6eqzh6tpenvxd0jdwm0honn"],
+                    "created": "2023-07-27T13:11:36.986Z",
+                    "description": "Allows the user to edit colour, backgrounds",
+                    "dataType": {
+                        "kind": "boolean"
+                    },
+                    "audienceExceptions": [
+                        {
+                            "audienceId": "zpmuq3xls263kwylkas9swiu",
+                            "value": true
+                        },
+                        {
+                            "audienceId": "mar4yixxykc7ibvtktb6t1wy",
+                            "value": true
+                        }
+                    ],
+                    "defaultValue": false
+                },
+                {
+                    "key": "number-custom-collections",
+                    "name": "Number custom collections",
+                    "categoryIds": ["q6eqzh6tpenvxd0jdwm0honn"],
+                    "created": "2023-07-27T13:17:13.871Z",
+                    "description": "",
+                    "dataType": {
+                        "kind": "number"
+                    },
+                    "audienceExceptions": [
+                        {
+                            "audienceId": "ou7ihrqezpxa8k8cc6c2kes7",
+                            "value": 10
+                        },
+                        {
+                            "audienceId": "ixlassftgjlfcc1q3ae53pv7",
+                            "value": 1
+                        }
+                    ],
+                    "defaultValue": 0
+                },
+                {
+                    "key": "team-management",
+                    "name": "Team management",
+                    "categoryIds": ["q6eqzh6tpenvxd0jdwm0honn"],
+                    "created": "2023-07-27T13:19:53.344Z",
+                    "description": "",
+                    "dataType": {
+                        "kind": "boolean"
+                    },
+                    "audienceExceptions": [
+                        {
+                            "audienceId": "zpmuq3xls263kwylkas9swiu",
+                            "value": true
+                        }
+                    ],
+                    "defaultValue": false
+                },
+                {
+                    "key": "custom-collections",
+                    "name": "Custom collections",
+                    "categoryIds": ["q6eqzh6tpenvxd0jdwm0honn"],
+                    "created": "2023-07-27T13:41:10.873Z",
+                    "description": "",
+                    "dataType": {
+                        "kind": "options",
+                        "options": ["Disabled", "Enabled", "Shared"]
+                    },
+                    "audienceExceptions": [
+                        {
+                            "audienceId": "zpmuq3xls263kwylkas9swiu",
+                            "value": "Disabled"
+                        },
+                        {
+                            "audienceId": "ixlassftgjlfcc1q3ae53pv7",
+                            "value": "Shared"
+                        }
+                    ],
+                    "defaultValue": "Enabled"
+                },
+                {
+                    "key": "view-subscribers",
+                    "name": "View subscribers",
+                    "categoryIds": ["nkmqhd7hx8t1nyr0abinarjb"],
+                    "created": "2023-07-27T14:16:51.107Z",
+                    "description": "",
+                    "dataType": {
+                        "kind": "boolean"
+                    },
+                    "audienceExceptions": [
+                        {
+                            "audienceId": "fxs53xyb1mwqfyor0zsalzv5",
+                            "value": true
+                        }
+                    ],
+                    "defaultValue": true
+                }
+            ],
+            "audiences": [
+                {
+                    "id": "ixlassftgjlfcc1q3ae53pv7",
+                    "categoryId": "vwx0vzrs6einwehejkgxhtfu",
+                    "key": "plan-free",
+                    "name": "Free",
+                    "description": ""
+                },
+                {
+                    "id": "ou7ihrqezpxa8k8cc6c2kes7",
+                    "categoryId": "vwx0vzrs6einwehejkgxhtfu",
+                    "key": "plan-personal-plus",
+                    "name": "Personal Plus",
+                    "description": ""
+                },
+                {
+                    "id": "mar4yixxykc7ibvtktb6t1wy",
+                    "categoryId": "vwx0vzrs6einwehejkgxhtfu",
+                    "key": "plan-personal-pro",
+                    "name": "Personal Pro",
+                    "description": ""
+                },
+                {
+                    "id": "zpmuq3xls263kwylkas9swiu",
+                    "categoryId": "vwx0vzrs6einwehejkgxhtfu",
+                    "key": "plan-team",
+                    "name": "Team",
+                    "description": ""
+                },
+                {
+                    "id": "fxs53xyb1mwqfyor0zsalzv5",
+                    "categoryId": "k6f5gs5qc8cy6m5f9i35qvh5",
+                    "key": "role-service-admin",
+                    "name": "Service Admin",
+                    "description": ""
+                },
+                {
+                    "id": "myxzal5edlfc9mmic15ex1rc",
+                    "categoryId": "k6f5gs5qc8cy6m5f9i35qvh5",
+                    "key": "role-admin",
+                    "name": "Admin",
+                    "description": ""
+                },
+                {
+                    "id": "ll3ogsjd8s23ovoc9nlj9nrm",
+                    "categoryId": "k6f5gs5qc8cy6m5f9i35qvh5",
+                    "key": "role-member",
+                    "name": "member",
+                    "description": ""
+                }
+            ]
+        },
+        {
+            "id": "iwsqhg8qzs1ex3vzmo8iu07k",
+            "name": "GitHub",
+            "environments": [
+                {
+                    "id": "b5gzgjpatililuns7mltb7j9",
+                    "name": "Dev",
+                    "availableFeatures": ["maintain-access", "open-issues"]
+                },
+                {
+                    "id": "v0b2sy4lehx7hsrft5m8vmcf",
+                    "name": "Stg",
+                    "availableFeatures": ["maintain-access", "open-issues"]
+                },
+                {
+                    "id": "a1otcmfg0w0v0ysd161x3gfy",
+                    "name": "Prod",
+                    "availableFeatures": ["maintain-access", "open-issues"]
+                }
+            ],
+            "features": [
+                {
+                    "key": "maintain-access",
+                    "name": "Maintain Access",
+                    "categoryIds": ["nkmqhd7hx8t1nyr0abinarjb"],
+                    "created": "2023-08-08T05:50:41.722Z",
+                    "description": "",
+                    "dataType": {
+                        "kind": "boolean"
+                    },
+                    "audienceExceptions": [
+                        {
+                            "audienceId": "g7d688xw4zn8xbfayih37ego",
+                            "value": true
+                        }
+                    ],
+                    "defaultValue": false
+                },
+                {
+                    "key": "open-issues",
+                    "name": "Open issues",
+                    "categoryIds": ["nkmqhd7hx8t1nyr0abinarjb"],
+                    "created": "2023-08-08T05:51:54.628Z",
+                    "description": "",
+                    "dataType": {
+                        "kind": "boolean"
+                    },
+                    "audienceExceptions": [],
+                    "defaultValue": true
+                },
+                {
+                    "key": "view-repository",
+                    "name": "View Repository",
+                    "categoryIds": ["nkmqhd7hx8t1nyr0abinarjb"],
+                    "created": "2023-08-08T06:02:13.601Z",
+                    "description": "",
+                    "dataType": {
+                        "kind": "boolean"
+                    },
+                    "audienceExceptions": [],
+                    "defaultValue": false
+                }
+            ],
+            "audiences": [
+                {
+                    "id": "nto77gat626mjig3we81joqk",
+                    "categoryId": "vwx0vzrs6einwehejkgxhtfu",
+                    "key": "plan-free",
+                    "name": "Free",
+                    "description": ""
+                },
+                {
+                    "id": "jkl7mhbtgq3z7cxaziwihvlx",
+                    "categoryId": "vwx0vzrs6einwehejkgxhtfu",
+                    "key": "plan-team",
+                    "name": "Team",
+                    "description": ""
+                },
+                {
+                    "id": "wfkt2ob8kuzvsifn52ki3n2e",
+                    "categoryId": "vwx0vzrs6einwehejkgxhtfu",
+                    "key": "plan-enterprise",
+                    "name": "Enterprise",
+                    "description": ""
+                },
+                {
+                    "id": "rclum5s4l3kvdf5gjeuvzi6r",
+                    "categoryId": "k6f5gs5qc8cy6m5f9i35qvh5",
+                    "key": "role-organization-owner",
+                    "name": "Organization Owner",
+                    "description": ""
+                },
+                {
+                    "id": "zp2hpokxdw4qznpogx7vza78",
+                    "categoryId": "k6f5gs5qc8cy6m5f9i35qvh5",
+                    "key": "role-organization-member",
+                    "name": "Organization Member",
+                    "description": ""
+                },
+                {
+                    "id": "lalnjvz427i6xls3ijsez6st",
+                    "categoryId": "k6f5gs5qc8cy6m5f9i35qvh5",
+                    "key": "role-organization-moderator",
+                    "name": "Organization Moderator",
+                    "description": ""
+                },
+                {
+                    "id": "v7eigotcorhhx7mykwgatw63",
+                    "categoryId": "k6f5gs5qc8cy6m5f9i35qvh5",
+                    "key": "role-billing-manager",
+                    "name": "Billing Manager",
+                    "description": ""
+                },
+                {
+                    "id": "szh9x0m21rotf3byhjll9sbt",
+                    "categoryId": "k6f5gs5qc8cy6m5f9i35qvh5",
+                    "key": "role-security-manager",
+                    "name": "Security Manager",
+                    "description": ""
+                },
+                {
+                    "id": "m94ewp57yedfk00s4y2bnwtm",
+                    "categoryId": "k6f5gs5qc8cy6m5f9i35qvh5",
+                    "key": "role-outside-collaborator",
+                    "name": "Outside Collaborator",
+                    "description": ""
+                },
+                {
+                    "id": "hjyfmlku37nk2md9pu82r0q8",
+                    "categoryId": "k6f5gs5qc8cy6m5f9i35qvh5",
+                    "key": "role-github-app-manager",
+                    "name": "GitHub App Manager",
+                    "description": ""
+                },
+                {
+                    "id": "b8delfe3xr7rgp9j222wq5i4",
+                    "categoryId": "k6f5gs5qc8cy6m5f9i35qvh5",
+                    "key": "role-repository-read",
+                    "name": "Repository Read",
+                    "description": ""
+                },
+                {
+                    "id": "jks0y218q1dss0ko2sr2wqbe",
+                    "categoryId": "k6f5gs5qc8cy6m5f9i35qvh5",
+                    "key": "role-repository-triage",
+                    "name": "Repository Triage",
+                    "description": ""
+                },
+                {
+                    "id": "e30zeup9eek4uc3ik55e1x2l",
+                    "categoryId": "k6f5gs5qc8cy6m5f9i35qvh5",
+                    "key": "role-repository-write",
+                    "name": "Repository Write",
+                    "description": ""
+                },
+                {
+                    "id": "n1ef9uu1e9hbm9uciz4z431q",
+                    "categoryId": "k6f5gs5qc8cy6m5f9i35qvh5",
+                    "key": "role-repository-maintain",
+                    "name": "Repository Maintain",
+                    "description": ""
+                },
+                {
+                    "id": "g7d688xw4zn8xbfayih37ego",
+                    "categoryId": "k6f5gs5qc8cy6m5f9i35qvh5",
+                    "key": "role-repository-admin",
+                    "name": "Repository Admin",
+                    "description": ""
+                },
+                {
+                    "id": "gi33srkec0iploye4ua8eu58",
+                    "categoryId": "m8diylg2dd18vzbxsutodg6r",
+                    "key": "policy-default-permission-read",
+                    "name": "Default permission - Read",
+                    "description": ""
+                },
+                {
+                    "id": "coko9iirk0b0xzbj7cnupsuw",
+                    "categoryId": "m8diylg2dd18vzbxsutodg6r",
+                    "key": "policy-default-permission-write",
+                    "name": "Default Permission - Write",
+                    "description": ""
+                },
+                {
+                    "id": "oqnjvu9h84evy42aots085ec",
+                    "categoryId": "m8diylg2dd18vzbxsutodg6r",
+                    "key": "policy-default-permission-triage",
+                    "name": "Default Permission - Triage",
+                    "description": ""
+                },
+                {
+                    "id": "alac5tf8gvvhqeyr06zdqyjm",
+                    "categoryId": "m8diylg2dd18vzbxsutodg6r",
+                    "key": "policy-default-permission-maintain",
+                    "name": "Default Permission - Maintain",
+                    "description": ""
+                },
+                {
+                    "id": "wb229hyd217wmwz0tv3xnhjn",
+                    "categoryId": "m8diylg2dd18vzbxsutodg6r",
+                    "key": "policy-default-permission-admin",
+                    "name": "Default Permission - Admin",
+                    "description": ""
+                }
+            ]
+        }
+    ]
+}

@@ -7,87 +7,45 @@ namespace FeatureBoardSdk.Examples.DotnetApi;
 // Features
 public class Features : IFeatures
 {
-  [FeatureKeyName("organization-management")]
-  public bool OrganizationManagement { get; set; }
-  [FeatureKeyName("projects-write")]
-  public bool ProjectsWrite { get; set; }
-  [FeatureKeyName("environments-write")]
-  public bool EnvironmentsWrite { get; set; }
-  [FeatureKeyName("features-write")]
-  public bool FeaturesWrite { get; set; }
-  [FeatureKeyName("audiences-write")]
-  public bool AudiencesWrite { get; set; }
-  [FeatureKeyName("set-feature-availability")]
-  public bool SetFeatureAvailability { get; set; }
-  [FeatureKeyName("service-administration")]
-  public bool ServiceAdministration { get; set; }
-  [FeatureKeyName("webhooks-write")]
-  public bool WebhooksWrite { get; set; }
-  [FeatureKeyName("features-value-write")]
-  public bool FeaturesValueWrite { get; set; }
-  [FeatureKeyName("delete-organization")]
-  public bool DeleteOrganization { get; set; }
-  [FeatureKeyName("api-key-management")]
-  public bool ApiKeyManagement { get; set; }
-  [FeatureKeyName("webhooks")]
-  public bool Webhooks { get; set; }
-  [FeatureKeyName("cache-ttl")]
-  public decimal CacheTtl { get; set; }
-  [FeatureKeyName("live-updates-enabled")]
-  public bool LiveUpdatesEnabled { get; set; }
-  [FeatureKeyName("max-full-users")]
-  public decimal MaxFullUsers { get; set; }
-  [FeatureKeyName("max-limited-users")]
-  public decimal MaxLimitedUsers { get; set; }
-  [FeatureKeyName("max-projects")]
-  public decimal MaxProjects { get; set; }
-  [FeatureKeyName("webhook-type")]
-  public WebhookType WebhookType { get; set; }
-  [FeatureKeyName("organization-creation")]
-  public bool OrganizationCreation { get; set; }
-  [FeatureKeyName("environments-key-read")]
-  public bool EnvironmentsKeyRead { get; set; }
+  [FeatureKeyName("requires-attribution")]
+  public bool RequiresAttribution { get; set; }
+  [FeatureKeyName("allow-edits")]
+  public bool AllowEdits { get; set; }
+  [FeatureKeyName("number-custom-collections")]
+  public decimal NumberCustomCollections { get; set; }
+  [FeatureKeyName("team-management")]
+  public bool TeamManagement { get; set; }
+  [FeatureKeyName("custom-collections")]
+  public CustomCollections CustomCollections { get; set; }
+  [FeatureKeyName("view-subscribers")]
+  public bool ViewSubscribers { get; set; }
 }
 
 
 // Options Enums
 
-//Available webhook types 
-public enum WebhookType
+//Custom collections
+public enum CustomCollections
 {
-  [EnumMember(Value = "none")]
-  None,
-  [EnumMember(Value = "basic")]
-  Basic,
-  [EnumMember(Value = "advanced")]
-  Advanced,
+  [EnumMember(Value = "Disabled")]
+  Disabled,
+  [EnumMember(Value = "Enabled")]
+  Enabled,
+  [EnumMember(Value = "Shared")]
+  Shared,
 }
 
 // Type Enums
 public enum BooleanFeature
 {
-  OrganizationManagement,
-  ProjectsWrite,
-  EnvironmentsWrite,
-  FeaturesWrite,
-  AudiencesWrite,
-  SetFeatureAvailability,
-  ServiceAdministration,
-  WebhooksWrite,
-  FeaturesValueWrite,
-  DeleteOrganization,
-  ApiKeyManagement,
-  Webhooks,
-  LiveUpdatesEnabled,
-  OrganizationCreation,
-  EnvironmentsKeyRead,
+  RequiresAttribution,
+  AllowEdits,
+  TeamManagement,
+  ViewSubscribers,
 }
 public enum NumberFeature
 {
-  CacheTtl,
-  MaxFullUsers,
-  MaxLimitedUsers,
-  MaxProjects,
+  NumberCustomCollections,
 }
 public enum StringFeature
 {
@@ -102,25 +60,11 @@ public class FeatureFilterAttribute : FeatureFilterAttributeBase
   protected override object? IsEqualTo { get; }
   private readonly Dictionary<string, string> _featureKeyLookup = new()
   {
-    { "OrganizationManagement", "organization-management" },
-    { "ProjectsWrite", "projects-write" },
-    { "EnvironmentsWrite", "environments-write" },
-    { "FeaturesWrite", "features-write" },
-    { "AudiencesWrite", "audiences-write" },
-    { "SetFeatureAvailability", "set-feature-availability" },
-    { "ServiceAdministration", "service-administration" },
-    { "WebhooksWrite", "webhooks-write" },
-    { "FeaturesValueWrite", "features-value-write" },
-    { "DeleteOrganization", "delete-organization" },
-    { "ApiKeyManagement", "api-key-management" },
-    { "Webhooks", "webhooks" },
-    { "CacheTtl", "cache-ttl" },
-    { "LiveUpdatesEnabled", "live-updates-enabled" },
-    { "MaxFullUsers", "max-full-users" },
-    { "MaxLimitedUsers", "max-limited-users" },
-    { "MaxProjects", "max-projects" },
-    { "OrganizationCreation", "organization-creation" },
-    { "EnvironmentsKeyRead", "environments-key-read" },
+    { "RequiresAttribution", "requires-attribution" },
+    { "AllowEdits", "allow-edits" },
+    { "NumberCustomCollections", "number-custom-collections" },
+    { "TeamManagement", "team-management" },
+    { "ViewSubscribers", "view-subscribers" },
   };
 
   public FeatureFilterAttribute(BooleanFeature feature, bool defaultValue)
@@ -150,9 +94,9 @@ public class FeatureFilterAttribute : FeatureFilterAttributeBase
     DefaultValue = defaultValue;
   }
 
-  public FeatureFilterAttribute(WebhookType isEqualTo, WebhookType defaultValue)
+  public FeatureFilterAttribute(CustomCollections isEqualTo, CustomCollections defaultValue)
   {
-    Feature = "webhook-type";
+    Feature = "custom-collections";
     IsEqualTo = isEqualTo;
     DefaultValue = defaultValue;
   }

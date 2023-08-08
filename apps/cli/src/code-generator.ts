@@ -1,17 +1,12 @@
-import { Tree, formatFiles, generateFiles } from '@nx/devkit'
-import { printChanges } from 'nx/src/command-line/generate/generate'
-import { FsTree, flushChanges } from 'nx/src/generators/tree'
 import * as path from 'path'
 import prompts from 'prompts'
-import { FeatureDto } from './models/feature-dto'
-import { OrganizationDto } from './models/organization-dto'
-import { ProjectExtendedDto } from './models/project-extended-dto'
 import {
     getDotNetNameSpace,
-    getDotNetNameSpaceFromNx,
     toDotNetType,
     toPascalCase,
 } from './templates/functions'
+import { generateFiles } from './templates/generate-files'
+import { Tree } from './tree/tree'
 
 export type TemplateType = 'dotnet-api'
 
@@ -20,64 +15,33 @@ export type CodeGeneratorOptions = {
     organizationId?: string
     featureBoardKey?: string
     featureBoardBearerToken?: string
-    featureBoardprojectName?: string
+    featureBoardProjectName?: string
 
-    quiet: boolean
-    verbose: boolean
     interactive: boolean
-}
 
-export type CodeGeneratorOptionsPath = CodeGeneratorOptions & {
-    dryRun: boolean
-    outputPath: string
-}
-export type CodeGeneratorOptionsTree = CodeGeneratorOptions & {
     tree: Tree
-    realitiveFilePath: string
+    relativeFilePath: string
 }
 
 export async function codeGenerator(
-    options: CodeGeneratorOptionsPath,
-): Promise<void>
-export async function codeGenerator(
-    options: CodeGeneratorOptionsTree,
-): Promise<void>
-export async function codeGenerator(
-    options: CodeGeneratorOptionsPath | CodeGeneratorOptionsTree,
+    options: CodeGeneratorOptions,
 ): Promise<void> {
     const features = await getFeatures(options)
-
-    let tree: Tree | undefined
-    let srcFolder = './'
-    let runSaveChanges: boolean
-    let dryRun: boolean
-    if ('tree' in options) {
-        tree = options.tree
-        srcFolder = options.realitiveFilePath
-        runSaveChanges = false
-        dryRun = false
-    } else {
-        tree = new FsTree(options.outputPath, options.verbose)
-        runSaveChanges = true
-        dryRun = options.dryRun
-    }
+    const relativeFilePath = options.relativeFilePath
 
     const templateSpecificOptions: any = {}
     switch (options.templateType) {
         case 'dotnet-api':
-            templateSpecificOptions.namespace =
-                'tree' in options
-                    ? await getDotNetNameSpaceFromNx(
-                          tree,
-                          options.realitiveFilePath,
-                      )
-                    : getDotNetNameSpace(options.outputPath)
+            templateSpecificOptions.namespace = getDotNetNameSpace(
+                options.tree,
+                relativeFilePath,
+            )
     }
 
-    generateFiles(
-        tree,
+    await generateFiles(
+        options.tree,
         path.join(__dirname, 'templates', options.templateType),
-        srcFolder,
+        options.relativeFilePath,
         {
             toPascalCase,
             toDotNetType,
@@ -85,13 +49,10 @@ export async function codeGenerator(
             features: features,
         },
     )
-
-    await formatFiles(tree)
-    if (runSaveChanges) saveChanges(tree, { quiet: options.quiet, dryRun })
 }
 
 async function getFeatures({
-    featureBoardprojectName,
+    featureBoardProjectName,
     featureBoardKey,
     featureBoardBearerToken,
     interactive,
@@ -99,8 +60,8 @@ async function getFeatures({
     interactive: boolean
     featureBoardKey?: string
     featureBoardBearerToken?: string
-    featureBoardprojectName?: string
-}): Promise<FeatureDto[]> {
+    featureBoardProjectName?: string
+}): Promise<any[]> {
     const headers: HeadersInit = {}
 
     if (featureBoardKey) headers['x-api-key'] = featureBoardKey
@@ -109,25 +70,25 @@ async function getFeatures({
 
         let organizationId: string | undefined
         if (interactive) {
-            const orgnisationResults = await queryFeatureBoard<{
-                organizations: OrganizationDto[]
+            const organisationResults = await queryFeatureBoard<{
+                organizations: { id: string; name: string }[]
             }>('my-organizations', headers)
 
-            if (orgnisationResults.organizations.length === 1) {
-                organizationId = orgnisationResults.organizations[0].id
+            if (organisationResults.organizations.length === 1) {
+                organizationId = organisationResults.organizations[0].id
                 console.log(
-                    `One orgnization found. Setting feature board orgnization to ${organizationId}`,
+                    `One organization found. Setting feature board organization to ${organizationId}`,
                 )
             } else {
                 const promptResult = await prompts({
                     type: 'select',
                     name: 'organizations',
-                    message: `Pick your feature board orgnisation?`,
+                    message: `Pick your feature board organisation?`,
                     validate: (x) =>
-                        orgnisationResults.organizations
+                        organisationResults.organizations
                             .map((x) => x.name)
                             .includes(x),
-                    choices: orgnisationResults.organizations.map((x) => ({
+                    choices: organisationResults.organizations.map((x) => ({
                         title: x.name,
                         value: x.id,
                     })),
@@ -142,13 +103,13 @@ async function getFeatures({
     } else throw new Error('Auth token not set')
 
     const projectResults = await queryFeatureBoard<{
-        projects: ProjectExtendedDto[]
+        projects: { name: string; features: any[] }[]
     }>('projects?deep=true', headers)
 
     let project = projectResults.projects.find(
         (x: any) =>
             x.name.toLowerCase() ===
-            featureBoardprojectName?.toLocaleLowerCase(),
+            featureBoardProjectName?.toLocaleLowerCase(),
     )
     if (!project && interactive) {
         if (projectResults.projects.length === 1) {
@@ -185,32 +146,9 @@ async function queryFeatureBoard<T>(endpoint: string, headers: HeadersInit) {
             return (await response.json()) as T
         }
         throw new Error(
-            `Unable to reretrieve roject data from feature board. Status Code: ${
+            `Unable to retrieve project data from FeatureBoard. Status Code: ${
                 response.status
             } (${response.statusText}), Content: ${await response.text()}`,
         )
     })
-}
-
-function saveChanges(
-    tree: Tree,
-    options: {
-        dryRun: boolean
-        quiet: boolean
-    },
-) {
-    const changes = tree.listChanges()
-    if (!options.quiet) {
-        printChanges(changes)
-        if (changes.length === 0) {
-            console.log(`\nFiles are the same no changes were made.`)
-            return
-        }
-    }
-
-    if (!options.dryRun && changes.length !== 0) {
-        flushChanges(tree.root, changes)
-        return
-    }
-    console.log(`\nNOTE: The "dryRun" flag means no changes were made.`)
 }

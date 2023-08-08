@@ -4,8 +4,9 @@ import fs from 'fs/promises'
 import path from 'path'
 import { exit } from 'process'
 import prompts from 'prompts'
-import packageJson from '../package.json'
+import * as packageJson from '../package.json'
 import { TemplateType, codeGenerator } from './code-generator'
+import { FsTree, flushChanges, printChanges } from './tree/tree'
 
 const titleText = figlet.textSync('FeatureBoard CLI')
 
@@ -42,12 +43,14 @@ program
     .action(async (options) => {
         if (!options.quiet) console.log(titleText)
 
-        const outputPath = path.join(process.cwd(), options.outputPath)
+        const sanatisedOutputPath = options.outputPath.replace('../', './')
+        const outputPath = path.join(process.cwd(), sanatisedOutputPath)
         try {
             await fs.access(outputPath)
         } catch {
             throw new Error(`Output path doesn't exist: ${outputPath}`)
         }
+
         const promptsSet: Array<prompts.PromptObject<string>> = []
         if (!options.templateType) {
             if (templateTypeChoices.length == 1 && !options.nonInteractive) {
@@ -86,17 +89,30 @@ program
         if (!options.featureBoardKey && !bearerToken)
             throw new Error('Feature Board Key is not set')
 
+        const tree = new FsTree(process.cwd(), options.verbose)
         await codeGenerator({
             templateType: options.templateType as TemplateType,
-            outputPath: outputPath,
+            tree: tree,
+            relativeFilePath: sanatisedOutputPath,
             featureBoardKey: options.featureBoardKey,
             featureBoardBearerToken: bearerToken,
-            dryRun: options.dryRun,
-            quiet: options.quiet,
-
-            verbose: options.verbose,
             interactive: !options.nonInteractive,
         })
+
+        const changes = tree.listChanges()
+        if (!options.quiet) {
+            printChanges(changes)
+            if (changes.length === 0) {
+                console.log(`\nFiles are the same no changes were made.`)
+                return
+            }
+        }
+
+        if (!options.dryRun && changes.length !== 0) {
+            flushChanges(tree.root, changes)
+            return
+        }
+        console.log(`\nNOTE: The "dryRun" flag means no changes were made.`)
     })
 
 program.parse()

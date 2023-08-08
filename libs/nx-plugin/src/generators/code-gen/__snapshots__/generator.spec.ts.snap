@@ -109,3 +109,17 @@ public class FeatureFilterAttribute : FeatureFilterAttributeBase
 `;
 
 exports[`code-generator templateType: dotnet-api should produce the expected features files: apps/my-app/Project.FeatureBoard.MyApp.csproj 1`] = `""`;
+
+exports[`code-generator templateType: dotnet-api should produce the expected features files: apps/my-app/project.json 1`] = `
+"{
+  "name": "my-app",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "targets": {
+    "my-target": {
+      "executor": "nx:noop"
+    }
+  }
+}
+"
+`;

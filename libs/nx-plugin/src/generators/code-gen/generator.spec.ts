@@ -1,21 +1,20 @@
-// import {
-//     addProjectConfiguration,
-//     joinPathFragments,
-//     readProjectConfiguration,
-// } from '@nx/devkit'
+import {
+    Tree,
+    addProjectConfiguration,
+    joinPathFragments,
+    readProjectConfiguration,
+} from '@nx/devkit'
+import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing'
 import * as fs from 'fs/promises'
 import { rest } from 'msw/'
 import { SetupServer, setupServer } from 'msw/node'
 import * as path from 'path'
-import { FsTree, Tree } from './tree/tree'
-
-import { CodeGeneratorOptions, codeGenerator } from './code-generator'
+import { codeGenGenerator } from './generator'
+import { CodeGenGeneratorSchema } from './schema'
 
 describe('code-generator', () => {
     let tree: Tree
-    let options: Omit<CodeGeneratorOptions, 'tree' | 'relativeFilePath'> & {
-        subFolder: string
-    }
+    let options: CodeGenGeneratorSchema
     let server: SetupServer
     describe('templateType: dotnet-api', () => {
         beforeAll(() => {
@@ -26,7 +25,7 @@ describe('code-generator', () => {
                         const file = await fs.readFile(
                             path.join(
                                 __dirname,
-                                '../test-data/projects-deep.json',
+                                '../../../test-data/projects-deep.json',
                             ),
                             {
                                 encoding: 'utf8',
@@ -40,44 +39,46 @@ describe('code-generator', () => {
         })
 
         beforeEach(async () => {
-            const cwd = process.cwd()
-            tree = new FsTree(cwd, true)
-
-            const subFolder = 'apps/my-app'
-            tree.write(
-                path.join(subFolder, 'Project.FeatureBoard.MyApp.csproj'),
-                '',
-            )
+            tree = createTreeWithEmptyWorkspace({ layout: 'apps-libs' })
 
             options = {
-                subFolder: subFolder,
+                projectName: 'my-app',
+                subFolder: './',
                 templateType: 'dotnet-api',
-                interactive: false,
                 featureBoardProjectName: 'SaaSy Icons',
                 featureBoardKey: 'This is totally a key',
             }
+
+            const root = 'apps/my-app'
+            addProjectConfiguration(tree, options.projectName, {
+                root: `apps/${options.projectName}`,
+                projectType: 'application',
+                targets: { 'my-target': { executor: 'nx:noop' } },
+            })
+            tree.write(
+                joinPathFragments(root, 'Project.FeatureBoard.MyApp.csproj'),
+                '',
+            )
         })
 
         it('should run successfully', async () => {
-            await codeGenerator({
-                tree: tree,
-                relativeFilePath: options.subFolder,
-                ...options,
-            })
+            let project = readProjectConfiguration(tree, options.projectName)
+            await codeGenGenerator(tree, options)
+
+            project = readProjectConfiguration(tree, options.projectName)
+            expect(project).toBeDefined()
         })
 
         it('should produce the expected features files', async () => {
-            await codeGenerator({
-                tree: tree,
-                relativeFilePath: options.subFolder,
-                ...options,
-            })
+            let project = readProjectConfiguration(tree, options.projectName)
+            await codeGenGenerator(tree, options)
 
+            project = readProjectConfiguration(tree, options.projectName)
             const files = tree
                 .listChanges()
                 .filter((x) => x.path.match(/^apps\/my-app\/.*$/))
 
-            expect(files).toHaveLength(2)
+            expect(files).toHaveLength(3)
             files.forEach((x) => {
                 expect(x.content?.toString('utf-8')).toMatchSnapshot(x.path)
             })

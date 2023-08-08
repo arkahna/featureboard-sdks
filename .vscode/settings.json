@@ -14,5 +14,7 @@
         "**/cypress/**",
         "**/.{idea,git,cache,output,temp}/**"
     ],
-    "eslint.validate": ["json"]
+    "eslint.validate": ["json"],
+    "cSpell.enableFiletypes": ["typescript"],
+    "cSpell.words": ["featureboard"]
 }

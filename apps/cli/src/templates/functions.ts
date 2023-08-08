@@ -1,7 +1,5 @@
-import { Tree } from '@nx/devkit'
-import * as fs from 'fs/promises'
 import * as path from 'path'
-import { FeatureDto } from '../models/feature-dto'
+import { Tree } from '../tree/tree'
 
 export function toPascalCase(str: string) {
     return (
@@ -14,7 +12,7 @@ export function toPascalCase(str: string) {
     )
 }
 
-export function toDotNetType(feature: FeatureDto) {
+export function toDotNetType(feature: any) {
     switch (feature.dataType.kind) {
         case 'boolean':
             return 'bool'
@@ -27,24 +25,7 @@ export function toDotNetType(feature: FeatureDto) {
     }
 }
 
-export async function getDotNetNameSpace(filePath: string): Promise<any> {
-    const files = await fs.readdir(filePath)
-    console.log('FILES: ', filePath, files)
-    const namespace = files
-        .find((x) => x.endsWith('.csproj'))
-        ?.replace('.csproj', '')
-
-    if (namespace) return namespace
-
-    const parentDir = path.resolve(filePath, '..')
-    if (parentDir == filePath) throw new Error("Can't find .net project file")
-    return `${getDotNetNameSpace(parentDir)}.${path.dirname(filePath)}`
-}
-
-export async function getDotNetNameSpaceFromNx(
-    tree: Tree,
-    filePath: string,
-): Promise<any> {
+export function getDotNetNameSpace(tree: Tree, filePath: string): string {
     const files = tree.children(filePath)
     const namespace = files
         .find((x) => x.endsWith('.csproj'))
@@ -54,5 +35,5 @@ export async function getDotNetNameSpaceFromNx(
 
     const parentDir = path.resolve(filePath, '..')
     if (parentDir == filePath) throw new Error("Can't find .net project file")
-    return `${getDotNetNameSpace(parentDir)}.${path.dirname(filePath)}`
+    return `${getDotNetNameSpace(tree, parentDir)}.${path.dirname(filePath)}`
 }

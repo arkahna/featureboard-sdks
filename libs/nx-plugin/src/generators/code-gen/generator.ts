@@ -6,19 +6,10 @@ import { CodeGenGeneratorSchema } from './schema'
 
 export async function codeGenGenerator(
     tree: Tree,
-    {
-        projectName,
-        dryRun,
-        ...options
-    }: CodeGenGeneratorSchema & {
-        help: boolean
-        dryRun: boolean
-        quiet: boolean
-        verbose: boolean
-    },
+    { projectName, ...options }: CodeGenGeneratorSchema,
 ): Promise<void> {
-    console.log(options)
     const project = readProjectConfiguration(tree, projectName)
+    const dryRun = isDryRun()
 
     let featureBoardBearerToken: string | undefined
     if (!dryRun && !options.featureBoardKey) {
@@ -35,11 +26,15 @@ export async function codeGenGenerator(
 
     await codeGenerator({
         tree: tree,
-        realitiveFilePath: joinPathFragments(project.root, options.subFolder),
+        relativeFilePath: joinPathFragments(project.root, options.subFolder),
         interactive: !dryRun,
         featureBoardBearerToken,
         ...options,
     })
+}
+
+export function isDryRun(): boolean {
+    return process.argv.some((x) => x === '--dry-run')
 }
 
 export default codeGenGenerator

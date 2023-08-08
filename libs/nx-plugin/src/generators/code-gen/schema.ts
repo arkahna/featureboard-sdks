@@ -4,7 +4,7 @@ import { TemplateType } from '@featureboard/cli'
 export interface CodeGenGeneratorSchema {
     templateType: TemplateType
     projectName: string
-    featureBoardprojectName: string
+    featureBoardProjectName: string
     featureBoardKey: string
     subFolder: string
 }
