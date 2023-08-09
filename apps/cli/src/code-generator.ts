@@ -1,3 +1,4 @@
+import fetch from 'cross-fetch'
 import * as path from 'path'
 import prompts from 'prompts'
 import {
@@ -7,6 +8,11 @@ import {
 } from './templates/functions'
 import { generateFiles } from './templates/generate-files'
 import { Tree } from './tree/tree'
+
+// HACK this works around the different import stratiges that the cli vs the nx plugin have.
+// As we can't change the ones for the plugin as they come from NX
+const promptsInternal: typeof prompts =
+    typeof prompts == 'function' ? prompts : require('prompts')
 
 export type TemplateType = 'dotnet-api'
 
@@ -80,7 +86,7 @@ async function getFeatures({
                     `One organization found. Setting feature board organization to ${organizationId}`,
                 )
             } else {
-                const promptResult = await prompts({
+                const promptResult = await promptsInternal({
                     type: 'select',
                     name: 'organizations',
                     message: `Pick your feature board organisation?`,
@@ -118,7 +124,7 @@ async function getFeatures({
                 `One project found. Setting feature board project to ${project.name}`,
             )
         } else {
-            const promptResult = await prompts({
+            const promptResult = await promptsInternal({
                 type: 'select',
                 name: 'project',
                 message: `Pick feature board project?`,

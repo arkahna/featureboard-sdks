@@ -12,7 +12,7 @@ const titleText = figlet.textSync('FeatureBoard CLI')
 
 const program = new Command()
     .description(`${titleText}\nA Code generator for FeatureBoard`)
-    .version(packageJson.version) // how do we set this dynamicly
+    .version(packageJson.version)
     .option('-q, --quiet', 'No output', false)
 
 if (!process.argv.slice(2).length) {
