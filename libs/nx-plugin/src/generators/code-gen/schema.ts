@@ -1,5 +1,4 @@
-// eslint-disable-next-line @nx/enforce-module-boundaries
-import { TemplateType } from '@featureboard/cli'
+import { TemplateType } from '@featureboard/code-generator'
 
 export interface CodeGenGeneratorSchema {
     templateType: TemplateType

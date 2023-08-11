@@ -203,6 +203,8 @@ importers:
 
   apps/examples/dotnet-api: {}
 
+  libs/code-generator: {}
+
   libs/contracts: {}
 
   libs/dotnet-sdk: {}

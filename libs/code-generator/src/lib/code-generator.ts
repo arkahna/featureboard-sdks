@@ -9,7 +9,7 @@ import {
 import { generateFiles } from './templates/generate-files'
 import { Tree } from './tree/tree'
 
-// HACK this works around the different import stratiges that the cli vs the nx plugin have.
+// HACK this works around the different import strategies that the cli vs the nx plugin have.
 // As we can't change the ones for the plugin as they come from NX
 const promptsInternal: typeof prompts =
     typeof prompts == 'function' ? prompts : require('prompts')

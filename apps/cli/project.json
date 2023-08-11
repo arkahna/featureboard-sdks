@@ -1,5 +1,5 @@
 {
-    "name": "@featureboard/cli",
+    "name": "cli",
     "$schema": "../../node_modules/nx/schemas/project-schema.json",
     "sourceRoot": "apps/cli/src",
     "projectType": "application",
@@ -19,7 +19,7 @@
                     "./apps/cli/*.md",
                     "./apps/cli/package.json",
                     {
-                        "input": "./apps/cli/src",
+                        "input": "./libs/code-generator/src/lib",
                         "glob": "**/*.template",
                         "output": "./"
                     }
@@ -49,7 +49,7 @@
             "executor": "@nx/js:node",
             "defaultConfiguration": "development",
             "options": {
-                "buildTarget": "@featureboard/cli:build",
+                "buildTarget": "cli:build",
                 "args": [
                     "code-gen",
                     "--output-path",
@@ -58,10 +58,10 @@
             },
             "configurations": {
                 "development": {
-                    "buildTarget": "@featureboard/cli:build:development"
+                    "buildTarget": "cli:build:development"
                 },
                 "production": {
-                    "buildTarget": "@featureboard/cli:build:production"
+                    "buildTarget": "cli:build:production"
                 }
             }
         },

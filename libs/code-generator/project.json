@@ -1,0 +1,51 @@
+{
+    "name": "code-generator",
+    "$schema": "../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "libs/code-generator/src",
+    "projectType": "library",
+    "targets": {
+        "build": {
+            "executor": "@nx/js:tsc",
+            "outputs": ["{options.outputPath}"],
+            "options": {
+                "outputPath": "dist/libs/code-generator",
+                "tsConfig": "libs/code-generator/tsconfig.lib.json",
+                "packageJson": "libs/code-generator/package.json",
+                "main": "libs/code-generator/src/index.ts",
+                "assets": [
+                    "libs/code-generator/*.md",
+                    {
+                        "input": "./libs/code-generator/src",
+                        "glob": "**/*.template",
+                        "output": "./src"
+                    }
+                ]
+            }
+        },
+        "lint": {
+            "executor": "@nx/linter:eslint",
+            "outputs": ["{options.outputFile}"],
+            "options": {
+                "lintFilePatterns": [
+                    "libs/code-generator/**/*.ts",
+                    "libs/code-generator/package.json"
+                ]
+            }
+        },
+        "test": {
+            "executor": "@nx/jest:jest",
+            "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+            "options": {
+                "jestConfig": "libs/code-generator/jest.config.ts",
+                "passWithNoTests": true
+            },
+            "configurations": {
+                "ci": {
+                    "ci": true,
+                    "codeCoverage": true
+                }
+            }
+        }
+    },
+    "tags": []
+}

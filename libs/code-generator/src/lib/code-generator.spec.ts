@@ -1,8 +1,3 @@
-// import {
-//     addProjectConfiguration,
-//     joinPathFragments,
-//     readProjectConfiguration,
-// } from '@nx/devkit'
 import * as fs from 'fs/promises'
 import { rest } from 'msw/'
 import { SetupServer, setupServer } from 'msw/node'
@@ -26,7 +21,7 @@ describe('code-generator', () => {
                         const file = await fs.readFile(
                             path.join(
                                 __dirname,
-                                '../test-data/projects-deep.json',
+                                './test-data/projects-deep.json',
                             ),
                             {
                                 encoding: 'utf8',

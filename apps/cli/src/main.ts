@@ -1,12 +1,17 @@
 import { Command, Option } from '@commander-js/extra-typings'
+import {
+    FsTree,
+    TemplateType,
+    codeGenerator,
+    flushChanges,
+    printChanges,
+} from '@featureboard/code-generator'
 import * as figlet from 'figlet'
 import fs from 'fs/promises'
 import path from 'path'
 import { exit } from 'process'
 import prompts from 'prompts'
 import * as packageJson from '../package.json'
-import { TemplateType, codeGenerator } from './code-generator'
-import { FsTree, flushChanges, printChanges } from './tree/tree'
 
 const titleText = figlet.textSync('FeatureBoard CLI')
 
@@ -27,9 +32,10 @@ program
     .description('A Code generator for feature board')
     .requiredOption('-p, --output-path <path>', 'Output location')
     .addOption(
-        new Option('-t, --templateType <template>', 'Select the template type')
-            // .default('dotnet-api')
-            .choices(templateTypeChoices),
+        new Option(
+            '-t, --templateType <template>',
+            'Select the template type',
+        ).choices(templateTypeChoices),
     )
     .option('-k, --featureBoardKey <key>', 'FeatureBoard api key')
     .option('-d, --dryRun', 'Dry run show what files have changed', false)
@@ -43,8 +49,8 @@ program
     .action(async (options) => {
         if (!options.quiet) console.log(titleText)
 
-        const sanatisedOutputPath = options.outputPath.replace('../', './')
-        const outputPath = path.join(process.cwd(), sanatisedOutputPath)
+        const sanitisedOutputPath = options.outputPath.replace('../', './')
+        const outputPath = path.join(process.cwd(), sanitisedOutputPath)
         try {
             await fs.access(outputPath)
         } catch {
@@ -93,7 +99,7 @@ program
         await codeGenerator({
             templateType: options.templateType as TemplateType,
             tree: tree,
-            relativeFilePath: sanatisedOutputPath,
+            relativeFilePath: sanitisedOutputPath,
             featureBoardKey: options.featureBoardKey,
             featureBoardBearerToken: bearerToken,
             interactive: !options.nonInteractive,

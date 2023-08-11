@@ -2,14 +2,11 @@
     "extends": "../../tsconfig.settings.json",
     "compilerOptions": {
         "module": "commonjs",
-        "noEmit": true
+        "esModuleInterop": true
     },
     "files": [],
     "include": [],
     "references": [
-        {
-            "path": "../code-generator"
-        },
         {
             "path": "./tsconfig.lib.json"
         },

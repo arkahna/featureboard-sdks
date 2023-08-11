@@ -1,5 +1,4 @@
-// eslint-disable-next-line @nx/enforce-module-boundaries
-import { codeGenerator } from '@featureboard/cli'
+import { codeGenerator } from '@featureboard/code-generator'
 import { Tree, joinPathFragments, readProjectConfiguration } from '@nx/devkit'
 import * as prompts from 'prompts'
 import { CodeGenGeneratorSchema } from './schema'
