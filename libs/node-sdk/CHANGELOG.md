@@ -1,5 +1,16 @@
 # @featureboard/node-sdk
 
+## 0.15.0
+
+### Minor Changes
+
+- [#24](https://github.com/arkahna/featureboard-sdks/pull/24) [`edcd744`](https://github.com/arkahna/featureboard-sdks/commit/edcd74424971dfc5f513164a891444af1b5fcf5d) Thanks [@idadaniels](https://github.com/idadaniels)! - Replaced last-modified and if-modified-since headers with etag and if-none-match headers when fetching features
+
+### Patch Changes
+
+- Updated dependencies [[`edcd744`](https://github.com/arkahna/featureboard-sdks/commit/edcd74424971dfc5f513164a891444af1b5fcf5d)]:
+  - @featureboard/js-sdk@0.13.0
+
 ## 0.14.0
 
 ### Minor Changes

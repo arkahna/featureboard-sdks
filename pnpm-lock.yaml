@@ -165,7 +165,7 @@ importers:
   libs/node-sdk:
     dependencies:
       '@featureboard/js-sdk':
-        specifier: workspace:0.12.0
+        specifier: workspace:0.13.0
         version: link:../js-sdk
       debug:
         specifier: ^4.3.4
@@ -177,7 +177,7 @@ importers:
   libs/react-sdk:
     dependencies:
       '@featureboard/js-sdk':
-        specifier: workspace:0.12.0
+        specifier: workspace:0.13.0
         version: link:../js-sdk
       debug:
         specifier: ^4.3.4
