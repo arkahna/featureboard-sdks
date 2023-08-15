@@ -25,7 +25,7 @@ public class FeatureBoardClientTests : SdkTestsBase
   public void ItReturnsTheDefaultValueWhenNoValueIsFound()
   {
     var featureBoardMock = Services.Resolve<Mock<IFeatureBoardState>>();
-    featureBoardMock.Setup(x => x.GetSnapshot()).Returns(new FeatureBoardStateSnapshot(Array.Empty<KeyValuePair<string, FeatureConfiguration>>()));
+    featureBoardMock.Setup(x => x.GetSnapshot()).Returns(new FeatureBoardStateSnapshot(new Dictionary<string, FeatureConfiguration>(0)));
 
     var client = Services.Resolve<IFeatureBoardClient<TestFeatures>>();
 
