@@ -7,7 +7,7 @@ export function createManualUpdateStrategy(
     environmentApiKey: string,
     httpEndpoint: string,
 ): AllConfigUpdateStrategy {
-    let lastModified: undefined | string
+    let etag: undefined | string
     let fetchUpdatesSingle: undefined | (() => Promise<void>)
 
     return {
@@ -15,11 +15,11 @@ export function createManualUpdateStrategy(
             // Ensure that we don't trigger another request while one is in flight
             fetchUpdatesSingle = createEnsureSingle(async () => {
                 const allEndpoint = getAllEndpoint(httpEndpoint)
-                lastModified = await fetchFeaturesConfigurationViaHttp(
+                etag = await fetchFeaturesConfigurationViaHttp(
                     allEndpoint,
                     environmentApiKey,
                     stateStore,
-                    lastModified,
+                    etag,
                     'manual',
                 )
             })

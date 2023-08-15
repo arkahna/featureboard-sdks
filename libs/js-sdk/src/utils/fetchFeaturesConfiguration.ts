@@ -9,7 +9,7 @@ export async function fetchFeaturesConfigurationViaHttp(
     audiences: string[],
     environmentApiKey: string,
     stateStore: EffectiveFeatureStateStore,
-    lastModified: string | undefined,
+    etag: string | undefined,
     getCurrentAudiences: () => string[],
 ) {
     const effectiveEndpoint = getEffectiveEndpoint(
@@ -17,14 +17,14 @@ export async function fetchFeaturesConfigurationViaHttp(
         audiences,
     )
     httpClientDebug('Fetching effective values (%o)', {
-        lastModified,
+        etag,
         audiences,
     })
     const response = await fetch(effectiveEndpoint, {
         method: 'GET',
         headers: {
             'x-environment-key': environmentApiKey,
-            ...(lastModified ? { 'if-modified-since': lastModified } : {}),
+            ...(etag ? { 'if-none-match': etag } : {}),
         },
     })
 
@@ -41,7 +41,7 @@ export async function fetchFeaturesConfigurationViaHttp(
     // Expect most times will just get a response from the HEAD request saying no updates
     if (response.status === 304) {
         httpClientDebug('No changes (%o)', audiences)
-        return lastModified
+        return etag
     }
 
     const currentEffectiveValues: EffectiveFeatureValue[] =
@@ -49,7 +49,7 @@ export async function fetchFeaturesConfigurationViaHttp(
 
     if (!compareArrays(getCurrentAudiences(), audiences)) {
         httpClientDebug('Audiences changed while fetching (%o)', audiences)
-        return lastModified
+        return etag
     }
     const existing = { ...stateStore.all() }
 
@@ -66,5 +66,5 @@ export async function fetchFeaturesConfigurationViaHttp(
         unavailableFeatures,
     })
 
-    return response.headers.get('last-modified') || undefined
+    return response.headers.get('etag') || undefined
 }

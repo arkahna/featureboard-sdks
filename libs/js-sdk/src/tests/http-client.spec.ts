@@ -130,8 +130,8 @@ describe('http client', () => {
         }
     })
 
-    // Below tests are testing behaviour around https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/If-Modified-Since
-    it('Attaches last modified header to update requests', async () => {
+    // Below tests are testing behavior around https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/If-None-Match
+    it('Attaches etag header to update requests', async () => {
         const values: EffectiveFeatureValue[] = [
             {
                 featureKey: 'my-feature',
@@ -148,14 +148,14 @@ describe('http client', () => {
                         ctx.json(values),
                         ctx.status(200),
                         ctx.set({
-                            'Last-Modified': lastModified,
+                            'etag': lastModified,
                         }),
                     ),
             ),
             rest.get(
                 'https://client.featureboard.app/effective',
                 (req, res, ctx) => {
-                    if (req.headers.get('if-modified-since') === lastModified) {
+                    if (req.headers.get('if-none-match') === lastModified) {
                         matched = true
                         return res.once(ctx.status(304))
                     }
@@ -206,13 +206,13 @@ describe('http client', () => {
             rest.get(
                 'https://client.featureboard.app/effective',
                 (req, res, ctx) => {
-                    if (req.headers.get('if-modified-since') === lastModified) {
+                    if (req.headers.get('if-none-match') === lastModified) {
                         const newLastModified = new Date().toISOString()
                         return res(
                             ctx.json(newValues),
                             ctx.status(200),
                             ctx.set({
-                                'Last-Modified': newLastModified,
+                                'etag': newLastModified,
                             }),
                         )
                     }
@@ -220,7 +220,7 @@ describe('http client', () => {
                         ctx.json(values),
                         ctx.status(200),
                         ctx.set({
-                            'Last-Modified': lastModified,
+                            'etag': lastModified,
                         }),
                     )
                 },
@@ -322,7 +322,7 @@ describe('http client', () => {
                             ctx.json(newValues),
                             ctx.status(200),
                             ctx.set({
-                                'Last-Modified': newLastModified,
+                                'etag': newLastModified,
                             }),
                         )
                     }
@@ -330,7 +330,7 @@ describe('http client', () => {
                         ctx.json(values),
                         ctx.status(200),
                         ctx.set({
-                            'Last-Modified': lastModified,
+                            'etag': lastModified,
                         }),
                     )
                 },
@@ -407,7 +407,7 @@ describe('http client', () => {
                             ctx.json(newValues),
                             ctx.status(200),
                             ctx.set({
-                                'Last-Modified': newLastModified,
+                                'etag': newLastModified,
                             }),
                         )
                     }
@@ -420,7 +420,7 @@ describe('http client', () => {
                         ctx.json(values),
                         ctx.status(200),
                         ctx.set({
-                            'Last-Modified': lastModified,
+                            'etag': lastModified,
                         }),
                     )
                 },
@@ -496,7 +496,7 @@ describe('http client', () => {
                             ctx.json(newValues),
                             ctx.status(200),
                             ctx.set({
-                                'Last-Modified': newLastModified,
+                                'etag': newLastModified,
                             }),
                         )
                     }
@@ -504,7 +504,7 @@ describe('http client', () => {
                         ctx.json(values),
                         ctx.status(200),
                         ctx.set({
-                            'Last-Modified': lastModified,
+                            'etag': lastModified,
                         }),
                     )
                 },

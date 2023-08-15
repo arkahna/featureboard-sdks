@@ -12,22 +12,22 @@ export function createPollingUpdateStrategy(
     intervalMs: number,
 ): EffectiveConfigUpdateStrategy {
     let stopPolling: undefined | (() => void)
-    let lastModified: undefined | string
+    let etag: undefined | string
     let fetchUpdatesSingle: undefined | (() => Promise<void>)
 
     return {
         async connect(stateStore) {
             // Force update
-            lastModified = undefined
+            etag = undefined
 
             // Ensure that we don't trigger another request while one is in flight
             fetchUpdatesSingle = createEnsureSingle(async () => {
-                lastModified = await fetchFeaturesConfigurationViaHttp(
+                etag = await fetchFeaturesConfigurationViaHttp(
                     httpEndpoint,
                     stateStore.audiences,
                     environmentApiKey,
                     stateStore,
-                    lastModified,
+                    etag,
                     () => stateStore.audiences,
                 )
             })
@@ -39,7 +39,7 @@ export function createPollingUpdateStrategy(
                 if (fetchUpdatesSingle) {
                     pollingUpdatesDebugLog(
                         'Polling for updates (%o)',
-                        lastModified,
+                        etag,
                     )
                     // Catch errors here to ensure no unhandled promise rejections after a poll
                     return fetchUpdatesSingle().catch(() => {})
