@@ -1,6 +1,7 @@
 using FeatureBoard.DotnetSdk.Models;
 using Microsoft.Extensions.Logging;
 using System.Net;
+using System.Net.Http.Json;
 
 namespace FeatureBoard.DotnetSdk;
 
@@ -30,7 +31,7 @@ internal class FeatureBoardHttpClient : IFeatureBoardHttpClient
 
     if (response.IsSuccessStatusCode)
     {
-      var features = await response.Content.ReadAsAsync<List<FeatureConfiguration>>(cancellationToken: cancellationToken)
+      var features = await response.Content.ReadFromJsonAsync<List<FeatureConfiguration>>(cancellationToken: cancellationToken)
                      ?? throw new ApplicationException("Unable to retrieve decode response content");
 
       lastModified = response.Content.Headers.LastModified ?? lastModified; // if didn't get last-modified header just report previous last modified
