@@ -6,10 +6,10 @@ public interface IFeatureBoardState
 {
   DateTimeOffset? LastUpdated { get; }
 
-  DateTimeOffset? LastModified { get; }
+  string? ETag { get; }
 
   FeatureBoardStateSnapshot GetSnapshot();
 
-  Task InitialiseState(List<FeatureConfiguration>? features, DateTimeOffset? lastModified, CancellationToken cancellationToken);
-  Task UpdateState(List<FeatureConfiguration>? features, DateTimeOffset? lastModified, CancellationToken cancellationToken);
+  Task InitialiseState(List<FeatureConfiguration>? features, string? eTag, CancellationToken cancellationToken);
+  Task UpdateState(List<FeatureConfiguration>? features, string? eTag, CancellationToken cancellationToken);
 }

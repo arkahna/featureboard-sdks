@@ -7,7 +7,7 @@ namespace FeatureBoard.DotnetSdk.State;
 public class FeatureBoardState : IFeatureBoardState
 {
   public DateTimeOffset? LastUpdated { get; private set; }
-  public DateTimeOffset? LastModified { get; private set; }
+  public string? ETag { get; private set; }
   private readonly IFeatureBoardExternalState? _externalState;
   private static readonly ConcurrentDictionary<string, FeatureConfiguration> _cache = new(StringComparer.OrdinalIgnoreCase);
 
@@ -18,22 +18,22 @@ public class FeatureBoardState : IFeatureBoardState
 
   public FeatureBoardStateSnapshot GetSnapshot() => new(_cache);
 
-  public async Task InitialiseState(List<FeatureConfiguration>? features, DateTimeOffset? lastModified, CancellationToken cancellationToken)
+  public async Task InitialiseState(List<FeatureConfiguration>? features, string? eTag, CancellationToken cancellationToken)
   {
     if (features is null && _externalState is not null)
     {
       features = await _externalState.GetState(cancellationToken);
     }
 
-    await UpdateStateInternal(features ?? new List<FeatureConfiguration>(), lastModified, cancellationToken);
+    await UpdateStateInternal(features ?? new List<FeatureConfiguration>(), eTag, cancellationToken);
   }
 
-  public async Task UpdateState(List<FeatureConfiguration>? features, DateTimeOffset? lastModified, CancellationToken cancellationToken)
+  public async Task UpdateState(List<FeatureConfiguration>? features, string? eTag, CancellationToken cancellationToken)
   {
-    await UpdateStateInternal(features, lastModified, cancellationToken);
+    await UpdateStateInternal(features, eTag, cancellationToken);
   }
 
-  private async Task UpdateStateInternal(List<FeatureConfiguration>? features, DateTimeOffset? lastModified, CancellationToken cancellationToken)
+  private async Task UpdateStateInternal(List<FeatureConfiguration>? features, string? eTag, CancellationToken cancellationToken)
   {
     if (features is not null)
     {
@@ -52,7 +52,7 @@ public class FeatureBoardState : IFeatureBoardState
       if (_externalState is not null)
         await _externalState.UpdateState(new List<FeatureConfiguration>(_cache.Values), cancellationToken);
 
-      LastModified = lastModified;
+      ETag = eTag;
     }
 
     LastUpdated = DateTimeOffset.UtcNow;
