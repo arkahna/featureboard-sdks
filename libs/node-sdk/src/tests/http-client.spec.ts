@@ -194,8 +194,8 @@ describe('http client', () => {
         }
     })
 
-    // Below tests are testing behaviour around https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/If-Modified-Since
-    it('Attaches last modified header to update requests', async () => {
+    // Below tests are testing behavior around https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/If-None-Match
+    it('Attaches etag header to update requests', async () => {
         const values: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
@@ -207,7 +207,7 @@ describe('http client', () => {
 
         const server = setupServer(
             rest.get('https://client.featureboard.app/all', (req, res, ctx) => {
-                if (req.headers.get('if-modified-since') === lastModified) {
+                if (req.headers.get('if-none-match') === lastModified) {
                     return res(ctx.status(304))
                 }
 
@@ -215,7 +215,7 @@ describe('http client', () => {
                     ctx.json(values),
                     ctx.status(200),
                     ctx.set({
-                        'Last-Modified': lastModified,
+                        'etag': lastModified,
                     }),
                 )
             }),

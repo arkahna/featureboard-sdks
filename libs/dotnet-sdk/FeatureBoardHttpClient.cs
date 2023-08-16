@@ -1,6 +1,7 @@
 using FeatureBoard.DotnetSdk.Models;
 using Microsoft.Extensions.Logging;
 using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 
 namespace FeatureBoard.DotnetSdk;
@@ -16,17 +17,18 @@ internal class FeatureBoardHttpClient : IFeatureBoardHttpClient
     _logger = logger;
   }
 
-  public async Task<(List<FeatureConfiguration>? features, DateTimeOffset? lastModified)> FetchUpdates(DateTimeOffset? lastModified, CancellationToken cancellationToken)
+  public async Task<(List<FeatureConfiguration>? features, string? eTag)> FetchUpdates(string? eTag, CancellationToken cancellationToken)
   {
     using var request = new HttpRequestMessage(HttpMethod.Get, "all");
-    request.Headers.IfModifiedSince = lastModified;
+    if (!string.IsNullOrWhiteSpace(eTag))
+      request.Headers.IfNoneMatch.Add(new EntityTagHeaderValue(eTag));
 
     using var response = await _httpClient.SendAsync(request, cancellationToken);
 
     if (response.StatusCode == HttpStatusCode.NotModified)
     {
       _logger.LogDebug("No changes");
-      return (null, lastModified);
+      return (null, eTag);
     }
 
     if (response.IsSuccessStatusCode)
@@ -34,13 +36,14 @@ internal class FeatureBoardHttpClient : IFeatureBoardHttpClient
       var features = await response.Content.ReadFromJsonAsync<List<FeatureConfiguration>>(cancellationToken: cancellationToken)
                      ?? throw new ApplicationException("Unable to retrieve decode response content");
 
-      lastModified = response.Content.Headers.LastModified ?? lastModified; // if didn't get last-modified header just report previous last modified
 
-      _logger.LogDebug("Fetching updates done, newLastModified={newLastModified}", lastModified);
-      return (features, lastModified);
+      eTag = response.Headers.ETag?.Tag ?? eTag; // if didn't get eTag just report previous eTag
+
+      _logger.LogDebug("Fetching updates done, eTag={eTag}", eTag);
+      return (features, eTag);
     }
 
     _logger.LogError("Failed to get latest toggles: Service returned error {statusCode}({responseBody})", response.StatusCode, await response.Content.ReadAsStringAsync());
-    return (null, lastModified);
+    return (null, eTag);
   }
 }

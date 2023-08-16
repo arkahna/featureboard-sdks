@@ -6,19 +6,19 @@ export async function fetchFeaturesConfigurationViaHttp(
     allEndpoint: string,
     environmentApiKey: string,
     stateStore: AllFeatureStateStore,
-    lastModified: string | undefined,
+    etag: string | undefined,
     updateTrigger: string,
 ) {
     httpClientDebug(
         'Fetching updates: trigger=%s, lastModified=%s',
         updateTrigger,
-        lastModified,
+        etag,
     )
     const response = await fetch(allEndpoint, {
         method: 'GET',
         headers: {
             'x-environment-key': environmentApiKey,
-            ...(lastModified ? { 'if-modified-since': lastModified } : {}),
+            ...(etag ? { 'if-none-match': etag } : {}),
         },
     })
 
@@ -31,7 +31,7 @@ export async function fetchFeaturesConfigurationViaHttp(
     // Expect most times will just get a response from the HEAD request saying no updates
     if (response.status === 304) {
         httpClientDebug('No changes')
-        return lastModified
+        return etag
     }
 
     const allValues: FeatureConfiguration[] = await response.json()
@@ -47,7 +47,7 @@ export async function fetchFeaturesConfigurationViaHttp(
         stateStore.set(removedFeature, undefined)
     }
 
-    const newLastModified = response.headers.get('last-modified') || undefined
-    httpClientDebug('Fetching updates done, newLastModified=%s', lastModified)
-    return newLastModified
+    const newEtag = response.headers.get('etag') || undefined
+    httpClientDebug('Fetching updates done, newEtag=%s', newEtag)
+    return newEtag
 }

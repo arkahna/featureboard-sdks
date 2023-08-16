@@ -71,16 +71,16 @@ public class PollingUpdateStrategyBackgroundService : BackgroundService
       using var scope = _scopeFactory.CreateScope();
       var featureBoardHttpClient = scope.ServiceProvider.GetRequiredService<IFeatureBoardHttpClient>();
       var state = scope.ServiceProvider.GetRequiredService<IFeatureBoardState>();
-      var (features, lastModified) = await featureBoardHttpClient.FetchUpdates(state.LastModified, cancellationToken);
+      var (features, lastModified) = await featureBoardHttpClient.FetchUpdates(state.ETag, cancellationToken);
       if (_initialised)
       {
         _logger.LogDebug("Updating State");
-        await state.UpdateState(features, lastModified ?? state.LastModified, cancellationToken);
+        await state.UpdateState(features, lastModified ?? state.ETag, cancellationToken);
         return;
       }
 
       _logger.LogDebug("Initialising State");
-      await state.InitialiseState(features, lastModified ?? state.LastModified, cancellationToken);
+      await state.InitialiseState(features, lastModified ?? state.ETag, cancellationToken);
       _initialised = true;
     }
     catch (Exception exception)

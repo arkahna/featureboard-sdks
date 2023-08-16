@@ -39,9 +39,9 @@ public class OnRequestUpdateStrategyMiddleware : IMiddleware
           return;
 
         _logger.LogDebug("State not initialised updating state");
-        var (features, lastModified) =
-          await _featureBoardHttpClient.FetchUpdates(_state.LastModified, cancellationToken);
-        await _state.InitialiseState(features, lastModified ?? _state.LastModified, cancellationToken);
+        var (features, eTag) =
+          await _featureBoardHttpClient.FetchUpdates(_state.ETag, cancellationToken);
+        await _state.InitialiseState(features, eTag ?? _state.ETag, cancellationToken);
       }
       finally
       {
@@ -80,8 +80,8 @@ public class OnRequestUpdateStrategyMiddleware : IMiddleware
         }
 
         _logger.LogDebug("Response expired, fetching updates: {{maxAge: {maxAge}, newExpiry: {newExpiry}}}", _options.Value.MaxAge, now + _options.Value.MaxAge);
-        var (features, lastModified) = await _featureBoardHttpClient.FetchUpdates(_state.LastModified, cancellationToken);
-        await _state.UpdateState(features, lastModified ?? _state.LastModified, cancellationToken);
+        var (features, lastModified) = await _featureBoardHttpClient.FetchUpdates(_state.ETag, cancellationToken);
+        await _state.UpdateState(features, lastModified ?? _state.ETag, cancellationToken);
       }
       finally
       {
