@@ -7,9 +7,7 @@
         "lint": {
             "executor": "@nx/linter:eslint",
             "options": {
-                "lintFilePatterns": [
-                    "libs/js-sdk/**/*.ts"
-                ]
+                "lintFilePatterns": ["libs/js-sdk/**/*.ts"]
             }
         },
         "test": {

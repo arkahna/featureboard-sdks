@@ -8,6 +8,9 @@
             "path": "./libs/contracts"
         },
         {
+            "path": "./libs/code-generator"
+        },
+        {
             "path": "./libs/js-sdk"
         },
         {

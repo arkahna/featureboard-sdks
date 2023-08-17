@@ -1,0 +1,20 @@
+{
+    "extends": "../../tsconfig.settings.json",
+    "compilerOptions": {
+        "module": "commonjs",
+        "noEmit": true
+    },
+    "files": [],
+    "include": [],
+    "references": [
+        {
+            "path": "../code-generator"
+        },
+        {
+            "path": "./tsconfig.lib.json"
+        },
+        {
+            "path": "./tsconfig.spec.json"
+        }
+    ]
+}

@@ -14,18 +14,19 @@ public class WeatherForecastController : ControllerBase
     };
 
   private readonly ILogger<WeatherForecastController> _logger;
-  private readonly IFeatureBoardClient<WeatherFeatures> _featureBoardClient;
+  private readonly IFeatureBoardClient<Features> _featureBoardClient;
 
-  public WeatherForecastController(ILogger<WeatherForecastController> logger, IFeatureBoardClient<WeatherFeatures> featureBoardClient)
+  public WeatherForecastController(ILogger<WeatherForecastController> logger, IFeatureBoardClient<Features> featureBoardClient)
   {
     _logger = logger;
     _featureBoardClient = featureBoardClient;
   }
 
   [HttpGet(Name = "GetWeatherForecast")]
+  [FeatureFilter(BooleanFeature.AudiencesWrite, false)]
   public ActionResult<WeatherForecast[]> Get()
   {
-    if (_featureBoardClient.GetFeatureValue(features => features.WeatherImperial, false))
+    if (_featureBoardClient.GetFeatureValue(features => features.AudiencesWrite, false))
     {
       return Ok(Enumerable.Range(1, 5).Select(index => new WeatherForecast
       {
