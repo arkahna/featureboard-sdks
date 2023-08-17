@@ -3,7 +3,6 @@ using FeatureBoard.DotnetSdk.Helpers;
 using FeatureBoard.DotnetSdk.Models;
 using FeatureBoard.DotnetSdk.State;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.Json.Nodes;
