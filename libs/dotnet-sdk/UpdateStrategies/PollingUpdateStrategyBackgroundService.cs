@@ -1,5 +1,4 @@
 using FeatureBoard.DotnetSdk.Models;
-using FeatureBoard.DotnetSdk.State;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -11,8 +10,7 @@ public class PollingUpdateStrategyBackgroundService : BackgroundService
 {
   private readonly IOptions<FeatureBoardOptions> _options;
   private readonly IServiceScopeFactory _scopeFactory;
-  private readonly ILogger<PollingUpdateStrategyBackgroundService> _logger;
-  private bool _initialised = false;
+  private readonly ILogger _logger;
 
   public PollingUpdateStrategyBackgroundService(IOptions<FeatureBoardOptions> options, IServiceScopeFactory scopeFactory, ILogger<PollingUpdateStrategyBackgroundService> logger)
   {
@@ -25,9 +23,6 @@ public class PollingUpdateStrategyBackgroundService : BackgroundService
   {
     _logger.LogInformation("Polling Update Strategy Background Service running.");
 
-    // When the timer should have no due-time, then do the work once now.
-    await UpdateState(stoppingToken);
-
 #if NET6_0_OR_GREATER
     using var timer = new PeriodicTimer(_options.Value.MaxAge);
     async Task<bool> WaitForNextTickAsync(CancellationToken cancellation) => await timer.WaitForNextTickAsync(stoppingToken);
@@ -39,11 +34,12 @@ public class PollingUpdateStrategyBackgroundService : BackgroundService
       {
         var elapsedFraction = stopwatch.Elapsed.Ticks % _options.Value.MaxAge.Ticks;
         var delayFor = _options.Value.MaxAge - TimeSpan.FromTicks(elapsedFraction);
+        _logger.LogDebug("Elapsed time {0}; Delaying for {1}", stopwatch.Elapsed, delayFor);
         await Task.Delay(delayFor, cancellation);
         stopwatch.Restart();
         return true;
       }
-      catch ( TaskCanceledException e )
+      catch (TaskCanceledException e)
       {
         throw new OperationCanceledException(null, e, cancellation);
       }
@@ -54,39 +50,14 @@ public class PollingUpdateStrategyBackgroundService : BackgroundService
     {
       while (await WaitForNextTickAsync(stoppingToken))
       {
-        await UpdateState(stoppingToken);
+        using var scope = _scopeFactory.CreateScope();
+        var featureBoardService = scope.ServiceProvider.GetRequiredService<IFeatureBoardService>();
+        await featureBoardService.RefreshFeatureConfiguration(stoppingToken);
       }
     }
     catch (OperationCanceledException)
     {
       _logger.LogInformation("Polling Update Strategy Background Service is stopping.");
-    }
-  }
-
-  private async Task UpdateState(CancellationToken cancellationToken)
-  {
-    try
-    {
-      _logger.LogDebug("Fetching updates");
-      using var scope = _scopeFactory.CreateScope();
-      var featureBoardHttpClient = scope.ServiceProvider.GetRequiredService<IFeatureBoardHttpClient>();
-      var state = scope.ServiceProvider.GetRequiredService<IFeatureBoardState>();
-      var (features, lastModified) = await featureBoardHttpClient.FetchUpdates(state.ETag, cancellationToken);
-      if (_initialised)
-      {
-        _logger.LogDebug("Updating State");
-        await state.UpdateState(features, lastModified ?? state.ETag, cancellationToken);
-        return;
-      }
-
-      _logger.LogDebug("Initialising State");
-      await state.InitialiseState(features, lastModified ?? state.ETag, cancellationToken);
-      _initialised = true;
-    }
-    catch (Exception exception)
-    {
-      // Unhandled errors will cause the background service to restart the app
-      _logger.LogError(exception, "Error occurred calling UpdateState in (PollingUpdateStrategyBackgroundService) message: {message}", exception.Message);
     }
   }
 }

@@ -1,60 +1,48 @@
+using System.Threading;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using FeatureBoard.DotnetSdk.Models;
-using System.Collections.Concurrent;
 
 namespace FeatureBoard.DotnetSdk.State;
 
 
-public class FeatureBoardState : IFeatureBoardState
+internal sealed class FeatureBoardState : IFeatureBoardState, IHostedService
 {
-  public DateTimeOffset? LastUpdated { get; private set; }
-  public string? ETag { get; private set; }
+  private readonly IServiceScopeFactory _scopeFactory;
   private readonly IFeatureBoardExternalState? _externalState;
-  private static readonly ConcurrentDictionary<string, FeatureConfiguration> _cache = new(StringComparer.OrdinalIgnoreCase);
 
-  public FeatureBoardState(IFeatureBoardExternalState? externalState = null)
+  private Dictionary<string, FeatureConfiguration> _cache = new(0);
+
+  public FeatureBoardState(IServiceScopeFactory scopeFactory, IFeatureBoardExternalState? externalState = null)
   {
+    _scopeFactory = scopeFactory;
     _externalState = externalState;
   }
 
-  public FeatureBoardStateSnapshot GetSnapshot() => new(_cache);
+  public FeatureBoardStateSnapshot GetSnapshot() => new FeatureBoardStateSnapshot(_cache);
 
-  public async Task InitialiseState(List<FeatureConfiguration>? features, string? eTag, CancellationToken cancellationToken)
+
+  public void Update(IReadOnlyCollection<FeatureConfiguration> state) => _cache = state.ToDictionary(s => s.FeatureKey, s => s);
+
+  public async Task StartAsync(CancellationToken cancellationToken)
   {
-    if (features is null && _externalState is not null)
+    if (_externalState is null)
     {
-      features = await _externalState.GetState(cancellationToken);
+      using var scope = _scopeFactory.CreateScope();
+      await scope.ServiceProvider.GetRequiredService<IFeatureBoardService>().RefreshFeatureConfiguration(cancellationToken);
+      return;
     }
 
-    await UpdateStateInternal(features ?? new List<FeatureConfiguration>(), eTag, cancellationToken);
+    var state = await _externalState.GetState(cancellationToken);
+    if (state == null)
+      return;
+
+    Update(state);
   }
 
-  public async Task UpdateState(List<FeatureConfiguration>? features, string? eTag, CancellationToken cancellationToken)
+  public async Task StopAsync(CancellationToken cancellationToken)
   {
-    await UpdateStateInternal(features, eTag, cancellationToken);
-  }
-
-  private async Task UpdateStateInternal(List<FeatureConfiguration>? features, string? eTag, CancellationToken cancellationToken)
-  {
-    if (features is not null)
-    {
-      foreach (var feature in features)
-      {
-        _cache[feature.FeatureKey] = feature;
-      }
-
-      var newKeys = features.Select(x => x.FeatureKey);
-      var unusedKeys = _cache.Keys.Where(x => !newKeys.Contains(x));
-      foreach (var unusedKey in unusedKeys)
-      {
-        _cache.TryRemove(unusedKey, out _);
-      }
-
-      if (_externalState is not null)
-        await _externalState.UpdateState(new List<FeatureConfiguration>(_cache.Values), cancellationToken);
-
-      ETag = eTag;
-    }
-
-    LastUpdated = DateTimeOffset.UtcNow;
+    if (_externalState is not null)
+      await _externalState.UpdateState(_cache.Values, cancellationToken);
   }
 }

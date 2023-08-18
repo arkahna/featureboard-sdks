@@ -1,3 +1,4 @@
+using System.Net.Http.Headers;
 using FeatureBoard.DotnetSdk.Models;
 using FeatureBoard.DotnetSdk.State;
 using FeatureBoard.DotnetSdk.UpdateStrategies;
@@ -11,32 +12,45 @@ namespace FeatureBoard.DotnetSdk.Registration;
 public static class RegisterFeatureBoard
 {
   private static UpdateStrategy _updateStrategy = UpdateStrategy.None;
-  public static FeatureBoardBuilder AddFeatureBoard<TFeatures, TAudienceProvider>(this IServiceCollection services) where TFeatures : class, IFeatures where TAudienceProvider : class, IAudienceProvider
+
+  private static EntityTagHeaderValue? lastETag = null;
+
+  public static FeatureBoardBuilder AddFeatureBoard<TFeatures>(this IServiceCollection services, IConfigurationRoot configuration) where TFeatures : class, IFeatures
   {
-    var configuration = services.BuildServiceProvider().GetRequiredService<IConfiguration>();
     services.AddOptions<FeatureBoardOptions>().Bind(configuration.GetSection(nameof(FeatureBoardOptions))).ValidateDataAnnotations();
 
-    services.AddHttpClient<IFeatureBoardHttpClient, FeatureBoardHttpClient>().ConfigureHttpClient((serviceProvider, client) =>
+    services.AddHttpClient<IFeatureBoardHttpClient, FeatureBoardHttpClient>().ConfigureHttpClient(static (serviceProvider, client) =>
     {
       var options = serviceProvider.GetRequiredService<IOptions<FeatureBoardOptions>>();
       client.BaseAddress = options.Value.HttpEndpoint;
       client.DefaultRequestHeaders.Add("x-environment-key", options.Value.EnvironmentApiKey);
-      client.Timeout = options.Value.MaxAge - TimeSpan.FromMilliseconds(3); //prevent multiple requests running at the same time.
+      // client.Timeout = options.Value.MaxAge - TimeSpan.FromMilliseconds(3); //prevent multiple requests running at the same time.
     });
 
+    services.AddSingleton<LastETagProvider>(() => ref lastETag);
+
     services.AddScoped<IFeatureBoardClient<TFeatures>, FeatureBoardClient<TFeatures>>();
-    services.AddScoped<IFeatureBoardClient>(c => c.GetRequiredService<IFeatureBoardClient<TFeatures>>());
-    services.AddScoped<IAudienceProvider, TAudienceProvider>();
-    services.AddSingleton<IFeatureBoardState, FeatureBoardState>();
+    services.AddScoped<IFeatureBoardClient>(static c => c.GetRequiredService<IFeatureBoardClient<TFeatures>>());
+
+    services.AddSingleton<FeatureBoardState>();
+    services.AddHostedService(static provider => provider.GetRequiredService<FeatureBoardState>());
+    services.AddTransient<Action<IReadOnlyCollection<FeatureConfiguration>>>(static provider => provider.GetRequiredService<FeatureBoardState>().Update);
+    services.AddScoped(static provider => provider.GetRequiredService<FeatureBoardState>().GetSnapshot());
 
     return new FeatureBoardBuilder(services);
   }
+
+  private static DateTimeOffset lastChecked = DateTimeOffset.MinValue;
 
   public static FeatureBoardBuilder WithOnRequestUpdateStrategy(this FeatureBoardBuilder builder)
   {
     if (_updateStrategy != UpdateStrategy.None)
       throw new ApplicationException("You can only have one update strategy registered");
     builder.Services.AddTransient<OnRequestUpdateStrategyMiddleware>();
+    builder.Services.AddScoped<FeatureBoardService>();
+    builder.Services.AddScoped<IFeatureBoardService, FeatureBoardLastCheckedService>();
+    builder.Services.AddSingleton<LastCheckedTimeProvider>(() => ref lastChecked);
+    builder.Services.AddSingleton<Func<DateTimeOffset>>(() => DateTimeOffset.UtcNow);
 
     _updateStrategy = UpdateStrategy.OnRequest;
 
@@ -48,6 +62,7 @@ public static class RegisterFeatureBoard
     if (_updateStrategy != UpdateStrategy.None)
       throw new ApplicationException("You can only have one update strategy registered");
     builder.Services.AddHostedService<PollingUpdateStrategyBackgroundService>();
+    builder.Services.AddScoped<IFeatureBoardService, FeatureBoardService>();
 
     _updateStrategy = UpdateStrategy.Polling;
 

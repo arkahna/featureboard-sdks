@@ -1,33 +1,37 @@
+using System.Text.Json.Nodes;
+using FeatureBoard.DotnetSdk.Test.Extensions;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Bogus;
+using Shouldly;
 using FeatureBoard.DotnetSdk.Helpers;
 using FeatureBoard.DotnetSdk.Models;
 using FeatureBoard.DotnetSdk.State;
-using Moq;
-using Shouldly;
-using System.Text.Json.Nodes;
 
 namespace FeatureBoard.DotnetSdk.Test;
 
-public class FeatureBoardClientTests : SdkTestsBase
+public class FeatureBoardClientTests
 {
+  private readonly IServiceCollection Services = new ServiceCollection();
+
   public FeatureBoardClientTests()
   {
-    Services.AddService<IFeatureBoardClient<TestFeatures>, FeatureBoardClient<TestFeatures>>();
+    Services.AddTransient(typeof(ILogger<>), typeof(NullLogger<>));
+    Services.AddTransient<FeatureBoardClient<TestFeatures>>();
 
-    var audienceMock = Services.AddServiceMock<IAudienceProvider>();
-    audienceMock.Setup(x => x.AudienceKeys).Returns(new List<string> { "an-audience" });
-
-    Services.AddServiceMock<IFeatureBoardState>();
+    var audienceMock = Services.AddServiceMock<IAudienceProvider>((_, mock) =>
+      mock.Setup(x => x.AudienceKeys).Returns(new List<string> { "an-audience" })
+    );
   }
 
 
   [Fact]
   public void ItReturnsTheDefaultValueWhenNoValueIsFound()
   {
-    var featureBoardMock = Services.Resolve<Mock<IFeatureBoardState>>();
-    featureBoardMock.Setup(x => x.GetSnapshot()).Returns(new FeatureBoardStateSnapshot(new Dictionary<string, FeatureConfiguration>(0)));
+    Services.AddTransient<FeatureBoardStateSnapshot>(_ => new FeatureBoardStateSnapshot(new Dictionary<string, FeatureConfiguration>(0)));
 
-    var client = Services.Resolve<IFeatureBoardClient<TestFeatures>>();
+    var client = Services.BuildServiceProvider().GetRequiredService<FeatureBoardClient<TestFeatures>>();
 
     var defaultValue = Guid.NewGuid().ToString();
     var result = client.GetFeatureValue(x => x.StringFeature, defaultValue);
@@ -40,22 +44,18 @@ public class FeatureBoardClientTests : SdkTestsBase
   {
     var faker = new Faker();
     var defaultFeatureValue = faker.Lorem.Sentence();
-    var featureBoardMock = Services.Resolve<Mock<IFeatureBoardState>>();
-    featureBoardMock
-      .Setup(x => x.GetSnapshot())
-      .Returns(new FeatureBoardStateSnapshot(new Dictionary<string, FeatureConfiguration>
+    Services.AddTransient<FeatureBoardStateSnapshot>(_ => new FeatureBoardStateSnapshot(new Dictionary<string, FeatureConfiguration>
+    {
       {
+        nameof(TestFeatures.StringFeature).ToFeatureBoardKey(), new FeatureConfiguration
         {
-          nameof(TestFeatures.StringFeature).ToFeatureBoardKey(), new FeatureConfiguration
-          {
-            DefaultValue = JsonValue.Create(defaultFeatureValue)!,
-            FeatureKey = nameof(TestFeatures.StringFeature),
-            AudienceExceptions = Array.Empty<AudienceExceptionValue>()
-          }
+          DefaultValue = JsonValue.Create(defaultFeatureValue)!,
+          FeatureKey = nameof(TestFeatures.StringFeature),
+          AudienceExceptions = Array.Empty<AudienceExceptionValue>()
         }
-      }));
-
-    var client = Services.Resolve<IFeatureBoardClient<TestFeatures>>();
+      }
+    }));
+    var client = Services.BuildServiceProvider().GetRequiredService<FeatureBoardClient<TestFeatures>>();
 
     var result = client.GetFeatureValue(x => x.StringFeature, Guid.NewGuid().ToString());
     result.ShouldBe(defaultFeatureValue);
@@ -66,10 +66,7 @@ public class FeatureBoardClientTests : SdkTestsBase
   {
     var faker = new Faker();
     var defaultAudienceValue = faker.Lorem.Paragraph();
-    var featureBoardMock = Services.Resolve<Mock<IFeatureBoardState>>();
-    featureBoardMock
-      .Setup(x => x.GetSnapshot())
-      .Returns(new FeatureBoardStateSnapshot(new Dictionary<string, FeatureConfiguration>
+    Services.AddTransient<FeatureBoardStateSnapshot>(_ => new FeatureBoardStateSnapshot(new Dictionary<string, FeatureConfiguration>
       {
         {
           nameof(TestFeatures.StringFeature).ToFeatureBoardKey(), new FeatureConfiguration
@@ -87,7 +84,7 @@ public class FeatureBoardClientTests : SdkTestsBase
         }
       }));
 
-    var client = Services.Resolve<IFeatureBoardClient<TestFeatures>>();
+    var client = Services.BuildServiceProvider().GetRequiredService<FeatureBoardClient<TestFeatures>>();
 
     var result = client.GetFeatureValue(x => x.StringFeature, Guid.NewGuid().ToString());
     result.ShouldBe(defaultAudienceValue);
@@ -98,10 +95,7 @@ public class FeatureBoardClientTests : SdkTestsBase
   {
     var faker = new Faker();
     var defaultAudienceValue = faker.Random.Decimal();
-    var featureBoardMock = Services.Resolve<Mock<IFeatureBoardState>>();
-    featureBoardMock
-      .Setup(x => x.GetSnapshot())
-      .Returns(new FeatureBoardStateSnapshot(new Dictionary<string, FeatureConfiguration>
+    Services.AddTransient<FeatureBoardStateSnapshot>(_ => new FeatureBoardStateSnapshot(new Dictionary<string, FeatureConfiguration>
       {
         {
           nameof(TestFeatures.NumberFeature).ToFeatureBoardKey(), new FeatureConfiguration
@@ -119,7 +113,7 @@ public class FeatureBoardClientTests : SdkTestsBase
         }
       }));
 
-    var client = Services.Resolve<IFeatureBoardClient<TestFeatures>>();
+    var client = Services.BuildServiceProvider().GetRequiredService<FeatureBoardClient<TestFeatures>>();
 
     var result = client.GetFeatureValue(x => x.NumberFeature, 0);
     result.ShouldBe(defaultAudienceValue);
@@ -131,11 +125,7 @@ public class FeatureBoardClientTests : SdkTestsBase
   {
     var faker = new Faker();
     var defaultAudienceValue = faker.Random.Bool();
-    var featureBoardMock = Services.Resolve<Mock<IFeatureBoardState>>();
-    featureBoardMock
-      .Setup(x => x.GetSnapshot())
-      .Returns(new FeatureBoardStateSnapshot(new Dictionary<string, FeatureConfiguration>
-      {
+    Services.AddTransient<FeatureBoardStateSnapshot>(_ => new FeatureBoardStateSnapshot(new Dictionary<string, FeatureConfiguration>      {
         {
           nameof(TestFeatures.BoolFeature).ToFeatureBoardKey(), new FeatureConfiguration
           {
@@ -152,7 +142,7 @@ public class FeatureBoardClientTests : SdkTestsBase
         }
       }));
 
-    var client = Services.Resolve<IFeatureBoardClient<TestFeatures>>();
+    var client = Services.BuildServiceProvider().GetRequiredService<FeatureBoardClient<TestFeatures>>();
 
     var result = client.GetFeatureValue(x => x.BoolFeature, !defaultAudienceValue);
     result.ShouldBe(defaultAudienceValue);
@@ -163,10 +153,7 @@ public class FeatureBoardClientTests : SdkTestsBase
   {
     var faker = new Faker();
     var defaultAudienceValue = Guid.NewGuid().ToString();
-    var featureBoardMock = Services.Resolve<Mock<IFeatureBoardState>>();
-    featureBoardMock
-      .Setup(x => x.GetSnapshot())
-      .Returns(new FeatureBoardStateSnapshot(new Dictionary<string, FeatureConfiguration>
+    Services.AddTransient<FeatureBoardStateSnapshot>(_ => new FeatureBoardStateSnapshot(new Dictionary<string, FeatureConfiguration>
       {
         {
           nameof(TestFeatures.StringFeature).ToFeatureBoardKey(), new FeatureConfiguration
@@ -184,7 +171,7 @@ public class FeatureBoardClientTests : SdkTestsBase
         }
       }));
 
-    var client = Services.Resolve<IFeatureBoardClient<TestFeatures>>();
+    var client = Services.BuildServiceProvider().GetRequiredService<FeatureBoardClient<TestFeatures>>();
     var result = client.GetFeatureValue(x => x.StringFeature, Guid.NewGuid().ToString());
 
     result.ShouldBe(defaultAudienceValue);
@@ -195,11 +182,7 @@ public class FeatureBoardClientTests : SdkTestsBase
   {
     var faker = new Faker();
     var defaultAudienceValue = faker.PickRandom<TestEnum>();
-    var featureBoardMock = Services.Resolve<Mock<IFeatureBoardState>>();
-    featureBoardMock
-      .Setup(x => x.GetSnapshot())
-      .Returns(new FeatureBoardStateSnapshot(new Dictionary<string, FeatureConfiguration>
-      {
+    Services.AddTransient<FeatureBoardStateSnapshot>(_ => new FeatureBoardStateSnapshot(new Dictionary<string, FeatureConfiguration>      {
         {
           nameof(TestFeatures.EnumFeature).ToFeatureBoardKey(), new FeatureConfiguration
           {
@@ -216,7 +199,7 @@ public class FeatureBoardClientTests : SdkTestsBase
         }
       }));
 
-    var client = Services.Resolve<IFeatureBoardClient<TestFeatures>>();
+    var client = Services.BuildServiceProvider().GetRequiredService<FeatureBoardClient<TestFeatures>>();
     var result = client.GetFeatureValue(x => x.EnumFeature, faker.PickRandomWithout(defaultAudienceValue));
 
     result.ShouldBe(defaultAudienceValue);
@@ -228,11 +211,7 @@ public class FeatureBoardClientTests : SdkTestsBase
   {
     var faker = new Faker();
     var defaultAudienceValue = Guid.NewGuid().ToString();
-    var featureBoardMock = Services.Resolve<Mock<IFeatureBoardState>>();
-    featureBoardMock
-      .Setup(x => x.GetSnapshot())
-      .Returns(new FeatureBoardStateSnapshot(new Dictionary<string, FeatureConfiguration>
-      {
+    Services.AddTransient<FeatureBoardStateSnapshot>(_ => new FeatureBoardStateSnapshot(new Dictionary<string, FeatureConfiguration>      {
         {
           "a-strange-name", new FeatureConfiguration
           {
@@ -249,7 +228,7 @@ public class FeatureBoardClientTests : SdkTestsBase
         }
       }));
 
-    var client = Services.Resolve<IFeatureBoardClient<TestFeatures>>();
+    var client = Services.BuildServiceProvider().GetRequiredService<FeatureBoardClient<TestFeatures>>();
     var result = client.GetFeatureValue(x => x.StrangeName, Guid.NewGuid().ToString());
 
     result.ShouldBe(defaultAudienceValue);

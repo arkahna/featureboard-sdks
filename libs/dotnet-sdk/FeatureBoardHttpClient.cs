@@ -1,49 +1,64 @@
-using FeatureBoard.DotnetSdk.Models;
-using Microsoft.Extensions.Logging;
 using System.Net;
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using Microsoft.Extensions.Logging;
+using FeatureBoard.DotnetSdk.Models;
+using System.Net.Http.Headers;
 
 namespace FeatureBoard.DotnetSdk;
 
-internal class FeatureBoardHttpClient : IFeatureBoardHttpClient
+public delegate ref EntityTagHeaderValue? LastETagProvider();
+
+internal sealed class FeatureBoardHttpClient : IFeatureBoardHttpClient
 {
+  internal static readonly string Action = "all.json";
+
+  private LastETagProvider _eTag;
   private readonly HttpClient _httpClient;
+  private readonly Action<IReadOnlyCollection<FeatureConfiguration>> _processResult;
   private readonly ILogger _logger;
 
-  public FeatureBoardHttpClient(HttpClient httpClient, ILogger<FeatureBoardHttpClient> logger)
+
+  public FeatureBoardHttpClient(HttpClient httpClient, LastETagProvider lastModifiedTimeProvider, Action<IReadOnlyCollection<FeatureConfiguration>> processResult, ILogger<FeatureBoardHttpClient> logger)
   {
     _httpClient = httpClient;
+    _processResult = processResult;
     _logger = logger;
+    _eTag = lastModifiedTimeProvider;
   }
 
-  public async Task<(List<FeatureConfiguration>? features, string? eTag)> FetchUpdates(string? eTag, CancellationToken cancellationToken)
+  public async Task<bool?> RefreshFeatureConfiguration(CancellationToken cancellationToken)
   {
-    using var request = new HttpRequestMessage(HttpMethod.Get, "all");
-    if (!string.IsNullOrWhiteSpace(eTag))
-      request.Headers.IfNoneMatch.Add(new EntityTagHeaderValue(eTag));
+    using var request = new HttpRequestMessage(HttpMethod.Get, Action);
+    var eTag = _eTag();
+    if (null != eTag)
+      request.Headers.IfNoneMatch.Add(eTag);
 
     using var response = await _httpClient.SendAsync(request, cancellationToken);
 
-    if (response.StatusCode == HttpStatusCode.NotModified)
+    switch (response.StatusCode)
     {
-      _logger.LogDebug("No changes");
-      return (null, eTag);
+      case HttpStatusCode.NotModified:
+        _logger.LogDebug("No changes");
+        return false;
+
+      case not HttpStatusCode.OK:
+        _logger.LogError("Failed to get latest toggles: Service returned error {statusCode}({responseBody})", response.StatusCode, await response.Content.ReadAsStringAsync());
+        return null;
     }
 
-    if (response.IsSuccessStatusCode)
+    var features = await response.Content.ReadFromJsonAsync<List<FeatureConfiguration>>(cancellationToken: cancellationToken)
+                    ?? throw new ApplicationException("Unable to retrieve decode response content");
+
+    _processResult(features);
+    updateEtagRef(response.Headers.ETag);
+
+    void updateEtagRef(EntityTagHeaderValue? responseTag) // Sync method to allow use of eTag ref-local variable
     {
-      var features = await response.Content.ReadFromJsonAsync<List<FeatureConfiguration>>(cancellationToken: cancellationToken)
-                     ?? throw new ApplicationException("Unable to retrieve decode response content");
-
-
-      eTag = response.Headers.ETag?.Tag ?? eTag; // if didn't get eTag just report previous eTag
-
-      _logger.LogDebug("Fetching updates done, eTag={eTag}", eTag);
-      return (features, eTag);
+      ref var eTag = ref _eTag();
+      eTag = responseTag ?? eTag; // if didn't get eTag just retain previous eTag
+      _logger.LogDebug("Fetching updates done, eTag={eTag}", _eTag);
     }
 
-    _logger.LogError("Failed to get latest toggles: Service returned error {statusCode}({responseBody})", response.StatusCode, await response.Content.ReadAsStringAsync());
-    return (null, eTag);
+    return true;
   }
 }
