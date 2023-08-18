@@ -1,3 +1,4 @@
+using FeatureBoard.DotnetSdk;
 using FeatureBoard.DotnetSdk.Registration;
 using FeatureBoardSdk.Examples.DotnetApi;
 using FeatureBoardSdk.Examples.DotnetApi.Services;
@@ -12,7 +13,10 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Register featureBoard
-builder.Services.AddFeatureBoard<Features, QueryStringAudienceProvider>()
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IAudienceProvider, QueryStringAudienceProvider>();
+
+builder.Services.AddFeatureBoard<Features>(builder.Configuration)
   .WithPollingUpdateStrategy();
 
 builder.Services.AddHttpContextAccessor();
@@ -32,7 +36,6 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();

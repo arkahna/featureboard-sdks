@@ -1,25 +1,26 @@
+using System;
+using System.Linq.Expressions;
+using System.Reflection;
+using System.Text.Json.Nodes;
+using Microsoft.Extensions.Logging;
 using FeatureBoard.DotnetSdk.Attributes;
 using FeatureBoard.DotnetSdk.Helpers;
 using FeatureBoard.DotnetSdk.Models;
 using FeatureBoard.DotnetSdk.State;
-using Microsoft.Extensions.Logging;
-using System.Linq.Expressions;
-using System.Reflection;
-using System.Text.Json.Nodes;
 
 namespace FeatureBoard.DotnetSdk;
 
-public class FeatureBoardClient<TFeatures> : IFeatureBoardClient<TFeatures> where TFeatures : class, IFeatures
+internal class FeatureBoardClient<TFeatures> : IFeatureBoardClient<TFeatures> where TFeatures : class, IFeatures
 {
   private readonly FeatureBoardStateSnapshot _state;
   private readonly IAudienceProvider _audienceProvider;
   private readonly ILogger _logger;
 
-  public FeatureBoardClient(IFeatureBoardState state, IAudienceProvider audienceProvider, ILogger<FeatureBoardClient<TFeatures>> logger)
+  public FeatureBoardClient(FeatureBoardStateSnapshot state, IAudienceProvider audienceProvider, ILogger<FeatureBoardClient<TFeatures>> logger)
   {
+    _state = state;
     _audienceProvider = audienceProvider;
     _logger = logger;
-    _state = state.GetSnapshot();
   }
 
   public decimal GetFeatureValue(Expression<Func<TFeatures, decimal>> expr, decimal defaultValue)
@@ -84,13 +85,13 @@ public class FeatureBoardClient<TFeatures> : IFeatureBoardClient<TFeatures> wher
   private JsonValue? GetFeatureConfigurationValue(string featureKey, string? defaultValue)
   {
     var feature = _state.Get(featureKey);
-    var audienceKeys = _audienceProvider.AudienceKeys;
     if (feature == null)
     {
       _logger.LogDebug("GetFeatureValue - no value, returning user fallback: {defaultValue}", defaultValue);
       return null;
     }
 
+    var audienceKeys = _audienceProvider.AudienceKeys;
     var audienceException = feature.AudienceExceptions.FirstOrDefault(a =>
       audienceKeys.Contains(a.AudienceKey)
     );

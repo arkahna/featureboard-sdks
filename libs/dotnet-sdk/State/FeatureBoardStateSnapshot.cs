@@ -4,12 +4,13 @@ namespace FeatureBoard.DotnetSdk.State;
 
 public class FeatureBoardStateSnapshot
 {
-  private readonly Dictionary<string, FeatureConfiguration> _snapshot;
+  private readonly IReadOnlyDictionary<string, FeatureConfiguration> _snapshot;
 
-  public FeatureBoardStateSnapshot(IDictionary<string, FeatureConfiguration> state)
+  public FeatureBoardStateSnapshot(Dictionary<string, FeatureConfiguration> state)
   {
-    _snapshot = new Dictionary<string, FeatureConfiguration>(state, StringComparer.OrdinalIgnoreCase);
+    _snapshot = new Dictionary<string, FeatureConfiguration>(state, state.Comparer);
   }
+
   public FeatureConfiguration? Get(string featureKey)
   {
     return _snapshot.TryGetValue(featureKey, out var feature)
