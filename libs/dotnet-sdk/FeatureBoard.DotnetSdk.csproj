@@ -7,6 +7,12 @@
     <LangVersion>latest</LangVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Version>0.0.1</Version>
+    <PackageDescription>FeatureBoard .NET SDK for .NET core and framework applications.</PackageDescription>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReleaseNotes>https://github.com/arkahna/featureboard-sdks/blob/main/libs/dotnet-sdk/CHANGELOG.md</PackageReleaseNotes>
+    <PackageProjectUrl>https://docs.featurebard.app</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/arkahna/featureboard-sdks/</RepositoryUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
@@ -29,6 +35,10 @@
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="7.*" />
     <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="7.*" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\"/>
+</ItemGroup>
 
   <PropertyGroup>
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
