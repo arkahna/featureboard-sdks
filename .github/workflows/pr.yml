@@ -47,20 +47,5 @@ jobs:
       - name: Tests
         run: pnpm run test
 
-      - name: Version command
-        id: version
-        run: |
-          npx changeset version
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Update DotNet SDK version
-        run: |
-          version=$(grep -o '"version": "[^"]*"' libs/dotnet-sdk/package.json | awk -F'"' '{print $4}')
-          echo "Version: $version"
-          csproj_path=libs/dotnet-sdk/FeatureBoard.DotnetSdk.csproj
-          sed -i "s/<Version>.*<\/Version>/<Version>$version<\/Version>/" $csproj_path
-          cat $csproj_path
-
       - name: Package libs
         run: pnpm package
