@@ -22,6 +22,21 @@
         },
         "lint": {
             "executor": "@nx-dotnet/core:format"
+        },
+        "package": {
+            "executor": "@nx-dotnet/core:build",
+            "outputs": [
+                "{workspaceRoot}/dist/libs/dotnet-sdk"
+            ],
+            "options": {
+                "configuration": "Release",
+                "noDependencies": true
+            },
+            "configurations": {
+                "production": {
+                    "configuration": "Release"
+                }
+            }
         }
     },
     "tags": []
