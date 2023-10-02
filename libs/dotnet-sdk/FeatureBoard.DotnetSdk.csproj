@@ -8,6 +8,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Version>0.0.1</Version>
     <PackageDescription>FeatureBoard .NET SDK for .NET core and framework applications.</PackageDescription>
+    <PackageIcon>featureboard-logo.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageReleaseNotes>https://github.com/arkahna/featureboard-sdks/blob/main/libs/dotnet-sdk/CHANGELOG.md</PackageReleaseNotes>
     <PackageProjectUrl>https://docs.featurebard.app</PackageProjectUrl>
@@ -38,6 +39,7 @@
 
   <ItemGroup>
     <None Include="README.md" Pack="true" PackagePath="\"/>
+    <None Include="assets\featureboard-logo.png" Pack="true" PackagePath="\"/>
 </ItemGroup>
 
   <PropertyGroup>
