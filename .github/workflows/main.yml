@@ -32,7 +32,7 @@ jobs:
       - name: Setup NuGet
         uses: nuget/setup-nuget@v1
         with:
-          nuget-api-key: ${{ secrets.NuGetAPIKey }}
+          nuget-api-key: ${{ secrets.NUGET_API_KEY }}
           nuget-version: '5.x'
 
       - uses: pnpm/action-setup@v2
@@ -63,7 +63,7 @@ jobs:
 
       - name: Update DotNet SDK version
         run: |
-          version=$(grep -o '"version": "[^"]*"' libs/dotnet-sdk/package.json | awk -F'"' '{print $4}')
+          version=$(node -pe "require('./libs/dotnet-sdk/package.json').version")
           csproj_path=libs/dotnet-sdk/FeatureBoard.DotnetSdk.csproj
           sed -i "s/<Version>.*<\/Version>/<Version>$version<\/Version>/" $csproj_path
 
@@ -92,7 +92,6 @@ jobs:
         run: pnpm publish -r --access public
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
+
       - name: Release NuGet package
         run: nuget push dist/libs/dotnet-sdk/FeatureBoard.DotnetSdk.$version.nupkg -Source 'https://api.nuget.org/v3/index.json'
-
