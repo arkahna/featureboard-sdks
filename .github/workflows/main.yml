@@ -64,8 +64,10 @@ jobs:
       - name: Update DotNet SDK version
         run: |
           version=$(node -pe "require('./libs/dotnet-sdk/package.json').version")
+          currentYear=$(node -pe "new Date().getFullYear()")
           csproj_path=libs/dotnet-sdk/FeatureBoard.DotnetSdk.csproj
           sed -i "s/<Version>.*<\/Version>/<Version>$version<\/Version>/" $csproj_path
+          sed -i "s/<Copyright>.*<\/Copyright>/<Copyright>Copyright (c) Arkahna $currentYear<\/Copyright>/" $csproj_path
 
       - name: Push changes
         run: |
