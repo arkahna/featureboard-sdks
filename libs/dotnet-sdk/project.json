@@ -31,11 +31,6 @@
             "options": {
                 "configuration": "Release",
                 "noDependencies": true
-            },
-            "configurations": {
-                "production": {
-                    "configuration": "Release"
-                }
             }
         }
     },
