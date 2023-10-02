@@ -96,4 +96,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Release NuGet package
-        run: nuget push dist/libs/dotnet-sdk/FeatureBoard.DotnetSdk.$version.nupkg -Source 'https://api.nuget.org/v3/index.json'
+        run: nuget push dist/libs/dotnet-sdk/*.nupkg -Source 'https://api.nuget.org/v3/index.json' -SkipDuplicate
