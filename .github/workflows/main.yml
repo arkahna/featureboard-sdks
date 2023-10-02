@@ -61,7 +61,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Update DotNet SDK version
+      - name: Update DotNet SDK version and copyright year
         run: |
           version=$(node -pe "require('./libs/dotnet-sdk/package.json').version")
           currentYear=$(node -pe "new Date().getFullYear()")
