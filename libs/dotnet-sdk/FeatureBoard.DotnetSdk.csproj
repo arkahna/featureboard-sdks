@@ -8,11 +8,15 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Version>0.0.1</Version>
     <PackageDescription>FeatureBoard .NET SDK for .NET core and framework applications.</PackageDescription>
+    <PackageTags>feature toggle flags</PackageTags>
+    <Authors>Arkahna</Authors>
+    <Copyright>Copyright (c) Arkahna 2023</Copyright>
     <PackageIcon>featureboard-logo.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageReleaseNotes>https://github.com/arkahna/featureboard-sdks/blob/main/libs/dotnet-sdk/CHANGELOG.md</PackageReleaseNotes>
     <PackageProjectUrl>https://docs.featurebard.app</PackageProjectUrl>
     <RepositoryUrl>https://github.com/arkahna/featureboard-sdks/</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
