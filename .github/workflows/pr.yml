@@ -56,7 +56,7 @@ jobs:
 
       - name: Update DotNet SDK version
         run: |
-          version=$(node -pe "require('libs/dotnet-sdk/package.json').version")
+          version=$(node -pe "JSON.stringify(require('./libs/dotnet-sdk/package.json').version)")
           echo "Version: $version"
           csproj_path=libs/dotnet-sdk/FeatureBoard.DotnetSdk.csproj
           sed -i "s/<Version>.*<\/Version>/<Version>$version<\/Version>/" $csproj_path
