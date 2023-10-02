@@ -29,6 +29,12 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
+      - name: Setup NuGet
+        uses: nuget/setup-nuget@v1
+        with:
+          nuget-api-key: ${{ secrets.NUGET_API_KEY }}
+          nuget-version: '5.x'
+
       - uses: pnpm/action-setup@v2
         name: Install pnpm
         with:
@@ -55,6 +61,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Update DotNet SDK version and copyright year
+        run: |
+          version=$(node -pe "require('./libs/dotnet-sdk/package.json').version")
+          currentYear=$(node -pe "new Date().getFullYear()")
+          csproj_path=libs/dotnet-sdk/FeatureBoard.DotnetSdk.csproj
+          sed -i "s/<Version>.*<\/Version>/<Version>$version<\/Version>/" $csproj_path
+          sed -i "s/<Copyright>.*<\/Copyright>/<Copyright>Copyright (c) Arkahna $currentYear<\/Copyright>/" $csproj_path
+
       - name: Push changes
         run: |
           pnpm i -r --no-frozen-lockfile
@@ -76,7 +90,10 @@ jobs:
       - name: Package libs
         run: pnpm package
 
-      - name: Release packages
+      - name: Release NPM packages
         run: pnpm publish -r --access public
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Release NuGet package
+        run: nuget push dist/libs/dotnet-sdk/FeatureBoard.DotnetSdk.$version.nupkg -Source 'https://api.nuget.org/v3/index.json'
