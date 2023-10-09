@@ -19,8 +19,6 @@ builder.Services.AddScoped<IAudienceProvider, QueryStringAudienceProvider>();
 builder.Services.AddFeatureBoard<Features>(builder.Configuration)
   .WithPollingUpdateStrategy();
 
-builder.Services.AddHttpContextAccessor();
-
 var app = builder.Build();
 
 // Add featureBoard middleware

@@ -6,9 +6,9 @@ public class FeatureBoardStateSnapshot
 {
   private readonly IReadOnlyDictionary<string, FeatureConfiguration> _snapshot;
 
-  public FeatureBoardStateSnapshot(Dictionary<string, FeatureConfiguration> state)
+  public FeatureBoardStateSnapshot(IReadOnlyDictionary<string, FeatureConfiguration> state)
   {
-    _snapshot = new Dictionary<string, FeatureConfiguration>(state, state.Comparer);
+    _snapshot = state;
   }
 
   public FeatureConfiguration? Get(string featureKey)
