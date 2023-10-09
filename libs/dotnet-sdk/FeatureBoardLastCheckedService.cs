@@ -25,7 +25,8 @@ internal class FeatureBoardLastCheckedService : IFeatureBoardService
 
   public virtual async Task<bool?> RefreshFeatureConfiguration(CancellationToken cancellationToken)
   {
-    var maxAgeHasExpired = _now > _lastCheckedTimeProvider() + _options.Value.MaxAge;
+    var beforeLastChecked = _lastCheckedTimeProvider();
+    var maxAgeHasExpired = _now > beforeLastChecked + _options.Value.MaxAge;
     if (!maxAgeHasExpired)
     {
       _logger.LogDebug("Feature Configuration has not reached {0}, skipping refresh", _options.Value.MaxAge);
@@ -35,6 +36,9 @@ internal class FeatureBoardLastCheckedService : IFeatureBoardService
     void UpdateLastChecked() // Sync method to allow use of lastChecked ref-local variable
     {
       ref var lastChecked = ref _lastCheckedTimeProvider();
+#if DEBUG
+      System.Diagnostics.Debug.Assert(lastChecked == beforeLastChecked, "Last Checked mismatch!");
+#endif
       lastChecked = _now;
     }
 
