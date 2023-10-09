@@ -1,5 +1,7 @@
 # FeatureBoard React SDK
 
+![npm (scoped)](https://img.shields.io/npm/v/%40featureboard/react-sdk?color=%23492CED)
+
 FeatureBoard SDK for React applications.
 
 ## Installation

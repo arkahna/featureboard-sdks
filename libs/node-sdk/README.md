@@ -1,6 +1,10 @@
 # FeatureBoard NodeJS SDK
 
+![npm (scoped)](https://img.shields.io/npm/v/%40featureboard/node-sdk?color=%23492CED)
+
 FeatureBoard SDK for server side NodeJS.
+
+Looking for our JS SDK for browser based web applications, you can find it [here](https://www.npmjs.com/package/@featureboard/js-sdk).
 
 ## Installation
 
