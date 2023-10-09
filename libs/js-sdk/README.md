@@ -1,7 +1,23 @@
 # FeatureBoard Client JavaScript SDK
 
-Browser JavaScript SDK for https://featureboard.app
+FeatureBoard SDK for browser based web applications.
 
-## Docs
+## Installation
 
-See https://featureboard.app/docs/sdks/javascript/ for usage instructions and documentation
+The FeatureBoard JavaScript SDK is available on NPM.
+
+```bash
+npm add @featureboard/js-sdk
+# Or
+yarn add @featureboard/js-sdk
+# Or
+pnpm add @featureboard/js-sdk
+```
+
+## Documentation
+
+How to setup and use FeatureBoard JavaScript SDK can be found in our [documentation](https://docs.featureboard.app/sdks/javascript-sdk/).
+
+## Release notes
+
+You can find our [changelog here](CHANGELOG.md).
