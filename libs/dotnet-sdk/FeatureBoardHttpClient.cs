@@ -10,7 +10,7 @@ public delegate ref EntityTagHeaderValue? LastETagProvider();
 
 internal sealed class FeatureBoardHttpClient : IFeatureBoardHttpClient
 {
-  internal static readonly string Action = "all.json";
+  internal static readonly string Action = "all";
 
   private LastETagProvider _eTag;
   private readonly HttpClient _httpClient;
