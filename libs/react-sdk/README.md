@@ -9,7 +9,7 @@ FeatureBoard SDK for React applications.
 The FeatureBoard React SDK is available on NPM.
 
 ```bash
-npm add --save @featureboard/react-sdk
+npm add @featureboard/react-sdk
 # Or
 yarn add @featureboard/react-sdk
 # Or
