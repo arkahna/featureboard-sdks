@@ -15,9 +15,12 @@
     "bugs": {
         "url": "https://github.com/featureboard/sdks/issues"
     },
-    "homepage": "https://github.com/featureboard/sdks/tree/master/libs/node-sdk",
+    "files": [
+        "../../dist/apps/cli/**/*"
+    ],
+    "bin": "./main.js",
+    "homepage": "https://github.com/featureboard/sdks/tree/master/apps/cli",
     "publishConfig": {
-        "main": "dist/index.js",
-        "module": "dist/esm/index.js"
+        "main": "./index.js"
     }
 }

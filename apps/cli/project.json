@@ -65,6 +65,14 @@
                 }
             }
         },
+        "package": {
+            "executor": "nx:run-commands",
+            "options": {
+                "commands": []
+            },
+            "defaultConfiguration": "production",
+            "dependsOn": ["build"]
+        },
         "lint": {
             "executor": "@nx/linter:eslint",
             "outputs": ["{options.outputFile}"],
