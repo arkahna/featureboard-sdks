@@ -1,6 +1,5 @@
 # FeatureBoard Client JavaScript SDK
-
-![npm (scoped)](https://img.shields.io/npm/v/%40featureboard/js-sdk?color=%23492CED)
+![npm](https://img.shields.io/npm/v/%40featureboard%2Fjs-sdk?logo=npm) ![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/arkahna/featureboard-sdks/main.yml?logo=github)
 
 FeatureBoard SDK for browser based web applications.
 

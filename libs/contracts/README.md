@@ -1,6 +1,6 @@
 # FeatureBoard Contracts
 
-![npm (scoped)](https://img.shields.io/npm/v/%40featureboard/contracts?color=%23492CED)
+![npm](https://img.shields.io/npm/v/%40featureboard%2Fcontracts?logo=npm) ![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/arkahna/featureboard-sdks/main.yml?logo=github)
 
 Contains TypeScript type definitions for FeatureBoard SDKs.
 
