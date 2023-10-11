@@ -201,8 +201,6 @@ importers:
 
   apps/cli: {}
 
-  apps/cli/dist: {}
-
   apps/examples/dotnet-api: {}
 
   libs/code-generator: {}
