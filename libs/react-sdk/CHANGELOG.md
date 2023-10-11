@@ -1,5 +1,14 @@
 # @featureboard/react-sdk
 
+## 0.10.2
+
+### Patch Changes
+
+- [#30](https://github.com/arkahna/featureboard-sdks/pull/30) [`c5bec3d`](https://github.com/arkahna/featureboard-sdks/commit/c5bec3dc55c4ee271bb9a6ffe30ef9ba6089e1df) Thanks [@idadaniels](https://github.com/idadaniels)! - Update readme
+
+- Updated dependencies [[`c5bec3d`](https://github.com/arkahna/featureboard-sdks/commit/c5bec3dc55c4ee271bb9a6ffe30ef9ba6089e1df)]:
+  - @featureboard/js-sdk@0.13.1
+
 ## 0.10.1
 
 ### Patch Changes
