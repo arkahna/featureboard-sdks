@@ -9,10 +9,7 @@
             "outputs": ["{options.outputPath}"],
             "defaultConfiguration": "production",
             "options": {
-                "platform": "node",
-                "outputPath": "dist/apps/cli",
-                "format": ["cjs"],
-                "bundle": true,
+                "outputPath": "apps/cli/dist",
                 "main": "apps/cli/src/main.ts",
                 "tsConfig": "apps/cli/tsconfig.app.json",
                 "assets": [
@@ -26,22 +23,9 @@
                 ],
                 "generatePackageJson": false,
                 "additionalEntryPoints": ["apps/cli/src/index.ts"],
+                "format": ["cjs"],
                 "esbuildOptions": {
-                    "sourcemap": true,
-                    "outExtension": {
-                        ".js": ".js"
-                    }
-                }
-            },
-            "configurations": {
-                "development": {},
-                "production": {
-                    "esbuildOptions": {
-                        "sourcemap": false,
-                        "outExtension": {
-                            ".js": ".js"
-                        }
-                    }
+                    "sourcemap": true
                 }
             }
         },
@@ -65,11 +49,26 @@
                 }
             }
         },
+        "package": {
+            "executor": "nx:run-commands",
+            "options": {
+                "commands": [
+                    "tsc --project tsconfig.app.json --emitDeclarationOnly --declaration --outDir dist"
+                ],
+                "cwd": "apps/cli",
+                "parallel": false
+            },
+            "defaultConfiguration": "production",
+            "dependsOn": ["build"]
+        },
         "lint": {
             "executor": "@nx/linter:eslint",
             "outputs": ["{options.outputFile}"],
             "options": {
-                "lintFilePatterns": ["apps/cli/**/*.ts"]
+                "lintFilePatterns": [
+                    "apps/cli/**/*.ts",
+                    "apps/cli/package.json"
+                ]
             }
         },
         "test": {

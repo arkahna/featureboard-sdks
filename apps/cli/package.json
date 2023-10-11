@@ -1,9 +1,11 @@
 {
     "name": "@featureboard/cli",
     "version": "0.0.0",
-    "main": "tsc-out/index.js",
     "license": "MIT",
-    "sideEffects": false,
+    "dependencies": {},
+    "type": "commonjs",
+    "main": "./index.cjs",
+    "bin": "./main.cjs",
     "repository": {
         "type": "git",
         "url": "git+https://github.com/featureboard/sdks.git"
@@ -14,10 +16,5 @@
     ],
     "bugs": {
         "url": "https://github.com/featureboard/sdks/issues"
-    },
-    "homepage": "https://github.com/featureboard/sdks/tree/master/libs/node-sdk",
-    "publishConfig": {
-        "main": "dist/index.js",
-        "module": "dist/esm/index.js"
     }
 }

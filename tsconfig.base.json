@@ -15,10 +15,10 @@
         "baseUrl": ".",
         "strict": true,
         "paths": {
+            "@featureboard/cli": ["apps/cli/src/index.ts"],
             "@featureboard/code-generator": [
                 "libs/code-generator/src/index.ts"
             ],
-            "@featureboard/cli": ["apps/cli/src/index.ts"],
             "@featureboard/contracts": ["libs/contracts/src/index.ts"],
             "@featureboard/js-sdk": ["libs/js-sdk/src/index.ts"],
             "@featureboard/live-connection": [
