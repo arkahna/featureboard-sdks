@@ -4,8 +4,12 @@
     "license": "MIT",
     "dependencies": {},
     "type": "commonjs",
-    "main": "./index.cjs",
-    "bin": "./main.cjs",
+    "main": "./dist/index.js",
+    "bin": "./dist/main.js",
+    "files": [
+        "dist/**/*",
+        "dist/templates/**/*"
+    ],
     "repository": {
         "type": "git",
         "url": "git+https://github.com/featureboard/sdks.git"

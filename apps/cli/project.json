@@ -8,13 +8,13 @@
             "executor": "@nx/esbuild:esbuild",
             "outputs": ["{options.outputPath}"],
             "defaultConfiguration": "production",
+            "bundle": true,
             "options": {
                 "outputPath": "apps/cli/dist",
                 "main": "apps/cli/src/main.ts",
                 "tsConfig": "apps/cli/tsconfig.app.json",
                 "assets": [
                     "./apps/cli/*.md",
-                    "./apps/cli/package.json",
                     {
                         "input": "./libs/code-generator/src/lib",
                         "glob": "**/*.template",
@@ -25,7 +25,10 @@
                 "additionalEntryPoints": ["apps/cli/src/index.ts"],
                 "format": ["cjs"],
                 "esbuildOptions": {
-                    "sourcemap": true
+                    "sourcemap": true,
+                    "outExtension": {
+                        ".js": ".js"
+                    }
                 }
             }
         },
@@ -53,6 +56,7 @@
             "executor": "nx:run-commands",
             "options": {
                 "commands": [
+                    "(rm ./dist/package.json || del \"dist\\package.json\")",
                     "tsc --project tsconfig.app.json --emitDeclarationOnly --declaration --outDir dist"
                 ],
                 "cwd": "apps/cli",
