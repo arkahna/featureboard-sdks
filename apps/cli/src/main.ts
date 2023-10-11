@@ -44,7 +44,7 @@ program
     .option(
         '-n, --nonInteractive',
         "Don't prompt for missing options",
-        !!process.env.CI,
+        !!process.env['CI'],
     )
     .action(async (options) => {
         if (!options.quiet) console.log(titleText)
@@ -87,8 +87,9 @@ program
         if (!options.nonInteractive && promptsSet.length >= 1) {
             const result = await prompts(promptsSet)
 
-            options.templateType = options.templateType ?? result.templateType
-            bearerToken = result.bearerToken
+            options.templateType =
+                options.templateType ?? result['templateType']
+            bearerToken = result['bearerToken']
         }
 
         if (!options.templateType) throw new Error('Template type is not set')

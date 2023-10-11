@@ -72,7 +72,7 @@ async function getFeatures({
 
     if (featureBoardKey) headers['x-api-key'] = featureBoardKey
     else if (featureBoardBearerToken) {
-        headers.Authorization = `Bearer ${featureBoardBearerToken}`
+        headers['Authorization'] = `Bearer ${featureBoardBearerToken}`
 
         let organizationId: string | undefined
         if (interactive) {

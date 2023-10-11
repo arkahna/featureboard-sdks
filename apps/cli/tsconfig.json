@@ -1,17 +1,27 @@
 {
     "extends": "../../tsconfig.base.json",
+    "compilerOptions": {
+        "module": "commonjs",
+        "forceConsistentCasingInFileNames": true,
+        "strict": true,
+        "noImplicitOverride": true,
+        "noPropertyAccessFromIndexSignature": true,
+        "noImplicitReturns": true,
+        "noFallthroughCasesInSwitch": true,
+        "esModuleInterop": true,
+        "resolveJsonModule": true
+    },
     "files": [],
     "include": [],
     "references": [
+        {
+            "path": "../../libs/code-generator"
+        },
         {
             "path": "./tsconfig.app.json"
         },
         {
             "path": "./tsconfig.spec.json"
         }
-    ],
-    "compilerOptions": {
-        "esModuleInterop": true,
-        "resolveJsonModule": true
-    }
+    ]
 }
