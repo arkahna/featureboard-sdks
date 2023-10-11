@@ -24,4 +24,4 @@ How to setup and use FeatureBoard NodeJS SDK can be found in our [documentation]
 
 ## Release notes
 
-You can find our [changelog here](CHANGELOG.md).
+You can find our [changelog here](/libs/node-sdk/CHANGELOG.md).

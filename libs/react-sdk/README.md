@@ -22,4 +22,4 @@ How to setup and use FeatureBoard React SDK can be found in our [documentation](
 
 ## Release notes
 
-You can find our [changelog here](CHANGELOG.md).
+You can find our [changelog here](/libs/react-sdk/CHANGELOG.md).

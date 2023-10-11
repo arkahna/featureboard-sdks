@@ -23,4 +23,4 @@ How to setup and use FeatureBoard JavaScript SDK can be found in our [documentat
 
 ## Release notes
 
-You can find our [changelog here](CHANGELOG.md).
+You can find our [changelog here](/libs/js-sdk/CHANGELOG.md).

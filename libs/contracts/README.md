@@ -38,4 +38,4 @@ The advantages of using TypeScript type definitions are:
 
 ## Release notes
 
-You can find our [changelog here](CHANGELOG.md).
+You can find our [changelog here](/libs/contracts/CHANGELOG.md).
