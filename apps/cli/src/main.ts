@@ -7,13 +7,18 @@ import {
     printChanges,
 } from '@featureboard/code-generator'
 import * as figlet from 'figlet'
+import * as fsSync from 'fs'
 import fs from 'fs/promises'
 import path from 'path'
 import { exit } from 'process'
 import prompts from 'prompts'
-import * as packageJson from '../package.json'
 
-const titleText = figlet.textSync('FeatureBoard CLI')
+const packageJson = JSON.parse(
+    fsSync.readFileSync(path.join(__filename, '../package.json'), {
+        encoding: 'utf8',
+    }),
+)
+const titleText = figlet.textSync(`FeatureBoard CLI V${packageJson.version}`)
 
 const program = new Command()
     .description(`${titleText}\nA Code generator for FeatureBoard`)
