@@ -214,7 +214,7 @@ importers:
   libs/js-sdk:
     dependencies:
       '@featureboard/contracts':
-        specifier: workspace:0.3.1
+        specifier: workspace:0.3.2
         version: link:../contracts
       debug:
         specifier: ^4.3.4
@@ -226,7 +226,7 @@ importers:
   libs/live-connection:
     dependencies:
       '@featureboard/contracts':
-        specifier: workspace:0.3.1
+        specifier: workspace:0.3.2
         version: link:../contracts
       debug:
         specifier: ^4.3.4
@@ -241,7 +241,7 @@ importers:
   libs/node-sdk:
     dependencies:
       '@featureboard/js-sdk':
-        specifier: workspace:0.13.1
+        specifier: workspace:0.13.2
         version: link:../js-sdk
       debug:
         specifier: ^4.3.4
@@ -255,7 +255,7 @@ importers:
   libs/react-sdk:
     dependencies:
       '@featureboard/js-sdk':
-        specifier: workspace:0.13.1
+        specifier: workspace:0.13.2
         version: link:../js-sdk
       debug:
         specifier: ^4.3.4

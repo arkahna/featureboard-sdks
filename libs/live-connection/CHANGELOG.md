@@ -1,5 +1,12 @@
 # @featureboard/live-connection
 
+## 0.2.2
+
+### Patch Changes
+
+- Updated dependencies [[`ffbe263`](https://github.com/arkahna/featureboard-sdks/commit/ffbe263aa2008fd22b34fda0db79dae3e00c2746)]:
+  - @featureboard/contracts@0.3.2
+
 ## 0.2.1
 
 ### Patch Changes

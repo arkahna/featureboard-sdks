@@ -1,5 +1,14 @@
 # @featureboard/js-sdk
 
+## 0.13.2
+
+### Patch Changes
+
+- [#32](https://github.com/arkahna/featureboard-sdks/pull/32) [`ffbe263`](https://github.com/arkahna/featureboard-sdks/commit/ffbe263aa2008fd22b34fda0db79dae3e00c2746) Thanks [@idadaniels](https://github.com/idadaniels)! - Fix readme links
+
+- Updated dependencies [[`ffbe263`](https://github.com/arkahna/featureboard-sdks/commit/ffbe263aa2008fd22b34fda0db79dae3e00c2746)]:
+  - @featureboard/contracts@0.3.2
+
 ## 0.13.1
 
 ### Patch Changes
