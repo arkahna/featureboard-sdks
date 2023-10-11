@@ -21,7 +21,7 @@
                         "output": "./"
                     }
                 ],
-                "generatePackageJson": true,
+                "generatePackageJson": false,
                 "additionalEntryPoints": ["apps/cli/src/index.ts"],
                 "format": ["cjs"],
                 "esbuildOptions": {
@@ -53,8 +53,10 @@
             "executor": "nx:run-commands",
             "options": {
                 "commands": [
-                    "tsc --project  tsconfig.app.json --emitDeclarationOnly --declaration --outDir dist"
-                ]
+                    "tsc --project tsconfig.app.json --emitDeclarationOnly --declaration --outDir dist"
+                ],
+                "cwd": "apps/cli",
+                "parallel": false
             },
             "defaultConfiguration": "production",
             "dependsOn": ["build"]
