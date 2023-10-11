@@ -1,5 +1,11 @@
 # @featureboard/cli
 
+## 0.1.1
+
+### Patch Changes
+
+- [#33](https://github.com/arkahna/featureboard-sdks/pull/33) [`a08a0d0`](https://github.com/arkahna/featureboard-sdks/commit/a08a0d03c76a9bb2ebd7716639f6e1fa7a669b1d) Thanks [@emlyn-arkahna](https://github.com/emlyn-arkahna)! - Update build process
+
 ## 0.1.0
 
 ### Minor Changes
