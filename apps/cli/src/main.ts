@@ -30,7 +30,7 @@ const templateTypeChoices = ['dotnet-api']
 program
     .command('code-gen')
     .description('A Code generator for feature board')
-    .requiredOption('-p, --output-path <path>', 'Output location')
+    .option('-p, --output-path <path>', 'Output path')
     .addOption(
         new Option(
             '-t, --templateType <template>',
@@ -49,15 +49,16 @@ program
     .action(async (options) => {
         if (!options.quiet) console.log(titleText)
 
-        const sanitisedOutputPath = options.outputPath.replace('../', './')
-        const outputPath = path.join(process.cwd(), sanitisedOutputPath)
-        try {
-            await fs.access(outputPath)
-        } catch {
-            throw new Error(`Output path doesn't exist: ${outputPath}`)
+        const promptsSet: Array<prompts.PromptObject<string>> = []
+        if (!options.outputPath) {
+            promptsSet.push({
+                type: 'text',
+                name: 'outputPath',
+                message: `Enter the output path for the generated code.`,
+                validate: (x) => !!x,
+            })
         }
 
-        const promptsSet: Array<prompts.PromptObject<string>> = []
         if (!options.templateType) {
             if (templateTypeChoices.length == 1 && !options.nonInteractive) {
                 options.templateType = templateTypeChoices[0]
@@ -90,6 +91,18 @@ program
             options.templateType =
                 options.templateType ?? result['templateType']
             bearerToken = result['bearerToken']
+            options.outputPath = options.outputPath ?? result['outputPath']
+        }
+
+        const sanitisedOutputPath = (options.outputPath ?? '').replace(
+            '../',
+            './',
+        )
+        const outputPath = path.join(process.cwd(), sanitisedOutputPath)
+        try {
+            await fs.access(outputPath)
+        } catch {
+            throw new Error(`Output path doesn't exist: ${outputPath}`)
         }
 
         if (!options.templateType) throw new Error('Template type is not set')
