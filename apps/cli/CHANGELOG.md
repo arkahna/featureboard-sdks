@@ -1,5 +1,11 @@
 # @featureboard/cli
 
+## 0.1.3
+
+### Patch Changes
+
+- [#35](https://github.com/arkahna/featureboard-sdks/pull/35) [`28eba13`](https://github.com/arkahna/featureboard-sdks/commit/28eba13ed9def84a2a147ab00f9050c446f9afcd) Thanks [@emlyn-arkahna](https://github.com/emlyn-arkahna)! - Fix import location for package.json
+
 ## 0.1.2
 
 ### Patch Changes
