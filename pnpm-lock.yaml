@@ -217,8 +217,6 @@ importers:
         specifier: ^2.4.2
         version: 2.4.2
 
-  apps/cli/dist: {}
-
   apps/examples/dotnet-api: {}
 
   libs/code-generator: {}
