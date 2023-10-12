@@ -1,5 +1,11 @@
 # @featureboard/cli
 
+## 0.1.4
+
+### Patch Changes
+
+- [#36](https://github.com/arkahna/featureboard-sdks/pull/36) [`705f4ec`](https://github.com/arkahna/featureboard-sdks/commit/705f4ece1cd437a71ff96200839aca5fd94be184) Thanks [@emlyn-arkahna](https://github.com/emlyn-arkahna)! - Allow users to provide an output path if missing
+
 ## 0.1.3
 
 ### Patch Changes
