@@ -13,6 +13,7 @@
                 "outputPath": "apps/cli/dist",
                 "main": "apps/cli/src/main.ts",
                 "tsConfig": "apps/cli/tsconfig.app.json",
+                "bundle": true,
                 "assets": [
                     "./apps/cli/*.md",
                     {
@@ -21,7 +22,7 @@
                         "output": "./"
                     }
                 ],
-                "generatePackageJson": false,
+                "generatePackageJson": true,
                 "additionalEntryPoints": ["apps/cli/src/index.ts"],
                 "format": ["cjs"],
                 "esbuildOptions": {
