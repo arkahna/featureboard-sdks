@@ -2,7 +2,7 @@ import { EffectiveFeatureValue } from '@featureboard/contracts'
 import { rest } from 'msw'
 import { setupServer } from 'msw/node'
 import { describe, expect, it } from 'vitest'
-import { createBrowserClient } from '../client'
+import { createBrowserClient } from '../create-browser-client'
 
 describe('Manual update mode', () => {
     it('fetches initial values', async () => {

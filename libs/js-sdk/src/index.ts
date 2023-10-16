@@ -1,9 +1,13 @@
-export * from './client'
-export * from './client-connection'
-export * from './ensure-single'
-export * from './featureboard-api-config'
-export * from './featureboard-service-urls'
-export * from './features-client'
-export * from './utils/retry'
+export { BrowserClient } from './client-connection'
+export { createBrowserClient } from './create-browser-client'
+export { createManualClient } from './create-manual-client'
+export { FeatureBoardApiConfig } from './featureboard-api-config'
+export { FeatureBoardClient } from './features-client'
+
+// TODO We should make these 'internal' and not export them
+// Need to figure out how to do that with the current build setup
+export { createEnsureSingle } from './ensure-single'
+export { featureBoardHostedService } from './featureboard-service-urls'
+export { retry } from './utils/retry'
 
 export interface Features {}

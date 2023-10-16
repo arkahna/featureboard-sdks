@@ -1,3 +1,4 @@
+import { EffectiveFeatureValue } from '@featureboard/contracts'
 import {
     FeatureBoardApiConfig,
     FeatureBoardClient,
@@ -11,7 +12,6 @@ import { AllFeatureStateStore } from './feature-state-store'
 import { debugLog } from './log'
 import { resolveUpdateStrategy } from './update-strategies/resolveUpdateStrategy'
 import { UpdateStrategies } from './update-strategies/update-strategies'
-import { EffectiveFeatureValue } from '@featureboard/contracts'
 
 const serverConnectionDebug = debugLog.extend('server-connection')
 
@@ -32,7 +32,7 @@ export interface CreateServerClientOptions {
      * manual - will not proactively update
      * live - uses websockets for near realtime updates
      * polling - checks with the featureboard service every 30seconds (or configured interval) for updates
-     * on-request - checks for updates on every request - see docs for how to enable HTTP caching in node
+     * on-request - checks for updates on every request
      */
     updateStrategy?: UpdateStrategies | UpdateStrategies['kind']
 
@@ -111,7 +111,7 @@ export function createServerClient({
                 ? addUserWarnings(
                       request.then(() => syncRequest(stateStore, audienceKeys)),
                   )
-                : addSyncUserWarnings(syncRequest(stateStore, audienceKeys))
+                : makeRequestClient(syncRequest(stateStore, audienceKeys))
         },
         updateFeatures() {
             return updateStrategyImplementation.updateFeatures()
@@ -138,8 +138,10 @@ function addUserWarnings(
     return client as any
 }
 
-/** Adds warnings to the promise if the user doesn't await it */
-function addSyncUserWarnings(
+/**
+ * Makes a request client which is can be awaited or not
+ **/
+export function makeRequestClient(
     client: FeatureBoardClient,
 ): FeatureBoardClient & PromiseLike<FeatureBoardClient> {
     return client as any

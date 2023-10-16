@@ -1,5 +1,5 @@
-import { EffectiveFeatureValue } from '@featureboard/contracts'
 import { Features } from '.'
+import { FeatureBoardEffectiveStateJS } from './js-state'
 
 export interface FeatureBoardClient {
     getFeatureValue<T extends keyof Features>(
@@ -18,8 +18,5 @@ export interface FeatureBoardClient {
         onValue: (value: Features[T]) => void,
     ): () => void
 
-    getEffectiveValues(): {
-        audiences: string[]
-        effectiveValues: EffectiveFeatureValue[]
-    }
+    getEffectiveValues(): FeatureBoardEffectiveStateJS
 }
