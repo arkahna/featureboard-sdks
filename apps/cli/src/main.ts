@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { Command, Option } from '@commander-js/extra-typings'
 import {
     FsTree,
@@ -107,7 +109,11 @@ program
 
         if (!options.templateType) throw new Error('Template type is not set')
         if (!options.featureBoardKey && !bearerToken)
-            throw new Error('Feature Board Key is not set')
+            throw new Error(
+                options.nonInteractive
+                    ? 'Feature Board Key is not set'
+                    : 'Bearer token is not set',
+            )
 
         const tree = new FsTree(process.cwd(), options.verbose)
         await codeGenerator({
