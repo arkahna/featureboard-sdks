@@ -83,13 +83,13 @@ async function getFeatures({
             if (organisationResults.organizations.length === 1) {
                 organizationId = organisationResults.organizations[0].id
                 console.log(
-                    `One organization found. Setting feature board organization to ${organizationId}`,
+                    `One organization found. Setting FeatureBoard organization to ${organizationId}`,
                 )
             } else {
                 const promptResult = await promptsInternal({
                     type: 'select',
                     name: 'organizations',
-                    message: `Pick your feature board organisation?`,
+                    message: `Pick your FeatureBoard organisation?`,
                     validate: (x) =>
                         organisationResults.organizations
                             .map((x) => x.name)
@@ -121,13 +121,13 @@ async function getFeatures({
         if (projectResults.projects.length === 1) {
             project = projectResults.projects[0]
             console.log(
-                `One project found. Setting feature board project to ${project.name}`,
+                `One project found. Setting FeatureBoard project to ${project.name}`,
             )
         } else {
             const promptResult = await promptsInternal({
                 type: 'select',
                 name: 'project',
-                message: `Pick feature board project?`,
+                message: `Pick your FeatureBoard project?`,
                 validate: (x) =>
                     projectResults.projects.map((x) => x.name).includes(x),
                 choices: projectResults.projects.map((x) => ({

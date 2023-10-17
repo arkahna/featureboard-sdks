@@ -32,12 +32,12 @@
 
         "featureBoardProjectName": {
             "type": "string",
-            "description": "The name of the feature board project you want to pull the types from."
+            "description": "The name of the FeatureBoard project you want to pull the types from."
         },
 
         "featureBoardKey": {
             "type": "string",
-            "description": "The feature board API key."
+            "description": "The FeatureBoard API key."
         },
 
         "subFolder": {

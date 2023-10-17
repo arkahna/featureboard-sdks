@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { Command, Option } from '@commander-js/extra-typings'
 import {
     FsTree,
@@ -29,7 +31,7 @@ if (!process.argv.slice(2).length) {
 const templateTypeChoices = ['dotnet-api']
 program
     .command('code-gen')
-    .description('A Code generator for feature board')
+    .description('A Code generator for FeatureBoard')
     .option('-p, --output-path <path>', 'Output path')
     .addOption(
         new Option(
@@ -79,7 +81,7 @@ program
             promptsSet.push({
                 type: 'password',
                 name: 'bearerToken',
-                message: `Enter your feature board bearer token:`,
+                message: `Enter your featureboard bearer token:`,
                 validate: (x) => !!x,
             })
         }
@@ -107,7 +109,11 @@ program
 
         if (!options.templateType) throw new Error('Template type is not set')
         if (!options.featureBoardKey && !bearerToken)
-            throw new Error('Feature Board Key is not set')
+            throw new Error(
+                options.nonInteractive
+                    ? 'FeatureBoard Key is not set'
+                    : 'Bearer token is not set',
+            )
 
         const tree = new FsTree(process.cwd(), options.verbose)
         await codeGenerator({
