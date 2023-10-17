@@ -31,7 +31,7 @@ if (!process.argv.slice(2).length) {
 const templateTypeChoices = ['dotnet-api']
 program
     .command('code-gen')
-    .description('A Code generator for feature board')
+    .description('A Code generator for FeatureBoard')
     .option('-p, --output-path <path>', 'Output path')
     .addOption(
         new Option(
@@ -81,7 +81,7 @@ program
             promptsSet.push({
                 type: 'password',
                 name: 'bearerToken',
-                message: `Enter your feature board bearer token:`,
+                message: `Enter your featureboard bearer token:`,
                 validate: (x) => !!x,
             })
         }
@@ -111,7 +111,7 @@ program
         if (!options.featureBoardKey && !bearerToken)
             throw new Error(
                 options.nonInteractive
-                    ? 'Feature Board Key is not set'
+                    ? 'FeatureBoard Key is not set'
                     : 'Bearer token is not set',
             )
 

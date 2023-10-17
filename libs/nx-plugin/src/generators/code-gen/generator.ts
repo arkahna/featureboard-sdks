@@ -16,7 +16,7 @@ export async function codeGenGenerator(
             {
                 type: 'password',
                 name: 'bearerToken',
-                message: `Enter your feature board bearer token:`,
+                message: `Enter your FeatureBoard bearer token:`,
                 validate: (x) => !!x,
             },
         ])
