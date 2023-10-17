@@ -2,7 +2,7 @@ import { EffectiveFeatureValue } from '@featureboard/contracts'
 import { rest } from 'msw'
 import { setupServer } from 'msw/node'
 import { describe, expect, it } from 'vitest'
-import { createBrowserClient } from '../client'
+import { createBrowserClient } from '../create-browser-client'
 import { featureBoardHostedService } from '../featureboard-service-urls'
 
 describe('http client', () => {
@@ -148,7 +148,7 @@ describe('http client', () => {
                         ctx.json(values),
                         ctx.status(200),
                         ctx.set({
-                            'etag': lastModified,
+                            etag: lastModified,
                         }),
                     ),
             ),
@@ -212,7 +212,7 @@ describe('http client', () => {
                             ctx.json(newValues),
                             ctx.status(200),
                             ctx.set({
-                                'etag': newLastModified,
+                                etag: newLastModified,
                             }),
                         )
                     }
@@ -220,7 +220,7 @@ describe('http client', () => {
                         ctx.json(values),
                         ctx.status(200),
                         ctx.set({
-                            'etag': lastModified,
+                            etag: lastModified,
                         }),
                     )
                 },
@@ -256,44 +256,48 @@ describe('http client', () => {
         }
     })
 
-    it('can start with last known good config', async () => {
-        const server = setupServer(
-            rest.get(
-                'https://client.featureboard.app/effective',
-                (_req, res, ctx) => res(ctx.status(500)),
-            ),
-        )
-        server.listen()
-
-        try {
-            const client = createBrowserClient({
-                environmentApiKey: 'env-api-key',
-                api: featureBoardHostedService,
-                audiences: ['audience1'],
-                initialValues: [
-                    {
-                        featureKey: 'my-feature',
-                        value: 'service-default-value',
-                    },
-                ],
-                updateStrategy: { kind: 'manual' },
-            })
-
-            const value = client.client.getFeatureValue(
-                'my-feature',
-                'default-value',
+    it(
+        'can start with last known good config',
+        async () => {
+            const server = setupServer(
+                rest.get(
+                    'https://client.featureboard.app/effective',
+                    (_req, res, ctx) => res(ctx.status(500)),
+                ),
             )
-            expect(client.initialised).toEqual(false)
-            expect(value).toEqual('service-default-value')
-            await expect(async () => {
-                await client.waitForInitialised()
-            }).rejects.toThrowError('500')
-            expect(client.initialised).toEqual(true)
-        } finally {
-            server.resetHandlers()
-            server.close()
-        }
-    }, { timeout: 60000 })
+            server.listen()
+
+            try {
+                const client = createBrowserClient({
+                    environmentApiKey: 'env-api-key',
+                    api: featureBoardHostedService,
+                    audiences: ['audience1'],
+                    initialValues: [
+                        {
+                            featureKey: 'my-feature',
+                            value: 'service-default-value',
+                        },
+                    ],
+                    updateStrategy: { kind: 'manual' },
+                })
+
+                const value = client.client.getFeatureValue(
+                    'my-feature',
+                    'default-value',
+                )
+                expect(client.initialised).toEqual(false)
+                expect(value).toEqual('service-default-value')
+                await expect(async () => {
+                    await client.waitForInitialised()
+                }).rejects.toThrowError('500')
+                expect(client.initialised).toEqual(true)
+            } finally {
+                server.resetHandlers()
+                server.close()
+            }
+        },
+        { timeout: 60000 },
+    )
 
     it('Handles updating audience', async () => {
         const values: EffectiveFeatureValue[] = [
@@ -322,7 +326,7 @@ describe('http client', () => {
                             ctx.json(newValues),
                             ctx.status(200),
                             ctx.set({
-                                'etag': newLastModified,
+                                etag: newLastModified,
                             }),
                         )
                     }
@@ -330,7 +334,7 @@ describe('http client', () => {
                         ctx.json(values),
                         ctx.status(200),
                         ctx.set({
-                            'etag': lastModified,
+                            etag: lastModified,
                         }),
                     )
                 },
@@ -407,7 +411,7 @@ describe('http client', () => {
                             ctx.json(newValues),
                             ctx.status(200),
                             ctx.set({
-                                'etag': newLastModified,
+                                etag: newLastModified,
                             }),
                         )
                     }
@@ -420,7 +424,7 @@ describe('http client', () => {
                         ctx.json(values),
                         ctx.status(200),
                         ctx.set({
-                            'etag': lastModified,
+                            etag: lastModified,
                         }),
                     )
                 },
@@ -496,7 +500,7 @@ describe('http client', () => {
                             ctx.json(newValues),
                             ctx.status(200),
                             ctx.set({
-                                'etag': newLastModified,
+                                etag: newLastModified,
                             }),
                         )
                     }
@@ -504,7 +508,7 @@ describe('http client', () => {
                         ctx.json(values),
                         ctx.status(200),
                         ctx.set({
-                            'etag': lastModified,
+                            etag: lastModified,
                         }),
                     )
                 },

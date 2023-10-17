@@ -2,7 +2,7 @@ import { EffectiveFeatureValue } from '@featureboard/contracts'
 import { rest } from 'msw'
 import { setupServer } from 'msw/node'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { createBrowserClient } from '../client'
+import { createBrowserClient } from '../create-browser-client'
 import { interval } from '../interval'
 
 beforeEach(() => {

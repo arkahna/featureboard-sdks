@@ -1,7 +1,7 @@
 import { EffectiveFeatureValue } from '@featureboard/contracts'
 import { debugLog } from './log'
 
-type FeatureValue = EffectiveFeatureValue['value'] | undefined
+export type FeatureValue = EffectiveFeatureValue['value'] | undefined
 
 const stateStoreDebug = debugLog.extend('state-store')
 
@@ -12,12 +12,9 @@ export class EffectiveFeatureStateStore {
         (featureKey: string, value: FeatureValue) => void
     > = []
 
-    constructor(
-        audiences: string[],
-        initialValues?: EffectiveFeatureValue[],
-    ) {
+    constructor(audiences: string[], initialValues?: EffectiveFeatureValue[]) {
         this._audiences = audiences
-        
+
         for (const value of initialValues || []) {
             this._store[value.featureKey] = value.value
         }

@@ -4,7 +4,7 @@
  * manual - will not proactively update
  * live - uses websockets for near realtime updates
  * polling - checks with the featureboard service every 30seconds (or configured interval) for updates
- * on-request - checks for updates on every request - see docs for how to enable HTTP caching in node
+ * on-request - checks for updates on every request
  */
 
 import type { LiveOptions } from '@featureboard/live-connection'
