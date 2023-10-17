@@ -1,5 +1,11 @@
 # @featureboard/js-sdk
 
+## 0.14.0
+
+### Minor Changes
+
+- [#37](https://github.com/arkahna/featureboard-sdks/pull/37) [`81147bc`](https://github.com/arkahna/featureboard-sdks/commit/81147bc3a36f6ee390ecbe28e4281ad3f5eae635) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Add manual client which can be used to easily provide static feature values
+
 ## 0.13.2
 
 ### Patch Changes
