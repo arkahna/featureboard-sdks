@@ -1,5 +1,11 @@
 # @featureboard/node-sdk
 
+## 0.16.0
+
+### Minor Changes
+
+- [#40](https://github.com/arkahna/featureboard-sdks/pull/40) [`c35ba12`](https://github.com/arkahna/featureboard-sdks/commit/c35ba12fb831185607d3e91b574d43772f80785f) Thanks [@JakeGinnivan](https://github.com/JakeGinnivan)! - Add manualServerClient which enables using the manualClient on the server easily
+
 ## 0.15.3
 
 ### Patch Changes
