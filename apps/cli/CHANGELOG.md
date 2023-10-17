@@ -1,5 +1,11 @@
 # @featureboard/cli
 
+## 0.1.5
+
+### Patch Changes
+
+- [#38](https://github.com/arkahna/featureboard-sdks/pull/38) [`7c2a99a`](https://github.com/arkahna/featureboard-sdks/commit/7c2a99a52449a7c1a055bfc9b8bc1befacd13317) Thanks [@emlyn-arkahna](https://github.com/emlyn-arkahna)! - Add shebang to cli
+
 ## 0.1.4
 
 ### Patch Changes
