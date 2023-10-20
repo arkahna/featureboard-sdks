@@ -1,5 +1,11 @@
 # @featureboard/cli
 
+## 0.1.6
+
+### Patch Changes
+
+- [#41](https://github.com/arkahna/featureboard-sdks/pull/41) [`3a05f7c`](https://github.com/arkahna/featureboard-sdks/commit/3a05f7cc1829c7893bdc4894f024670708464c03) Thanks [@emlyn-arkahna](https://github.com/emlyn-arkahna)! - Remove trace log from cli errors if verbose flag is not set
+
 ## 0.1.5
 
 ### Patch Changes
