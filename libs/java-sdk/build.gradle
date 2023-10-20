@@ -1,0 +1,35 @@
+plugins {
+  // Apply the java-library plugin for API and implementation separation.
+  id 'java-library'
+  id 'maven-publish'
+}
+
+version = '0.0.1-SNAPSHOT'
+
+repositories {
+  // Use Maven Central for resolving dependencies.
+  mavenCentral()
+  mavenLocal()
+}
+
+dependencies {
+  // Use JUnit test framework.
+  testImplementation 'junit:junit:4.13.2'
+  // This dependency is exported to consumers, that is to say found on their compile classpath.
+  api 'org.apache.commons:commons-math3:3.6.1'
+  // This dependency is used internally, and not exposed to consumers on their own compile classpath.
+  implementation 'com.google.guava:guava:32.1.1-jre'
+  implementation 'com.fasterxml.jackson.core:jackson-annotations:2.15.3'
+  implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.3'
+  implementation 'org.springframework:spring-web:6.0.13'
+  implementation 'org.springframework:spring-context:6.0.13'
+  implementation 'org.springframework:spring-webmvc:6.0.13'
+}
+
+// Apply a specific Java toolchain to ease working on different environments.
+java {
+  toolchain {
+    // NOTE: Gradle 8.4 does not have full support for Java 21 yet
+    languageVersion = JavaLanguageVersion.of(21)
+  }
+}
