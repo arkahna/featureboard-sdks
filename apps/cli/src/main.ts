@@ -56,7 +56,7 @@ program
     )
     .option('-k, --featureBoardKey <key>', 'FeatureBoard api key')
     .option('-d, --dryRun', 'Dry run show what files have changed', false)
-    .option('-q, --quiet', "Don't show changes", false)
+    .option('-q, --quiet', "Don't show file changes", false)
     .option(
         '-v, --verbose',
         'Verbose output, show additional logging and tracing',
