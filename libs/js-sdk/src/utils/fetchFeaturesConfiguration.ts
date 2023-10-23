@@ -1,8 +1,8 @@
 import { EffectiveFeatureValue } from '@featureboard/contracts'
+import { EffectiveFeatureStateStore } from '../effective-feature-state-store'
 import { getEffectiveEndpoint } from '../update-strategies/getEffectiveEndpoint'
 import { compareArrays } from './compare-arrays'
 import { httpClientDebug } from './http-log'
-import { EffectiveFeatureStateStore } from '../effective-feature-state-store'
 
 export async function fetchFeaturesConfigurationViaHttp(
     featureBoardEndpoint: string,
@@ -30,7 +30,9 @@ export async function fetchFeaturesConfigurationViaHttp(
 
     if (response.status !== 200 && response.status !== 304) {
         httpClientDebug(
-            `Failed to fetch updates (%o): ${response.status}`,
+            `Failed to fetch updates (%o): ${
+                response.status
+            } (${await response.text()})`,
             audiences,
         )
         throw new Error(
