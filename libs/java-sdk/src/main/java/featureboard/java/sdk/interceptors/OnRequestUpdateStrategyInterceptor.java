@@ -1,7 +1,8 @@
 package featureboard.java.sdk.interceptors;
 
 
-import featureboard.java.sdk.interfaces.FeatureBoardServiceInterface;
+import featureboard.java.sdk.FeatureBoardServiceImpl;
+import featureboard.java.sdk.interfaces.FeatureBoardService;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.stereotype.Component;
@@ -12,13 +13,12 @@ import java.util.logging.Logger;
 
 @Component
 public class OnRequestUpdateStrategyInterceptor implements HandlerInterceptor {
+  // We do specifically want the FeatureBoardServiceImpl here, not FeatureBoardLastCheckedServiceImpl
+  private final FeatureBoardServiceImpl featureBoardService;
+  private static final Logger logger = Logger.getLogger(OnRequestUpdateStrategyInterceptor.class.getName());
 
-  private final FeatureBoardServiceInterface featureBoardService;
-  private final Logger logger;
-
-  public OnRequestUpdateStrategyInterceptor(FeatureBoardServiceInterface featureBoardService, Logger logger) {
+  public OnRequestUpdateStrategyInterceptor(FeatureBoardServiceImpl featureBoardService) {
     this.featureBoardService = featureBoardService;
-    this.logger = logger;
   }
 
   // Note: no override? this is odd
@@ -27,7 +27,7 @@ public class OnRequestUpdateStrategyInterceptor implements HandlerInterceptor {
       // Note: the .net version will context.RequestAborted here - we are not. Implications of this?
       featureBoardService.refreshFeatureConfiguration();
     } catch (Exception ex) {
-      // TODO: logging
+      // TODO: logging tidy up
       logger.severe("Error refreshing feature configuration");
       logger.severe(ex.getMessage());
     }

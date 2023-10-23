@@ -3,6 +3,7 @@
  */
 package featureboard.java.sdk;
 
+//TODO: clean me up
 public class Library {
     public boolean someLibraryMethod() {
         return true;

@@ -24,12 +24,27 @@ dependencies {
   implementation 'org.springframework:spring-web:6.0.13'
   implementation 'org.springframework:spring-context:6.0.13'
   implementation 'org.springframework:spring-webmvc:6.0.13'
+  implementation 'org.springframework.boot:spring-boot-autoconfigure:3.1.5'
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
 java {
   toolchain {
     // NOTE: Gradle 8.4 does not have full support for Java 21 yet
-    languageVersion = JavaLanguageVersion.of(21)
+    languageVersion = JavaLanguageVersion.of(20)
+  }
+}
+
+publishing {
+  publications {
+    mavenJava(MavenPublication) {
+      groupId = 'FeatureBoard'
+      artifactId = 'java-sdk'
+      from components.java
+    }
+  }
+  repositories {
+    mavenLocal()
+    // TODO: add maven central when appropriate
   }
 }

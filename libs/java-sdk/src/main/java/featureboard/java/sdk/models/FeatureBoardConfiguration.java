@@ -4,23 +4,23 @@ package featureboard.java.sdk.models;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
+import org.springframework.validation.annotation.Validated;
 
 import java.net.URI;
 import java.time.Duration;
 
-import org.springframework.validation.annotation.Validated;
-
+// TODO: do we need component here?
 @Component
 @Configuration
 @Validated
 public class FeatureBoardConfiguration {
 
-  private URI httpEndpoint = URI.create("https://client.featureboard.app");
+  public URI httpEndpoint = URI.create("https://client.featureboard.app");
 
   @Value("${EnvironmentApiKey}")
-  private String environmentApiKey;
+  public String environmentApiKey;
 
-  private Duration maxAge = Duration.ofMinutes(1);
+  public Duration maxAge = Duration.ofMinutes(1);
 
   public URI getHttpEndpoint() {
     return httpEndpoint;

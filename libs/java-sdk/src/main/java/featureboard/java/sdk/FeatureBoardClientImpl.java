@@ -6,26 +6,25 @@ import featureboard.java.sdk.interfaces.AudienceProvider;
 import featureboard.java.sdk.interfaces.FeatureBoardClient;
 import featureboard.java.sdk.models.AudienceExceptionValue;
 import featureboard.java.sdk.state.FeatureBoardStateSnapshot;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
 
-// TODO: docu me?
-// TODO: naming standard?
+@Service
 public class FeatureBoardClientImpl implements FeatureBoardClient {
 
   private final FeatureBoardStateSnapshot _state;
   private final AudienceProvider _audienceProvider;
-  private final Logger _logger;
+  private final Logger _logger = Logger.getLogger(FeatureBoardClientImpl.class.getName());
   private final ObjectMapper objectMapper = new ObjectMapper();
 
 
-  public FeatureBoardClientImpl(FeatureBoardStateSnapshot state, AudienceProvider audienceProvider, Logger logger) {
+  public FeatureBoardClientImpl(FeatureBoardStateSnapshot state, AudienceProvider audienceProvider) {
     _state = state;
     _audienceProvider = audienceProvider;
-    _logger = logger;
   }
 
   @Override

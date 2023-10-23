@@ -1,21 +1,24 @@
 package featureboard.java.sdk;
 
-import featureboard.java.sdk.interfaces.FeatureBoardServiceInterface;
+import featureboard.java.sdk.interfaces.FeatureBoardService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.net.http.HttpClient;
 import java.util.concurrent.CompletableFuture;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Service
-public class FeatureBoardServiceImpl implements FeatureBoardServiceInterface {
+public class FeatureBoardServiceImpl implements FeatureBoardService {
 
-  private final Logger _logger;
+  private static final Logger logger = Logger.getLogger(FeatureBoardServiceImpl.class.getName());
+
   private final HttpClient httpClient;
 
-  public FeatureBoardServiceImpl(Logger logger, HttpClient httpClient) {
-    _logger = logger;
-    this.httpClient = httpClient;
+  public FeatureBoardServiceImpl() {
+    // TODO: any other customisations also
+    httpClient = HttpClient.newBuilder().build();
   }
 
   @Override

@@ -21,22 +21,24 @@ public class FeatureBoardHttpClientImpl implements FeatureBoardHttpClient {
   private static final String ACTION = "all";
 
   private final HttpClient httpClient;
+
   // Configured by spring down the line, TODO: check this supposition
 //  private final ShallowEtagHeaderFilter eTagProvider;
-  private final Consumer<List<FeatureValue>> processResult;
-  private final Logger _logger;
+  private Consumer<List<FeatureValue>> processResult;
+  private final Logger _logger = Logger.getLogger(FeatureBoardHttpClientImpl.class.getName());
   private final ObjectMapper objectMapper = new ObjectMapper();
 
 
-  public FeatureBoardHttpClientImpl(HttpClient httpClient,
-                                    Consumer<List<FeatureValue>> processResult, Logger logger) {
-    this.httpClient = httpClient;
+  // TODO: do I really need an action/consumer here?
+  public FeatureBoardHttpClientImpl() {
+    // TODO: any other customisations also
+    httpClient = HttpClient.newBuilder().build();
+    // TODO: fix etag work
 //    this.eTagProvider = eTagProvider;
-    this.processResult = processResult;
-    _logger = logger;
   }
 
 
+  // TODO: pass the changed featureValues in here?
   @Override
   public CompletableFuture<Boolean> refreshFeatureConfiguration() {
     var requestBuilder = HttpRequest.newBuilder()
@@ -87,5 +89,13 @@ public class FeatureBoardHttpClientImpl implements FeatureBoardHttpClient {
       throw new RuntimeException(e);
     }
     return data;
+  }
+
+  public Consumer<List<FeatureValue>> getProcessResult() {
+    return processResult;
+  }
+
+  public void setProcessResult(Consumer<List<FeatureValue>> processResult) {
+    this.processResult = processResult;
   }
 }
