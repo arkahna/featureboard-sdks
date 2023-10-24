@@ -1,6 +1,6 @@
 {
     "name": "@featureboard/nx-plugin",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "type": "module",
     "generators": "./generators.json",
     "dependencies": {

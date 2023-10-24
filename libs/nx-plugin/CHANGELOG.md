@@ -1,5 +1,11 @@
 # @featureboard/nx-plugin
 
+## 0.0.3
+
+### Patch Changes
+
+- [#44](https://github.com/arkahna/featureboard-sdks/pull/44) [`e54d3c4`](https://github.com/arkahna/featureboard-sdks/commit/e54d3c47dc196d1c9a2f0d05e43c3f749533a0ae) Thanks [@emlyn-arkahna](https://github.com/emlyn-arkahna)! - Test as a module
+
 ## 0.0.2
 
 ### Patch Changes
