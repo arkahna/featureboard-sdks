@@ -21,7 +21,9 @@
             "executor": "nx:run-commands",
             "options": {
                 "commands": [
-                    "tsup src/index.ts -d dist --sourcemap --format esm,cjs --legacy-output",
+                    "tsup src/index.ts -d dist --sourcemap --format esm --legacy-output --clean",
+                    "tsup src/index.ts -d dist/legacycjs --sourcemap --format cjs --legacy-output",
+                    "tsup src/index.ts -d dist --sourcemap --format esm,cjs",
                     "tsc --emitDeclarationOnly --declaration --outDir dist"
                 ],
                 "cwd": "libs/react-sdk",
