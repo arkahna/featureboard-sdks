@@ -1,21 +1,21 @@
 {
     "name": "@featureboard/js-sdk",
     "version": "0.14.0",
-    "main": "tsc-out/index.js",
+    "main": "src/index.ts",
     "license": "MIT",
     "sideEffects": false,
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/featureboard/sdks.git"
+        "url": "git+https://github.com/arkahna/featureboard-sdks.git"
     },
     "keywords": [
         "Feature toggle",
         "Feature flags"
     ],
     "bugs": {
-        "url": "https://github.com/featureboard/sdks/issues"
+        "url": "https://github.com/arkahna/featureboard-sdks/issues"
     },
-    "homepage": "https://github.com/featureboard/sdks/tree/master/libs/js-sdk#readme",
+    "homepage": "https://github.com/arkahna/featureboard-sdks/tree/master/libs/js-sdk#readme",
     "publishConfig": {
         "main": "dist/index.js",
         "module": "dist/esm/index.js"

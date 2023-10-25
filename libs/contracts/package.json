@@ -4,16 +4,16 @@
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/featureboard/sdks.git"
+        "url": "git+https://github.com/arkahna/featureboard-sdks.git"
     },
     "keywords": [
         "Feature toggle",
         "Feature flags"
     ],
     "bugs": {
-        "url": "https://github.com/featureboard/sdks/issues"
+        "url": "https://github.com/arkahna/featureboard-sdks/issues"
     },
-    "homepage": "https://github.com/featureboard/sdks/tree/master/libs/contracts#readme",
+    "homepage": "https://github.com/arkahna/featureboard-sdks/tree/master/libs/contracts#readme",
     "main": "tsc-out/index.js",
     "publishConfig": {
         "main": "dist/index.js",
