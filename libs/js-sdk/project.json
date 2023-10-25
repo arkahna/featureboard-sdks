@@ -5,7 +5,7 @@
     "sourceRoot": "libs/js-sdk/src",
     "targets": {
         "lint": {
-            "executor": "@nx/linter:eslint",
+            "executor": "@nx/eslint:lint",
             "options": {
                 "lintFilePatterns": ["libs/js-sdk/**/*.ts"]
             }

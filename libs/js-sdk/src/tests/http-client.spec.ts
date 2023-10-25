@@ -206,7 +206,9 @@ describe('http client', () => {
             rest.get(
                 'https://client.featureboard.app/effective',
                 (req, res, ctx) => {
-                    if (req.headers.get('if-none-match') === lastModified) {
+                    const ifNoneMatchHeader = req.headers.get('if-none-match')
+
+                    if (ifNoneMatchHeader === lastModified) {
                         const newLastModified = new Date().toISOString()
                         return res(
                             ctx.json(newValues),
@@ -216,6 +218,7 @@ describe('http client', () => {
                             }),
                         )
                     }
+
                     return res(
                         ctx.json(values),
                         ctx.status(200),
