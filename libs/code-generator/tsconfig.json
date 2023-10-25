@@ -1,17 +1,16 @@
 {
     "extends": "../../tsconfig.settings.json",
     "compilerOptions": {
-        "module": "commonjs",
-        "esModuleInterop": true
+        "outDir": "./tsc-out",
+        "rootDir": "./src",
+        "types": [
+            "node",
+            "vitest/globals",
+            "vitest/importMeta",
+            "vite/client",
+            "vitest"
+        ]
     },
-    "files": [],
-    "include": [],
-    "references": [
-        {
-            "path": "./tsconfig.lib.json"
-        },
-        {
-            "path": "./tsconfig.spec.json"
-        }
-    ]
+    "include": ["src/**/*.ts"],
+    "exclude": ["node_modules", "tsc-out", "dist"]
 }

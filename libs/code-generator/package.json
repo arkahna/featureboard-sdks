@@ -1,4 +1,33 @@
 {
     "name": "@featureboard/code-generator",
-    "version": "0.0.2"
+    "version": "0.0.2",
+    "type": "module",
+    "main": "src/index.ts",
+    "license": "MIT",
+    "sideEffects": false,
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/arkahna/featureboard-sdks.git"
+    },
+    "keywords": [
+        "Feature toggle",
+        "Feature flags"
+    ],
+    "bugs": {
+        "url": "https://github.com/arkahna/featureboard-sdks/issues"
+    },
+    "homepage": "https://github.com/arkahna/featureboard-sdks/tree/master/libs/code-generator#readme",
+    "publishConfig": {
+        "main": "dist/legacycjs/index.js",
+        "module": "dist/esm/index.js",
+        "types": "dist/index.d.ts",
+        "exports": {
+            "./package.json": "./package.json",
+            ".": {
+                "types": "./dist/index.d.ts",
+                "import": "./dist/index.js",
+                "default": "./dist/index.cjs"
+            }
+        }
+    }
 }

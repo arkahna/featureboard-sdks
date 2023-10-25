@@ -4,24 +4,6 @@
     "sourceRoot": "libs/code-generator/src",
     "projectType": "library",
     "targets": {
-        "build": {
-            "executor": "@nx/js:tsc",
-            "outputs": ["{options.outputPath}"],
-            "options": {
-                "outputPath": "dist/libs/code-generator",
-                "tsConfig": "libs/code-generator/tsconfig.lib.json",
-                "packageJson": "libs/code-generator/package.json",
-                "main": "libs/code-generator/src/index.ts",
-                "assets": [
-                    "libs/code-generator/*.md",
-                    {
-                        "input": "./libs/code-generator/src",
-                        "glob": "**/*.template",
-                        "output": "./src"
-                    }
-                ]
-            }
-        },
         "lint": {
             "executor": "@nx/eslint:lint",
             "outputs": ["{options.outputFile}"],
@@ -30,6 +12,26 @@
                     "libs/code-generator/**/*.ts",
                     "libs/code-generator/package.json"
                 ]
+            }
+        },
+        "package": {
+            "executor": "nx:run-commands",
+            "options": {
+                "commands": [
+                    "tsup src/index.ts -d dist --sourcemap --format esm --legacy-output --dts --tsconfig tsconfig.build.json --clean",
+                    "tsup src/index.ts -d dist/legacycjs --sourcemap --format cjs --legacy-output --tsconfig tsconfig.build.json",
+                    "tsup src/index.ts -d dist --sourcemap --format esm,cjs --tsconfig tsconfig.build.json"
+                ],
+                "cwd": "libs/code-generator",
+                "parallel": false
+            }
+        },
+        "test": {
+            "executor": "@nx/vite:test",
+            "outputs": ["{options.reportsDirectory}"],
+            "options": {
+                "passWithNoTests": true,
+                "reportsDirectory": "../../coverage/libs/code-generator"
             }
         }
     },
