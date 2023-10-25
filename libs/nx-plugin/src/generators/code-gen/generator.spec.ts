@@ -6,7 +6,7 @@ import {
 } from '@nx/devkit'
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing'
 import * as fs from 'fs/promises'
-import { rest } from 'msw/'
+import { rest } from 'msw'
 import { SetupServer, setupServer } from 'msw/node'
 import * as path from 'path'
 import { codeGenGenerator } from './generator'
