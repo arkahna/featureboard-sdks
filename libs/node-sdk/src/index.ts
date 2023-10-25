@@ -1,9 +1,10 @@
-export {
+export type {
     FeatureBoardApiConfig,
     FeatureBoardClient,
     Features,
 } from '@featureboard/js-sdk'
-export { ExternalStateStore } from './external-state-store'
+export type { ExternalStateStore } from './external-state-store'
 export { createManualServerClient } from './manual-server-client'
-export { CreateServerClientOptions, createServerClient } from './server-client'
-export { ServerClient } from './server-connection'
+export { createServerClient } from './server-client'
+export type { CreateServerClientOptions } from './server-client'
+export type { ServerClient } from './server-connection'
