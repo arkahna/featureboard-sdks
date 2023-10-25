@@ -6,9 +6,19 @@
     "module": "src/server.ts",
     "browser": "src/browser.ts",
     "publishConfig": {
-        "main": "dist/server.js",
-        "module": "dist/esm/server.js",
-        "browser": "dist/esm/browser.js"
+        "main": "dist/legacycjs/index.js",
+        "module": "dist/esm/index.js",
+        "browser": "dist/legacycjs/browser.js",
+        "types": "dist/index.d.ts",
+        "exports": {
+            "./package.json": "./package.json",
+            ".": {
+                "types": "./dist/index.d.ts",
+                "import": "./dist/index.js",
+                "default": "./dist/index.cjs",
+                "browser": "./dist/browser.js"
+            }
+        }
     },
     "dependencies": {
         "@featureboard/contracts": "workspace:0.3.2",
