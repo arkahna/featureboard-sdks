@@ -8,4 +8,4 @@ Run `nx build code-generator` to build the library.
 
 ## Running unit tests
 
-Run `nx test code-generator` to execute the unit tests via [Jest](https://jestjs.io).
+Run `nx test code-generator` to execute the unit tests via Vitest

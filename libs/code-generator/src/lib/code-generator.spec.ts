@@ -1,5 +1,5 @@
 import * as fs from 'fs/promises'
-import { rest } from 'msw/'
+import { rest } from 'msw'
 import { SetupServer, setupServer } from 'msw/node'
 import * as path from 'path'
 import { FsTree, Tree } from './tree/tree'
