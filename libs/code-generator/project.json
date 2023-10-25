@@ -19,8 +19,8 @@
             "options": {
                 "commands": [
                     "tsup src/index.ts -d dist --sourcemap --format esm --legacy-output --dts --tsconfig tsconfig.build.json --clean",
-                    "tsup src/index.ts -d dist/legacycjs --sourcemap --format cjs --legacy-output --tsconfig tsconfig.build.json",
-                    "tsup src/index.ts -d dist --sourcemap --format esm,cjs --tsconfig tsconfig.build.json"
+                    "tsup src/index.ts -d dist/legacycjs --sourcemap --format cjs --legacy-output",
+                    "tsup src/index.ts -d dist --sourcemap --format esm,cjs"
                 ],
                 "cwd": "libs/code-generator",
                 "parallel": false
