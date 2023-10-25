@@ -9,7 +9,7 @@
             "outputs": ["{options.outputFile}"],
             "options": {
                 "lintFilePatterns": [
-                    "libs/code-generator/**/*.ts",
+                    "libs/code-generator/src/**/*.ts",
                     "libs/code-generator/package.json"
                 ]
             }
@@ -18,7 +18,7 @@
             "executor": "nx:run-commands",
             "options": {
                 "commands": [
-                    "tsup src/index.ts -d dist --sourcemap --format esm --legacy-output --dts --tsconfig tsconfig.build.json --clean",
+                    "tsup src/index.ts -d dist --sourcemap --format esm --legacy-output --dts --tsconfig tsconfig.build.json",
                     "tsup src/index.ts -d dist/legacycjs --sourcemap --format cjs --legacy-output",
                     "tsup src/index.ts -d dist --sourcemap --format esm,cjs"
                 ],

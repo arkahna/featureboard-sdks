@@ -38,7 +38,8 @@
             "cache": true
         },
         "lint": {
-            "cache": true
+            "cache": true,
+            "inputs": ["default", "{workspaceRoot}/.eslintrc.json"]
         },
         "e2e": {
             "cache": true

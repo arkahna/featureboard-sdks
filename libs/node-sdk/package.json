@@ -4,6 +4,7 @@
     "main": "tsc-out/index.js",
     "license": "MIT",
     "sideEffects": false,
+    "type": "module",
     "repository": {
         "type": "git",
         "url": "git+https://github.com/arkahna/featureboard-sdks.git"

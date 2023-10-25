@@ -28,7 +28,7 @@
             "executor": "nx:run-commands",
             "options": {
                 "commands": [
-                    "tsup src/main.ts -d dist --sourcemap --format esm --clean --external @featureboard/code-generator"
+                    "tsup src/main.ts -d dist --sourcemap --format esm --external @featureboard/code-generator"
                 ],
                 "cwd": "apps/cli",
                 "parallel": false
@@ -39,7 +39,7 @@
             "outputs": ["{options.outputFile}"],
             "options": {
                 "lintFilePatterns": [
-                    "apps/cli/**/*.ts",
+                    "apps/cli/src/**/*.ts",
                     "apps/cli/package.json"
                 ]
             }

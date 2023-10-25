@@ -4,6 +4,7 @@
     "main": "src/index.ts",
     "license": "MIT",
     "sideEffects": false,
+    "type": "module",
     "repository": {
         "type": "git",
         "url": "git+https://github.com/arkahna/featureboard-sdks.git"

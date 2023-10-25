@@ -2,6 +2,8 @@
     "name": "@featureboard/contracts",
     "version": "0.3.2",
     "license": "MIT",
+    "type": "module",
+    "sideEffects": false,
     "repository": {
         "type": "git",
         "url": "git+https://github.com/arkahna/featureboard-sdks.git"

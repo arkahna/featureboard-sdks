@@ -1,7 +1,7 @@
 {
     "name": "@featureboard/live-connection",
     "private": true,
-    "version": "0.2.2",
+    "type": "module",
     "main": "tsc-out/server.js",
     "module": "src/server.ts",
     "browser": "src/browser.ts",
