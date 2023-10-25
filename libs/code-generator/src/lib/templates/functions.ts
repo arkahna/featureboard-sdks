@@ -1,5 +1,5 @@
 import * as path from 'path'
-import { Tree } from '../tree/tree'
+import type { Tree } from '../tree/tree'
 
 export function toPascalCase(str: string) {
     return (

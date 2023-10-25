@@ -1,7 +1,7 @@
 import { createEnsureSingle } from '../ensure-single'
 import { fetchFeaturesConfigurationViaHttp } from '../utils/fetchFeaturesConfiguration'
 import { pollingUpdates } from '../utils/pollingUpdates'
-import { EffectiveConfigUpdateStrategy } from './update-strategies'
+import type { EffectiveConfigUpdateStrategy } from './update-strategies'
 import { updatesLog } from './updates-log'
 
 export const pollingUpdatesDebugLog = updatesLog.extend('polling')
@@ -37,10 +37,7 @@ export function createPollingUpdateStrategy(
             }
             stopPolling = pollingUpdates(() => {
                 if (fetchUpdatesSingle) {
-                    pollingUpdatesDebugLog(
-                        'Polling for updates (%o)',
-                        etag,
-                    )
+                    pollingUpdatesDebugLog('Polling for updates (%o)', etag)
                     // Catch errors here to ensure no unhandled promise rejections after a poll
                     return fetchUpdatesSingle().catch(() => {})
                 }

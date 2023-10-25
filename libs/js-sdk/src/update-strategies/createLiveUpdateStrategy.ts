@@ -1,8 +1,8 @@
-import { NotificationType } from '@featureboard/contracts'
+import type { NotificationType } from '@featureboard/contracts'
 import type { LiveOptions } from '@featureboard/live-connection'
-import { EffectiveConfigUpdateStrategy } from './update-strategies'
+import type { EffectiveFeatureStateStore } from '../effective-feature-state-store'
+import type { EffectiveConfigUpdateStrategy } from './update-strategies'
 import { updatesLog } from './updates-log'
-import { EffectiveFeatureStateStore } from '../effective-feature-state-store'
 
 export const liveDebugLog = updatesLog.extend('live')
 
@@ -33,18 +33,12 @@ export function createLiveUpdateStrategy(
                 switch (message.kind) {
                     case 'feature-value-updated':
                     case 'feature-value-available': {
-                        stateStore.set(
-                            message.featureKey,
-                            message.value,
-                        )
+                        stateStore.set(message.featureKey, message.value)
                         break
                     }
                     case 'state-of-the-world-effective-values': {
                         message.features.forEach((feature) => {
-                            stateStore.set(
-                                feature.featureKey,
-                                feature.value,
-                            )
+                            stateStore.set(feature.featureKey, feature.value)
                         })
                         connectionState = 'connected'
                         break

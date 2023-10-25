@@ -1,5 +1,5 @@
-import { Features } from '.'
-import { FeatureBoardEffectiveStateJS } from './js-state'
+import type { Features } from '.'
+import type { FeatureBoardEffectiveStateJS } from './js-state'
 
 export interface FeatureBoardClient {
     getFeatureValue<T extends keyof Features>(

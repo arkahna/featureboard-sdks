@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 
-import { Command, Option, OptionValues } from '@commander-js/extra-typings'
+import type { OptionValues } from '@commander-js/extra-typings'
+import { Command, Option } from '@commander-js/extra-typings'
+import type { TemplateType } from '@featureboard/code-generator'
 import {
     FsTree,
-    TemplateType,
     codeGenerator,
     flushChanges,
     printChanges,

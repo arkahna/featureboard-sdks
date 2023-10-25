@@ -7,7 +7,7 @@ import {
     toPascalCase,
 } from './templates/functions'
 import { generateFiles } from './templates/generate-files'
-import { Tree } from './tree/tree'
+import type { Tree } from './tree/tree'
 
 // HACK this works around the different import strategies that the cli vs the nx plugin have.
 // As we can't change the ones for the plugin as they come from NX

@@ -1,4 +1,4 @@
-import { EffectiveFeatureValue } from '@featureboard/contracts'
+import type { EffectiveFeatureValue } from '@featureboard/contracts'
 import { debugLog } from './log'
 
 export type FeatureValue = EffectiveFeatureValue['value'] | undefined

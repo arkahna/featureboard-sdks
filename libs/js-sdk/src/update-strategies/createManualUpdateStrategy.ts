@@ -1,6 +1,6 @@
 import { createEnsureSingle } from '../ensure-single'
 import { fetchFeaturesConfigurationViaHttp } from '../utils/fetchFeaturesConfiguration'
-import { EffectiveConfigUpdateStrategy } from './update-strategies'
+import type { EffectiveConfigUpdateStrategy } from './update-strategies'
 import { updatesLog } from './updates-log'
 
 export const manualUpdatesDebugLog = updatesLog.extend('manual')

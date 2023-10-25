@@ -1,5 +1,5 @@
+import type { Tree } from '@nx/devkit'
 import {
-    Tree,
     addProjectConfiguration,
     joinPathFragments,
     readProjectConfiguration,
@@ -7,10 +7,11 @@ import {
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing'
 import * as fs from 'fs/promises'
 import { rest } from 'msw'
-import { SetupServer, setupServer } from 'msw/node'
+import type { SetupServer } from 'msw/node'
+import { setupServer } from 'msw/node'
 import * as path from 'path'
 import { codeGenGenerator } from './generator'
-import { CodeGenGeneratorSchema } from './schema'
+import type { CodeGenGeneratorSchema } from './schema'
 
 describe('code-generator', () => {
     let tree: Tree

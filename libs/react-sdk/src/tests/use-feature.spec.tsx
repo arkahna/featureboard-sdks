@@ -1,4 +1,4 @@
-import { FeatureBoardClient } from '@featureboard/js-sdk'
+import type { FeatureBoardClient } from '@featureboard/js-sdk'
 import { act, renderHook } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { FeatureBoardProvider } from '../featureboard-provider'

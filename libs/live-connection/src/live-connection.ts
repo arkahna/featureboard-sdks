@@ -1,4 +1,4 @@
-import {
+import type {
     NotificationType,
     SubscribeToEnvironment,
 } from '@featureboard/contracts'

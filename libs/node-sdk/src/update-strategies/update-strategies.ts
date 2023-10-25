@@ -8,7 +8,7 @@
  */
 
 import type { LiveOptions } from '@featureboard/live-connection'
-import { AllFeatureStateStore } from '../feature-state-store'
+import type { AllFeatureStateStore } from '../feature-state-store'
 
 export interface ManualUpdateStrategy {
     kind: 'manual'

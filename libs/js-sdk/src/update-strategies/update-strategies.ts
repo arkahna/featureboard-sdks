@@ -7,7 +7,7 @@
  */
 
 import type { LiveOptions } from '@featureboard/live-connection'
-import { EffectiveFeatureStateStore } from '../effective-feature-state-store'
+import type { EffectiveFeatureStateStore } from '../effective-feature-state-store'
 
 export interface ManualUpdateStrategy {
     kind: 'manual'

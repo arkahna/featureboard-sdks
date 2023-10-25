@@ -1,6 +1,6 @@
-import { EffectiveFeatureValue } from '@featureboard/contracts'
-import { EffectiveFeatureStateStore } from './effective-feature-state-store'
-import { FeatureBoardClient } from './features-client'
+import type { EffectiveFeatureValue } from '@featureboard/contracts'
+import type { EffectiveFeatureStateStore } from './effective-feature-state-store'
+import type { FeatureBoardClient } from './features-client'
 import { debugLog } from './log'
 
 /** Designed for internal SDK use */

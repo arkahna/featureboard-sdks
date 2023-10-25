@@ -1,4 +1,4 @@
-import { FeatureConfiguration } from '@featureboard/contracts'
+import type { FeatureConfiguration } from '@featureboard/contracts'
 import { featureBoardHostedService } from '@featureboard/js-sdk'
 import { rest } from 'msw'
 import { setupServer } from 'msw/node'
@@ -215,7 +215,7 @@ describe('http client', () => {
                     ctx.json(values),
                     ctx.status(200),
                     ctx.set({
-                        'etag': lastModified,
+                        etag: lastModified,
                     }),
                 )
             }),
@@ -459,7 +459,6 @@ describe('http client', () => {
             server.close()
         }
     })
-
 
     it('Catch error when update external state store throws error', async () => {
         expect.assertions(1)

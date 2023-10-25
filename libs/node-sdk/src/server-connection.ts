@@ -1,4 +1,4 @@
-import { FeatureBoardClient } from '@featureboard/js-sdk'
+import type { FeatureBoardClient } from '@featureboard/js-sdk'
 
 export interface ServerClient {
     /**
@@ -6,8 +6,8 @@ export interface ServerClient {
      *
      * @argument request The audiences for this request
      * @returns Promise<FeatureBoardClient> when update strategy is on-request, otherwise FeatureBoardClient
-     * 
-     * Note: If FeatureBoardClient.subscribeToFeatureValue() is used in Node SDK, it will only call back once. It will 
+     *
+     * Note: If FeatureBoardClient.subscribeToFeatureValue() is used in Node SDK, it will only call back once. It will
      * immediately call back with the current value and will not subscribe to the feature in the state store.
      **/
     request(
@@ -19,7 +19,7 @@ export interface ServerClient {
 
     /**
      * Waits for ServerClient to be initialised
-     * 
+     *
      * @throws {Error} If the initialisation process fails an error is thrown
      */
     waitForInitialised(): Promise<boolean>

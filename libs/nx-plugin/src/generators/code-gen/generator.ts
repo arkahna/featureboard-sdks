@@ -1,7 +1,8 @@
 import { codeGenerator } from '@featureboard/code-generator'
-import { Tree, joinPathFragments, readProjectConfiguration } from '@nx/devkit'
+import type { Tree } from '@nx/devkit'
+import { joinPathFragments, readProjectConfiguration } from '@nx/devkit'
 import * as prompts from 'prompts'
-import { CodeGenGeneratorSchema } from './schema'
+import type { CodeGenGeneratorSchema } from './schema'
 
 export async function codeGenGenerator(
     tree: Tree,

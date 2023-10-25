@@ -1,8 +1,8 @@
-import { EffectiveFeatureValue } from '@featureboard/contracts'
-import { Features } from '.'
+import type { EffectiveFeatureValue } from '@featureboard/contracts'
+import type { Features } from '.'
 import { createClientInternal } from './create-client'
 import { EffectiveFeatureStateStore } from './effective-feature-state-store'
-import { FeatureBoardClient } from './features-client'
+import type { FeatureBoardClient } from './features-client'
 
 /**
  * Creates a FeatureBoard client which can be used to manually set feature values rather than using the FeatureBoard service

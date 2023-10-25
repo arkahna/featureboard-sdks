@@ -1,10 +1,12 @@
 import * as fs from 'fs/promises'
 import { rest } from 'msw'
-import { SetupServer, setupServer } from 'msw/node'
+import type { SetupServer } from 'msw/node'
+import { setupServer } from 'msw/node'
 import * as path from 'path'
-import { FsTree, Tree } from './tree/tree'
-
-import { CodeGeneratorOptions, codeGenerator } from './code-generator'
+import type { CodeGeneratorOptions } from './code-generator'
+import { codeGenerator } from './code-generator'
+import type { Tree } from './tree/tree'
+import { FsTree } from './tree/tree'
 
 describe('code-generator', () => {
     let tree: Tree
