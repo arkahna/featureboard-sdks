@@ -4,35 +4,6 @@
     "sourceRoot": "apps/cli/src",
     "projectType": "application",
     "targets": {
-        "build": {
-            "executor": "@nx/esbuild:esbuild",
-            "outputs": ["{options.outputPath}"],
-            "defaultConfiguration": "production",
-            "bundle": true,
-            "options": {
-                "outputPath": "apps/cli/dist",
-                "main": "apps/cli/src/main.ts",
-                "tsConfig": "apps/cli/tsconfig.app.json",
-                "bundle": true,
-                "assets": [
-                    "./apps/cli/*.md",
-                    {
-                        "input": "./libs/code-generator/src/lib",
-                        "glob": "**/*.template",
-                        "output": "./"
-                    }
-                ],
-                "generatePackageJson": true,
-                "additionalEntryPoints": ["apps/cli/src/index.ts"],
-                "format": ["cjs"],
-                "esbuildOptions": {
-                    "sourcemap": true,
-                    "outExtension": {
-                        ".js": ".js"
-                    }
-                }
-            }
-        },
         "serve": {
             "executor": "@nx/js:node",
             "defaultConfiguration": "development",
@@ -57,14 +28,11 @@
             "executor": "nx:run-commands",
             "options": {
                 "commands": [
-                    "(rm ./dist/package.json || del \"dist\\package.json\")",
-                    "tsc --project tsconfig.app.json --emitDeclarationOnly --declaration --outDir dist"
+                    "tsup src/main.ts -d dist --sourcemap --format esm --clean --external @featureboard/code-generator"
                 ],
                 "cwd": "apps/cli",
                 "parallel": false
-            },
-            "defaultConfiguration": "production",
-            "dependsOn": ["build"]
+            }
         },
         "lint": {
             "executor": "@nx/eslint:lint",
@@ -74,6 +42,14 @@
                     "apps/cli/**/*.ts",
                     "apps/cli/package.json"
                 ]
+            }
+        },
+        "test": {
+            "executor": "@nx/vite:test",
+            "outputs": ["{options.reportsDirectory}"],
+            "options": {
+                "passWithNoTests": true,
+                "reportsDirectory": "../../coverage/apps/cli"
             }
         }
     },

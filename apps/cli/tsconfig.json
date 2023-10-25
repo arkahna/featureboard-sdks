@@ -1,27 +1,21 @@
 {
-    "extends": "../../tsconfig.base.json",
+    "extends": "../../tsconfig.settings.json",
     "compilerOptions": {
-        "module": "commonjs",
-        "forceConsistentCasingInFileNames": true,
-        "strict": true,
-        "noImplicitOverride": true,
-        "noPropertyAccessFromIndexSignature": true,
-        "noImplicitReturns": true,
-        "noFallthroughCasesInSwitch": true,
-        "esModuleInterop": true,
+        "outDir": "./tsc-out",
+        "rootDir": "./src",
+        "types": [
+            "node",
+            "vitest/globals",
+            "vitest/importMeta",
+            "vite/client",
+            "vitest"
+        ],
         "resolveJsonModule": true
     },
-    "files": [],
-    "include": [],
+    "include": ["src/**/*.ts"],
     "references": [
         {
             "path": "../../libs/code-generator"
-        },
-        {
-            "path": "./tsconfig.app.json"
-        },
-        {
-            "path": "./tsconfig.spec.json"
         }
     ]
 }
