@@ -39,7 +39,8 @@
                 "no-empty-pattern": "off",
                 "@typescript-eslint/no-empty-function": "off",
                 "@typescript-eslint/consistent-type-imports": "error",
-                "@typescript-eslint/consistent-type-exports": "error"
+                "@typescript-eslint/consistent-type-exports": "error",
+                "@typescript-eslint/no-redundant-type-constituents": "off"
             }
         },
         {

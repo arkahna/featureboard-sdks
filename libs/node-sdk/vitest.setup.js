@@ -1,4 +1,4 @@
-import { fetch, Headers, Request, Response } from 'cross-fetch'
+import { fetch, Headers, Request, Response } from 'node-fetch'
 
 // Add `fetch` polyfill.
 global.fetch = fetch

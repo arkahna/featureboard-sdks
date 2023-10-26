@@ -1,12 +1,13 @@
 /** @type {import('@types/eslint').Linter.BaseConfig} */
 module.exports = {
   extends: ['../../.eslintrc.json', 'prettier'],
-  parserOptions: {
-    tsconfigRootDir: __dirname,
-    project: ['./tsconfig.json'],
-  },
+
   overrides: [
     {
+      parserOptions: {
+        tsconfigRootDir: __dirname,
+        project: ['./tsconfig.json'],
+      },
       files: ['*.ts', '*.tsx'],
       rules: {},
     },
