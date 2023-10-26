@@ -31,7 +31,7 @@
         }
     },
     "dependencies": {
-        "@featureboard/js-sdk": "workspace:0.15.0",
+        "@featureboard/js-sdk": "workspace:*",
         "debug": "^4.3.4",
         "promise-completion-source": "^1.0.0"
     }

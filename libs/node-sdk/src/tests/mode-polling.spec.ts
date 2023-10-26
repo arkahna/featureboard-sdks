@@ -1,5 +1,5 @@
 import type { FeatureConfiguration } from '@featureboard/contracts'
-import { rest } from 'msw'
+import { HttpResponse, http } from 'msw'
 import { setupServer } from 'msw/node'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { interval } from '../interval'
@@ -21,8 +21,10 @@ describe('Polling update mode', () => {
             },
         ]
         const server = setupServer(
-            rest.get('https://client.featureboard.app/all', (_req, res, ctx) =>
-                res.once(ctx.json(values), ctx.status(200)),
+            http.get(
+                'https://client.featureboard.app/all',
+                () => HttpResponse.json(values),
+                { once: true },
             ),
         )
         server.listen()
@@ -59,8 +61,10 @@ describe('Polling update mode', () => {
             },
         ]
         const server = setupServer(
-            rest.get('https://client.featureboard.app/all', (_req, res, ctx) =>
-                res.once(ctx.json(values), ctx.status(200)),
+            http.get(
+                'https://client.featureboard.app/all',
+                () => HttpResponse.json(values),
+                { once: true },
             ),
         )
         server.listen()
@@ -100,20 +104,17 @@ describe('Polling update mode', () => {
         ]
         let count = 0
         const server = setupServer(
-            rest.get(
-                'https://client.featureboard.app/all',
-                (_req, res, ctx) => {
-                    if (count > 1) {
-                        throw new Error('Too many requests')
-                    }
-                    if (count > 0) {
-                        return res(ctx.json(newValues), ctx.status(200))
-                    }
+            http.get('https://client.featureboard.app/all', () => {
+                if (count > 1) {
+                    throw new Error('Too many requests')
+                }
+                if (count > 0) {
+                    return HttpResponse.json(newValues)
+                }
 
-                    count++
-                    return res(ctx.json(values), ctx.status(200))
-                },
-            ),
+                count++
+                return HttpResponse.json(values)
+            }),
         )
         server.listen()
 

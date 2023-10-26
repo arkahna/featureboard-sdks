@@ -34,7 +34,7 @@
         "react": "^16.8 || ^17.0.0 || ^18.0.0"
     },
     "dependencies": {
-        "@featureboard/js-sdk": "workspace:0.15.0",
+        "@featureboard/js-sdk": "workspace:*",
         "debug": "^4.3.4"
     }
 }

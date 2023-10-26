@@ -1,5 +1,5 @@
 import * as fs from 'fs/promises'
-import { rest } from 'msw'
+import { HttpResponse, http } from 'msw'
 import type { SetupServer } from 'msw/node'
 import { setupServer } from 'msw/node'
 import * as path from 'path'
@@ -17,9 +17,9 @@ describe('code-generator', () => {
     describe('templateType: dotnet-api', () => {
         beforeAll(() => {
             server = setupServer(
-                rest.get(
+                http.get(
                     'https://api.featureboard.dev/projects',
-                    async (req, res, ctx) => {
+                    async () => {
                         const file = await fs.readFile(
                             path.join(
                                 __dirname,
@@ -29,7 +29,7 @@ describe('code-generator', () => {
                                 encoding: 'utf8',
                             },
                         )
-                        return res(ctx.status(200), ctx.json(JSON.parse(file)))
+                        return HttpResponse.json(JSON.parse(file))
                     },
                 ),
             )

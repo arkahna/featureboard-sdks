@@ -53,7 +53,7 @@ export function createClientInternal(
             }
 
             stateStore.on('feature-updated', callback)
-            onValue((stateStore.get(featureKey) as any) ?? defaultValue)
+            onValue(stateStore.get(featureKey) ?? defaultValue)
 
             return () => {
                 debugLog('unsubscribeToFeatureValue: %s', featureKey)

@@ -1,4 +1,3 @@
-import fetch from 'cross-fetch'
 import * as path from 'path'
 import prompts from 'prompts'
 import {

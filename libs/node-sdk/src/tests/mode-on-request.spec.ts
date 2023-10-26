@@ -1,5 +1,5 @@
 import type { FeatureConfiguration } from '@featureboard/contracts'
-import { rest } from 'msw'
+import { HttpResponse, http } from 'msw'
 import { setupServer } from 'msw/node'
 import { describe, expect, it } from 'vitest'
 import { createServerClient } from '../server-client'
@@ -14,8 +14,10 @@ describe('On request update mode', () => {
             },
         ]
         const server = setupServer(
-            rest.get('https://client.featureboard.app/all', (_req, res, ctx) =>
-                res.once(ctx.json(values), ctx.status(200)),
+            http.get(
+                'https://client.featureboard.app/all',
+                () => HttpResponse.json(values),
+                { once: true },
             ),
         )
         server.listen()
@@ -48,8 +50,10 @@ describe('On request update mode', () => {
             },
         ]
         const server = setupServer(
-            rest.get('https://client.featureboard.app/all', (_req, res, ctx) =>
-                res.once(ctx.json(values), ctx.status(200)),
+            http.get(
+                'https://client.featureboard.app/all',
+                () => HttpResponse.json(values),
+                { once: true },
             ),
         )
         server.listen()
@@ -94,18 +98,15 @@ describe('On request update mode', () => {
         ]
         let count = 0
         const server = setupServer(
-            rest.get(
-                'https://client.featureboard.app/all',
-                (_req, res, ctx) => {
-                    console.log('count', count)
-                    if (count > 0) {
-                        return res(ctx.json(newValues), ctx.status(200))
-                    }
+            http.get('https://client.featureboard.app/all', () => {
+                console.log('count', count)
+                if (count > 0) {
+                    return HttpResponse.json(newValues)
+                }
 
-                    count++
-                    return res(ctx.json(values), ctx.status(200))
-                },
-            ),
+                count++
+                return HttpResponse.json(values)
+            }),
         )
         server.listen()
 
@@ -143,17 +144,14 @@ describe('On request update mode', () => {
         ]
         let count = 0
         const server = setupServer(
-            rest.get(
-                'https://client.featureboard.app/all',
-                (_req, res, ctx) => {
-                    if (count > 0) {
-                        return res(ctx.json(newValues), ctx.status(200))
-                    }
+            http.get('https://client.featureboard.app/all', () => {
+                if (count > 0) {
+                    return HttpResponse.json(newValues)
+                }
 
-                    count++
-                    return res(ctx.json(values), ctx.status(200))
-                },
-            ),
+                count++
+                return HttpResponse.json(values)
+            }),
         )
         server.listen()
 
