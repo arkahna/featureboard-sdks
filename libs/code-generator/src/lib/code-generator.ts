@@ -1,4 +1,5 @@
-import fetch from 'cross-fetch'
+import type { HeadersInit } from 'node-fetch'
+import fetch from 'node-fetch'
 import * as path from 'path'
 import prompts from 'prompts'
 import {

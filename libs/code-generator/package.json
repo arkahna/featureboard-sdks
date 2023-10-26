@@ -16,6 +16,9 @@
     "bugs": {
         "url": "https://github.com/arkahna/featureboard-sdks/issues"
     },
+    "dependencies": {
+        "node-fetch": "^3.3.2"
+    },
     "homepage": "https://github.com/arkahna/featureboard-sdks/tree/master/libs/code-generator#readme",
     "publishConfig": {
         "main": "dist/legacycjs/index.js",
