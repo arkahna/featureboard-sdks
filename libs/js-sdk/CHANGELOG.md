@@ -1,5 +1,16 @@
 # @featureboard/js-sdk
 
+## 0.15.0
+
+### Minor Changes
+
+- 7587dae: Add support for modern bundlers
+
+### Patch Changes
+
+- Updated dependencies [7587dae]
+  - @featureboard/contracts@0.4.0
+
 ## 0.14.0
 
 ### Minor Changes

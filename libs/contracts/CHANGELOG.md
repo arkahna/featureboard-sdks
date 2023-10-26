@@ -1,5 +1,11 @@
 # @featureboard/contracts
 
+## 0.4.0
+
+### Minor Changes
+
+- 7587dae: Add support for modern bundlers
+
 ## 0.3.2
 
 ### Patch Changes

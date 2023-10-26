@@ -1,5 +1,16 @@
 # @featureboard/live-connection
 
+## null
+
+### Minor Changes
+
+- 7587dae: Add support for modern bundlers
+
+### Patch Changes
+
+- Updated dependencies [7587dae]
+  - @featureboard/contracts@0.4.0
+
 ## 0.2.2
 
 ### Patch Changes

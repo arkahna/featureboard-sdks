@@ -1,6 +1,6 @@
 {
     "name": "@featureboard/nx-plugin",
-    "version": "0.0.3",
+    "version": "0.1.0",
     "type": "module",
     "repository": {
         "type": "git",
@@ -19,7 +19,7 @@
         "@nx/devkit": "~17.0.0"
     },
     "dependencies": {
-        "@featureboard/code-generator": "0.0.2",
+        "@featureboard/code-generator": "0.1.0",
         "prompts": "^2.4.2"
     },
     "publishConfig": {

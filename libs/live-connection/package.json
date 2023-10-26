@@ -21,9 +21,10 @@
         }
     },
     "dependencies": {
-        "@featureboard/contracts": "workspace:0.3.2",
+        "@featureboard/contracts": "workspace:0.4.0",
         "debug": "^4.3.4",
         "promise-completion-source": "^1.0.0",
         "ws": "^8.13.0"
-    }
+    },
+    "version": null
 }

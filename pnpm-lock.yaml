@@ -202,7 +202,7 @@ importers:
         specifier: ^11.0.0
         version: 11.1.0(commander@11.1.0)
       '@featureboard/code-generator':
-        specifier: workspace:0.0.2
+        specifier: workspace:0.1.0
         version: link:../../libs/code-generator
       cross-fetch:
         specifier: ^3.1.6
@@ -230,7 +230,7 @@ importers:
   libs/js-sdk:
     dependencies:
       '@featureboard/contracts':
-        specifier: workspace:0.3.2
+        specifier: workspace:0.4.0
         version: link:../contracts
       debug:
         specifier: ^4.3.4
@@ -242,7 +242,7 @@ importers:
   libs/live-connection:
     dependencies:
       '@featureboard/contracts':
-        specifier: workspace:0.3.2
+        specifier: workspace:0.4.0
         version: link:../contracts
       debug:
         specifier: ^4.3.4
@@ -257,7 +257,7 @@ importers:
   libs/node-sdk:
     dependencies:
       '@featureboard/js-sdk':
-        specifier: workspace:0.14.0
+        specifier: workspace:0.15.0
         version: link:../js-sdk
       debug:
         specifier: ^4.3.4
@@ -269,7 +269,7 @@ importers:
   libs/nx-plugin:
     dependencies:
       '@featureboard/code-generator':
-        specifier: 0.0.2
+        specifier: 0.1.0
         version: link:../code-generator
       '@nx/devkit':
         specifier: ~17.0.0
@@ -281,7 +281,7 @@ importers:
   libs/react-sdk:
     dependencies:
       '@featureboard/js-sdk':
-        specifier: workspace:0.14.0
+        specifier: workspace:0.15.0
         version: link:../js-sdk
       debug:
         specifier: ^4.3.4

@@ -1,5 +1,16 @@
 # @featureboard/react-sdk
 
+## 0.11.0
+
+### Minor Changes
+
+- 7587dae: Add support for modern bundlers
+
+### Patch Changes
+
+- Updated dependencies [7587dae]
+  - @featureboard/js-sdk@0.15.0
+
 ## 0.10.4
 
 ### Patch Changes
