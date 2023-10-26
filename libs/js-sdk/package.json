@@ -31,7 +31,7 @@
         }
     },
     "dependencies": {
-        "@featureboard/contracts": "workspace:0.4.0",
+        "@featureboard/contracts": "workspace:*",
         "debug": "^4.3.4",
         "promise-completion-source": "^1.0.0"
     }

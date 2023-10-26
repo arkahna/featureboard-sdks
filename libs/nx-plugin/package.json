@@ -19,7 +19,7 @@
         "@nx/devkit": "~17.0.0"
     },
     "dependencies": {
-        "@featureboard/code-generator": "0.1.0",
+        "@featureboard/code-generator": "workspace:*",
         "prompts": "^2.4.2"
     },
     "publishConfig": {
