@@ -2,7 +2,7 @@ import { createEnsureSingle } from '@featureboard/js-sdk'
 import { fetchFeaturesConfigurationViaHttp } from '../utils/fetchFeaturesConfiguration'
 import { pollingUpdates } from '../utils/pollingUpdates'
 import { getAllEndpoint } from './getAllEndpoint'
-import { AllConfigUpdateStrategy } from './update-strategies'
+import type { AllConfigUpdateStrategy } from './update-strategies'
 
 export function createPollingUpdateStrategy(
     environmentApiKey: string,

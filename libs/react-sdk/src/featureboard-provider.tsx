@@ -1,4 +1,4 @@
-import { FeatureBoardClient } from '@featureboard/js-sdk'
+import type { FeatureBoardClient } from '@featureboard/js-sdk'
 import React from 'react'
 
 export interface FeatureBoardProviderProp {

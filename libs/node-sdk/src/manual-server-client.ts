@@ -1,5 +1,6 @@
-import { Features, createManualClient } from '@featureboard/js-sdk'
-import { ServerClient } from '.'
+import type { Features } from '@featureboard/js-sdk'
+import { createManualClient } from '@featureboard/js-sdk'
+import type { ServerClient } from '.'
 import { makeRequestClient } from './server-client'
 
 export function createManualServerClient(

@@ -1,6 +1,6 @@
 /* Copied from https://github.com/nrwl/nx/blob/ff04be51885b3ab2f635de6c13f3b29dec1859ba/packages/nx/src/generators/tree.ts with permission from the MIT licence on the 8/8/2023) */
+import type { Mode } from 'fs'
 import {
-    Mode,
     chmodSync,
     mkdirSync,
     readFileSync,

@@ -1,4 +1,4 @@
-import { EffectiveFeatureValue } from '@featureboard/contracts'
+import type { EffectiveFeatureValue } from '@featureboard/contracts'
 import { rest } from 'msw'
 import { setupServer } from 'msw/node'
 import { describe, expect, it } from 'vitest'
@@ -206,7 +206,9 @@ describe('http client', () => {
             rest.get(
                 'https://client.featureboard.app/effective',
                 (req, res, ctx) => {
-                    if (req.headers.get('if-none-match') === lastModified) {
+                    const ifNoneMatchHeader = req.headers.get('if-none-match')
+
+                    if (ifNoneMatchHeader === lastModified) {
                         const newLastModified = new Date().toISOString()
                         return res(
                             ctx.json(newValues),
@@ -216,6 +218,7 @@ describe('http client', () => {
                             }),
                         )
                     }
+
                     return res(
                         ctx.json(values),
                         ctx.status(200),

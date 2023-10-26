@@ -1,5 +1,5 @@
-import { FeatureConfiguration } from '@featureboard/contracts'
-import { ExternalStateStore } from '../external-state-store'
+import type { FeatureConfiguration } from '@featureboard/contracts'
+import type { ExternalStateStore } from '../external-state-store'
 
 export class MockExternalStateStore implements ExternalStateStore {
     constructor(

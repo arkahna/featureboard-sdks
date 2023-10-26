@@ -5,9 +5,9 @@
     "sourceRoot": "libs/node-sdk/src",
     "targets": {
         "lint": {
-            "executor": "@nx/linter:eslint",
+            "executor": "@nx/eslint:lint",
             "options": {
-                "lintFilePatterns": ["libs/node-sdk/**/*.ts"]
+                "lintFilePatterns": ["libs/node-sdk/src/**/*.ts"]
             }
         },
         "test": {
@@ -21,7 +21,9 @@
             "executor": "nx:run-commands",
             "options": {
                 "commands": [
-                    "tsup src/index.ts -d dist --sourcemap --format esm,cjs --legacy-output",
+                    "tsup src/index.ts -d dist --sourcemap --format esm --legacy-output --external @featureboard/js-sdk",
+                    "tsup src/index.ts -d dist/legacycjs --sourcemap --format cjs --legacy-output --external @featureboard/js-sdk",
+                    "tsup src/index.ts -d dist --sourcemap --format esm,cjs --external @featureboard/js-sdk",
                     "tsc --emitDeclarationOnly --declaration --outDir dist"
                 ],
                 "cwd": "libs/node-sdk",

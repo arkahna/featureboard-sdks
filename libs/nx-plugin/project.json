@@ -4,62 +4,34 @@
     "sourceRoot": "libs/nx-plugin/src",
     "projectType": "library",
     "targets": {
-        "build": {
-            "executor": "@nx/js:tsc",
-            "outputs": ["{options.outputPath}"],
+        "package": {
+            "executor": "nx:run-commands",
             "options": {
-                "outputPath": "dist/libs/nx-plugin",
-                "main": "libs/nx-plugin/src/index.ts",
-                "tsConfig": "libs/nx-plugin/tsconfig.lib.json",
-                "assets": [
-                    "libs/nx-plugin/*.md",
-                    {
-                        "input": "./libs/nx-plugin/src",
-                        "glob": "**/!(*.ts)",
-                        "output": "./src"
-                    },
-                    {
-                        "input": "./libs/nx-plugin/src",
-                        "glob": "**/*.d.ts",
-                        "output": "./src"
-                    },
-                    {
-                        "input": "./libs/nx-plugin",
-                        "glob": "generators.json",
-                        "output": "."
-                    },
-                    {
-                        "input": "./libs/nx-plugin",
-                        "glob": "executors.json",
-                        "output": "."
-                    }
+                "commands": [
+                    "tsup src/index.ts -d dist --sourcemap --format cjs --legacy-output",
+                    "tsc --emitDeclarationOnly --declaration --outDir dist"
                 ],
-                "updateBuildableProjectDepsInPackageJson": true
+                "cwd": "libs/nx-plugin",
+                "parallel": false
             }
         },
         "lint": {
-            "executor": "@nx/linter:eslint",
+            "executor": "@nx/eslint:lint",
             "outputs": ["{options.outputFile}"],
             "options": {
                 "lintFilePatterns": [
-                    "libs/nx-plugin/**/*.ts",
+                    "libs/nx-plugin/src/**/*.ts",
                     "libs/nx-plugin/package.json",
                     "libs/nx-plugin/generators.json"
                 ]
             }
         },
         "test": {
-            "executor": "@nx/jest:jest",
-            "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+            "executor": "@nx/vite:test",
+            "outputs": ["{options.reportsDirectory}"],
             "options": {
-                "jestConfig": "libs/nx-plugin/jest.config.ts",
-                "passWithNoTests": true
-            },
-            "configurations": {
-                "ci": {
-                    "ci": true,
-                    "codeCoverage": true
-                }
+                "passWithNoTests": true,
+                "reportsDirectory": "../../coverage/libs/nx-plugin"
             }
         }
     },

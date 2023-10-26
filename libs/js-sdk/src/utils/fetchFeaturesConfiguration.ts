@@ -1,5 +1,5 @@
-import { EffectiveFeatureValue } from '@featureboard/contracts'
-import { EffectiveFeatureStateStore } from '../effective-feature-state-store'
+import type { EffectiveFeatureValue } from '@featureboard/contracts'
+import type { EffectiveFeatureStateStore } from '../effective-feature-state-store'
 import { getEffectiveEndpoint } from '../update-strategies/getEffectiveEndpoint'
 import { compareArrays } from './compare-arrays'
 import { httpClientDebug } from './http-log'

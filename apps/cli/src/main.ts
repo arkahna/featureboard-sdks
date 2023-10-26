@@ -1,20 +1,25 @@
 #!/usr/bin/env node
 
-import { Command, Option, OptionValues } from '@commander-js/extra-typings'
+import type { OptionValues } from '@commander-js/extra-typings'
+import { Command, Option } from '@commander-js/extra-typings'
+import type { TemplateType } from '@featureboard/code-generator'
 import {
     FsTree,
-    TemplateType,
     codeGenerator,
     flushChanges,
     printChanges,
 } from '@featureboard/code-generator'
-import * as figlet from 'figlet'
-import fs from 'fs/promises'
+import figlet from 'figlet'
+import fs from 'fs'
+import fsAsync from 'fs/promises'
 import path from 'path'
 import { exit } from 'process'
 import prompts from 'prompts'
-import * as packageJson from '../package.json'
 
+// dynamically load package.json using fs
+const packageJson: { version: string } = JSON.parse(
+    fs.readFileSync(path.join(__dirname, '../package.json'), 'utf8'),
+)
 const titleText = figlet.textSync(`FeatureBoard CLI V${packageJson.version}`)
 
 const program = new Command()
@@ -35,8 +40,10 @@ function actionRunner<Args extends any[] = [], Opts extends OptionValues = {}>(
 ) {
     return (...args: [...Args, Opts, Command<Args, Opts>]) =>
         fn(...args).catch((error) => {
-            if (args[0].verbose == false || args[1].verbose == false) {
-                console.error(args[0].verbose)
+            if (
+                ('verbose' in args[0] && args[0].verbose == false) ||
+                ('verbose' in args[1] && args[1].verbose == false)
+            ) {
                 console.error(error.message || error)
                 exit(1000)
             }
@@ -127,7 +134,7 @@ program
             )
             const outputPath = path.join(process.cwd(), sanitisedOutputPath)
             try {
-                await fs.access(outputPath)
+                await fsAsync.access(outputPath)
             } catch {
                 throw new Error(`Output path doesn't exist: ${outputPath}`)
             }

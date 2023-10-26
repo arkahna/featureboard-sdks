@@ -1,4 +1,4 @@
-import { TemplateType } from '@featureboard/code-generator'
+import type { TemplateType } from '@featureboard/code-generator'
 
 export interface CodeGenGeneratorSchema {
     templateType: TemplateType

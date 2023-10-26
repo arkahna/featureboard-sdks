@@ -1,9 +1,6 @@
-import { SubscribeToEnvironment } from '@featureboard/contracts'
-import {
-    CommonLiveConnection,
-    IWebSocket,
-    LiveOptions,
-} from './live-connection'
+import type { SubscribeToEnvironment } from '@featureboard/contracts'
+import type { IWebSocket, LiveOptions } from './live-connection'
+import { CommonLiveConnection } from './live-connection'
 export type {
     ICloseEvent,
     IErrorEvent,

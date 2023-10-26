@@ -1,7 +1,7 @@
 import { createEnsureSingle } from '@featureboard/js-sdk'
 import { fetchFeaturesConfigurationViaHttp } from '../utils/fetchFeaturesConfiguration'
 import { getAllEndpoint } from './getAllEndpoint'
-import { AllConfigUpdateStrategy } from './update-strategies'
+import type { AllConfigUpdateStrategy } from './update-strategies'
 
 export function createManualUpdateStrategy(
     environmentApiKey: string,

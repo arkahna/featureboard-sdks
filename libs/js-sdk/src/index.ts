@@ -1,8 +1,8 @@
-export { BrowserClient } from './client-connection'
+export type { BrowserClient } from './client-connection'
 export { createBrowserClient } from './create-browser-client'
 export { createManualClient } from './create-manual-client'
-export { FeatureBoardApiConfig } from './featureboard-api-config'
-export { FeatureBoardClient } from './features-client'
+export type { FeatureBoardApiConfig } from './featureboard-api-config'
+export type { FeatureBoardClient } from './features-client'
 
 // TODO We should make these 'internal' and not export them
 // Need to figure out how to do that with the current build setup

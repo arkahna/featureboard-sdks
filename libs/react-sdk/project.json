@@ -5,9 +5,12 @@
     "sourceRoot": "libs/react-sdk/src",
     "targets": {
         "lint": {
-            "executor": "@nx/linter:eslint",
+            "executor": "@nx/eslint:lint",
             "options": {
-                "lintFilePatterns": ["libs/react-sdk/**/*.ts"]
+                "lintFilePatterns": [
+                    "libs/react-sdk/src/**/*.ts",
+                    "libs/react-sdk/src/**/*.tsx"
+                ]
             }
         },
         "test": {
@@ -21,7 +24,9 @@
             "executor": "nx:run-commands",
             "options": {
                 "commands": [
-                    "tsup src/index.ts -d dist --sourcemap --format esm,cjs --legacy-output",
+                    "tsup src/index.ts -d dist --sourcemap --format esm --legacy-output",
+                    "tsup src/index.ts -d dist/legacycjs --sourcemap --format cjs --legacy-output",
+                    "tsup src/index.ts -d dist --sourcemap --format esm,cjs",
                     "tsc --emitDeclarationOnly --declaration --outDir dist"
                 ],
                 "cwd": "libs/react-sdk",

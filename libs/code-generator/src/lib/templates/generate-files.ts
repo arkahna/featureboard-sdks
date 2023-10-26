@@ -2,7 +2,7 @@
 import * as ejs from 'ejs'
 import { readFile, readdir, stat } from 'fs/promises'
 import * as path from 'path'
-import { Tree } from '../tree/tree'
+import type { Tree } from '../tree/tree'
 /**
  * Generates a folder of files based on provided templates.
  *

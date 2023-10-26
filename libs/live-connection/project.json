@@ -5,9 +5,9 @@
     "sourceRoot": "libs/live-connection/src",
     "targets": {
         "lint": {
-            "executor": "@nx/linter:eslint",
+            "executor": "@nx/eslint:lint",
             "options": {
-                "lintFilePatterns": ["libs/live-connection/**/*.ts"]
+                "lintFilePatterns": ["libs/live-connection/src/**/*.ts"]
             }
         },
         "test": {
@@ -21,7 +21,9 @@
             "executor": "nx:run-commands",
             "options": {
                 "commands": [
-                    "tsup src/server.ts src/browser.ts -d dist --sourcemap --format esm,cjs --legacy-output",
+                    "tsup src/server.ts -d dist --sourcemap --format esm --legacy-output --external @featureboard/contracts",
+                    "tsup src/server.ts src/browser.ts -d dist/legacycjs --sourcemap --format cjs --legacy-output --external @featureboard/contracts",
+                    "tsup src/server.ts src/browser.ts -d dist --sourcemap --format esm,cjs --external @featureboard/contracts",
                     "tsc --emitDeclarationOnly --declaration --outDir dist"
                 ],
                 "cwd": "libs/live-connection",

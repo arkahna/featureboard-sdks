@@ -1,4 +1,4 @@
-import { FeatureBoardApiConfig } from './featureboard-api-config'
+import type { FeatureBoardApiConfig } from './featureboard-api-config'
 
 export const featureBoardHostedService: FeatureBoardApiConfig = {
     ws: 'wss://client-ws.featureboard.app',

@@ -1,11 +1,11 @@
-import { FeatureBoardApiConfig } from '../featureboard-api-config'
+import type { FeatureBoardApiConfig } from '../featureboard-api-config'
 import { createManualUpdateStrategy } from './createManualUpdateStrategy'
 import { createPollingUpdateStrategy } from './createPollingUpdateStrategy'
-import {
+import type {
     EffectiveConfigUpdateStrategy,
-    pollingIntervalDefault,
     UpdateStrategies,
 } from './update-strategies'
+import { pollingIntervalDefault } from './update-strategies'
 
 export function resolveUpdateStrategy(
     updateStrategy: UpdateStrategies['kind'] | UpdateStrategies | undefined,

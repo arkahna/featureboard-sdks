@@ -1,20 +1,20 @@
 {
     "extends": "../../tsconfig.settings.json",
     "compilerOptions": {
-        "module": "commonjs",
-        "noEmit": true
+        "outDir": "./tsc-out",
+        "rootDir": "./src",
+        "types": [
+            "node",
+            "vitest/globals",
+            "vitest/importMeta",
+            "vite/client",
+            "vitest"
+        ]
     },
-    "files": [],
-    "include": [],
+    "include": ["src/**/*.ts"],
     "references": [
         {
             "path": "../code-generator"
-        },
-        {
-            "path": "./tsconfig.lib.json"
-        },
-        {
-            "path": "./tsconfig.spec.json"
         }
     ]
 }

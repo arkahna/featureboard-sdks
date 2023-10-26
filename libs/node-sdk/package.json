@@ -4,21 +4,31 @@
     "main": "tsc-out/index.js",
     "license": "MIT",
     "sideEffects": false,
+    "type": "module",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/featureboard/sdks.git"
+        "url": "git+https://github.com/arkahna/featureboard-sdks.git"
     },
     "keywords": [
         "Feature toggle",
         "Feature flags"
     ],
     "bugs": {
-        "url": "https://github.com/featureboard/sdks/issues"
+        "url": "https://github.com/arkahna/featureboard-sdks/issues"
     },
-    "homepage": "https://github.com/featureboard/sdks/tree/master/libs/node-sdk",
+    "homepage": "https://github.com/arkahna/featureboard-sdks/tree/master/libs/node-sdk",
     "publishConfig": {
-        "main": "dist/index.js",
-        "module": "dist/esm/index.js"
+        "main": "dist/legacycjs/index.js",
+        "module": "dist/esm/index.js",
+        "types": "dist/index.d.ts",
+        "exports": {
+            "./package.json": "./package.json",
+            ".": {
+                "types": "./dist/index.d.ts",
+                "import": "./dist/index.js",
+                "default": "./dist/index.cjs"
+            }
+        }
     },
     "dependencies": {
         "@featureboard/js-sdk": "workspace:0.14.0",

@@ -1,4 +1,4 @@
-import { FeatureConfiguration } from '@featureboard/contracts'
+import type { FeatureConfiguration } from '@featureboard/contracts'
 
 export interface ExternalStateStore {
     /**
@@ -10,5 +10,7 @@ export interface ExternalStateStore {
      * Update is called whenever an effective feature value is updated.
      * It can be used to keep the external state store accurate.
      * */
-    update(store: Record<string, FeatureConfiguration | undefined>): PromiseLike<any>
+    update(
+        store: Record<string, FeatureConfiguration | undefined>,
+    ): PromiseLike<any>
 }

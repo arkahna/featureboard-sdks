@@ -1,4 +1,4 @@
-import { Features } from '@featureboard/js-sdk'
+import type { Features } from '@featureboard/js-sdk'
 import React from 'react'
 import { FeatureBoardContext } from './featureboard-provider'
 
