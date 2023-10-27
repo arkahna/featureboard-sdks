@@ -3,12 +3,12 @@ import type { Tree } from '@nx/devkit'
 import { joinPathFragments, readProjectConfiguration } from '@nx/devkit'
 import prompts from 'prompts'
 import { isDryRun } from '../../Shared/is-dry-run'
-import type { CodeGenGeneratorSchema } from './schema'
+import type { CodeGenExecutorSchema } from './schema'
 
-export async function codeGenGenerator(
+export async function codeGenExecutor(
     tree: Tree,
-    { projectName, ...options }: CodeGenGeneratorSchema,
-): Promise<void> {
+    { projectName, ...options }: CodeGenExecutorSchema,
+) {
     const project = readProjectConfiguration(tree, projectName)
     const dryRun = isDryRun()
 
@@ -33,5 +33,4 @@ export async function codeGenGenerator(
         ...options,
     })
 }
-
-export default codeGenGenerator
+export default codeGenExecutor

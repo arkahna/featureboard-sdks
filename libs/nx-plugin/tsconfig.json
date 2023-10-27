@@ -3,6 +3,8 @@
     "compilerOptions": {
         "outDir": "./tsc-out",
         "rootDir": "./src",
+        "module": "commonjs",
+        "esModuleInterop": true,
         "types": [
             "node",
             "vitest/globals",

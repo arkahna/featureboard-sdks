@@ -22,7 +22,8 @@
                 "lintFilePatterns": [
                     "libs/nx-plugin/src/**/*.ts",
                     "libs/nx-plugin/package.json",
-                    "libs/nx-plugin/generators.json"
+                    "libs/nx-plugin/generators.json",
+                    "libs/nx-plugin/executors.json"
                 ]
             }
         },
