@@ -1,6 +1,6 @@
 {
     "name": "@featureboard/cli",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "license": "MIT",
     "dependencies": {
         "@commander-js/extra-typings": "^11.1.0",

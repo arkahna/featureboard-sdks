@@ -1,5 +1,11 @@
 # @featureboard/code-generator
 
+## 0.1.1
+
+### Patch Changes
+
+- 41f499f: Fix package process
+
 ## 0.1.0
 
 ### Minor Changes

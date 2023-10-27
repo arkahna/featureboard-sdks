@@ -1,5 +1,13 @@
 # @featureboard/nx-plugin
 
+## 0.2.1
+
+### Patch Changes
+
+- 41f499f: Fix package process
+- Updated dependencies [41f499f]
+  - @featureboard/code-generator@0.1.1
+
 ## 0.2.0
 
 ### Minor Changes
