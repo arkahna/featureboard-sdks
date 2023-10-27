@@ -8,12 +8,15 @@
             "executor": "nx:run-commands",
             "options": {
                 "commands": [
-                    "tsup src/index.ts -d dist --sourcemap --format cjs --legacy-output",
+                    "tsup src/index.ts -d dist --sourcemap --format esm --legacy-output --external @featureboard/code-generator",
+                    "tsup src/index.ts -d dist/legacycjs --sourcemap --format cjs --legacy-output --external @featureboard/code-generator",
+                    "tsup src/index.ts -d dist --sourcemap --format esm,cjs --external @featureboard/code-generator",
                     "tsc --emitDeclarationOnly --declaration --outDir dist"
                 ],
                 "cwd": "libs/nx-plugin",
                 "parallel": false
-            }
+            },
+            "dependsOn": ["^package"]
         },
         "lint": {
             "executor": "@nx/eslint:lint",
