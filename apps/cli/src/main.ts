@@ -9,7 +9,6 @@ import {
     flushChanges,
     printChanges,
 } from '@featureboard/code-generator'
-import figlet from 'figlet'
 import fs from 'fs'
 import fsAsync from 'fs/promises'
 import path from 'path'
@@ -20,7 +19,13 @@ import prompts from 'prompts'
 const packageJson: { version: string } = JSON.parse(
     fs.readFileSync(path.join(__dirname, '../package.json'), 'utf8'),
 )
-const titleText = figlet.textSync(`FeatureBoard CLI V${packageJson.version}`)
+
+// https://manytools.org/hacker-tools/ascii-banner/
+const titleText = ` ___         _                ___                   _    ___ _    ___
+| __|__ __ _| |_ _  _ _ _ ___| _ ) ___  __ _ _ _ __| |  / __| |  |_ _|
+| _/ -_) _\` |  _| || | '_/ -_) _ \\/ _ \\/ _\` | '_/ _\` | | (__| |__ | |
+|_|\\___\\__,_|\\__|\\_,_|_| \\___|___/\\___/\\__,_|_| \\__,_|  \\___|____|___|
+                                                                      `
 
 const program = new Command()
     .description(`${titleText}\nA Code generator for FeatureBoard`)
