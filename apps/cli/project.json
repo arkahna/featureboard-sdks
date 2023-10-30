@@ -8,7 +8,7 @@
             "executor": "@nx/js:node",
             "defaultConfiguration": "development",
             "options": {
-                "buildTarget": "cli:build",
+                "buildTarget": "cli:package",
                 "args": [
                     "code-gen",
                     "--output-path",
@@ -17,22 +17,28 @@
             },
             "configurations": {
                 "development": {
-                    "buildTarget": "cli:build:development"
+                    "buildTarget": "cli:package:development"
                 },
                 "production": {
-                    "buildTarget": "cli:build:production"
+                    "buildTarget": "cli:package:production"
                 }
             }
         },
         "package": {
             "executor": "nx:run-commands",
             "options": {
+                "outputPath": "{projectRoot}/dist",
+                "outputFileName": "main.js",
                 "commands": [
-                    "tsup src/main.ts -d dist --sourcemap --format esm --external @featureboard/code-generator"
+                    "tsup src/main.ts -d dist --sourcemap --format esm --legacy-output --external @featureboard/code-generator",
+                    "tsup src/main.ts -d dist/legacycjs --sourcemap --format cjs --legacy-output --external @featureboard/code-generator",
+                    "tsup src/main.ts -d dist --sourcemap --format esm,cjs --external @featureboard/code-generator",
+                    "tsc --emitDeclarationOnly --declaration --outDir dist"
                 ],
                 "cwd": "apps/cli",
                 "parallel": false
-            }
+            },
+            "dependsOn": ["^package"]
         },
         "lint": {
             "executor": "@nx/eslint:lint",
