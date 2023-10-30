@@ -31,7 +31,11 @@
             },
             "configurations": {
                 "development": {},
-                "production": {}
+                "production": {
+                    "esbuildOptions": {
+                        "sourcemap": false
+                    }
+                }
             }
         },
         "serve": {
