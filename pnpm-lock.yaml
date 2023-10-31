@@ -202,42 +202,6 @@ importers:
         specifier: ^2.4.2
         version: 2.4.2
 
-  apps/cli/dist:
-    devDependencies:
-      '@commander-js/extra-typings':
-        specifier: ^11.1.0
-        version: 11.1.0(commander@11.1.0)
-      '@featureboard/code-generator':
-        specifier: workspace:*
-        version: link:../../../libs/code-generator
-      ejs:
-        specifier: ^3.1.9
-        version: 3.1.9
-      figlet:
-        specifier: ^1.7.0
-        version: 1.7.0
-      prompts:
-        specifier: ^2.4.2
-        version: 2.4.2
-
-  apps/cli/tsc-out:
-    dependencies:
-      '@commander-js/extra-typings':
-        specifier: ^11.1.0
-        version: 11.1.0(commander@11.1.0)
-      '@featureboard/code-generator':
-        specifier: workspace:*
-        version: link:../../../libs/code-generator
-      ejs:
-        specifier: ^3.1.9
-        version: 3.1.9
-      figlet:
-        specifier: ^1.7.0
-        version: 1.7.0
-      prompts:
-        specifier: ^2.4.2
-        version: 2.4.2
-
   apps/examples/dotnet-api: {}
 
   libs/code-generator: {}
@@ -1828,6 +1792,7 @@ packages:
       commander: 11.1.x
     dependencies:
       commander: 11.1.0
+    dev: true
 
   /@cspotcode/source-map-support@0.8.1:
     resolution: {integrity: sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw==}
@@ -5128,6 +5093,7 @@ packages:
   /commander@11.1.0:
     resolution: {integrity: sha512-yPVavfyCcRhmorC7rWlkHn15b4wDVgVmBA7kV4QVBsF7kv/9TKJAbAXVTxvTnwP8HHKjRCJDClKbciiYS7p0DQ==}
     engines: {node: '>=16'}
+    dev: true
 
   /commander@4.1.1:
     resolution: {integrity: sha512-NOKm8xhkzAjzFx8B2v5OAHT+u5pRQc2UCa2Vq9jYL/31o2wi9mxBA7LIFs3sV5VSC49z6pEhfbMULvShKj26WA==}
@@ -6338,11 +6304,6 @@ packages:
   /fflate@0.8.1:
     resolution: {integrity: sha512-/exOvEuc+/iaUm105QIiOt4LpBdMTWsXxqR0HDF35vx3fmaKzw7354gTilCh5rkzEt8WYyG//ku3h3nRmd7CHQ==}
     dev: true
-
-  /figlet@1.7.0:
-    resolution: {integrity: sha512-gO8l3wvqo0V7wEFLXPbkX83b7MVjRrk1oRLfYlZXol8nEpb/ON9pcKLI4qpBv5YtOTfrINtqb7b40iYY2FTWFg==}
-    engines: {node: '>= 0.4.0'}
-    hasBin: true
 
   /figures@3.2.0:
     resolution: {integrity: sha512-yaduQFRKLXYOGgEn6AZau90j3ggSOyiqXU0F9JZfeXYhNa+Jk4X+s45A2zg5jns87GAFa34BBm2kXw4XpNcbdg==}
