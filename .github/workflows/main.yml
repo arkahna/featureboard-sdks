@@ -81,14 +81,8 @@ jobs:
       - name: Type check
         run: pnpm tsc -b
 
-      - name: Lint types and code
-        run: pnpm run lint
-
-      - name: Run tests
-        run: pnpm test
-
-      - name: Package libs
-        run: pnpm package
+      - name: Lint, build and test
+        run: pnpm nx run-many --target build,lint,test,package --all --exclude examples-dotnet-api
 
       - name: Release NPM packages
         run: pnpm publish -r --access public

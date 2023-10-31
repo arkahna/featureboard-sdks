@@ -4,11 +4,46 @@
     "sourceRoot": "apps/cli/src",
     "projectType": "application",
     "targets": {
+        "build": {
+            "executor": "@nx/esbuild:esbuild",
+            "outputs": ["{options.outputPath}"],
+            "defaultConfiguration": "production",
+            "options": {
+                "platform": "node",
+                "outputPath": "apps/cli/dist",
+                "assets": [],
+                "format": ["esm"],
+                "bundle": true,
+                "skipTypeCheck": true,
+
+                "main": "apps/cli/src/main.ts",
+                "tsConfig": "apps/cli/tsconfig.json",
+                "esbuildOptions": {
+                    "sourcemap": true,
+                    "outExtension": {
+                        ".js": ".js"
+                    },
+                    "banner": {
+                        "js": "const require = (await import('node:module')).createRequire(import.meta.url);const __filename = (await import('node:url')).fileURLToPath(import.meta.url);const __dirname = (await import('node:path')).dirname(__filename);"
+                    }
+                },
+                "thirdParty": true
+            },
+            "configurations": {
+                "development": {},
+                "production": {
+                    "esbuildOptions": {
+                        "sourcemap": false
+                    }
+                }
+            }
+        },
         "serve": {
             "executor": "@nx/js:node",
             "defaultConfiguration": "development",
             "options": {
                 "buildTarget": "cli:build",
+
                 "args": [
                     "code-gen",
                     "--output-path",
@@ -22,16 +57,6 @@
                 "production": {
                     "buildTarget": "cli:build:production"
                 }
-            }
-        },
-        "package": {
-            "executor": "nx:run-commands",
-            "options": {
-                "commands": [
-                    "tsup src/main.ts -d dist --sourcemap --format esm --external @featureboard/code-generator"
-                ],
-                "cwd": "apps/cli",
-                "parallel": false
             }
         },
         "lint": {
