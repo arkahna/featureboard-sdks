@@ -1,4 +1,4 @@
-import { FeatureBoardClient } from './features-client'
+import type { FeatureBoardClient } from './features-client'
 
 export interface BrowserClient {
     client: FeatureBoardClient
@@ -8,7 +8,7 @@ export interface BrowserClient {
 
     /**
      * Waits for BrowserClient to be initialised
-     * 
+     *
      * @throws {Error} If the initialisation process fails an error is thrown
      */
     waitForInitialised(): Promise<boolean>

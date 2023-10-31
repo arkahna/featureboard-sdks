@@ -1,5 +1,23 @@
 # @featureboard/cli
 
+## 0.2.1
+
+### Patch Changes
+
+- Updated dependencies [41f499f]
+  - @featureboard/code-generator@0.1.1
+
+## 0.2.0
+
+### Minor Changes
+
+- 7587dae: Add support for modern bundlers
+
+### Patch Changes
+
+- Updated dependencies [7587dae]
+  - @featureboard/code-generator@0.1.0
+
 ## 0.1.6
 
 ### Patch Changes

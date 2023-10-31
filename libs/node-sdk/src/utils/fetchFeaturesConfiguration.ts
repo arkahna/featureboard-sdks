@@ -1,6 +1,6 @@
-import { FeatureConfiguration } from '@featureboard/contracts'
+import type { FeatureConfiguration } from '@featureboard/contracts'
+import type { AllFeatureStateStore } from '../feature-state-store'
 import { httpClientDebug } from './http-log'
-import { AllFeatureStateStore } from '../feature-state-store'
 
 export async function fetchFeaturesConfigurationViaHttp(
     allEndpoint: string,

@@ -8,5 +8,6 @@ export default defineConfig({
     plugins: [tsconfigPaths(), react()],
     test: {
         include: ['src/**/*.{test,spec}.{ts,mts,cts,tsx}'],
+        environment: 'happy-dom',
     },
 })

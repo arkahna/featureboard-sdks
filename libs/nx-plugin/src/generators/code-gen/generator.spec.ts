@@ -1,16 +1,17 @@
+import type { Tree } from '@nx/devkit'
 import {
-    Tree,
     addProjectConfiguration,
     joinPathFragments,
     readProjectConfiguration,
 } from '@nx/devkit'
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing'
 import * as fs from 'fs/promises'
-import { rest } from 'msw/'
-import { SetupServer, setupServer } from 'msw/node'
+import { HttpResponse, http } from 'msw'
+import type { SetupServer } from 'msw/node'
+import { setupServer } from 'msw/node'
 import * as path from 'path'
 import { codeGenGenerator } from './generator'
-import { CodeGenGeneratorSchema } from './schema'
+import type { CodeGenGeneratorSchema } from './schema'
 
 describe('code-generator', () => {
     let tree: Tree
@@ -19,21 +20,18 @@ describe('code-generator', () => {
     describe('templateType: dotnet-api', () => {
         beforeAll(() => {
             server = setupServer(
-                rest.get(
-                    'https://api.featureboard.dev/projects',
-                    async (req, res, ctx) => {
-                        const file = await fs.readFile(
-                            path.join(
-                                __dirname,
-                                '../../../test-data/projects-deep.json',
-                            ),
-                            {
-                                encoding: 'utf8',
-                            },
-                        )
-                        return res(ctx.status(200), ctx.json(JSON.parse(file)))
-                    },
-                ),
+                http.get('https://api.featureboard.dev/projects', async () => {
+                    const file = await fs.readFile(
+                        path.join(
+                            __dirname,
+                            '../../../test-data/projects-deep.json',
+                        ),
+                        {
+                            encoding: 'utf8',
+                        },
+                    )
+                    return HttpResponse.json(JSON.parse(file))
+                }),
             )
             server.listen()
         })

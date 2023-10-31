@@ -3,14 +3,10 @@
     "compilerOptions": {
         "outDir": "./tsc-out",
         "rootDir": "./src",
-        "types": [
-            "node"
-        ]
+        "types": ["node"]
     },
-    "include": [
-        "src/**/*.ts",
-        "src/**/*.tsx"
-    ],
+    "include": ["src/**/*.ts", "src/**/*.tsx"],
+    "exclude": ["node_modules", "tsc-out", "dist"],
     "references": [
         {
             "path": "../contracts"

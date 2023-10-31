@@ -1,0 +1,51 @@
+{
+    "$schema": "http://json-schema.org/schema",
+    "version": 2,
+    "title": "CodeGen executor",
+    "description": "",
+    "type": "object",
+    "properties": {
+        "templateType": {
+            "description": "The type of the component",
+            "alias": "t",
+            "type": "string",
+            "x-prompt": {
+                "message": "The type of the component",
+                "type": "list",
+                "items": [
+                    {
+                        "value": "dotnet-api",
+                        "label": "DotNet API"
+                    }
+                ]
+            }
+        },
+
+        "projectName": {
+            "type": "string",
+            "description": "The name of the project to add the component to.",
+            "alias": "p",
+            "$default": {
+                "$source": "projectName"
+            },
+            "x-prompt": "What is the name of the project you want to add the component to?"
+        },
+
+        "featureBoardProjectName": {
+            "type": "string",
+            "description": "The name of the FeatureBoard project you want to pull the types from."
+        },
+
+        "featureBoardKey": {
+            "type": "string",
+            "description": "The FeatureBoard API key."
+        },
+
+        "subFolder": {
+            "type": "string",
+            "description": "Sub-folder to add the generated code to.",
+            "default": "./"
+        }
+    },
+    "required": ["templateType", "projectName"]
+}

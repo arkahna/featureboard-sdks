@@ -1,4 +1,4 @@
-import {
+import type {
     NotificationType,
     SubscribeToEnvironment,
 } from '@featureboard/contracts'
@@ -159,6 +159,7 @@ export class CommonLiveConnection {
 
     private onMessage({ data }: IMessageEvent): void {
         try {
+            // eslint-disable-next-line @typescript-eslint/no-base-to-string
             const message: NotificationType = JSON.parse(data.toString())
             liveConnectionDebug({ kind: message.kind }, 'Recieved WS Message')
 
@@ -198,12 +199,15 @@ export class CommonLiveConnection {
         // Use `WebSocket#terminate()`, which immediately destroys the connection,
         // instead of `WebSocket#close()`, which waits for the close timer.
         // Server should ping every 5 minutes, terminate if we haven't heard in 6 minutes
-        this.pingTimeout = setTimeout(() => {
-            this.close('Ping timeout')
-            if (this.environmentApiKey && this.mode && this.handleMessage) {
-                this.connect(this.handleMessage)
-            }
-        }, 6 * 60 * 1000)
+        this.pingTimeout = setTimeout(
+            () => {
+                this.close('Ping timeout')
+                if (this.environmentApiKey && this.mode && this.handleMessage) {
+                    this.connect(this.handleMessage)
+                }
+            },
+            6 * 60 * 1000,
+        )
     }
 
     close(reason: string): void {

@@ -1,6 +1,6 @@
-import { EffectiveFeatureValue } from '@featureboard/contracts'
-import { EffectiveFeatureStateStore } from './effective-feature-state-store'
-import { FeatureBoardClient } from './features-client'
+import type { EffectiveFeatureValue } from '@featureboard/contracts'
+import type { EffectiveFeatureStateStore } from './effective-feature-state-store'
+import type { FeatureBoardClient } from './features-client'
 import { debugLog } from './log'
 
 /** Designed for internal SDK use */
@@ -53,7 +53,7 @@ export function createClientInternal(
             }
 
             stateStore.on('feature-updated', callback)
-            onValue((stateStore.get(featureKey) as any) ?? defaultValue)
+            onValue(stateStore.get(featureKey) ?? defaultValue)
 
             return () => {
                 debugLog('unsubscribeToFeatureValue: %s', featureKey)

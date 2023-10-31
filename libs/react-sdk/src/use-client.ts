@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { BrowserClient, FeatureBoardClient } from '@featureboard/js-sdk'
 import { useEffect, useMemo, useState } from 'react'
 

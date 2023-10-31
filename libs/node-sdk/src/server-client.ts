@@ -1,17 +1,16 @@
-import { EffectiveFeatureValue } from '@featureboard/contracts'
-import {
+import type { EffectiveFeatureValue } from '@featureboard/contracts'
+import type {
     FeatureBoardApiConfig,
     FeatureBoardClient,
     Features,
-    featureBoardHostedService,
-    retry,
 } from '@featureboard/js-sdk'
+import { featureBoardHostedService, retry } from '@featureboard/js-sdk'
 import { PromiseCompletionSource } from 'promise-completion-source'
-import { ExternalStateStore, ServerClient } from '.'
+import type { ExternalStateStore, ServerClient } from '.'
 import { AllFeatureStateStore } from './feature-state-store'
 import { debugLog } from './log'
 import { resolveUpdateStrategy } from './update-strategies/resolveUpdateStrategy'
-import { UpdateStrategies } from './update-strategies/update-strategies'
+import type { UpdateStrategies } from './update-strategies/update-strategies'
 
 const serverConnectionDebug = debugLog.extend('server-connection')
 

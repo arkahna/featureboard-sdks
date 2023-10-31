@@ -5,7 +5,11 @@
     "overrides": [
         {
             "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
-            "extends": ["plugin:@nx/javascript", "plugin:@nx/typescript"],
+            "extends": [
+                "plugin:@nx/javascript",
+                "plugin:@nx/typescript",
+                "plugin:@typescript-eslint/recommended-requiring-type-checking"
+            ],
             "parserOptions": {},
             "rules": {
                 "@nx/enforce-module-boundaries": [
@@ -21,16 +25,22 @@
                         ]
                     }
                 ],
-                "@typescript-eslint/no-extra-semi": "off",
-                "@typescript-eslint/no-use-before-define": "off",
-                "@typescript-eslint/no-unused-vars": "off",
                 "@typescript-eslint/no-explicit-any": "off",
-                "@typescript-eslint/ban-types": "off",
-                "@typescript-eslint/no-non-null-assertion": "off",
+                "@typescript-eslint/no-unsafe-assignment": "off",
+                "@typescript-eslint/no-unsafe-member-access": "off",
+                "@typescript-eslint/no-unused-vars": "off",
+                "@typescript-eslint/no-unsafe-call": "off",
+                "@typescript-eslint/require-await": "off",
+                "@typescript-eslint/no-misused-promises": "off",
+                "@typescript-eslint/no-floating-promises": "off",
+                "@typescript-eslint/restrict-plus-operands": "off",
+                "@typescript-eslint/no-non-null-assertio": "off",
                 "@typescript-eslint/no-empty-interface": "off",
                 "no-empty-pattern": "off",
-                "react/jsx-no-useless-fragment": "off",
-                "@typescript-eslint/no-empty-function": "off"
+                "@typescript-eslint/no-empty-function": "off",
+                "@typescript-eslint/consistent-type-imports": "error",
+                "@typescript-eslint/consistent-type-exports": "error",
+                "@typescript-eslint/no-redundant-type-constituents": "off"
             }
         },
         {

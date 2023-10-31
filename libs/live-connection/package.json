@@ -1,19 +1,30 @@
 {
     "name": "@featureboard/live-connection",
     "private": true,
-    "version": "0.2.2",
+    "type": "module",
     "main": "tsc-out/server.js",
     "module": "src/server.ts",
     "browser": "src/browser.ts",
     "publishConfig": {
-        "main": "dist/server.js",
-        "module": "dist/esm/server.js",
-        "browser": "dist/esm/browser.js"
+        "main": "dist/legacycjs/index.js",
+        "module": "dist/esm/index.js",
+        "browser": "dist/legacycjs/browser.js",
+        "types": "dist/index.d.ts",
+        "exports": {
+            "./package.json": "./package.json",
+            ".": {
+                "types": "./dist/index.d.ts",
+                "import": "./dist/index.js",
+                "default": "./dist/index.cjs",
+                "browser": "./dist/browser.js"
+            }
+        }
     },
     "dependencies": {
-        "@featureboard/contracts": "workspace:0.3.2",
+        "@featureboard/contracts": "workspace:*",
         "debug": "^4.3.4",
         "promise-completion-source": "^1.0.0",
-        "ws": "^8.13.0"
-    }
+        "ws": "^8.14.2"
+    },
+    "version": null
 }

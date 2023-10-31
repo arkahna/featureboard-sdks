@@ -4,46 +4,35 @@
     "sourceRoot": "libs/code-generator/src",
     "projectType": "library",
     "targets": {
-        "build": {
-            "executor": "@nx/js:tsc",
-            "outputs": ["{options.outputPath}"],
-            "options": {
-                "outputPath": "dist/libs/code-generator",
-                "tsConfig": "libs/code-generator/tsconfig.lib.json",
-                "packageJson": "libs/code-generator/package.json",
-                "main": "libs/code-generator/src/index.ts",
-                "assets": [
-                    "libs/code-generator/*.md",
-                    {
-                        "input": "./libs/code-generator/src",
-                        "glob": "**/*.template",
-                        "output": "./src"
-                    }
-                ]
-            }
-        },
         "lint": {
-            "executor": "@nx/linter:eslint",
+            "executor": "@nx/eslint:lint",
             "outputs": ["{options.outputFile}"],
             "options": {
                 "lintFilePatterns": [
-                    "libs/code-generator/**/*.ts",
+                    "libs/code-generator/src/**/*.ts",
                     "libs/code-generator/package.json"
                 ]
             }
         },
-        "test": {
-            "executor": "@nx/jest:jest",
-            "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+        "package": {
+            "executor": "nx:run-commands",
             "options": {
-                "jestConfig": "libs/code-generator/jest.config.ts",
-                "passWithNoTests": true
-            },
-            "configurations": {
-                "ci": {
-                    "ci": true,
-                    "codeCoverage": true
-                }
+                "commands": [
+                    "tsup src/index.ts -d dist --sourcemap --format esm --legacy-output",
+                    "tsup src/index.ts -d dist/legacycjs --sourcemap --format cjs --legacy-output",
+                    "tsup src/index.ts -d dist --sourcemap --format esm,cjs",
+                    "tsc --emitDeclarationOnly --declaration --outDir dist"
+                ],
+                "cwd": "libs/code-generator",
+                "parallel": false
+            }
+        },
+        "test": {
+            "executor": "@nx/vite:test",
+            "outputs": ["{options.reportsDirectory}"],
+            "options": {
+                "passWithNoTests": true,
+                "reportsDirectory": "../../coverage/libs/code-generator"
             }
         }
     },

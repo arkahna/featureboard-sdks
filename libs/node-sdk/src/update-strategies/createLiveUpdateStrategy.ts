@@ -1,8 +1,8 @@
-import { NotificationType } from '@featureboard/contracts'
+import type { NotificationType } from '@featureboard/contracts'
 // eslint-disable-next-line @nx/enforce-module-boundaries
-import { LiveOptions } from '@featureboard/live-connection'
-import { AllConfigUpdateStrategy } from './update-strategies'
-import { AllFeatureStateStore } from '../feature-state-store'
+import type { LiveOptions } from '@featureboard/live-connection'
+import type { AllFeatureStateStore } from '../feature-state-store'
+import type { AllConfigUpdateStrategy } from './update-strategies'
 
 export function createLiveUpdateStrategy(
     environmentApiKey: string,

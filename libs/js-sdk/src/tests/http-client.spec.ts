@@ -1,5 +1,5 @@
-import { EffectiveFeatureValue } from '@featureboard/contracts'
-import { rest } from 'msw'
+import type { EffectiveFeatureValue } from '@featureboard/contracts'
+import { HttpResponse, http } from 'msw'
 import { setupServer } from 'msw/node'
 import { describe, expect, it } from 'vitest'
 import { createBrowserClient } from '../create-browser-client'
@@ -14,9 +14,8 @@ describe('http client', () => {
             },
         ]
         const server = setupServer(
-            rest.get(
-                'https://client.featureboard.app/effective',
-                (_req, res, ctx) => res(ctx.json(values), ctx.status(200)),
+            http.get('https://client.featureboard.app/effective', () =>
+                HttpResponse.json(values),
             ),
         )
         server.listen()
@@ -52,9 +51,8 @@ describe('http client', () => {
             },
         ]
         const server = setupServer(
-            rest.get(
-                'https://client.featureboard.app/effective',
-                (_req, res, ctx) => res(ctx.json(values), ctx.status(200)),
+            http.get('https://client.featureboard.app/effective', () =>
+                HttpResponse.json(values),
             ),
         )
         server.listen()
@@ -96,14 +94,15 @@ describe('http client', () => {
             },
         ]
         const server = setupServer(
-            rest.get(
+            http.get(
                 'https://client.featureboard.app/effective',
-                (_req, res, ctx) => res.once(ctx.json(values), ctx.status(200)),
+                () => HttpResponse.json(values),
+                { once: true },
             ),
-            rest.get(
+            http.get(
                 'https://client.featureboard.app/effective',
-                (_req, res, ctx) =>
-                    res.once(ctx.json(newValues), ctx.status(200)),
+                () => HttpResponse.json(newValues),
+                { once: true },
             ),
         )
         server.listen()
@@ -141,28 +140,26 @@ describe('http client', () => {
         const lastModified = new Date().toISOString()
         let matched = false
         const server = setupServer(
-            rest.get(
+            http.get(
                 'https://client.featureboard.app/effective',
-                (_req, res, ctx) =>
-                    res.once(
-                        ctx.json(values),
-                        ctx.status(200),
-                        ctx.set({
-                            etag: lastModified,
-                        }),
-                    ),
+                () =>
+                    HttpResponse.json(values, {
+                        headers: { etag: lastModified },
+                    }),
+                { once: true },
             ),
-            rest.get(
+            http.get(
                 'https://client.featureboard.app/effective',
-                (req, res, ctx) => {
-                    if (req.headers.get('if-none-match') === lastModified) {
+                ({ request }) => {
+                    if (request.headers.get('if-none-match') === lastModified) {
                         matched = true
-                        return res.once(ctx.status(304))
+                        return new Response(null, { status: 304 })
                     }
 
-                    console.warn('Request Mismatch', req.url, lastModified)
-                    return res()
+                    console.warn('Request Mismatch', request.url, lastModified)
+                    return HttpResponse.json({}, { status: 500 })
                 },
+                { once: true },
             ),
         )
         server.listen()
@@ -203,26 +200,24 @@ describe('http client', () => {
         ]
         const lastModified = new Date().toISOString()
         const server = setupServer(
-            rest.get(
+            http.get(
                 'https://client.featureboard.app/effective',
-                (req, res, ctx) => {
-                    if (req.headers.get('if-none-match') === lastModified) {
+                ({ request }) => {
+                    const ifNoneMatchHeader =
+                        request.headers.get('if-none-match')
+
+                    if (ifNoneMatchHeader === lastModified) {
                         const newLastModified = new Date().toISOString()
-                        return res(
-                            ctx.json(newValues),
-                            ctx.status(200),
-                            ctx.set({
-                                etag: newLastModified,
-                            }),
-                        )
+                        return HttpResponse.json(newValues, {
+                            headers: { etag: newLastModified },
+                        })
                     }
-                    return res(
-                        ctx.json(values),
-                        ctx.status(200),
-                        ctx.set({
+
+                    return HttpResponse.json(values, {
+                        headers: {
                             etag: lastModified,
-                        }),
-                    )
+                        },
+                    })
                 },
             ),
         )
@@ -260,9 +255,8 @@ describe('http client', () => {
         'can start with last known good config',
         async () => {
             const server = setupServer(
-                rest.get(
-                    'https://client.featureboard.app/effective',
-                    (_req, res, ctx) => res(ctx.status(500)),
+                http.get('https://client.featureboard.app/effective', () =>
+                    HttpResponse.json({}, { status: 500 }),
                 ),
             )
             server.listen()
@@ -314,29 +308,20 @@ describe('http client', () => {
             },
         ]
         const server = setupServer(
-            rest.get(
+            http.get(
                 'https://client.featureboard.app/effective',
-                (req, res, ctx) => {
-                    if (
-                        req.url.searchParams.get('audiences') ===
-                        'test-audience'
-                    ) {
+                ({ request }) => {
+                    const url = new URL(request.url)
+                    if (url.searchParams.get('audiences') === 'test-audience') {
                         const newLastModified = new Date().toISOString()
-                        return res(
-                            ctx.json(newValues),
-                            ctx.status(200),
-                            ctx.set({
-                                etag: newLastModified,
-                            }),
-                        )
+                        return HttpResponse.json(newValues, {
+                            headers: { etag: newLastModified },
+                        })
                     }
-                    return res(
-                        ctx.json(values),
-                        ctx.status(200),
-                        ctx.set({
-                            etag: lastModified,
-                        }),
-                    )
+
+                    return HttpResponse.json(values, {
+                        headers: { etag: lastModified },
+                    })
                 },
             ),
         )
@@ -399,34 +384,24 @@ describe('http client', () => {
         ]
         let count = 0
         const server = setupServer(
-            rest.get(
+            http.get(
                 'https://client.featureboard.app/effective',
-                (req, res, ctx) => {
-                    if (
-                        req.url.searchParams.get('audiences') ===
-                        'test-audience'
-                    ) {
+                ({ request }) => {
+                    const url = new URL(request.url)
+                    if (url.searchParams.get('audiences') === 'test-audience') {
                         const newLastModified = new Date().toISOString()
-                        return res(
-                            ctx.json(newValues),
-                            ctx.status(200),
-                            ctx.set({
-                                etag: newLastModified,
-                            }),
-                        )
+                        return HttpResponse.json(newValues, {
+                            headers: { etag: newLastModified },
+                        })
                     }
                     if (count > 0) {
                         lastModified = new Date().toISOString()
                     }
 
                     count++
-                    return res(
-                        ctx.json(values),
-                        ctx.status(200),
-                        ctx.set({
-                            etag: lastModified,
-                        }),
-                    )
+                    return HttpResponse.json(values, {
+                        headers: { etag: lastModified },
+                    })
                 },
             ),
         )
@@ -488,29 +463,19 @@ describe('http client', () => {
             },
         ]
         const server = setupServer(
-            rest.get(
+            http.get(
                 'https://client.featureboard.app/effective',
-                (req, res, ctx) => {
-                    if (
-                        req.url.searchParams.get('audiences') ===
-                        'test-audience'
-                    ) {
+                ({ request }) => {
+                    const url = new URL(request.url)
+                    if (url.searchParams.get('audiences') === 'test-audience') {
                         const newLastModified = new Date().toISOString()
-                        return res(
-                            ctx.json(newValues),
-                            ctx.status(200),
-                            ctx.set({
-                                etag: newLastModified,
-                            }),
-                        )
+                        return HttpResponse.json(newValues, {
+                            headers: { etag: newLastModified },
+                        })
                     }
-                    return res(
-                        ctx.json(values),
-                        ctx.status(200),
-                        ctx.set({
-                            etag: lastModified,
-                        }),
-                    )
+                    return HttpResponse.json(values, {
+                        headers: { etag: lastModified },
+                    })
                 },
             ),
         )
@@ -557,13 +522,11 @@ describe('http client', () => {
 
     it('Throw error updating audience when SDK connection fails', async () => {
         const server = setupServer(
-            rest.get(
-                'https://client.featureboard.app/effective',
-                (_req, res, ctx) =>
-                    res(
-                        ctx.json({ message: 'Test Server Request Error' }),
-                        ctx.status(500),
-                    ),
+            http.get('https://client.featureboard.app/effective', () =>
+                HttpResponse.json(
+                    { message: 'Test Server Request Error' },
+                    { status: 500 },
+                ),
             ),
         )
         server.listen()
@@ -617,17 +580,17 @@ describe('http client', () => {
             },
         ]
         const server = setupServer(
-            rest.get(
+            http.get(
                 'https://client.featureboard.app/effective',
-                (_req, res, ctx) =>
-                    res.once(
-                        ctx.json({ message: 'Test Server Request Error' }),
-                        ctx.status(500),
+                () =>
+                    HttpResponse.json(
+                        { message: 'Test Server Request Error' },
+                        { status: 500 },
                     ),
+                { once: true },
             ),
-            rest.get(
-                'https://client.featureboard.app/effective',
-                (_req, res, ctx) => res(ctx.json(values), ctx.status(200)),
+            http.get('https://client.featureboard.app/effective', () =>
+                HttpResponse.json(values),
             ),
         )
         server.listen()
@@ -658,16 +621,13 @@ describe('http client', () => {
         async () => {
             let count = 0
             const server = setupServer(
-                rest.get(
-                    'https://client.featureboard.app/effective',
-                    (_req, res, ctx) => {
-                        count++
-                        return res(
-                            ctx.json({ message: 'Test Server Request Error' }),
-                            ctx.status(500),
-                        )
-                    },
-                ),
+                http.get('https://client.featureboard.app/effective', () => {
+                    count++
+                    return HttpResponse.json(
+                        { message: 'Test Server Request Error' },
+                        { status: 500 },
+                    )
+                }),
             )
             server.listen()
 
@@ -706,9 +666,8 @@ describe('http client', () => {
             },
         ]
         const server = setupServer(
-            rest.get(
-                'https://client.featureboard.app/effective',
-                (_req, res, ctx) => res(ctx.json(values), ctx.status(200)),
+            http.get('https://client.featureboard.app/effective', () =>
+                HttpResponse.json(values),
             ),
         )
         server.listen()

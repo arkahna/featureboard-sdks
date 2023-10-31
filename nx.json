@@ -1,23 +1,6 @@
 {
-    "npmScope": "featureboard-sdks",
     "affected": {
         "defaultBase": "main"
-    },
-    "tasksRunnerOptions": {
-        "default": {
-            "runner": "nx/tasks-runners/default",
-            "options": {
-                "cacheableOperations": [
-                    "build",
-                    "lint",
-                    "test",
-                    "e2e",
-                    "codegen",
-                    "swagger"
-                ],
-                "parallel": 1
-            }
-        }
     },
     "targetDependencies": {
         "build": [
@@ -27,9 +10,6 @@
             }
         ]
     },
-    "cli": {
-        "defaultCollection": "@nx/workspace"
-    },
     "namedInputs": {
         "default": ["{projectRoot}/**/*", "sharedGlobals"],
         "sharedGlobals": [],
@@ -37,21 +17,39 @@
             "default",
             "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
             "!{projectRoot}/tsconfig.spec.json",
-            "!{projectRoot}/jest.config.[jt]s",
             "!{projectRoot}/src/test-setup.[jt]s"
         ]
     },
-    "plugins": ["@nx-dotnet/core"],
+    "plugins": [
+        {
+            "plugin": "@nx-dotnet/core",
+            "options": {
+                "nugetPackages": {}
+            }
+        }
+    ],
     "targetDefaults": {
         "test": {
-            "inputs": [
-                "default",
-                "^production",
-                "{workspaceRoot}/jest.preset.js"
-            ]
+            "inputs": ["default", "^production"],
+            "cache": true
         },
         "build": {
-            "dependsOn": ["codegen", "^codegen"]
+            "dependsOn": ["codegen", "^codegen"],
+            "cache": true
+        },
+        "lint": {
+            "cache": true,
+            "inputs": ["default", "{workspaceRoot}/.eslintrc.json"]
+        },
+        "e2e": {
+            "cache": true
+        },
+        "codegen": {
+            "cache": true
+        },
+        "swagger": {
+            "cache": true
         }
-    }
+    },
+    "parallel": 1
 }

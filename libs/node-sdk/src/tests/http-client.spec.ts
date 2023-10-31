@@ -1,6 +1,6 @@
-import { FeatureConfiguration } from '@featureboard/contracts'
+import type { FeatureConfiguration } from '@featureboard/contracts'
 import { featureBoardHostedService } from '@featureboard/js-sdk'
-import { rest } from 'msw'
+import { HttpResponse, http } from 'msw'
 import { setupServer } from 'msw/node'
 import { describe, expect, it } from 'vitest'
 import { createServerClient } from '../server-client'
@@ -16,8 +16,10 @@ describe('http client', () => {
             },
         ]
         const server = setupServer(
-            rest.get('https://client.featureboard.app/all', (_req, res, ctx) =>
-                res.once(ctx.json(values), ctx.status(200)),
+            http.get(
+                'https://client.featureboard.app/all',
+                () => HttpResponse.json(values),
+                { once: true },
             ),
         )
         server.listen()
@@ -57,8 +59,10 @@ describe('http client', () => {
             },
         ]
         const server = setupServer(
-            rest.get('https://client.featureboard.app/all', (_req, res, ctx) =>
-                res.once(ctx.json(values), ctx.status(200)),
+            http.get(
+                'https://client.featureboard.app/all',
+                () => HttpResponse.json(values),
+                { once: true },
             ),
         )
         server.listen()
@@ -96,8 +100,10 @@ describe('http client', () => {
             },
         ]
         const server = setupServer(
-            rest.get('https://client.featureboard.app/all', (_req, res, ctx) =>
-                res.once(ctx.json(values), ctx.status(200)),
+            http.get(
+                'https://client.featureboard.app/all',
+                () => HttpResponse.json(values),
+                { once: true },
             ),
         )
         server.listen()
@@ -149,17 +155,14 @@ describe('http client', () => {
 
         let count = 0
         const server = setupServer(
-            rest.get(
-                'https://client.featureboard.app/all',
-                (_req, res, ctx) => {
-                    if (count > 0) {
-                        return res(ctx.json(newValues), ctx.status(200))
-                    }
+            http.get('https://client.featureboard.app/all', () => {
+                if (count > 0) {
+                    return HttpResponse.json(newValues)
+                }
 
-                    count++
-                    return res(ctx.json(values), ctx.status(200))
-                },
-            ),
+                count++
+                return HttpResponse.json(values)
+            }),
         )
         server.listen()
 
@@ -206,18 +209,16 @@ describe('http client', () => {
         const lastModified = new Date().toISOString()
 
         const server = setupServer(
-            rest.get('https://client.featureboard.app/all', (req, res, ctx) => {
-                if (req.headers.get('if-none-match') === lastModified) {
-                    return res(ctx.status(304))
+            http.get('https://client.featureboard.app/all', ({ request }) => {
+                if (request.headers.get('if-none-match') === lastModified) {
+                    return new Response(null, { status: 304 })
                 }
 
-                return res(
-                    ctx.json(values),
-                    ctx.status(200),
-                    ctx.set({
-                        'etag': lastModified,
-                    }),
-                )
+                return HttpResponse.json(values, {
+                    headers: {
+                        etag: lastModified,
+                    },
+                })
             }),
         )
         server.listen()
@@ -245,14 +246,19 @@ describe('http client', () => {
             },
         ]
         const server = setupServer(
-            rest.get('https://client.featureboard.app/all', (_req, res, ctx) =>
-                res.once(
-                    ctx.json({ message: 'Test FeatureBoard API Error' }),
-                    ctx.status(500),
-                ),
+            http.get(
+                'https://client.featureboard.app/all',
+                () =>
+                    HttpResponse.json(
+                        { message: 'Test FeatureBoard API Error' },
+                        { status: 500 },
+                    ),
+                { once: true },
             ),
-            rest.get('https://client.featureboard.app/all', (_req, res, ctx) =>
-                res.once(ctx.json(values), ctx.status(200)),
+            http.get(
+                'https://client.featureboard.app/all',
+                () => HttpResponse.json(values),
+                { once: true },
             ),
         )
         server.listen()
@@ -281,18 +287,15 @@ describe('http client', () => {
         async () => {
             let count = 0
             const server = setupServer(
-                rest.get(
-                    'https://client.featureboard.app/all',
-                    (_req, res, ctx) => {
-                        count++
-                        return res(
-                            ctx.json({
-                                message: 'Test FeatureBoard API Error',
-                            }),
-                            ctx.status(500),
-                        )
-                    },
-                ),
+                http.get('https://client.featureboard.app/all', () => {
+                    count++
+                    return HttpResponse.json(
+                        {
+                            message: 'Test FeatureBoard API Error',
+                        },
+                        { status: 500 },
+                    )
+                }),
             )
             server.listen()
 
@@ -317,15 +320,12 @@ describe('http client', () => {
 
     it('Use external state store when API request fails', async () => {
         const server = setupServer(
-            rest.get(
-                'https://client.featureboard.app/all',
-                (_req, res, ctx) => {
-                    return res(
-                        ctx.json({ message: 'Test FeatureBoard API Error' }),
-                        ctx.status(500),
-                    )
-                },
-            ),
+            http.get('https://client.featureboard.app/all', () => {
+                return HttpResponse.json(
+                    { message: 'Test FeatureBoard API Error' },
+                    { status: 500 },
+                )
+            }),
         )
         server.listen()
 
@@ -367,18 +367,13 @@ describe('http client', () => {
             let countAPIRequest = 0
             let countExternalStateStoreRequest = 0
             const server = setupServer(
-                rest.get(
-                    'https://client.featureboard.app/all',
-                    (_req, res, ctx) => {
-                        countAPIRequest++
-                        return res(
-                            ctx.json({
-                                message: 'Test FeatureBoard API Error',
-                            }),
-                            ctx.status(500),
-                        )
-                    },
-                ),
+                http.get('https://client.featureboard.app/all', () => {
+                    countAPIRequest++
+                    return HttpResponse.json(
+                        { message: 'Test FeatureBoard API Error' },
+                        { status: 500 },
+                    )
+                }),
             )
             server.listen()
 
@@ -425,8 +420,10 @@ describe('http client', () => {
         ]
 
         const server = setupServer(
-            rest.get('https://client.featureboard.app/all', (_req, res, ctx) =>
-                res.once(ctx.json(values), ctx.status(200)),
+            http.get(
+                'https://client.featureboard.app/all',
+                () => HttpResponse.json(values),
+                { once: true },
             ),
         )
         server.listen()
@@ -460,7 +457,6 @@ describe('http client', () => {
         }
     })
 
-
     it('Catch error when update external state store throws error', async () => {
         expect.assertions(1)
 
@@ -473,8 +469,10 @@ describe('http client', () => {
         ]
 
         const server = setupServer(
-            rest.get('https://client.featureboard.app/all', (_req, res, ctx) =>
-                res.once(ctx.json(values), ctx.status(200)),
+            http.get(
+                'https://client.featureboard.app/all',
+                () => HttpResponse.json(values),
+                { once: true },
             ),
         )
         server.listen()
@@ -528,11 +526,13 @@ describe('http client', () => {
             },
         ]
         const server = setupServer(
-            rest.get('https://client.featureboard.app/all', (_req, res, ctx) =>
-                res.once(ctx.json(values), ctx.status(200)),
+            http.get(
+                'https://client.featureboard.app/all',
+                () => HttpResponse.json(values),
+                { once: true },
             ),
-            rest.get('https://client.featureboard.app/all', (_req, res, ctx) =>
-                res(ctx.json(values2ndRequest), ctx.status(200)),
+            http.get('https://client.featureboard.app/all', () =>
+                HttpResponse.json(values2ndRequest),
             ),
         )
         server.listen()

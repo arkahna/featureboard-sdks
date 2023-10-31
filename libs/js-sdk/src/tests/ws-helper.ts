@@ -1,6 +1,6 @@
-import { ClientMessages } from '@featureboard/contracts'
+import type { ClientMessages } from '@featureboard/contracts'
 // eslint-disable-next-line @nx/enforce-module-boundaries
-import { IWebSocket } from '@featureboard/live-connection'
+import type { IWebSocket } from '@featureboard/live-connection'
 
 export function connectToWsClient(
     onMessage: (msg: ClientMessages, ws: IWebSocket) => void,

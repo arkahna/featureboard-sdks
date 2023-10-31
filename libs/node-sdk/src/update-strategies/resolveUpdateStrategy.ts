@@ -1,13 +1,12 @@
-import { FeatureBoardApiConfig } from '@featureboard/js-sdk'
+import type { FeatureBoardApiConfig } from '@featureboard/js-sdk'
 import { createManualUpdateStrategy } from './createManualUpdateStrategy'
 import { createOnRequestUpdateStrategy } from './createOnRequestUpdateStrategy'
 import { createPollingUpdateStrategy } from './createPollingUpdateStrategy'
-import {
+import type {
     AllConfigUpdateStrategy,
-    maxAgeDefault,
-    pollingIntervalDefault,
     UpdateStrategies,
 } from './update-strategies'
+import { maxAgeDefault, pollingIntervalDefault } from './update-strategies'
 
 export function resolveUpdateStrategy(
     updateStrategy: UpdateStrategies['kind'] | UpdateStrategies | undefined,

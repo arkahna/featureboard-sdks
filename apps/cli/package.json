@@ -1,30 +1,25 @@
 {
     "name": "@featureboard/cli",
-    "version": "0.1.6",
+    "version": "0.2.1",
     "license": "MIT",
     "dependencies": {
-        "@commander-js/extra-typings": "^11.0.0",
-        "cross-fetch": "^3.1.6",
-        "prompts": "^2.4.2",
+        "@commander-js/extra-typings": "^11.1.0",
+        "@featureboard/code-generator": "workspace:*",
         "ejs": "^3.1.9",
-        "figlet": "^1.6.0"
+        "figlet": "^1.7.0",
+        "prompts": "^2.4.2"
     },
-    "type": "commonjs",
-    "main": "./dist/index.js",
+    "type": "module",
     "bin": "./dist/main.js",
-    "files": [
-        "dist/**/*",
-        "dist/templates/**/*"
-    ],
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/featureboard/sdks.git"
+        "url": "git+https://github.com/arkahna/featureboard-sdks.git"
     },
     "keywords": [
         "Feature toggle",
         "Feature flags"
     ],
     "bugs": {
-        "url": "https://github.com/featureboard/sdks/issues"
+        "url": "https://github.com/arkahna/featureboard-sdks/issues"
     }
 }
