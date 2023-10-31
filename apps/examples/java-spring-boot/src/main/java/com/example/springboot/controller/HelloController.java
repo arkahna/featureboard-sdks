@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.math.BigDecimal;
+
 @RestController
 public class HelloController {
 
@@ -15,12 +17,28 @@ public class HelloController {
     this.featureBoardClient = featureBoardClient;
   }
 
-  @GetMapping("/")
-  public String index() {
-
-      return featureBoardClient.GetFeatureValue("some-feature", "Greetings from Spring Boot!");
+  @GetMapping("/string")
+  public String stringGet() {
+    return featureBoardClient.GetFeatureValue("string_toggle", "String Default Value!");
   }
 
-  //TODO: demo the thing
+  @GetMapping("/boolean")
+  public String booleanGet() {
+    if (featureBoardClient.GetFeatureValue("boolean_toggle", false)) {
+      return "This is true!";
+    }
+    return "This is false!";
+  }
+
+  @GetMapping("/bigdecimal")
+  public String bigdecimalGet() {
+    return "BigDecimal Value : " + featureBoardClient.GetFeatureValue("bigdecimal_toggle", new BigDecimal(22)).toString();
+  }
+
+  @GetMapping("/tprop")
+  public String tpropGet() {
+
+    return "";
+  }
 
 }
