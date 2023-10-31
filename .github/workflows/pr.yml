@@ -41,11 +41,8 @@ jobs:
       - name: Build packages
         run: pnpm tsc -b
 
-      - name: Lint types and code
-        run: pnpm run lint
-
-      - name: Tests
-        run: pnpm run test
+      - name: Lint, build and test
+        run: pnpm nx run-many --target build,lint,test --all --exclude examples-dotnet-api
 
       - name: Version command
         id: version
