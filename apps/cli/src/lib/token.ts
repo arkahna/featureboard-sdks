@@ -16,7 +16,7 @@ export const REDIRECT_PORT = 3524
 export const REDIRECT_URI = `http://localhost:${REDIRECT_PORT}`
 export const AUTH_URL = `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=${CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(
     REDIRECT_URI,
-)}/callback&scope=user.read offline_access`
+)}/callback&scope=${CLIENT_ID}/.default offline_access`
 export const TOKEN_URL =
     'https://login.microsoftonline.com/common/oauth2/v2.0/token'
 
