@@ -4,7 +4,7 @@ export async function getValidToken(): Promise<string | null> {
     const tokenData = await readToken()
 
     if (!tokenData) {
-        console.error('No token found. Please authenticate first.')
+        console.error('Please authenticate by running `fb login`.')
         return null
     }
 
