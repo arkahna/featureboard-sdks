@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`code-generator > templateType: dotnet-api > should produce the expected features files > apps/my-app/Features.cs 1`] = `
+exports[`code-generator > template: dotnet-api > should produce the expected features files > apps/my-app/Features.cs 1`] = `
 "using FeatureBoard.DotnetSdk.Attributes;
 using FeatureBoard.DotnetSdk.Models;
 using System.Runtime.Serialization;
@@ -108,9 +108,9 @@ public class FeatureFilterAttribute : FeatureFilterAttributeBase
 "
 `;
 
-exports[`code-generator > templateType: dotnet-api > should produce the expected features files > apps/my-app/Project.FeatureBoard.MyApp.csproj 1`] = `""`;
+exports[`code-generator > template: dotnet-api > should produce the expected features files > apps/my-app/Project.FeatureBoard.MyApp.csproj 1`] = `""`;
 
-exports[`code-generator templateType: dotnet-api should produce the expected features files: apps/my-app/Features.cs 1`] = `
+exports[`code-generator template: dotnet-api should produce the expected features files: apps/my-app/Features.cs 1`] = `
 "using FeatureBoard.DotnetSdk.Attributes;
 using FeatureBoard.DotnetSdk.Models;
 using System.Runtime.Serialization;
@@ -218,4 +218,4 @@ public class FeatureFilterAttribute : FeatureFilterAttributeBase
 "
 `;
 
-exports[`code-generator templateType: dotnet-api should produce the expected features files: apps/my-app/Project.FeatureBoard.MyApp.csproj 1`] = `""`;
+exports[`code-generator template: dotnet-api should produce the expected features files: apps/my-app/Project.FeatureBoard.MyApp.csproj 1`] = `""`;

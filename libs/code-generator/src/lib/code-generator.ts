@@ -13,10 +13,10 @@ import type { Tree } from './tree/tree'
 const promptsInternal: typeof prompts =
     typeof prompts == 'function' ? prompts : require('prompts')
 
-export type TemplateType = 'dotnet-api'
+export type Template = 'dotnet-api'
 
 export type CodeGeneratorOptions = {
-    templateType: TemplateType
+    template: Template
     organizationId?: string
     featureBoardKey?: string
     featureBoardBearerToken?: string
@@ -35,7 +35,7 @@ export async function codeGenerator(
     const relativeFilePath = options.relativeFilePath
 
     const templateSpecificOptions: any = {}
-    switch (options.templateType) {
+    switch (options.template) {
         case 'dotnet-api':
             templateSpecificOptions.namespace = getDotNetNameSpace(
                 options.tree,
@@ -45,7 +45,7 @@ export async function codeGenerator(
 
     await generateFiles(
         options.tree,
-        path.join(__dirname, 'templates', options.templateType),
+        path.join(__dirname, 'templates', options.template),
         options.relativeFilePath,
         {
             toPascalCase,
