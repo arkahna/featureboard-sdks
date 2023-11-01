@@ -4,14 +4,25 @@
     "sourceRoot": "apps/cli/src",
     "projectType": "application",
     "targets": {
+        "copy-templates": {
+            "executor": "nx:run-commands",
+            "options": {
+                "commands": [
+                    {
+                        "command": "cpy ./libs/code-generator/src/lib/templates/dotnet-api/* ./apps/cli/dist/templates/dotnet-api/ --flat"
+                    }
+                ]
+            }
+        },
         "build": {
             "executor": "@nx/esbuild:esbuild",
             "outputs": ["{options.outputPath}"],
             "defaultConfiguration": "production",
+            "dependsOn": ["copy-templates"],
             "options": {
                 "platform": "node",
                 "outputPath": "apps/cli/dist",
-                "assets": [],
+                "deleteOutputPath": false,
                 "format": ["esm"],
                 "bundle": true,
                 "skipTypeCheck": true,
