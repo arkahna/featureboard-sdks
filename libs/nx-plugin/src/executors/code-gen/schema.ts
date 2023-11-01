@@ -1,7 +1,7 @@
-import type { TemplateType } from '@featureboard/code-generator'
+import type { Template } from '@featureboard/code-generator'
 
 export interface CodeGenExecutorSchema {
-    templateType: TemplateType
+    template: Template
     projectName: string
     featureBoardProjectName: string
     featureBoardKey: string

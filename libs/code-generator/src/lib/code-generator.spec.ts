@@ -14,7 +14,7 @@ describe('code-generator', () => {
         subFolder: string
     }
     let server: SetupServer
-    describe('templateType: dotnet-api', () => {
+    describe('template: dotnet-api', () => {
         beforeAll(() => {
             server = setupServer(
                 http.get('https://api.featureboard.dev/projects', async () => {

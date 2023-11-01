@@ -17,7 +17,7 @@ describe('code-generator', () => {
     let tree: Tree
     let options: CodeGenGeneratorSchema
     let server: SetupServer
-    describe('templateType: dotnet-api', () => {
+    describe('template: dotnet-api', () => {
         beforeAll(() => {
             server = setupServer(
                 http.get('https://api.featureboard.dev/projects', async () => {
@@ -42,7 +42,7 @@ describe('code-generator', () => {
             options = {
                 projectName: 'my-app',
                 subFolder: './',
-                templateType: 'dotnet-api',
+                template: 'dotnet-api',
                 featureBoardProjectName: 'SaaSy Icons',
                 featureBoardKey: 'This is totally a key',
             }

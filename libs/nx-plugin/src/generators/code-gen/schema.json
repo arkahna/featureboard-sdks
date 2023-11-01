@@ -4,7 +4,7 @@
     "title": "",
     "type": "object",
     "properties": {
-        "templateType": {
+        "template": {
             "description": "The type of the component",
             "alias": "t",
             "type": "string",
@@ -46,5 +46,5 @@
             "default": "./"
         }
     },
-    "required": ["templateType", "projectName"]
+    "required": ["template", "projectName"]
 }
