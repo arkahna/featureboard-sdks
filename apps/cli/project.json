@@ -33,7 +33,13 @@
                 "development": {},
                 "production": {
                     "esbuildOptions": {
-                        "sourcemap": false
+                        "sourcemap": false,
+                        "outExtension": {
+                            ".js": ".js"
+                        },
+                        "banner": {
+                            "js": "const require = (await import('node:module')).createRequire(import.meta.url);const __filename = (await import('node:url')).fileURLToPath(import.meta.url);const __dirname = (await import('node:path')).dirname(__filename);"
+                        }
                     }
                 }
             }
@@ -43,12 +49,8 @@
             "defaultConfiguration": "development",
             "options": {
                 "buildTarget": "cli:build",
-
-                "args": [
-                    "code-gen",
-                    "--output-path",
-                    "./apps/examples/dotnet-api"
-                ]
+                "args": [],
+                "watch": true
             },
             "configurations": {
                 "development": {

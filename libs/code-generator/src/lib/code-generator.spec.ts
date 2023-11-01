@@ -17,21 +17,15 @@ describe('code-generator', () => {
     describe('templateType: dotnet-api', () => {
         beforeAll(() => {
             server = setupServer(
-                http.get(
-                    'https://api.featureboard.dev/projects',
-                    async () => {
-                        const file = await fs.readFile(
-                            path.join(
-                                __dirname,
-                                './test-data/projects-deep.json',
-                            ),
-                            {
-                                encoding: 'utf8',
-                            },
-                        )
-                        return HttpResponse.json(JSON.parse(file))
-                    },
-                ),
+                http.get('https://api.featureboard.dev/projects', async () => {
+                    const file = await fs.readFile(
+                        path.join(__dirname, './test-data/projects-deep.json'),
+                        {
+                            encoding: 'utf8',
+                        },
+                    )
+                    return HttpResponse.json(JSON.parse(file))
+                }),
             )
             server.listen()
         })
@@ -48,7 +42,7 @@ describe('code-generator', () => {
 
             options = {
                 subFolder: subFolder,
-                templateType: 'dotnet-api',
+                template: 'dotnet-api',
                 interactive: false,
                 featureBoardProjectName: 'SaaSy Icons',
                 featureBoardKey: 'This is totally a key',

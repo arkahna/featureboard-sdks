@@ -25,7 +25,8 @@
         "workspace-generator": "nx workspace-generator",
         "dep-graph": "nx dep-graph",
         "help": "nx help",
-        "prepare": "nx g @nx-dotnet/core:restore"
+        "prepare": "nx g @nx-dotnet/core:restore",
+        "cli": "nx build cli --mode development && node apps/cli/dist/main.js"
     },
     "private": true,
     "dependencies": {
