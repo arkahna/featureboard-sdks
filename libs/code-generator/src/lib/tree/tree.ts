@@ -417,11 +417,11 @@ export function flushChanges(root: string, fileChanges: FileChange[]): void {
 export function printChanges(fileChanges: FileChange[], indent = ''): void {
     fileChanges.forEach((f) => {
         if (f.type === 'CREATE') {
-            console.log(`${indent}${console.log('CREATE')} ${f.path}`)
+            console.log(`${indent}CREATE ${f.path}`)
         } else if (f.type === 'UPDATE') {
-            console.log(`${indent}${console.log('UPDATE')} ${f.path}`)
+            console.log(`${indent}UPDATE ${f.path}`)
         } else if (f.type === 'DELETE') {
-            console.log(`${indent}${console.log('DELETE')} ${f.path}`)
+            console.log(`${indent}DELETE ${f.path}`)
         }
     })
 }
