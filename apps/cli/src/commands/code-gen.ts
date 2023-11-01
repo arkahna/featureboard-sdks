@@ -48,19 +48,10 @@ export function codeGenCommand() {
                     console.log(titleText)
                 }
 
-                if (!options.outputPath && !options.nonInteractive) {
-                    const { outputPath } = await prompts({
-                        type: 'text',
-                        name: 'outputPath',
-                        message: `Enter the output path for the generated code.`,
-                        validate: (x) => !!x,
-                    })
-
-                    options.outputPath = outputPath
-                }
+                prompts.override(options)
 
                 if (!options.template && !options.nonInteractive) {
-                    const { template } = await prompts({
+                    const promptResult = await prompts({
                         type: 'select',
                         name: 'template',
                         message: `Pick a template?`,
@@ -71,7 +62,26 @@ export function codeGenCommand() {
                         })),
                     })
 
-                    options.template = template
+                    if (!('template' in promptResult)) {
+                        return
+                    }
+
+                    options.template = promptResult.template
+                }
+
+                if (!options.outputPath && !options.nonInteractive) {
+                    const promptResult = await prompts({
+                        type: 'text',
+                        name: 'outputPath',
+                        message: `Enter the output path for the generated code.`,
+                        validate: (x) => !!x,
+                    })
+
+                    if (!('outputPath' in promptResult)) {
+                        return
+                    }
+
+                    options.outputPath = promptResult.outputPath
                 }
 
                 let bearerToken: string | undefined
@@ -82,6 +92,11 @@ export function codeGenCommand() {
                         message: `Enter your featureboard bearer token:`,
                         validate: (x) => !!x,
                     })
+
+                    if (!('bearerToken' in promptResult)) {
+                        return
+                    }
+
                     bearerToken = promptResult.bearerToken
                 }
 
