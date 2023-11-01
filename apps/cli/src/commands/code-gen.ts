@@ -11,6 +11,7 @@ import path from 'node:path'
 import prompts from 'prompts'
 import { actionRunner } from '../lib/action-runner'
 import { API_ENDPOINT } from '../lib/config'
+import { getValidToken } from '../lib/get-valid-token'
 import { titleText } from '../lib/title-text'
 
 // Code Gen
@@ -19,7 +20,7 @@ const templateChoices: Template[] = ['dotnet-api']
 export function codeGenCommand() {
     return new Command('code-gen')
         .description(`A Code generator for FeatureBoard`)
-        .option('-p, --output-path <path>', 'Output path')
+        .option('-o, --output <path>', 'Output path')
         .addOption(
             new Option(
                 '-t, --template <template>',
@@ -31,6 +32,7 @@ export function codeGenCommand() {
             'FeatureBoard API key',
             process.env.FEATUREBOARD_API_KEY,
         )
+        .option('-p, --project <name>', 'FeatureBoard project name')
         .option('-d, --dryRun', 'Dry run show what files have changed', false)
         .option('-q, --quiet', "Don't show file changes", false)
         .option(
@@ -70,65 +72,45 @@ export function codeGenCommand() {
                     options.template = promptResult.template
                 }
 
-                if (!options.outputPath && !options.nonInteractive) {
+                if (!options.output && !options.nonInteractive) {
                     const promptResult = await prompts({
                         type: 'text',
-                        name: 'outputPath',
+                        name: 'output',
                         message: `Enter the output path for the generated code.`,
                         validate: (x) => !!x,
                     })
 
-                    if (!('outputPath' in promptResult)) {
+                    if (!('output' in promptResult)) {
                         return
                     }
 
-                    options.outputPath = promptResult.outputPath
+                    options.output = promptResult.output
                 }
 
                 let bearerToken: string | undefined
                 if (!options.featureBoardKey && !options.nonInteractive) {
-                    const promptResult = await prompts({
-                        type: 'password',
-                        name: 'bearerToken',
-                        message: `Enter your featureboard bearer token:`,
-                        validate: (x) => !!x,
-                    })
-
-                    if (!('bearerToken' in promptResult)) {
+                    const token = await getValidToken()
+                    if (!token) {
                         return
                     }
-
-                    bearerToken = promptResult.bearerToken
+                    bearerToken = token
                 }
 
-                const sanitisedOutputPath = (options.outputPath ?? '').replace(
-                    '../',
-                    './',
-                )
-
-                const outputPath = path.join(process.cwd(), sanitisedOutputPath)
+                const outputPath = path.join(process.cwd(), options.output!)
                 try {
                     await fsAsync.access(outputPath)
                 } catch {
                     throw new Error(`Output path doesn't exist: ${outputPath}`)
                 }
 
-                if (!options.template) throw new Error('Template is not set')
-                if (!options.featureBoardKey && !bearerToken) {
-                    throw new Error(
-                        options.nonInteractive
-                            ? 'FeatureBoard Key is not set'
-                            : 'Bearer token is not set',
-                    )
-                }
-
                 const tree = new FsTree(process.cwd(), options.verbose)
                 await codeGenerator({
                     template: options.template as Template,
                     tree: tree,
-                    relativeFilePath: sanitisedOutputPath,
+                    relativeFilePath: options.output!,
                     featureBoardKey: options.featureBoardKey,
                     featureBoardBearerToken: bearerToken,
+                    featureBoardProjectName: options.project,
                     interactive: !options.nonInteractive,
                     apiEndpoint: API_ENDPOINT,
                 })
