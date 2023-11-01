@@ -10,6 +10,7 @@ import fsAsync from 'fs/promises'
 import path from 'node:path'
 import prompts from 'prompts'
 import { actionRunner } from '../lib/action-runner'
+import { API_ENDPOINT } from '../lib/config'
 import { titleText } from '../lib/title-text'
 
 // Code Gen
@@ -129,6 +130,7 @@ export function codeGenCommand() {
                     featureBoardKey: options.featureBoardKey,
                     featureBoardBearerToken: bearerToken,
                     interactive: !options.nonInteractive,
+                    apiEndpoint: API_ENDPOINT,
                 })
 
                 const changes = tree.listChanges()

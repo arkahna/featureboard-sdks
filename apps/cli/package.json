@@ -6,7 +6,10 @@
         "@commander-js/extra-typings": "^11.1.0",
         "@featureboard/code-generator": "workspace:*",
         "ejs": "^3.1.9",
-        "prompts": "^2.4.2"
+        "prompts": "^2.4.2",
+        "zod": "^3.22.4",
+        "open": "^9.1.0",
+        "@types/open": "^6.2.1"
     },
     "type": "module",
     "bin": "./dist/main.js",

@@ -195,12 +195,45 @@ importers:
       '@featureboard/code-generator':
         specifier: workspace:*
         version: link:../../libs/code-generator
+      '@types/open':
+        specifier: ^6.2.1
+        version: 6.2.1
       ejs:
         specifier: ^3.1.9
         version: 3.1.9
+      open:
+        specifier: ^9.1.0
+        version: 9.1.0
       prompts:
         specifier: ^2.4.2
         version: 2.4.2
+      zod:
+        specifier: ^3.22.4
+        version: 3.22.4
+
+  apps/cli/dist:
+    devDependencies:
+      '@commander-js/extra-typings':
+        specifier: ^11.1.0
+        version: 11.1.0(commander@11.1.0)
+      '@featureboard/code-generator':
+        specifier: workspace:*
+        version: link:../../../libs/code-generator
+      '@types/open':
+        specifier: ^6.2.1
+        version: 6.2.1
+      ejs:
+        specifier: ^3.1.9
+        version: 3.1.9
+      open:
+        specifier: ^9.1.0
+        version: 9.1.0
+      prompts:
+        specifier: ^2.4.2
+        version: 2.4.2
+      zod:
+        specifier: ^3.22.4
+        version: 3.22.4
 
   apps/examples/dotnet-api: {}
 
@@ -3657,6 +3690,13 @@ packages:
 
   /@types/normalize-package-data@2.4.3:
     resolution: {integrity: sha512-ehPtgRgaULsFG8x0NeYJvmyH1hmlfsNLujHe9dQEia/7MAJYdzMSi19JtchUHjmBA6XC/75dK55mzZH+RyieSg==}
+    dev: true
+
+  /@types/open@6.2.1:
+    resolution: {integrity: sha512-CzV16LToFaKwm1FfplVTF08E3pznw4fQNCQ87N+A1RU00zu/se7npvb6IC9db3/emnSThQ6R8qFKgrei2M4EYQ==}
+    deprecated: This is a stub types definition. open provides its own type definitions, so you do not need this installed.
+    dependencies:
+      open: 9.1.0
     dev: true
 
   /@types/parse-json@4.0.1:
@@ -11130,4 +11170,8 @@ packages:
       nanoclone: 0.2.1
       property-expr: 2.0.6
       toposort: 2.0.2
+    dev: true
+
+  /zod@3.22.4:
+    resolution: {integrity: sha512-iC+8Io04lddc+mVqQ9AZ7OQ2MrUKGN+oIQyq1vemgt46jwCwLfhq7/pwnBnNXXXZb8VTVLKwp9EDkx+ryxIWmg==}
     dev: true

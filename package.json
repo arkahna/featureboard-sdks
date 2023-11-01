@@ -26,7 +26,8 @@
         "dep-graph": "nx dep-graph",
         "help": "nx help",
         "prepare": "nx g @nx-dotnet/core:restore",
-        "cli": "nx build cli --mode development && node apps/cli/dist/main.js"
+        "cli": "nx build cli --mode development && API_ENDPOINT=https://api.featureboard.dev CLIENT_ID=e0863135-0c7c-4945-a6ef-f63905c41c73 node apps/cli/dist/main.js",
+        "cli-prod": "nx build cli --mode development && node apps/cli/dist/main.js"
     },
     "private": true,
     "dependencies": {
