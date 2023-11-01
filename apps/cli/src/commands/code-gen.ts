@@ -25,7 +25,11 @@ export function codeGenCommand() {
                 'Select the template ',
             ).choices(templateChoices),
         )
-        .option('-k, --featureBoardKey <key>', 'FeatureBoard API key')
+        .option(
+            '-k, --featureBoardKey <key>',
+            'FeatureBoard API key',
+            process.env.FEATUREBOARD_API_KEY,
+        )
         .option('-d, --dryRun', 'Dry run show what files have changed', false)
         .option('-q, --quiet', "Don't show file changes", false)
         .option(
@@ -44,59 +48,48 @@ export function codeGenCommand() {
                     console.log(titleText)
                 }
 
-                const promptsSet: Array<prompts.PromptObject<string>> = []
-                if (!options.outputPath) {
-                    promptsSet.push({
+                if (!options.outputPath && !options.nonInteractive) {
+                    const { outputPath } = await prompts({
                         type: 'text',
                         name: 'outputPath',
                         message: `Enter the output path for the generated code.`,
                         validate: (x) => !!x,
                     })
+
+                    options.outputPath = outputPath
                 }
 
-                if (!options.template) {
-                    if (
-                        templateChoices.length == 1 &&
-                        !options.nonInteractive
-                    ) {
-                        options.template = templateChoices[0]
-                    } else {
-                        promptsSet.push({
-                            type: 'select',
-                            name: 'template',
-                            message: `Pick a template?`,
-                            validate: (x) => templateChoices.includes(x),
-                            choices: templateChoices.map((x) => ({
-                                title: x,
-                                value: x,
-                            })),
-                        })
-                    }
+                if (!options.template && !options.nonInteractive) {
+                    const { template } = await prompts({
+                        type: 'select',
+                        name: 'template',
+                        message: `Pick a template?`,
+                        validate: (x) => templateChoices.includes(x),
+                        choices: templateChoices.map((x) => ({
+                            title: x,
+                            value: x,
+                        })),
+                    })
+
+                    options.template = template
                 }
 
-                if (!options.featureBoardKey) {
-                    promptsSet.push({
+                let bearerToken: string | undefined
+                if (!options.featureBoardKey && !options.nonInteractive) {
+                    const promptResult = await prompts({
                         type: 'password',
                         name: 'bearerToken',
                         message: `Enter your featureboard bearer token:`,
                         validate: (x) => !!x,
                     })
-                }
-
-                let bearerToken: string | undefined
-                if (!options.nonInteractive && promptsSet.length >= 1) {
-                    const result = await prompts(promptsSet)
-
-                    options.template = options.template ?? result['template']
-                    bearerToken = result['bearerToken']
-                    options.outputPath =
-                        options.outputPath ?? result['outputPath']
+                    bearerToken = promptResult.bearerToken
                 }
 
                 const sanitisedOutputPath = (options.outputPath ?? '').replace(
                     '../',
                     './',
                 )
+
                 const outputPath = path.join(process.cwd(), sanitisedOutputPath)
                 try {
                     await fsAsync.access(outputPath)
@@ -105,12 +98,13 @@ export function codeGenCommand() {
                 }
 
                 if (!options.template) throw new Error('Template is not set')
-                if (!options.featureBoardKey && !bearerToken)
+                if (!options.featureBoardKey && !bearerToken) {
                     throw new Error(
                         options.nonInteractive
                             ? 'FeatureBoard Key is not set'
                             : 'Bearer token is not set',
                     )
+                }
 
                 const tree = new FsTree(process.cwd(), options.verbose)
                 await codeGenerator({
