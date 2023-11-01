@@ -95,6 +95,10 @@ async function startLoginServer() {
                     )
                     console.log('Authentication successful!')
                 } catch (error) {
+                    console.error(
+                        'Error occurred while exchanging the token.',
+                        error,
+                    )
                     res.writeHead(500, { 'Content-Type': 'text/plain' })
                     res.end('Error occurred while exchanging the token.')
                 }
