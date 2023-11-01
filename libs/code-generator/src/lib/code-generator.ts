@@ -15,12 +15,13 @@ const promptsInternal: typeof prompts =
 
 export type Template = 'dotnet-api'
 
-export type CodeGeneratorOptions = {
+export interface CodeGeneratorOptions {
     template: Template
     organizationId?: string
     featureBoardKey?: string
     featureBoardBearerToken?: string
     featureBoardProjectName?: string
+    apiEndpoint?: string
 
     interactive: boolean
 
@@ -61,11 +62,13 @@ async function getFeatures({
     featureBoardKey,
     featureBoardBearerToken,
     interactive,
+    apiEndpoint = 'https://api.featureboard.app',
 }: {
     interactive: boolean
     featureBoardKey?: string
     featureBoardBearerToken?: string
     featureBoardProjectName?: string
+    apiEndpoint?: string
 }): Promise<any[]> {
     const headers: HeadersInit = {}
 
@@ -77,7 +80,7 @@ async function getFeatures({
         if (interactive) {
             const organisationResults = await queryFeatureBoard<{
                 organizations: { id: string; name: string }[]
-            }>('my-organizations', headers)
+            }>(apiEndpoint, 'my-organizations', headers)
 
             if (organisationResults.organizations.length === 1) {
                 organizationId = organisationResults.organizations[0].id
@@ -109,7 +112,7 @@ async function getFeatures({
 
     const projectResults = await queryFeatureBoard<{
         projects: { name: string; features: any[] }[]
-    }>('projects?deep=true', headers)
+    }>(apiEndpoint, 'projects?deep=true', headers)
 
     let project = projectResults.projects.find(
         (x: any) =>
@@ -143,8 +146,19 @@ async function getFeatures({
     return project.features
 }
 
-async function queryFeatureBoard<T>(endpoint: string, headers: HeadersInit) {
-    return fetch(`https://api.featureboard.dev/${endpoint}`, {
+/**
+ *
+ * @param apiEndpoint The endpoint to query (eg https://api.featureboard.app) with no trailing /
+ * @param path
+ * @param headers
+ * @returns
+ */
+async function queryFeatureBoard<T>(
+    apiEndpoint: string,
+    path: string,
+    headers: HeadersInit,
+) {
+    return fetch(`${apiEndpoint}/${path}`, {
         headers: headers,
     }).then(async (response) => {
         if (response.ok) {
