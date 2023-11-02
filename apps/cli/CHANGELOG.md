@@ -1,5 +1,11 @@
 # @featureboard/cli
 
+## 0.3.0
+
+### Minor Changes
+
+- bc4d42a: Add login, select-organization and account commands to CLI
+
 ## 0.2.1
 
 ### Patch Changes

@@ -1,5 +1,16 @@
 # @featureboard/nx-plugin
 
+## 0.3.0
+
+### Minor Changes
+
+- bc4d42a: Add login, select-organization and account commands to CLI
+
+### Patch Changes
+
+- Updated dependencies [bc4d42a]
+  - @featureboard/code-generator@0.2.0
+
 ## 0.2.1
 
 ### Patch Changes

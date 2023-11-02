@@ -1,5 +1,11 @@
 # @featureboard/code-generator
 
+## 0.2.0
+
+### Minor Changes
+
+- bc4d42a: Add login, select-organization and account commands to CLI
+
 ## 0.1.1
 
 ### Patch Changes
