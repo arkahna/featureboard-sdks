@@ -22,7 +22,7 @@ describe('http client', () => {
                 { once: true },
             ),
         )
-        server.listen()
+        server.listen({ onUnhandledRequest: 'error' })
 
         try {
             const httpClient = createServerClient({
@@ -65,7 +65,7 @@ describe('http client', () => {
                 { once: true },
             ),
         )
-        server.listen()
+        server.listen({ onUnhandledRequest: 'error' })
 
         try {
             const httpClient = createServerClient({
@@ -106,7 +106,7 @@ describe('http client', () => {
                 { once: true },
             ),
         )
-        server.listen()
+        server.listen({ onUnhandledRequest: 'error' })
 
         try {
             const httpClient = createServerClient({
@@ -164,7 +164,7 @@ describe('http client', () => {
                 return HttpResponse.json(values)
             }),
         )
-        server.listen()
+        server.listen({ onUnhandledRequest: 'error' })
 
         try {
             const httpClient = createServerClient({
@@ -221,7 +221,7 @@ describe('http client', () => {
                 })
             }),
         )
-        server.listen()
+        server.listen({ onUnhandledRequest: 'error' })
 
         try {
             const httpClient = createServerClient({
@@ -261,7 +261,7 @@ describe('http client', () => {
                 { once: true },
             ),
         )
-        server.listen()
+        server.listen({ onUnhandledRequest: 'error' })
 
         try {
             const client = createServerClient({
@@ -297,7 +297,7 @@ describe('http client', () => {
                     )
                 }),
             )
-            server.listen()
+            server.listen({ onUnhandledRequest: 'error' })
 
             try {
                 const client = createServerClient({
@@ -327,7 +327,7 @@ describe('http client', () => {
                 )
             }),
         )
-        server.listen()
+        server.listen({ onUnhandledRequest: 'error' })
 
         try {
             const client = createServerClient({
@@ -375,7 +375,7 @@ describe('http client', () => {
                     )
                 }),
             )
-            server.listen()
+            server.listen({ onUnhandledRequest: 'error' })
 
             try {
                 const client = createServerClient({
@@ -426,7 +426,7 @@ describe('http client', () => {
                 { once: true },
             ),
         )
-        server.listen()
+        server.listen({ onUnhandledRequest: 'error' })
 
         try {
             const client = createServerClient({
@@ -475,7 +475,7 @@ describe('http client', () => {
                 { once: true },
             ),
         )
-        server.listen()
+        server.listen({ onUnhandledRequest: 'error' })
 
         try {
             const client = createServerClient({
@@ -535,7 +535,7 @@ describe('http client', () => {
                 HttpResponse.json(values2ndRequest),
             ),
         )
-        server.listen()
+        server.listen({ onUnhandledRequest: 'error' })
 
         try {
             const client = createServerClient({

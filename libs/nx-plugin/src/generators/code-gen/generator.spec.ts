@@ -20,11 +20,11 @@ describe('code-generator', () => {
     describe('template: dotnet-api', () => {
         beforeAll(() => {
             server = setupServer(
-                http.get('https://api.featureboard.dev/projects', async () => {
+                http.get('https://api.featureboard.app/projects', async () => {
                     const file = await fs.readFile(
                         path.join(
                             __dirname,
-                            '../../../test-data/projects-deep.json',
+                            '../../../test-data/projects.json',
                         ),
                         {
                             encoding: 'utf8',
@@ -32,8 +32,23 @@ describe('code-generator', () => {
                     )
                     return HttpResponse.json(JSON.parse(file))
                 }),
+                http.get(
+                    'https://api.featureboard.app/projects/ivu5ntxbxeeorm248jl25bs6/features',
+                    async () => {
+                        const file = await fs.readFile(
+                            path.join(
+                                __dirname,
+                                '../../../test-data/features-ivu5ntxbxeeorm248jl25bs6.json',
+                            ),
+                            {
+                                encoding: 'utf8',
+                            },
+                        )
+                        return HttpResponse.json(JSON.parse(file))
+                    },
+                ),
             )
-            server.listen()
+            server.listen({ onUnhandledRequest: 'error' })
         })
 
         beforeEach(async () => {
@@ -44,7 +59,7 @@ describe('code-generator', () => {
                 subFolder: './',
                 template: 'dotnet-api',
                 featureBoardProjectName: 'SaaSy Icons',
-                featureBoardKey: 'This is totally a key',
+                featureBoardApiKey: 'This is totally a key',
             }
 
             const root = 'apps/my-app'
