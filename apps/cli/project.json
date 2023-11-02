@@ -7,11 +7,7 @@
         "copy-templates": {
             "executor": "nx:run-commands",
             "options": {
-                "commands": [
-                    {
-                        "command": "cpy ./libs/code-generator/src/lib/templates/dotnet-api/* ./apps/cli/dist/templates/dotnet-api/ --flat"
-                    }
-                ]
+                "command": "copyfiles -u 4 \"./libs/code-generator/src/lib/templates/**/*\" ./apps/cli/dist"
             }
         },
         "build": {

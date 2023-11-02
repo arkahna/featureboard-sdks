@@ -8,8 +8,8 @@ import {
     getDotNetNameSpace,
     toDotNetType,
     toPascalCase,
-} from './templates/functions'
-import { generateFiles } from './templates/generate-files'
+} from './generators/dotnet-api/functions'
+import { generateFiles } from './generators/dotnet-api/generate-files'
 import type { Tree } from './tree/tree'
 
 export type Template = 'dotnet-api'
