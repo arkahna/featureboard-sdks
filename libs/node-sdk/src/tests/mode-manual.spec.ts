@@ -20,7 +20,7 @@ describe('Manual update mode', () => {
                 { once: true },
             ),
         )
-        server.listen()
+        server.listen({ onUnhandledRequest: 'error' })
 
         try {
             const client = createServerClient({
@@ -67,7 +67,7 @@ describe('Manual update mode', () => {
                 return HttpResponse.json(values)
             }),
         )
-        server.listen()
+        server.listen({ onUnhandledRequest: 'error' })
 
         try {
             const client = createServerClient({
@@ -118,7 +118,7 @@ describe('Manual update mode', () => {
                 return HttpResponse.json(values)
             }),
         )
-        server.listen()
+        server.listen({ onUnhandledRequest: 'error' })
 
         try {
             const client = createServerClient({
@@ -154,7 +154,7 @@ describe('Manual update mode', () => {
                 { once: true },
             ),
         )
-        server.listen()
+        server.listen({ onUnhandledRequest: 'error' })
 
         try {
             const client = createServerClient({

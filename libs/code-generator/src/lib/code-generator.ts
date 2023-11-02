@@ -1,25 +1,23 @@
-import * as path from 'path'
+import path from 'node:path'
 import prompts from 'prompts'
+import type { FeatureBoardFeature } from './api/get-project-features'
+import { getProjectFeatures } from './api/get-project-features'
+import { getProjects } from './api/get-projects'
+import type { FeatureBoardAuth } from './queryFeatureBoard'
 import {
     getDotNetNameSpace,
     toDotNetType,
     toPascalCase,
-} from './templates/functions'
-import { generateFiles } from './templates/generate-files'
+} from './generators/dotnet-api/functions'
+import { generateFiles } from './generators/dotnet-api/generate-files'
 import type { Tree } from './tree/tree'
-
-// HACK this works around the different import strategies that the cli vs the nx plugin have.
-// As we can't change the ones for the plugin as they come from NX
-const promptsInternal: typeof prompts =
-    typeof prompts == 'function' ? prompts : require('prompts')
 
 export type Template = 'dotnet-api'
 
-export type CodeGeneratorOptions = {
+export interface CodeGeneratorOptions {
     template: Template
-    organizationId?: string
-    featureBoardKey?: string
-    featureBoardBearerToken?: string
+    auth: FeatureBoardAuth
+    apiEndpoint?: string
     featureBoardProjectName?: string
 
     interactive: boolean
@@ -32,6 +30,9 @@ export async function codeGenerator(
     options: CodeGeneratorOptions,
 ): Promise<void> {
     const features = await getFeatures(options)
+    if (!features) {
+        return
+    }
     const relativeFilePath = options.relativeFilePath
 
     const templateSpecificOptions: any = {}
@@ -58,58 +59,16 @@ export async function codeGenerator(
 
 async function getFeatures({
     featureBoardProjectName,
-    featureBoardKey,
-    featureBoardBearerToken,
+    auth,
     interactive,
+    apiEndpoint = 'https://api.featureboard.app',
 }: {
     interactive: boolean
-    featureBoardKey?: string
-    featureBoardBearerToken?: string
+    auth: FeatureBoardAuth
     featureBoardProjectName?: string
-}): Promise<any[]> {
-    const headers: HeadersInit = {}
-
-    if (featureBoardKey) headers['x-api-key'] = featureBoardKey
-    else if (featureBoardBearerToken) {
-        headers['Authorization'] = `Bearer ${featureBoardBearerToken}`
-
-        let organizationId: string | undefined
-        if (interactive) {
-            const organisationResults = await queryFeatureBoard<{
-                organizations: { id: string; name: string }[]
-            }>('my-organizations', headers)
-
-            if (organisationResults.organizations.length === 1) {
-                organizationId = organisationResults.organizations[0].id
-                console.log(
-                    `One organization found. Setting FeatureBoard organization to ${organizationId}`,
-                )
-            } else {
-                const promptResult = await promptsInternal({
-                    type: 'select',
-                    name: 'organizations',
-                    message: `Pick your FeatureBoard organisation?`,
-                    validate: (x) =>
-                        organisationResults.organizations
-                            .map((x) => x.name)
-                            .includes(x),
-                    choices: organisationResults.organizations.map((x) => ({
-                        title: x.name,
-                        value: x.id,
-                    })),
-                })
-
-                organizationId = promptResult.organizations
-            }
-        }
-        if (!organizationId) throw new Error("organizationId isn't set")
-
-        headers['X-Organization'] = organizationId
-    } else throw new Error('Auth token not set')
-
-    const projectResults = await queryFeatureBoard<{
-        projects: { name: string; features: any[] }[]
-    }>('projects?deep=true', headers)
+    apiEndpoint?: string
+}): Promise<null | FeatureBoardFeature[]> {
+    const projectResults = await getProjects(apiEndpoint, auth)
 
     let project = projectResults.projects.find(
         (x: any) =>
@@ -123,7 +82,7 @@ async function getFeatures({
                 `One project found. Setting FeatureBoard project to ${project.name}`,
             )
         } else {
-            const promptResult = await promptsInternal({
+            const promptResult = await prompts({
                 type: 'select',
                 name: 'project',
                 message: `Pick your FeatureBoard project?`,
@@ -135,25 +94,16 @@ async function getFeatures({
                 })),
             })
 
+            if (!promptResult) {
+                return null
+            }
+
             project = promptResult.project
         }
     }
     if (!project) throw new Error('Unable to locate Project')
 
-    return project.features
-}
+    const featuresResult = await getProjectFeatures(apiEndpoint, project, auth)
 
-async function queryFeatureBoard<T>(endpoint: string, headers: HeadersInit) {
-    return fetch(`https://api.featureboard.dev/${endpoint}`, {
-        headers: headers,
-    }).then(async (response) => {
-        if (response.ok) {
-            return (await response.json()) as T
-        }
-        throw new Error(
-            `Unable to retrieve project data from FeatureBoard. Status Code: ${
-                response.status
-            } (${response.statusText}), Content: ${await response.text()}`,
-        )
-    })
+    return featuresResult.features
 }

@@ -27,7 +27,7 @@ describe('Polling update mode', () => {
                 { once: true },
             ),
         )
-        server.listen()
+        server.listen({ onUnhandledRequest: 'error' })
 
         try {
             const connection = createBrowserClient({
@@ -68,7 +68,7 @@ describe('Polling update mode', () => {
                 HttpResponse.json(values),
             ),
         )
-        server.listen()
+        server.listen({ onUnhandledRequest: 'error' })
 
         try {
             const connection = createBrowserClient({
@@ -114,7 +114,7 @@ describe('Polling update mode', () => {
                 return HttpResponse.json(values)
             }),
         )
-        server.listen()
+        server.listen({ onUnhandledRequest: 'error' })
 
         try {
             const client = createBrowserClient({

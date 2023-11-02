@@ -18,7 +18,7 @@ describe('http client', () => {
                 HttpResponse.json(values),
             ),
         )
-        server.listen()
+        server.listen({ onUnhandledRequest: 'error' })
 
         try {
             const httpClient = createBrowserClient({
@@ -55,7 +55,7 @@ describe('http client', () => {
                 HttpResponse.json(values),
             ),
         )
-        server.listen()
+        server.listen({ onUnhandledRequest: 'error' })
 
         try {
             const httpClient = createBrowserClient({
@@ -105,7 +105,7 @@ describe('http client', () => {
                 { once: true },
             ),
         )
-        server.listen()
+        server.listen({ onUnhandledRequest: 'error' })
 
         try {
             const httpClient = createBrowserClient({
@@ -162,7 +162,7 @@ describe('http client', () => {
                 { once: true },
             ),
         )
-        server.listen()
+        server.listen({ onUnhandledRequest: 'error' })
 
         try {
             const httpClient = createBrowserClient({
@@ -221,7 +221,7 @@ describe('http client', () => {
                 },
             ),
         )
-        server.listen()
+        server.listen({ onUnhandledRequest: 'error' })
 
         try {
             const httpClient = createBrowserClient({
@@ -259,7 +259,7 @@ describe('http client', () => {
                     HttpResponse.json({}, { status: 500 }),
                 ),
             )
-            server.listen()
+            server.listen({ onUnhandledRequest: 'error' })
 
             try {
                 const client = createBrowserClient({
@@ -325,7 +325,7 @@ describe('http client', () => {
                 },
             ),
         )
-        server.listen()
+        server.listen({ onUnhandledRequest: 'error' })
 
         try {
             expect.assertions(5)
@@ -405,7 +405,7 @@ describe('http client', () => {
                 },
             ),
         )
-        server.listen()
+        server.listen({ onUnhandledRequest: 'error' })
 
         try {
             expect.assertions(4)
@@ -479,7 +479,7 @@ describe('http client', () => {
                 },
             ),
         )
-        server.listen()
+        server.listen({ onUnhandledRequest: 'error' })
 
         try {
             expect.assertions(5)
@@ -529,7 +529,7 @@ describe('http client', () => {
                 ),
             ),
         )
-        server.listen()
+        server.listen({ onUnhandledRequest: 'error' })
 
         try {
             expect.assertions(6)
@@ -593,7 +593,7 @@ describe('http client', () => {
                 HttpResponse.json(values),
             ),
         )
-        server.listen()
+        server.listen({ onUnhandledRequest: 'error' })
 
         try {
             const httpClient = createBrowserClient({
@@ -629,7 +629,7 @@ describe('http client', () => {
                     )
                 }),
             )
-            server.listen()
+            server.listen({ onUnhandledRequest: 'error' })
 
             try {
                 const httpClient = createBrowserClient({
@@ -670,7 +670,7 @@ describe('http client', () => {
                 HttpResponse.json(values),
             ),
         )
-        server.listen()
+        server.listen({ onUnhandledRequest: 'error' })
 
         try {
             const httpClient = createBrowserClient({

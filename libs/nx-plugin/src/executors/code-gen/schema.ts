@@ -4,6 +4,6 @@ export interface CodeGenExecutorSchema {
     template: Template
     projectName: string
     featureBoardProjectName: string
-    featureBoardKey: string
+    featureBoardApiKey: string
     subFolder: string
 }

@@ -20,7 +20,7 @@ describe('On request update mode', () => {
                 { once: true },
             ),
         )
-        server.listen()
+        server.listen({ onUnhandledRequest: 'error' })
 
         try {
             const client = createServerClient({
@@ -56,7 +56,7 @@ describe('On request update mode', () => {
                 { once: true },
             ),
         )
-        server.listen()
+        server.listen({ onUnhandledRequest: 'error' })
 
         try {
             const client = createServerClient({
@@ -99,7 +99,6 @@ describe('On request update mode', () => {
         let count = 0
         const server = setupServer(
             http.get('https://client.featureboard.app/all', () => {
-                console.log('count', count)
                 if (count > 0) {
                     return HttpResponse.json(newValues)
                 }
@@ -108,7 +107,7 @@ describe('On request update mode', () => {
                 return HttpResponse.json(values)
             }),
         )
-        server.listen()
+        server.listen({ onUnhandledRequest: 'error' })
 
         try {
             const connection = createServerClient({
@@ -153,7 +152,7 @@ describe('On request update mode', () => {
                 return HttpResponse.json(values)
             }),
         )
-        server.listen()
+        server.listen({ onUnhandledRequest: 'error' })
 
         const connection = createServerClient({
             environmentApiKey: 'fake-key',

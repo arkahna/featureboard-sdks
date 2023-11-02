@@ -1,0 +1,119 @@
+{
+    "features": [
+        {
+            "key": "requires-attribution",
+            "name": "Requires attribution",
+            "categoryIds": ["q6eqzh6tpenvxd0jdwm0honn"],
+            "created": "2023-07-27T13:09:21.971Z",
+            "description": "",
+            "dataType": {
+                "kind": "boolean"
+            },
+            "audienceExceptions": [
+                {
+                    "audienceId": "ixlassftgjlfcc1q3ae53pv7",
+                    "value": true
+                }
+            ],
+            "defaultValue": false
+        },
+        {
+            "key": "allow-edits",
+            "name": "Allow edits",
+            "categoryIds": ["q6eqzh6tpenvxd0jdwm0honn"],
+            "created": "2023-07-27T13:11:36.986Z",
+            "description": "Allows the user to edit colour, backgrounds",
+            "dataType": {
+                "kind": "boolean"
+            },
+            "audienceExceptions": [
+                {
+                    "audienceId": "zpmuq3xls263kwylkas9swiu",
+                    "value": true
+                },
+                {
+                    "audienceId": "mar4yixxykc7ibvtktb6t1wy",
+                    "value": true
+                }
+            ],
+            "defaultValue": false
+        },
+        {
+            "key": "number-custom-collections",
+            "name": "Number custom collections",
+            "categoryIds": ["q6eqzh6tpenvxd0jdwm0honn"],
+            "created": "2023-07-27T13:17:13.871Z",
+            "description": "",
+            "dataType": {
+                "kind": "number"
+            },
+            "audienceExceptions": [
+                {
+                    "audienceId": "ou7ihrqezpxa8k8cc6c2kes7",
+                    "value": 10
+                },
+                {
+                    "audienceId": "ixlassftgjlfcc1q3ae53pv7",
+                    "value": 1
+                }
+            ],
+            "defaultValue": 0
+        },
+        {
+            "key": "team-management",
+            "name": "Team management",
+            "categoryIds": ["q6eqzh6tpenvxd0jdwm0honn"],
+            "created": "2023-07-27T13:19:53.344Z",
+            "description": "",
+            "dataType": {
+                "kind": "boolean"
+            },
+            "audienceExceptions": [
+                {
+                    "audienceId": "zpmuq3xls263kwylkas9swiu",
+                    "value": true
+                }
+            ],
+            "defaultValue": false
+        },
+        {
+            "key": "custom-collections",
+            "name": "Custom collections",
+            "categoryIds": ["q6eqzh6tpenvxd0jdwm0honn"],
+            "created": "2023-07-27T13:41:10.873Z",
+            "description": "",
+            "dataType": {
+                "kind": "options",
+                "options": ["Disabled", "Enabled", "Shared"]
+            },
+            "audienceExceptions": [
+                {
+                    "audienceId": "zpmuq3xls263kwylkas9swiu",
+                    "value": "Disabled"
+                },
+                {
+                    "audienceId": "ixlassftgjlfcc1q3ae53pv7",
+                    "value": "Shared"
+                }
+            ],
+            "defaultValue": "Enabled"
+        },
+        {
+            "key": "view-subscribers",
+            "name": "View subscribers",
+            "categoryIds": ["nkmqhd7hx8t1nyr0abinarjb"],
+            "created": "2023-07-27T14:16:51.107Z",
+            "description": "",
+            "dataType": {
+                "kind": "boolean"
+            },
+            "audienceExceptions": [
+                {
+                    "audienceId": "fxs53xyb1mwqfyor0zsalzv5",
+                    "value": true
+                }
+            ],
+            "defaultValue": true
+        }
+    ]
+}

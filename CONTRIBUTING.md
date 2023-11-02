@@ -13,3 +13,5 @@ To run the CLI locally run the following command (with the arguments you want to
 ```bash
 pnpm cli
 ```
+
+`pnpm cli login` will login to the dev app registration by default. If you want to login to production FeatureBoard
