@@ -10,7 +10,7 @@ export async function getValidToken(): Promise<string | null> {
 
     // If the token has expired (or is about to expire in the next minute), refresh it
     if (
-        tokenData.expiration_time &&
+        !tokenData.expiration_time ||
         tokenData.expiration_time < Date.now() + 60 * 1000
     ) {
         try {

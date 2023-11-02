@@ -1,5 +1,9 @@
 import path from 'node:path'
 import prompts from 'prompts'
+import type { FeatureBoardFeature } from './api/get-project-features'
+import { getProjectFeatures } from './api/get-project-features'
+import { getProjects } from './api/get-projects'
+import type { FeatureBoardAuth } from './queryFeatureBoard'
 import {
     getDotNetNameSpace,
     toDotNetType,
@@ -12,11 +16,9 @@ export type Template = 'dotnet-api'
 
 export interface CodeGeneratorOptions {
     template: Template
-    organizationId?: string
-    featureBoardKey?: string
-    featureBoardBearerToken?: string
-    featureBoardProjectName?: string
+    auth: FeatureBoardAuth
     apiEndpoint?: string
+    featureBoardProjectName?: string
 
     interactive: boolean
 
@@ -57,64 +59,16 @@ export async function codeGenerator(
 
 async function getFeatures({
     featureBoardProjectName,
-    featureBoardOrganization,
-    featureBoardKey,
-    featureBoardBearerToken,
+    auth,
     interactive,
     apiEndpoint = 'https://api.featureboard.app',
 }: {
     interactive: boolean
-    featureBoardKey?: string
-    featureBoardBearerToken?: string
+    auth: FeatureBoardAuth
     featureBoardProjectName?: string
-    featureBoardOrganization?: string
     apiEndpoint?: string
 }): Promise<null | FeatureBoardFeature[]> {
-    const headers: HeadersInit = {}
-
-    if (featureBoardKey) headers['x-api-key'] = featureBoardKey
-    else if (featureBoardBearerToken) {
-        headers['Authorization'] = `Bearer ${featureBoardBearerToken}`
-
-        if (interactive && !featureBoardOrganization) {
-            const organisationResults = await queryFeatureBoard<{
-                organizations: { id: string; name: string }[]
-            }>(apiEndpoint, 'my-organizations', headers)
-
-            if (!organisationResults.organizations.length) {
-                throw new Error('No organizations found')
-            } else if (organisationResults.organizations.length === 1) {
-                featureBoardOrganization =
-                    organisationResults.organizations[0].id
-                console.log(
-                    `One organization found. Setting FeatureBoard organization to ${featureBoardOrganization}`,
-                )
-            } else {
-                const promptResult = await prompts({
-                    type: 'select',
-                    name: 'organizations',
-                    message: `Pick your FeatureBoard organisation?`,
-                    validate: (x) =>
-                        organisationResults.organizations
-                            .map((x) => x.name)
-                            .includes(x),
-                    choices: organisationResults.organizations.map((x) => ({
-                        title: x.name,
-                        value: x.id,
-                    })),
-                })
-
-                featureBoardOrganization = promptResult.organizations
-            }
-        }
-        if (!featureBoardOrganization) throw new Error("Organization isn't set")
-
-        headers['X-Organization'] = featureBoardOrganization
-    } else throw new Error('Auth token not set')
-
-    const projectResults = await queryFeatureBoard<{
-        projects: Array<{ id: string; name: string }>
-    }>(apiEndpoint, 'projects', headers)
+    const projectResults = await getProjects(apiEndpoint, auth)
 
     let project = projectResults.projects.find(
         (x: any) =>
@@ -149,63 +103,7 @@ async function getFeatures({
     }
     if (!project) throw new Error('Unable to locate Project')
 
-    const featuresResult = await queryFeatureBoard<{
-        features: FeatureBoardFeature[]
-    }>(apiEndpoint, `projects/${project.id}/features`, headers)
+    const featuresResult = await getProjectFeatures(apiEndpoint, project, auth)
 
     return featuresResult.features
-}
-
-interface FeatureBoardFeature {
-    name: string
-    created: string
-    key: string
-    categoryIds: string[]
-    description: string
-    dataType:
-        | {
-              kind: 'boolean'
-          }
-        | {
-              kind: 'number'
-          }
-        | {
-              kind: 'string'
-          }
-        | {
-              kind: 'options'
-              options: string[]
-          }
-    audienceExceptions: {
-        audienceId: string
-        value: string | number | boolean
-    }[]
-    defaultValue: string | number | boolean
-}
-
-/**
- *
- * @param apiEndpoint The endpoint to query (eg https://api.featureboard.app) with no trailing /
- * @param path
- * @param headers
- * @returns
- */
-async function queryFeatureBoard<T>(
-    apiEndpoint: string,
-    path: string,
-    headers: HeadersInit,
-) {
-    return fetch(`${apiEndpoint}/${path}`, {
-        headers: headers,
-    }).then(async (response) => {
-        if (response.ok) {
-            return (await response.json()) as T
-        }
-
-        throw new Error(
-            `Call to ${path} failed. Status Code: ${response.status} (${
-                response.statusText
-            }), Content: ${await response.text()}`,
-        )
-    })
 }

@@ -1,9 +1,9 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import querystring from 'node:querystring'
-import { CLIENT_ID, TOKEN_FILE_PATH } from './config'
+import { CLIENT_ID, CONFIG_DIRECTORY } from './config'
 
-interface TokenData {
+export interface TokenData {
     access_token: string
     token_type: string
     expires_in: number
@@ -20,12 +20,12 @@ export const AUTH_URL = `https://login.microsoftonline.com/common/oauth2/v2.0/au
 export const TOKEN_URL =
     'https://login.microsoftonline.com/common/oauth2/v2.0/token'
 
-const TOKEN_FILE = path.join(TOKEN_FILE_PATH, 'token.json')
+const TOKEN_FILE = path.join(CONFIG_DIRECTORY, 'token.json')
 
-export function writeToken(tokenData: any) {
+export function writeToken(tokenData: TokenData) {
     // Check if the directory exists, create it if not
-    if (!fs.existsSync(TOKEN_FILE_PATH)) {
-        fs.mkdirSync(TOKEN_FILE_PATH, { recursive: true })
+    if (!fs.existsSync(CONFIG_DIRECTORY)) {
+        fs.mkdirSync(CONFIG_DIRECTORY, { recursive: true })
     }
 
     fs.writeFileSync(TOKEN_FILE, JSON.stringify(tokenData))

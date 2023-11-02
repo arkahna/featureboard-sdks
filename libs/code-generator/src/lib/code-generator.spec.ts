@@ -45,7 +45,7 @@ describe('code-generator', () => {
                 template: 'dotnet-api',
                 interactive: false,
                 featureBoardProjectName: 'SaaSy Icons',
-                featureBoardKey: 'This is totally a key',
+                auth: { featureBoardApiKey: 'This is totally a key' },
             }
         })
 

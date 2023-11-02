@@ -11,7 +11,9 @@ import path from 'node:path'
 import prompts from 'prompts'
 import { actionRunner } from '../lib/action-runner'
 import { API_ENDPOINT } from '../lib/config'
+import { readCurrentOrganization } from '../lib/current-organization'
 import { getValidToken } from '../lib/get-valid-token'
+import { promptForOrganization } from '../lib/prompt-for-organization'
 import { titleText } from '../lib/title-text'
 
 // Code Gen
@@ -21,6 +23,7 @@ export function codeGenCommand() {
     return new Command('code-gen')
         .description(`A Code generator for FeatureBoard`)
         .option('-o, --output <path>', 'Output path')
+        .option('-g, --organizationId <id>', 'The Orgnization Id')
         .addOption(
             new Option(
                 '-t, --template <template>',
@@ -28,7 +31,7 @@ export function codeGenCommand() {
             ).choices(templateChoices),
         )
         .option(
-            '-k, --featureBoardKey <key>',
+            '-k, --featureBoardApiKey <key>',
             'FeatureBoard API key',
             process.env.FEATUREBOARD_API_KEY,
         )
@@ -86,9 +89,20 @@ export function codeGenCommand() {
 
                     options.output = promptResult.output
                 }
+                const outputAbsolutePath = path.join(
+                    process.cwd(),
+                    options.output!,
+                )
+                try {
+                    await fsAsync.access(outputAbsolutePath)
+                } catch {
+                    throw new Error(
+                        `Output path doesn't exist: ${outputAbsolutePath}`,
+                    )
+                }
 
                 let bearerToken: string | undefined
-                if (!options.featureBoardKey && !options.nonInteractive) {
+                if (!options.featureBoardApiKey && !options.nonInteractive) {
                     const token = await getValidToken()
                     if (!token) {
                         return
@@ -96,11 +110,21 @@ export function codeGenCommand() {
                     bearerToken = token
                 }
 
-                const outputPath = path.join(process.cwd(), options.output!)
-                try {
-                    await fsAsync.access(outputPath)
-                } catch {
-                    throw new Error(`Output path doesn't exist: ${outputPath}`)
+                let currentOrganization =
+                    options.organizationId ??
+                    (await readCurrentOrganization(options.verbose))
+
+                if (
+                    bearerToken &&
+                    !currentOrganization &&
+                    !options.nonInteractive
+                ) {
+                    currentOrganization =
+                        await promptForOrganization(bearerToken)
+                }
+
+                if (!currentOrganization) {
+                    throw new Error("Organization isn't set")
                 }
 
                 const tree = new FsTree(process.cwd(), options.verbose)
@@ -108,9 +132,17 @@ export function codeGenCommand() {
                     template: options.template as Template,
                     tree: tree,
                     relativeFilePath: options.output!,
-                    featureBoardKey: options.featureBoardKey,
-                    featureBoardBearerToken: bearerToken,
                     featureBoardProjectName: options.project,
+                    auth: bearerToken
+                        ? {
+                              featureBoardBearerToken: bearerToken,
+                              organizationId: currentOrganization,
+                          }
+                        : {
+                              featureBoardApiKey: options.featureBoardApiKey,
+                              organizationId: currentOrganization,
+                          },
+
                     interactive: !options.nonInteractive,
                     apiEndpoint: API_ENDPOINT,
                 })

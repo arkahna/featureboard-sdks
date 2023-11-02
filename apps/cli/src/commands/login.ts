@@ -7,6 +7,7 @@ import { actionRunner } from '../lib/action-runner'
 import { CLIENT_ID } from '../lib/config'
 import { generateCodeChallenge, generateCodeVerifier } from '../lib/pkce'
 import { titleText } from '../lib/title-text'
+import type { TokenData } from '../lib/token'
 import {
     AUTH_URL,
     REDIRECT_PORT,
@@ -51,6 +52,9 @@ export function loginCommand() {
                             `Please authenticate at: http://localhost:${REDIRECT_PORT}`,
                         )
                     } else {
+                        console.log(
+                            `Please authenticate at the browser window that has been opened for you or visit http://localhost:${REDIRECT_PORT}.`,
+                        )
                         // Automatically open the authentication URL in the default browser
                         await open(`http://localhost:${REDIRECT_PORT}`)
                     }
@@ -84,7 +88,10 @@ async function startLoginServer() {
                         }),
                     })
 
-                    const tokenData = await response.json()
+                    const tokenData: TokenData = await response.json()
+                    // Set the exact expiration time
+                    tokenData.expiration_time =
+                        Date.now() + tokenData.expires_in * 1000
 
                     // Save token data to file
                     writeToken(tokenData)
