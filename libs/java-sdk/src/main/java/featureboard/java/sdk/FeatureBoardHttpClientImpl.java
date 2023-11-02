@@ -64,15 +64,22 @@ public class FeatureBoardHttpClientImpl implements FeatureBoardHttpClient {
           // TODO: probably should be false
           return null;
         } else {
-          List<FeatureValue> featureValues = fromJSON(response.body());
+          try {
+            List<FeatureValue> featureValues = fromJSON(response.body());
 
-          // TODO: fix state updating
-          processResult.accept(featureValues);
-          featureBoardState.update(featureValues);
-          // TODO: fixme, handle etag
+            // TODO: fix state updating
+            // TODO: assess if this is required
+//          processResult.accept(featureValues);
+            featureBoardState.update(featureValues);
+            // TODO: fixme, handle etag
 //          String responseETag = response.headers().firstValue("ETag").orElse(null);
 //          eTagProvider.updateETag(responseETag);
 //          logger.debug("Fetching updates done, eTag={}", eTagProvider.getETag());
+          } catch (Exception e) {
+            // TODO: fix logging
+            _logger.severe("error refreshing");
+            _logger.severe(e.getMessage());
+          }
 
           return true;
         }

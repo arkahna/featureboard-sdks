@@ -1,11 +1,12 @@
 package featureboard.java.sdk;
 
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import featureboard.java.sdk.interfaces.AudienceProvider;
 import featureboard.java.sdk.interfaces.FeatureBoardClient;
+import featureboard.java.sdk.interfaces.FeatureBoardState;
 import featureboard.java.sdk.models.AudienceExceptionValue;
-import featureboard.java.sdk.state.FeatureBoardStateSnapshot;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -16,13 +17,13 @@ import java.util.logging.Logger;
 @Service
 public class FeatureBoardClientImpl implements FeatureBoardClient {
 
-  private final FeatureBoardStateSnapshot _state;
+  private final FeatureBoardState _state;
   private final AudienceProvider _audienceProvider;
   private final Logger _logger = Logger.getLogger(FeatureBoardClientImpl.class.getName());
   private final ObjectMapper objectMapper = new ObjectMapper();
 
 
-  public FeatureBoardClientImpl(FeatureBoardStateSnapshot state, AudienceProvider audienceProvider) {
+  public FeatureBoardClientImpl(FeatureBoardState state, AudienceProvider audienceProvider) {
     _state = state;
     _audienceProvider = audienceProvider;
   }
@@ -31,21 +32,25 @@ public class FeatureBoardClientImpl implements FeatureBoardClient {
   public boolean GetFeatureValue(String featureKey, boolean defaultValue) {
     var jsonValue = getFeatureConfigurationValue(featureKey);
 
-    return jsonTryGetValueBoolean(jsonValue).orElse(defaultValue);
+    return Optional.of(jsonValue != null && jsonValue.asBoolean()).orElse(defaultValue);
   }
 
   @Override
   public BigDecimal GetFeatureValue(String featureKey, BigDecimal defaultValue) {
     var jsonValue = getFeatureConfigurationValue(featureKey);
 
-    return jsonTryGetValueBigDecimal(jsonValue).orElse(defaultValue);
+    if (jsonValue == null) {
+      return defaultValue;
+    } else {
+      return BigDecimal.valueOf(jsonValue.asDouble());
+    }
   }
 
   @Override
   public String GetFeatureValue(String featureKey, String defaultValue) {
     var jsonValue = getFeatureConfigurationValue(featureKey);
 
-    return jsonTryGetValueString(jsonValue).orElse(defaultValue);
+    return Optional.ofNullable(jsonValue != null ? jsonValue.asText() : null).orElse(defaultValue);
   }
 
   @Override
@@ -57,7 +62,9 @@ public class FeatureBoardClientImpl implements FeatureBoardClient {
     return null;
   }
 
-  private JsonValue getFeatureConfigurationValue(String featureKey) {
+  private JsonNode getFeatureConfigurationValue(String featureKey) {
+    // Current issue: jumps right in to fetching state which will be empty
+    // Need to ensure state is populated from the get go?
     var feature = _state.Get(featureKey);
     if (feature == null) {
       _logger.fine("GetFeatureValue - no value, returning user fallback.");
@@ -74,25 +81,13 @@ public class FeatureBoardClientImpl implements FeatureBoardClient {
       }
     }
 
-    // TODO: Check this String.valueOf
-    JsonValue value = (audienceException != null) ? audienceException.value() : feature.defaultValue();
+    JsonNode value = (audienceException != null) ? audienceException.value() : feature.defaultValue();
 
     _logger.fine(String.format("GetFeatureConfigurationValue: {audienceExceptionValue: %s, defaultValue: %s, value: %s}", (audienceException != null) ? audienceException.value() : "null", feature.defaultValue(), value));
     return value;
   }
 
-  private Optional<Boolean> jsonTryGetValueBoolean(JsonValue jsonValue) {
-    return Optional.ofNullable(objectMapper.convertValue(jsonValue, Boolean.class));
-  }
-
-  private Optional<BigDecimal> jsonTryGetValueBigDecimal(JsonValue jsonValue) {
-    return Optional.ofNullable(objectMapper.convertValue(jsonValue, BigDecimal.class));
-  }
-
-  private Optional<String> jsonTryGetValueString(JsonValue jsonValue) {
-    return Optional.ofNullable(objectMapper.convertValue(jsonValue, String.class));
-  }
-
+  // TODO: do I need this?
   private static <T extends Enum<T>> Optional<T> jsonTryGetValueEnum(JsonValue jsonValue, Class<T> enumType) {
     try {
       T enumValue = Enum.valueOf(enumType, jsonValue.toString().toUpperCase());
