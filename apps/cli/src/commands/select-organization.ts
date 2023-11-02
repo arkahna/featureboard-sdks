@@ -21,6 +21,7 @@ export function selectOrganizationCommand() {
             "Don't prompt for missing options",
             !!process.env['CI'],
         )
+        .option('-g, --organizationId <id>', 'The Orgnization Id')
         .action(
             actionRunner(async function codeGen(options) {
                 if (!options.nonInteractive) {
@@ -43,7 +44,8 @@ export function selectOrganizationCommand() {
                 }
 
                 const selectedOrganization =
-                    await promptForOrganization(bearerToken)
+                    options.organizationId ??
+                    (await promptForOrganization(bearerToken))
 
                 if (selectedOrganization) {
                     writeCurrentOrganization(selectedOrganization)
