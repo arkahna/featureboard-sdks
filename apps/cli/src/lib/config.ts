@@ -1,7 +1,8 @@
 import os from 'node:os'
+import path from 'node:path'
 import { z } from 'zod'
 
-export const CONFIG_DIRECTORY = `${os.homedir()}/.featureboard`
+export const CONFIG_DIRECTORY = path.join(os.homedir(), `.featureboard`)
 
 export const { CLIENT_ID, API_ENDPOINT } = z
     .object({
