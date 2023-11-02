@@ -7,7 +7,7 @@ import { getValidToken } from '../lib/get-valid-token'
 export function accountCommand() {
     return new Command('account')
         .description(
-            `Select an organization to work with FeatureBoard on the CLI`,
+            `Shows the account information of the currently logged in user`,
         )
         .option(
             '-v, --verbose',
