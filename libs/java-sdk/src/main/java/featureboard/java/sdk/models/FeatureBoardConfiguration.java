@@ -22,6 +22,9 @@ public class FeatureBoardConfiguration {
 
   public Duration maxAge = Duration.ofMinutes(1);
 
+  @Value("${updateStrategy}")
+  public String updateStrategy;
+
   public URI getHttpEndpoint() {
     return httpEndpoint;
   }

@@ -7,6 +7,7 @@ import featureboard.java.sdk.interfaces.AudienceProvider;
 import featureboard.java.sdk.interfaces.FeatureBoardClient;
 import featureboard.java.sdk.interfaces.FeatureBoardState;
 import featureboard.java.sdk.models.AudienceExceptionValue;
+import featureboard.java.sdk.state.FeatureBoardStateSnapshot;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -17,14 +18,15 @@ import java.util.logging.Logger;
 @Service
 public class FeatureBoardClientImpl implements FeatureBoardClient {
 
-  private final FeatureBoardState _state;
+ private final FeatureBoardState globalState;
+  private FeatureBoardStateSnapshot _snapshotState;
   private final AudienceProvider _audienceProvider;
   private final Logger _logger = Logger.getLogger(FeatureBoardClientImpl.class.getName());
   private final ObjectMapper objectMapper = new ObjectMapper();
 
 
-  public FeatureBoardClientImpl(FeatureBoardState state, AudienceProvider audienceProvider) {
-    _state = state;
+  public FeatureBoardClientImpl(FeatureBoardState globalState, AudienceProvider audienceProvider) {
+    this.globalState = globalState;
     _audienceProvider = audienceProvider;
   }
 
@@ -62,10 +64,22 @@ public class FeatureBoardClientImpl implements FeatureBoardClient {
     return null;
   }
 
+  @Override
+  public void setSnapshot(FeatureBoardStateSnapshot snapshot) {
+    _snapshotState = snapshot;
+  }
+
   private JsonNode getFeatureConfigurationValue(String featureKey) {
     // Current issue: jumps right in to fetching state which will be empty
     // Need to ensure state is populated from the get go?
-    var feature = _state.Get(featureKey);
+
+    // check state here, fetch snapshot
+    // Just being defensive
+    if (_snapshotState == null) {
+      _snapshotState = globalState.GetSnapshot();
+    }
+
+    var feature = _snapshotState.Get(featureKey);
     if (feature == null) {
       _logger.fine("GetFeatureValue - no value, returning user fallback.");
       return null;

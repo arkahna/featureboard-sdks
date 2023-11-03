@@ -1,9 +1,11 @@
 package featureboard.java.sdk.cron;
 
 import featureboard.java.sdk.FeatureBoardServiceImpl;
+import featureboard.java.sdk.interfaces.FeatureBoardClient;
+import featureboard.java.sdk.interfaces.FeatureBoardState;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -13,20 +15,24 @@ import java.util.logging.Logger;
 
 @Service
 @EnableScheduling
+@ConditionalOnProperty(name="updateStrategy", havingValue="polling", matchIfMissing = false)
 public class PollingUpdateStrategyBackgroundService implements InitializingBean {
 
-  // TODO: public or private? weird
   @Autowired
   public final FeatureBoardServiceImpl featureBoardService;
+  @Autowired
+  private final FeatureBoardState featureBoardState;
 
   @Autowired
-  private ApplicationContext context;
+  private final FeatureBoardClient featureBoardClient;
 
   private static final Logger logger = Logger.getLogger(PollingUpdateStrategyBackgroundService.class.getName());
 
   // Note: specifying an impl here
-  public PollingUpdateStrategyBackgroundService(FeatureBoardServiceImpl featureBoardService) {
+  public PollingUpdateStrategyBackgroundService(FeatureBoardServiceImpl featureBoardService, FeatureBoardState featureBoardState, FeatureBoardClient featureBoardClient) {
     this.featureBoardService = featureBoardService;
+    this.featureBoardState = featureBoardState;
+    this.featureBoardClient = featureBoardClient;
   }
 
   // Note: reference value from Spring name directly - not from autowired instance in this class
@@ -51,7 +57,11 @@ public class PollingUpdateStrategyBackgroundService implements InitializingBean 
 
   private void refreshFeatureConfiguration() {
     try {
+      // 1. Refresh and set state
       featureBoardService.refreshFeatureConfiguration();
+
+      // 2. For the base client set a snapshot - this snapshot should live for the period between polling
+      featureBoardClient.setSnapshot(featureBoardState.GetSnapshot());
     } catch (Exception e) {
       logger.log(Level.SEVERE,"Error occurred during polling.",e);
     }
