@@ -19,21 +19,20 @@ public class HttpRequestBuilder {
   }
 
   /**
-   * Create a HttpRequest with a specific Base URI and requisite auth header.
+   * Create a HttpRequest Builder for a GET with a specific Base URI and requisite auth header.
    *
    * @param path Extra path for the request
-   * @return a HttpRequest with preset URI/Header information
+   * @return a HttpRequest Builder with preset URI/Header information
    */
-  public HttpRequest create(String path) {
+  public HttpRequest.Builder createGETBuilder(String path) {
     URI baseUri = configuration.getHttpEndpoint();
     URI fullUri = UriComponentsBuilder.fromUri(baseUri)
       .pathSegment(path)
       .build()
       .toUri();
-    HttpRequest.Builder builder = HttpRequest.newBuilder(fullUri)
+
+    return HttpRequest.newBuilder(fullUri)
       .GET()
       .setHeader("x-environment-key", configuration.getEnvironmentApiKey());
-
-    return builder.build();
   }
 }

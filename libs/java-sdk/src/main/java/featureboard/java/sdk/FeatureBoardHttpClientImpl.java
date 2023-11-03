@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import java.net.http.HttpClient;
 import java.net.http.HttpResponse;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
@@ -56,15 +55,13 @@ public class FeatureBoardHttpClientImpl implements FeatureBoardHttpClient {
    */
   @Override
   public CompletableFuture<Boolean> refreshFeatureConfiguration() {
-    var request = httpRequestBuilder.create("all");
-    // Check for the existence of an eTag in memory
+    var requestBuilder = httpRequestBuilder.createGETBuilder("all");
+    // Check for the existence of an eTag in memory/state
     if (!eTagState.geteTagValue().isEmpty()) {
-      var eTag = new ArrayList<String>();
-      eTag.add(eTagState.geteTagValue());
-      request.headers().map().put("If-None-Match", eTag);
+      requestBuilder.setHeader("If-None-Match", eTagState.geteTagValue());
     }
 
-    return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+    return httpClient.sendAsync(requestBuilder.build(), HttpResponse.BodyHandlers.ofString())
       .thenApply(response -> {
         int statusCode = response.statusCode();
         if (statusCode == 304) { // Not Modified
