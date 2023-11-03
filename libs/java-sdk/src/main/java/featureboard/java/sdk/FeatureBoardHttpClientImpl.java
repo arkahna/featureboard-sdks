@@ -7,11 +7,13 @@ import featureboard.java.sdk.http.HttpRequestBuilder;
 import featureboard.java.sdk.interfaces.FeatureBoardHttpClient;
 import featureboard.java.sdk.interfaces.FeatureBoardState;
 import featureboard.java.sdk.models.FeatureValue;
+import featureboard.java.sdk.state.ETagState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.net.http.HttpClient;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
@@ -30,12 +32,14 @@ public class FeatureBoardHttpClientImpl implements FeatureBoardHttpClient {
 
   @Autowired
   private final HttpRequestBuilder httpRequestBuilder;
-
   @Autowired
   private final FeatureBoardState featureBoardState;
+  @Autowired
+  private final ETagState eTagState;
 
-  public FeatureBoardHttpClientImpl(HttpRequestBuilder httpRequestBuilder, FeatureBoardState featureBoardState) {
+  public FeatureBoardHttpClientImpl(HttpRequestBuilder httpRequestBuilder, FeatureBoardState featureBoardState, ETagState eTagState) {
     this.featureBoardState = featureBoardState;
+    this.eTagState = eTagState;
     this.httpClient = HttpClient.newBuilder().build();
     // TODO: fix etag work
 //    this.eTagProvider = eTagProvider;
@@ -53,6 +57,12 @@ public class FeatureBoardHttpClientImpl implements FeatureBoardHttpClient {
   @Override
   public CompletableFuture<Boolean> refreshFeatureConfiguration() {
     var request = httpRequestBuilder.create("all");
+    // Check for the existence of an eTag in memory
+    if (!eTagState.geteTagValue().isEmpty()) {
+      var eTag = new ArrayList<String>();
+      eTag.add(eTagState.geteTagValue());
+      request.headers().map().put("If-None-Match", eTag);
+    }
 
     return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
       .thenApply(response -> {
@@ -69,11 +79,9 @@ public class FeatureBoardHttpClientImpl implements FeatureBoardHttpClient {
 
             // Refresh the GLOBAL state - not the snapshot
             featureBoardState.update(featureValues);
-
-            // TODO: fixme, handle etag
-//          String responseETag = response.headers().firstValue("ETag").orElse(null);
-//          eTagProvider.updateETag(responseETag);
-//          logger.debug("Fetching updates done, eTag={}", eTagProvider.getETag());
+            // Update eTag based on response
+            String responseETag = response.headers().firstValue("ETag").orElse(eTagState.geteTagValue());
+            eTagState.seteTagValue(responseETag);
           } catch (Exception e) {
             _logger.severe("Error Refreshing Configuration: " + e.getMessage());
           }
