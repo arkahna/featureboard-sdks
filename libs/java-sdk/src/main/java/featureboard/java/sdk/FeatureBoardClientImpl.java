@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
 
+// TODO: ensure the state is fixed for the lifecycle of the request
 @Service
 public class FeatureBoardClientImpl implements FeatureBoardClient {
 
