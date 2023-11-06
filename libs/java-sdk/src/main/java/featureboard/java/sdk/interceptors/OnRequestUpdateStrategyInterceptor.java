@@ -22,7 +22,7 @@ import java.util.logging.Logger;
  */
 @Component
 @ConditionalOnProperty(name="updateStrategy", havingValue="onrequest", matchIfMissing = true)
-public class OnRequestUpdateStrategyInterceptor implements HandlerInterceptor, InitializingBean {
+public class OnRequestUpdateStrategyInterceptor implements HandlerInterceptor , InitializingBean {
   // We do specifically want the FeatureBoardServiceImpl here, not FeatureBoardLastCheckedServiceImpl
   @Autowired
   private final FeatureBoardServiceImpl featureBoardService;
@@ -32,6 +32,7 @@ public class OnRequestUpdateStrategyInterceptor implements HandlerInterceptor, I
   private final FeatureBoardClient featureBoardClient;
   @Autowired
   private final FeatureBoardLastCheckedServiceImpl featureBoardLastCheckedService;
+
   private static final Logger logger = Logger.getLogger(OnRequestUpdateStrategyInterceptor.class.getName());
 
   public OnRequestUpdateStrategyInterceptor(FeatureBoardServiceImpl featureBoardService, FeatureBoardState featureBoardState,

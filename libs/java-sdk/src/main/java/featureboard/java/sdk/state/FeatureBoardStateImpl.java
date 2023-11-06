@@ -8,13 +8,8 @@ import java.util.Collection;
 import java.util.HashMap;
 
 @Service
-public class FeatureBoardStateImpl implements FeatureBoardState {
-
+public class FeatureBoardStateImpl  implements FeatureBoardState {
   private HashMap<String, FeatureValue> cache = new HashMap<>();
-
-  public FeatureBoardStateImpl(FeatureBoardStateSnapshot snapshot) {
-
-  }
 
   // TODO: implement a more robust snapshotting system.
   // Without it this SDK may suffer from Performance issues.
@@ -43,5 +38,4 @@ public class FeatureBoardStateImpl implements FeatureBoardState {
     // TODO: do we want this?
     // Or handle it elsewhere eh
   }
-
 }

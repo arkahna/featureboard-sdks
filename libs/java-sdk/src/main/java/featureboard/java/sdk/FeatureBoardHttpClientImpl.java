@@ -22,9 +22,6 @@ import java.util.logging.Logger;
 public class FeatureBoardHttpClientImpl implements FeatureBoardHttpClient {
 
   private final HttpClient httpClient;
-
-  // Configured by spring down the line, TODO: check this supposition
-//  private final ShallowEtagHeaderFilter eTagProvider;
   private Consumer<List<FeatureValue>> processResult;
   private final Logger _logger = Logger.getLogger(FeatureBoardHttpClientImpl.class.getName());
   private final ObjectMapper objectMapper;
@@ -40,8 +37,6 @@ public class FeatureBoardHttpClientImpl implements FeatureBoardHttpClient {
     this.featureBoardState = featureBoardState;
     this.eTagState = eTagState;
     this.httpClient = HttpClient.newBuilder().build();
-    // TODO: fix etag work
-//    this.eTagProvider = eTagProvider;
     this.httpRequestBuilder = httpRequestBuilder;
 
     objectMapper = new ObjectMapper();
