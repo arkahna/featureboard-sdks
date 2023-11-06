@@ -6,7 +6,7 @@ import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
 // TODO: change example package name?
-@ComponentScan({"featureboard.java.sdk", "com.example.springboot"})
+@ComponentScan(basePackages = {"featureboard.java.sdk", "com.example.springboot"})
 public class Application {
 
   public static void main(String[] args) {
