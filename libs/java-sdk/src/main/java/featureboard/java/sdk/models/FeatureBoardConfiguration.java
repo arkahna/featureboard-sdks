@@ -3,26 +3,24 @@ package featureboard.java.sdk.models;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
 import java.net.URI;
 import java.time.Duration;
 
-// TODO: do we need component here?
-@Component
 @Configuration
 @Validated
 public class FeatureBoardConfiguration {
 
   public URI httpEndpoint = URI.create("https://client.featureboard.app");
 
-  @Value("${EnvironmentApiKey}")
+  @Value("${featureBoardOptions.environmentApiKey}")
   public String environmentApiKey;
 
-  public Duration maxAge = Duration.ofMinutes(1);
+  @Value("${maxAge:60}")
+  public int maxAge;
 
-  @Value("${updateStrategy}")
+  @Value("${featureBoardOptions.updateStrategy}")
   public String updateStrategy;
 
   public URI getHttpEndpoint() {
@@ -42,12 +40,11 @@ public class FeatureBoardConfiguration {
   }
 
   public Duration getMaxAge() {
-    return maxAge;
+    return Duration.ofSeconds(maxAge);
   }
 
-  public void setMaxAge(Duration maxAge) {
-    if (maxAge.compareTo(Duration.ofSeconds(1)) >= 0) {
-      this.maxAge = maxAge;
-    }
+  public void setMaxAge(int maxAge) {
+    // Max age shouldn't be less than one second
+      this.maxAge = Math.min(maxAge, 1);
   }
 }

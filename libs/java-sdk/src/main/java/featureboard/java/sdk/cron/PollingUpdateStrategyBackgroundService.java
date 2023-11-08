@@ -20,7 +20,7 @@ import java.util.logging.Logger;
  */
 @Service
 @EnableScheduling
-@ConditionalOnProperty(name = "updateStrategy", havingValue = "polling", matchIfMissing = false)
+@ConditionalOnProperty(name = "featureBoardOptions.updateStrategy", havingValue = "polling", matchIfMissing = false)
 public class PollingUpdateStrategyBackgroundService implements InitializingBean {
 
   @Autowired
