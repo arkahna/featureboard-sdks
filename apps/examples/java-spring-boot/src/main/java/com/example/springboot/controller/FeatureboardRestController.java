@@ -2,18 +2,20 @@ package com.example.springboot.controller;
 
 import featureboard.java.sdk.FeatureBoardClientImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
 
 @RestController
-public class HelloController {
+@ConditionalOnProperty(name = "featureBoardOptions.updateStrategy", havingValue = "onrequest", matchIfMissing = true)
+public class FeatureboardRestController {
 
   @Autowired
   private final FeatureBoardClientImpl featureBoardClient;
 
-  public HelloController(FeatureBoardClientImpl featureBoardClient) {
+  public FeatureboardRestController(FeatureBoardClientImpl featureBoardClient) {
     this.featureBoardClient = featureBoardClient;
   }
 
