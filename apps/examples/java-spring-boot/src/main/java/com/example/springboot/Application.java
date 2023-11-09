@@ -13,6 +13,4 @@ public class Application {
     SpringApplication.run(Application.class, args);
   }
 
-// TODO: define the interceptors etc
-
 }

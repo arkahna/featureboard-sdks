@@ -29,7 +29,7 @@ public class PeriodicFeatureboardPoller {
    * Check feature status periodically and output the status. Designed to be used in polling mode.
    * Pretend this is not a web app (e.g. console based application).
    */
-  @Scheduled(fixedDelayString = "30000")
+  @Scheduled(fixedDelayString = "30000", initialDelayString = "30000")
   public void checkFeatureboardValues() {
     logger.info("Checking for Featureboard Values.");
 
