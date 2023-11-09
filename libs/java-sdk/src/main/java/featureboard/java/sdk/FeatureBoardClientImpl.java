@@ -2,12 +2,12 @@ package featureboard.java.sdk;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import featureboard.java.sdk.interfaces.AudienceProvider;
 import featureboard.java.sdk.interfaces.FeatureBoardClient;
 import featureboard.java.sdk.interfaces.FeatureBoardState;
 import featureboard.java.sdk.models.AudienceExceptionValue;
 import featureboard.java.sdk.state.FeatureBoardStateSnapshot;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -19,12 +19,13 @@ import java.util.logging.Logger;
 @Service
 public class FeatureBoardClientImpl implements FeatureBoardClient {
 
- private final FeatureBoardState globalState;
+  @Autowired
+  private final FeatureBoardState globalState;
+  @Autowired
   private FeatureBoardStateSnapshot _snapshotState;
+  @Autowired
   private final AudienceProvider _audienceProvider;
   private final Logger _logger = Logger.getLogger(FeatureBoardClientImpl.class.getName());
-  private final ObjectMapper objectMapper = new ObjectMapper();
-
 
   public FeatureBoardClientImpl(FeatureBoardState globalState, AudienceProvider audienceProvider) {
     this.globalState = globalState;
@@ -82,7 +83,7 @@ public class FeatureBoardClientImpl implements FeatureBoardClient {
 
     var feature = _snapshotState.Get(featureKey);
     if (feature == null) {
-      _logger.fine("GetFeatureValue - no value, returning user fallback.");
+      _logger.fine("GetFeatureValue - no value for " + featureKey + " returning user fallback.");
       return null;
     }
 

@@ -29,6 +29,7 @@ public class FeatureBoardServiceImpl implements FeatureBoardService {
     // Check if we can acquire the semaphore immediately
     if (!semaphore.tryAcquire()) {
       // If not, just abort with null because another request must be in process of refreshing state
+      logger.fine("Cannot acquire semaphore - another request must be in process of refreshing state.");
       return CompletableFuture.completedFuture(null);
     }
 
@@ -36,9 +37,9 @@ public class FeatureBoardServiceImpl implements FeatureBoardService {
       // Note: may need to specify the "http" client here
       return featureBoardHttpClient.refreshFeatureConfiguration();
     } catch (Exception e) {
-      // TODO: logging
-      e.printStackTrace();
-      // TODO: do i care?
+      // TODO: fix this logging
+      logger.severe("Unable to refresh configuration.");
+      logger.severe(e.getMessage());
       return CompletableFuture.completedFuture(null); // Or handle the exception accordingly
     } finally {
       semaphore.release();

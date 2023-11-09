@@ -60,6 +60,7 @@ public class FeatureBoardHttpClientImpl implements FeatureBoardHttpClient {
       .thenApply(response -> {
         int statusCode = response.statusCode();
         if (statusCode == 304) { // Not Modified
+          _logger.fine("Configuration unchanged - nothing to do.");
           return false;
         } else if (statusCode != 200) {
           _logger.severe("Failed to get latest toggles: Service returned error {" + statusCode + "} + ({" + response.body() + "}) to the following URI: " + response.uri());
@@ -68,6 +69,7 @@ public class FeatureBoardHttpClientImpl implements FeatureBoardHttpClient {
         } else {
           try {
             List<FeatureValue> featureValues = fromJSON(response.body());
+            featureValues.forEach(featureValue -> _logger.fine("Updating Feature Value: " + featureValue.featureKey()));
 
             // Refresh the GLOBAL state - not the snapshot
             featureBoardState.update(featureValues);

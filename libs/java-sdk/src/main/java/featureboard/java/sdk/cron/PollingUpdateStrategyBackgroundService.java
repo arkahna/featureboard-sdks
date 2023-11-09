@@ -21,7 +21,7 @@ import java.util.logging.Logger;
 @Service
 @EnableScheduling
 @ConditionalOnProperty(name = "featureBoardOptions.updateStrategy", havingValue = "polling", matchIfMissing = false)
-public class PollingUpdateStrategyBackgroundService implements InitializingBean {
+public class PollingUpdateStrategyBackgroundService {
 
   @Autowired
   @Qualifier("featureBoardServiceImpl")
@@ -40,27 +40,15 @@ public class PollingUpdateStrategyBackgroundService implements InitializingBean 
     this.featureBoardClient = featureBoardClient;
   }
 
-  // Note: reference value from Spring name directly - not from autowired instance in this class
+  /**
+   * Poll and periodically refresh the configuration
+   * <br />
+   * Also note: will trigger on start
+   */
   @Scheduled(fixedDelayString = "#{featureBoardConfiguration.getMaxAge().toMillis()}")
   public void pollingUpdate() {
     logger.info("Refreshing Feature Configuration state on pollingUpdate.");
 
-    refreshFeatureConfiguration();
-  }
-
-  /**
-   * The intent here is this is executed "on startup" of any container (e.g. Spring Boot)
-   *
-   * @throws Exception
-   */
-  @Override
-  public void afterPropertiesSet() throws Exception {
-    logger.info("Refreshing Feature Configuration state on Startup.");
-
-    refreshFeatureConfiguration();
-  }
-
-  private void refreshFeatureConfiguration() {
     try {
       // 1. Refresh and set state
       featureBoardService.refreshFeatureConfiguration();

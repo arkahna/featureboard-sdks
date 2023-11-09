@@ -17,7 +17,7 @@ TODO: Add maven and gradle snippets
 
 ## Setup and example
 
-How to setup and use FeatureBoard Java SDK can be found in our [documentation](https://docs.featureboard.app/sdks/dotnet-sdk/).
+How to setup and use FeatureBoard Java SDK can be found in our [documentation](https://docs.featureboard.app/sdks/java-sdk/).
 
 ## Release notes
 

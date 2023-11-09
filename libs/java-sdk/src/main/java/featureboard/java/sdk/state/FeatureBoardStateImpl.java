@@ -21,7 +21,6 @@ public class FeatureBoardStateImpl  implements FeatureBoardState {
 
   @Override
   public void update(Collection<FeatureValue> state) {
-    cache = new HashMap<>();
     for (FeatureValue s : state) {
       cache.put(s.featureKey(), s);
     }
@@ -31,7 +30,6 @@ public class FeatureBoardStateImpl  implements FeatureBoardState {
     // TODO: OR from snapshot hmm
     return cache.get(featureKey);
   }
-
 
   // OK so this is a HostedService under .net and as such refreshes - we can do this also in Java but slightly different
   public void updateSnapshot() {
