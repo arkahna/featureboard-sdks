@@ -1,5 +1,13 @@
 # @featureboard/nx-plugin
 
+## 0.3.1
+
+### Patch Changes
+
+- 5755d8f: Updated documentation and instructions
+- Updated dependencies [5755d8f]
+  - @featureboard/code-generator@0.2.1
+
 ## 0.3.0
 
 ### Minor Changes

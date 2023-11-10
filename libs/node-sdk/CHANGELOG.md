@@ -1,5 +1,13 @@
 # @featureboard/node-sdk
 
+## 0.17.1
+
+### Patch Changes
+
+- 5755d8f: Updated documentation and instructions
+- Updated dependencies [5755d8f]
+  - @featureboard/js-sdk@0.15.1
+
 ## 0.17.0
 
 ### Minor Changes

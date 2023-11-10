@@ -1,5 +1,13 @@
 # @featureboard/js-sdk
 
+## 0.15.1
+
+### Patch Changes
+
+- 5755d8f: Updated documentation and instructions
+- Updated dependencies [5755d8f]
+  - @featureboard/contracts@0.4.1
+
 ## 0.15.0
 
 ### Minor Changes

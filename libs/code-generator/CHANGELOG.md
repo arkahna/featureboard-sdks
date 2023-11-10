@@ -1,5 +1,11 @@
 # @featureboard/code-generator
 
+## 0.2.1
+
+### Patch Changes
+
+- 5755d8f: Updated documentation and instructions
+
 ## 0.2.0
 
 ### Minor Changes

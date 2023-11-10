@@ -1,5 +1,11 @@
 # @featureboard/contracts
 
+## 0.4.1
+
+### Patch Changes
+
+- 5755d8f: Updated documentation and instructions
+
 ## 0.4.0
 
 ### Minor Changes
