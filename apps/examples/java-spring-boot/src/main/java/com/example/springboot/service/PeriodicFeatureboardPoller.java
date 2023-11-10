@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 
 @Component
 @EnableScheduling
-@ConditionalOnProperty(name = "featureBoardOptions.updateStrategy", havingValue = "polling", matchIfMissing = false)
+@ConditionalOnProperty(name = "featureBoardOptions.updateStrategy", havingValue = "polling", matchIfMissing = true)
 public class PeriodicFeatureboardPoller {
 
   @Autowired
@@ -33,16 +33,16 @@ public class PeriodicFeatureboardPoller {
   public void checkFeatureboardValues() {
     logger.info("Checking for Featureboard Values.");
 
-    var stringValue = featureBoardClient.GetFeatureValue("string_toggle", "String Default Value!");
+    var stringValue = featureBoardClient.getFeatureValue("string_toggle", "String Default Value!");
 
     String booleanValue = "";
-    if (featureBoardClient.GetFeatureValue("boolean_toggle", false)) {
+    if (featureBoardClient.getFeatureValue("boolean_toggle", false)) {
       booleanValue = "Boolean Value is true!";
     } else {
       booleanValue = "Boolean Value is false!";
     }
 
-    var bigDecimalValue = "BigDecimal Value: " + featureBoardClient.GetFeatureValue("bigdecimal_toggle", new BigDecimal(22)).toString();
+    var bigDecimalValue = "BigDecimal Value: " + featureBoardClient.getFeatureValue("bigdecimal_toggle", new BigDecimal(22)).toString();
 
     logger.info("String Value: {}", stringValue);
     logger.info(booleanValue);
