@@ -8,7 +8,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Version>0.0.2</Version>
     <PackageDescription>FeatureBoard .NET SDK for .NET core and framework applications.</PackageDescription>
-    <PackageTags>feature toggle flags</PackageTags>
+    <PackageTags>feature toggles flags</PackageTags>
     <Authors>Arkahna</Authors>
     <Copyright>Copyright (c) Arkahna 2023</Copyright>
     <PackageIcon>featureboard-logo.png</PackageIcon>

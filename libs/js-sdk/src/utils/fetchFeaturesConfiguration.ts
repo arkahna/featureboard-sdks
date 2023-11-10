@@ -36,7 +36,7 @@ export async function fetchFeaturesConfigurationViaHttp(
             audiences,
         )
         throw new Error(
-            `Failed to get latest toggles: Service returned error ${response.status} (${response.statusText})`,
+            `Failed to get latest flags: Service returned error ${response.status} (${response.statusText})`,
         )
     }
 

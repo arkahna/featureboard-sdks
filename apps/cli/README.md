@@ -1,7 +1,7 @@
-# Featureboard CLI
+# FeatureBoard CLI
 
-CLI tool for interacting with featureboard
+The FeatureBoard Command Line tool.
 
-## Docs
+## Documentation
 
-See https://featureboard.app/docs/cli/getting-started/ for usage instructions and documentation
+See https://docs.featureboard.app/cli/using-the-cli/ for usage instructions and documentation.

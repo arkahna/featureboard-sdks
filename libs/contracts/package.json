@@ -9,7 +9,8 @@
         "url": "git+https://github.com/arkahna/featureboard-sdks.git"
     },
     "keywords": [
-        "Feature toggle",
+        "Feature management",
+        "Feature toggles",
         "Feature flags"
     ],
     "bugs": {
