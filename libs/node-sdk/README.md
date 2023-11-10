@@ -14,9 +14,11 @@ The FeatureBoard NodeJS SDK is available on NPM.
 
 ```bash
 npm add @featureboard/node-sdk
-# Or
+```
+```bash
 yarn add @featureboard/node-sdk
-# Or
+```
+```bash
 pnpm add @featureboard/node-sdk
 ```
 

@@ -13,9 +13,11 @@ The FeatureBoard JavaScript SDK is available on NPM.
 
 ```bash
 npm add @featureboard/js-sdk
-# Or
+```
+```bash
 yarn add @featureboard/js-sdk
-# Or
+```
+```bash
 pnpm add @featureboard/js-sdk
 ```
 

@@ -11,9 +11,11 @@ The FeatureBoard React SDK is available on NPM.
 
 ```bash
 npm add @featureboard/react-sdk
-# Or
+```
+```bash
 yarn add @featureboard/react-sdk
-# Or
+```
+```bash
 pnpm add @featureboard/react-sdk
 ```
 
