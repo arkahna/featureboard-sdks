@@ -8,7 +8,7 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
-@ConditionalOnProperty(name="featureBoardOptions.updateStrategy", havingValue="onrequest", matchIfMissing = true)
+@ConditionalOnProperty(name="featureBoardOptions.updateStrategy", havingValue="onrequest", matchIfMissing = false)
 public class HttpInterceptorConfig implements WebMvcConfigurer {
   @Autowired
   private OnRequestUpdateStrategyInterceptor onRequestUpdateStrategyInterceptor;

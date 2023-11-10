@@ -21,7 +21,7 @@ import java.util.logging.Logger;
  * here should persist for the lifetime of the request.
  */
 @Component
-@ConditionalOnProperty(name="featureBoardOptions.updateStrategy", havingValue="onrequest", matchIfMissing = true)
+@ConditionalOnProperty(name="featureBoardOptions.updateStrategy", havingValue="onrequest", matchIfMissing = false)
 public class OnRequestUpdateStrategyInterceptor implements HandlerInterceptor , InitializingBean {
   // We do specifically want the FeatureBoardServiceImpl here, not FeatureBoardLastCheckedServiceImpl
   @Autowired
