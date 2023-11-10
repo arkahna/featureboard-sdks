@@ -33,14 +33,14 @@ public class FeatureBoardClientImpl implements FeatureBoardClient {
   }
 
   @Override
-  public boolean GetFeatureValue(String featureKey, boolean defaultValue) {
+  public boolean getFeatureValue(String featureKey, boolean defaultValue) {
     var jsonValue = getFeatureConfigurationValue(featureKey);
 
     return Optional.of(jsonValue != null && jsonValue.asBoolean()).orElse(defaultValue);
   }
 
   @Override
-  public BigDecimal GetFeatureValue(String featureKey, BigDecimal defaultValue) {
+  public BigDecimal getFeatureValue(String featureKey, BigDecimal defaultValue) {
     var jsonValue = getFeatureConfigurationValue(featureKey);
 
     if (jsonValue == null) {
@@ -51,14 +51,14 @@ public class FeatureBoardClientImpl implements FeatureBoardClient {
   }
 
   @Override
-  public String GetFeatureValue(String featureKey, String defaultValue) {
+  public String getFeatureValue(String featureKey, String defaultValue) {
     var jsonValue = getFeatureConfigurationValue(featureKey);
 
     return Optional.ofNullable(jsonValue != null ? jsonValue.asText() : null).orElse(defaultValue);
   }
 
   @Override
-  public <TProp extends Enum<TProp>> TProp GetFeatureValue(String featureKey, TProp defaultValue) {
+  public <TProp extends Enum<TProp>> TProp getFeatureValue(String featureKey, TProp defaultValue) {
     var jsonValue = getFeatureConfigurationValue(featureKey);
 
     // TODO: fixme
