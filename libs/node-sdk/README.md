@@ -2,7 +2,7 @@
 
 FeatureBoard SDK for server side NodJS.
 
-![npm](https://img.shields.io/npm/v/%40featureboard%2Fnode-sdk?logo=npm)  ![npm](https://img.shields.io/npm/dt/%40featureboard%2Fnode-sdk) ![GitHub Workflow](https://img.shields.io/github/actions/workflow/status/arkahna/featureboard-sdks/main.yml?logo=github)
+![npm](https://img.shields.io/npm/v/%40featureboard%2Fnode-sdk?logo=npm)  ![npm](https://img.shields.io/npm/dt/%40featureboard%2Fnode-sdk?logo=npm) ![GitHub Workflow](https://img.shields.io/github/actions/workflow/status/arkahna/featureboard-sdks/main.yml?logo=github)
 
 
 

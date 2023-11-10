@@ -2,7 +2,7 @@
 
 NX tool that generates FeatureBoard SDKs for different languages.
 
-![npm](https://img.shields.io/npm/v/%40featureboard%2Fcode-generator?logo=npm) ![npm](https://img.shields.io/npm/dt/%40featureboard%2Fcode-generator) ![GitHub Workflow](https://img.shields.io/github/actions/workflow/status/arkahna/featureboard-sdks/main.yml?logo=github)
+![npm](https://img.shields.io/npm/v/%40featureboard%2Fcode-generator?logo=npm) ![npm](https://img.shields.io/npm/dt/%40featureboard%2Fcode-generator?logo=npm) ![GitHub Workflow](https://img.shields.io/github/actions/workflow/status/arkahna/featureboard-sdks/main.yml?logo=github)
 
 ## Installation
 
