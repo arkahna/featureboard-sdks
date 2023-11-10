@@ -24,7 +24,7 @@ export async function fetchFeaturesConfigurationViaHttp(
 
     if (response.status !== 200 && response.status !== 304) {
         throw new Error(
-            `Failed to get latest toggles: Service returned error ${response.status} (${response.statusText})`,
+            `Failed to get latest flags: Service returned error ${response.status} (${response.statusText})`,
         )
     }
 

@@ -1,18 +1,20 @@
 # FeatureBoard Contracts
 
-![npm](https://img.shields.io/npm/v/%40featureboard%2Fcontracts?logo=npm) ![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/arkahna/featureboard-sdks/main.yml?logo=github)
+TypeScript type definitions for FeatureBoard SDKs.
 
-Contains TypeScript type definitions for FeatureBoard SDKs.
+![npm](https://img.shields.io/npm/v/%40featureboard%2Fcontracts?logo=npm) ![npm](https://img.shields.io/npm/dt/%40featureboard%2Fcontracts) ![GitHub Workflow](https://img.shields.io/github/actions/workflow/status/arkahna/featureboard-sdks/main.yml?logo=github)
+
 
 ## Installation
 
-The FeatureBoard Contracts is available on NPM.
 
 ```bash
 npm add @featureboard/contracts
-# Or
+```
+```bash
 yarn add @featureboard/contracts
-# Or
+```
+```bash
 pnpm add @featureboard/contracts
 ```
 
@@ -38,4 +40,4 @@ The advantages of using TypeScript type definitions are:
 
 ## Release notes
 
-You can find our [changelog here](/libs/contracts/CHANGELOG.md).
+Our changelog can be found on [Github](https://github.com/arkahna/featureboard-sdks/blob/main/libs/contracts/CHANGELOG.md).

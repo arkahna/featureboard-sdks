@@ -14,6 +14,10 @@ FeatureBoard Code Generators:
 
 ## What is FeatureBoard?
 
-FeatureBoard is the future of Feature Toggling and is tailored for SaaS teams on the hunt for a simplified yet highly potent feature toggling solution. FeatureBoard enhances team productivity by allowing everyone to manage software features seamlessly, not just developers.
+FeatureBoard is the future of Feature Management and is tailored for SaaS teams on the hunt for a simplified yet highly potent feature toggling solution. FeatureBoard enhances team productivity by allowing everyone to manage software features seamlessly, not just developers.
 
 Go to [our website](https://featureboard.app) to find out more.
+
+## Documentation
+
+Installation and usage instructions can be found on our [docs site](https://docs.featureboard.app).

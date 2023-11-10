@@ -1,11 +1,21 @@
-# code-generator
+# FeatureBoard Code Generator
 
-This library was generated with [Nx](https://nx.dev).
+NX tool that generates FeatureBoard SDKs for different languages.
 
-## Building
+![npm](https://img.shields.io/npm/v/%40featureboard%2Fcode-generator?logo=npm) ![npm](https://img.shields.io/npm/dt/%40featureboard%2Fcode-generator) ![GitHub Workflow](https://img.shields.io/github/actions/workflow/status/arkahna/featureboard-sdks/main.yml?logo=github)
 
-Run `nx build code-generator` to build the library.
+## Installation
 
-## Running unit tests
+```bash
+npm add @featureboard/code-generator
+```
+```bash
+yarn add @featureboard/code-generator
+```
+```bash
+pnpm add @featureboard/code-generator
+```
 
-Run `nx test code-generator` to execute the unit tests via Vitest
+## Release Notes
+
+Our changelog can be found on [GitHub](https://github.com/arkahna/featureboard-sdks/blob/main/libs/code-generator/CHANGELOG.md).

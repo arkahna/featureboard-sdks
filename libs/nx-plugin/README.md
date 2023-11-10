@@ -1,11 +1,22 @@
 # nx-plugin
 
-This library was generated with [Nx](https://nx.dev).
+NX plugin for FeatureBoard.
 
-## Building
+![npm](https://img.shields.io/npm/v/%40featureboard%2Fnx-plugin?logo=npm) ![npm](https://img.shields.io/npm/dt/%40featureboard%2Fnx-plugin?logo=npm) ![GitHub Workflow](https://img.shields.io/github/actions/workflow/status/arkahna/featureboard-sdks/main.yml?logo=github)
 
-Run `nx build nx-plugin` to build the library.
 
-## Running unit tests
+## Installation
 
-Run `nx test nx-plugin` to execute the unit tests via Vitest
+The FeatureBoard React SDK is available on NPM.
+
+```bash
+npm add @featureboard/nx-plugin
+# Or
+yarn add @featureboard/nx-plugin
+# Or
+pnpm add @featureboard/nx-plugin
+```
+
+## Release Notes
+
+Our changelog can be found on [GitHub](https://github.com/arkahna/featureboard-sdks/blob/main/libs/nx-plugin/CHANGELOG.md).

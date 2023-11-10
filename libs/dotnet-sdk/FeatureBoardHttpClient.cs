@@ -42,7 +42,7 @@ internal sealed class FeatureBoardHttpClient : IFeatureBoardHttpClient
         return false;
 
       case not HttpStatusCode.OK:
-        _logger.LogError("Failed to get latest toggles: Service returned error {statusCode}({responseBody})", response.StatusCode, await response.Content.ReadAsStringAsync());
+        _logger.LogError("Failed to get latest flags: Service returned error {statusCode}({responseBody})", response.StatusCode, await response.Content.ReadAsStringAsync());
         return null;
     }
 

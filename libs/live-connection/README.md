@@ -1,6 +1,6 @@
 # FeatureBoard - Live Connection
 
-Provides live update functionality in FeatureBoard using WebSockets.
+Live update functionality for FeatureBoard using WebSockets.
 
 On the server it uses the 'ws' module, and in the browser the WebSocket global.
 
