@@ -195,9 +195,6 @@ importers:
       '@commander-js/extra-typings':
         specifier: ^11.1.0
         version: 11.1.0(commander@11.1.0)
-      '@featureboard/code-generator':
-        specifier: workspace:*
-        version: link:../../libs/code-generator
       '@types/open':
         specifier: ^6.2.1
         version: 6.2.1
