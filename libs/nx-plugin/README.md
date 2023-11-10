@@ -7,13 +7,15 @@ NX plugin for FeatureBoard.
 
 ## Installation
 
-The FeatureBoard React SDK is available on NPM.
+The FeatureBoard NX plugin is available on NPM.
 
 ```bash
 npm add @featureboard/nx-plugin
-# Or
+```
+```bash
 yarn add @featureboard/nx-plugin
-# Or
+```
+```bash
 pnpm add @featureboard/nx-plugin
 ```
 
