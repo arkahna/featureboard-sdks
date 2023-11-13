@@ -26,9 +26,6 @@ import static org.mockito.Mockito.when;
 public class FeatureBoardClientTest {
 
   @Mock
-  private JsonNode jsonNode;
-
-  @Mock
   private FeatureBoardState snapshotState;
 
   @Mock
@@ -144,6 +141,42 @@ public class FeatureBoardClientTest {
     // Setup
     String featureKey = "featureKey";
     var defaultValue = new BigDecimal("111.2");
+
+    var featureMap = new HashMap<String, FeatureValue>();
+
+    // Arrange
+    when(snapshotState.GetSnapshot()).thenReturn(new FeatureBoardStateSnapshot(featureMap));
+
+    // Act
+    var result = featureBoardClient.getFeatureValue(featureKey, defaultValue);
+    assertNotNull(result);
+    assertEquals(result, defaultValue);
+  }
+
+  @Test
+  public void WhenFeatureKeySet_getFeatureValue_returnsOptionValue() {
+    // Setup
+    String featureKey = "featureKey";
+    var defaultValue = TestEnum.BLUE;
+    var featureValue = new TextNode(TestEnum.RED.name());
+
+    var featureMap = new HashMap<String, FeatureValue>();
+    featureMap.put(featureKey, new FeatureValue(featureKey, featureValue, Collections.emptyList()));
+
+    // Arrange
+    when(snapshotState.GetSnapshot()).thenReturn(new FeatureBoardStateSnapshot(featureMap));
+
+    // Act
+    var result = featureBoardClient.getFeatureValue(featureKey, defaultValue);
+    assertNotNull(result);
+    assertEquals(result.toString(), featureValue.textValue());
+  }
+
+  @Test
+  public void WhenFeatureKeyNotSet_getFeatureValue_returnsDefaultOptionValue() {
+    // Setup
+    String featureKey = "featureKey";
+    var defaultValue = TestEnum.BLUE;
 
     var featureMap = new HashMap<String, FeatureValue>();
 
