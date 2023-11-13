@@ -1,6 +1,7 @@
 package com.example.springboot.service;
 
 
+import com.example.springboot.Colour;
 import featureboard.java.sdk.FeatureBoardClientImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,8 +45,11 @@ public class PeriodicFeatureboardPoller {
 
     var bigDecimalValue = "BigDecimal Value: " + featureBoardClient.getFeatureValue("bigdecimal_toggle", new BigDecimal(22)).toString();
 
+    var optionEnum = featureBoardClient.getFeatureValue("colour", Colour.GREEN);
+
     logger.info("String Value: {}", stringValue);
     logger.info(booleanValue);
     logger.info(bigDecimalValue);
+    logger.info("Colour enum value is: {}", optionEnum.toString());
   }
 }

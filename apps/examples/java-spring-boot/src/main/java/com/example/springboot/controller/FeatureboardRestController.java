@@ -1,5 +1,6 @@
 package com.example.springboot.controller;
 
+import com.example.springboot.Colour;
 import featureboard.java.sdk.interfaces.FeatureBoardClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -36,11 +37,9 @@ public class FeatureboardRestController {
   public String bigdecimalGet() {
     return "BigDecimal Value : " + featureBoardClient.getFeatureValue("bigdecimal_toggle", new BigDecimal(22)).toString();
   }
-
-  @GetMapping("/tprop")
-  public String tpropGet() {
-
-    return "";
+  
+  @GetMapping("/option")
+  public String optionGet() {
+    return featureBoardClient.getFeatureValue("colour", Colour.GREEN).toString();
   }
-
 }
