@@ -2,7 +2,7 @@ package featureboard.java.sdk;
 
 import featureboard.java.sdk.interfaces.FeatureBoardService;
 import featureboard.java.sdk.models.FeatureBoardConfiguration;
-import featureboard.java.sdk.state.LastCheckedTimeBean;
+import featureboard.java.sdk.state.LastCheckedTimeProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,10 +25,10 @@ public class FeatureBoardLastCheckedServiceImpl implements FeatureBoardService {
   private final FeatureBoardConfiguration configuration;
   private final Logger logger = Logger.getLogger(FeatureBoardLastCheckedServiceImpl.class.getName());
   @Autowired
-  private final LastCheckedTimeBean lastCheckedTimeProvider;
+  private final LastCheckedTimeProvider lastCheckedTimeProvider;
 
   public FeatureBoardLastCheckedServiceImpl(FeatureBoardServiceImpl featureBoardServiceImpl, FeatureBoardConfiguration config,
-                                            LastCheckedTimeBean lastCheckedTimeProvider) {
+                                            LastCheckedTimeProvider lastCheckedTimeProvider) {
     this.featureBoardServiceImpl = featureBoardServiceImpl;
     this.configuration = config;
     this.lastCheckedTimeProvider = lastCheckedTimeProvider;
@@ -36,7 +36,7 @@ public class FeatureBoardLastCheckedServiceImpl implements FeatureBoardService {
 
   @Override
   public CompletableFuture<Boolean> refreshFeatureConfiguration() {
-    OffsetDateTime beforeLastChecked = lastCheckedTimeProvider.getLastCheckedTimeReference().get();
+    OffsetDateTime beforeLastChecked = lastCheckedTimeProvider.getLastCheckedTime();
     boolean maxAgeHasExpired = OffsetDateTime.now().isAfter(beforeLastChecked.plus(configuration.getMaxAge()));
 
     if (!maxAgeHasExpired) {

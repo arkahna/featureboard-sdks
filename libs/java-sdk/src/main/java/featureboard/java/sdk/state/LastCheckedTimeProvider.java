@@ -7,14 +7,11 @@ import org.springframework.web.context.annotation.ApplicationScope;
 import java.time.OffsetDateTime;
 import java.util.concurrent.atomic.AtomicReference;
 
-// TODO: change the name this is dumb
-// TODO: check this handles the offset in the same way (keeps value) as the .net version of LastCheckedTimeProvider class
 @ApplicationScope
 @Component
-public class LastCheckedTimeBean {
+public class LastCheckedTimeProvider {
 
-  // TODO: final or not
-  private AtomicReference<OffsetDateTime> lastCheckedTimeReference = new AtomicReference<>(OffsetDateTime.now());
+  private final AtomicReference<OffsetDateTime> lastCheckedTimeReference = new AtomicReference<>(OffsetDateTime.now());
 
   public OffsetDateTime getLastCheckedTime() {
     return lastCheckedTimeReference.get();
