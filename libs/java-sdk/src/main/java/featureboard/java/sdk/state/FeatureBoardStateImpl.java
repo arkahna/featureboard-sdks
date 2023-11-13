@@ -30,10 +30,4 @@ public class FeatureBoardStateImpl  implements FeatureBoardState {
     // TODO: OR from snapshot hmm
     return cache.get(featureKey);
   }
-
-  // OK so this is a HostedService under .net and as such refreshes - we can do this also in Java but slightly different
-  public void updateSnapshot() {
-    // TODO: do we want this?
-    // Or handle it elsewhere eh
-  }
 }
