@@ -37,9 +37,9 @@ public class FeatureboardRestController {
   public String bigdecimalGet() {
     return "BigDecimal Value : " + featureBoardClient.getFeatureValue("bigdecimal_toggle", new BigDecimal(22)).toString();
   }
-  
+
   @GetMapping("/option")
   public String optionGet() {
-    return featureBoardClient.getFeatureValue("colour", Colour.GREEN).toString();
+    return featureBoardClient.getFeatureValue("colour", Colour.GREEN).name();
   }
 }

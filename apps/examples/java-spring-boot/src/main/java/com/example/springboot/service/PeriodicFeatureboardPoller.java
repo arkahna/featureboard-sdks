@@ -50,6 +50,6 @@ public class PeriodicFeatureboardPoller {
     logger.info("String Value: {}", stringValue);
     logger.info(booleanValue);
     logger.info(bigDecimalValue);
-    logger.info("Colour enum value is: {}", optionEnum.toString());
+    logger.info("Colour enum value is: {}", optionEnum.name());
   }
 }
