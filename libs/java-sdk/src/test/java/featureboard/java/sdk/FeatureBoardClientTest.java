@@ -33,7 +33,6 @@ public class FeatureBoardClientTest {
 
   private FeatureBoardClient featureBoardClient;
 
-  //  @BeforeEach
   @Before
   public void setUp() {
     snapshotState = mock(FeatureBoardStateImpl.class);
@@ -59,6 +58,29 @@ public class FeatureBoardClientTest {
     assertFalse(result.isEmpty());
     assertEquals(result, featureValue.textValue());
   }
+
+  @Test
+  public void WhenManyFeatureKeysSet_getFeatureValue_returnsStringValue() {
+    // Setup
+    String featureKey = "featureKey";
+    var defaultValue = "default_value";
+    var featureValue = new TextNode("feature_value");
+
+    var featureMap = new HashMap<String, FeatureValue>();
+    featureMap.put(featureKey, new FeatureValue(featureKey, featureValue, Collections.emptyList()));
+    featureMap.put("featureKey2", new FeatureValue("featureKey2", featureValue, Collections.emptyList()));
+    featureMap.put("featureKey3", new FeatureValue("featureKey3", featureValue, Collections.emptyList()));
+    featureMap.put("featureKey4", new FeatureValue("featureKey4", featureValue, Collections.emptyList()));
+
+    // Arrange
+    when(snapshotState.GetSnapshot()).thenReturn(new FeatureBoardStateSnapshot(featureMap));
+
+    // Act
+    String result = featureBoardClient.getFeatureValue(featureKey, defaultValue);
+    assertFalse(result.isEmpty());
+    assertEquals(result, featureValue.textValue());
+  }
+
 
   @Test
   public void WhenFeatureKeyNotSet_getFeatureValue_returnsDefaultStringValue() {
