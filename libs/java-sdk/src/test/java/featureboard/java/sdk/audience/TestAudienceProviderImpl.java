@@ -1,4 +1,4 @@
-package featureboard.java.sdk;
+package featureboard.java.sdk.audience;
 
 import featureboard.java.sdk.interfaces.AudienceProvider;
 import org.springframework.stereotype.Component;

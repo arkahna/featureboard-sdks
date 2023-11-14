@@ -1,10 +1,11 @@
 package featureboard.java.sdk;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.TextNode;
+import featureboard.java.sdk.audience.TestAudienceProviderImpl;
 import featureboard.java.sdk.interfaces.AudienceProvider;
 import featureboard.java.sdk.interfaces.FeatureBoardClient;
 import featureboard.java.sdk.interfaces.FeatureBoardState;
+import featureboard.java.sdk.models.AudienceExceptionValue;
 import featureboard.java.sdk.models.FeatureValue;
 import featureboard.java.sdk.state.FeatureBoardStateImpl;
 import featureboard.java.sdk.state.FeatureBoardStateSnapshot;
@@ -15,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 
@@ -80,7 +82,6 @@ public class FeatureBoardClientTest {
     assertFalse(result.isEmpty());
     assertEquals(result, featureValue.textValue());
   }
-
 
   @Test
   public void WhenFeatureKeyNotSet_getFeatureValue_returnsDefaultStringValue() {
@@ -209,6 +210,53 @@ public class FeatureBoardClientTest {
     var result = featureBoardClient.getFeatureValue(featureKey, defaultValue);
     assertNotNull(result);
     assertEquals(result, defaultValue);
+  }
+
+  @Test
+  public void WhenFeatureKeySet_AudienceSet_returnsAudienceValue() {
+    // Setup
+    String featureKey = "featureKey";
+    var defaultValue = "default_value";
+    var featureValue = new TextNode("feature_value");
+    var audienceValue = new TextNode("audience_value");
+    var audienceList = new ArrayList<AudienceExceptionValue>();
+    audienceList.add(new AudienceExceptionValue("someAudience", audienceValue));
+
+    var featureMap = new HashMap<String, FeatureValue>();
+    // Given we have a concrete here - seems more straight forward than mocking the audience call in this instance
+    featureMap.put(featureKey, new FeatureValue(featureKey, featureValue, audienceList));
+
+    // Arrange
+    when(snapshotState.GetSnapshot()).thenReturn(new FeatureBoardStateSnapshot(featureMap));
+
+    // Act
+    String result = featureBoardClient.getFeatureValue(featureKey, defaultValue);
+    assertFalse(result.isEmpty());
+    assertNotEquals(result, featureValue.textValue());
+    assertEquals(result, audienceValue.textValue());
+  }
+
+  @Test
+  public void WhenFeatureKeySet_AudienceNotFoundSet_returnsFeatureValue() {
+    // Setup
+    String featureKey = "featureKey";
+    var defaultValue = "default_value";
+    var featureValue = new TextNode("feature_value");
+    var audienceValue = new TextNode("audience_value");
+    var audienceList = new ArrayList<AudienceExceptionValue>();
+    audienceList.add(new AudienceExceptionValue("some_missing_audience", audienceValue));
+
+    var featureMap = new HashMap<String, FeatureValue>();
+    // Given we have a concrete here - seems more straight forward than mocking the audience call in this instance
+    featureMap.put(featureKey, new FeatureValue(featureKey, featureValue, audienceList));
+
+    // Arrange
+    when(snapshotState.GetSnapshot()).thenReturn(new FeatureBoardStateSnapshot(featureMap));
+
+    // Act
+    String result = featureBoardClient.getFeatureValue(featureKey, defaultValue);
+    assertFalse(result.isEmpty());
+    assertEquals(result, featureValue.textValue());
   }
 
 }
