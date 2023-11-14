@@ -1,5 +1,12 @@
 # @featureboard/node-sdk
 
+## 0.17.2
+
+### Patch Changes
+
+- Updated dependencies [1601a44]
+  - @featureboard/js-sdk@0.15.2
+
 ## 0.17.1
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @featureboard/js-sdk
 
+## 0.15.2
+
+### Patch Changes
+
+- 1601a44: Fix for uncaught ReferenceError: process is not defined
+
 ## 0.15.1
 
 ### Patch Changes
