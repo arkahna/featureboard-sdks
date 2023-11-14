@@ -1,10 +1,8 @@
 # FeatureBoard NodeJS SDK
 
-FeatureBoard SDK for server side NodJS.
+FeatureBoard SDK for server side NodeJS.
 
-![npm](https://img.shields.io/npm/v/%40featureboard%2Fnode-sdk?logo=npm)  ![npm](https://img.shields.io/npm/dt/%40featureboard%2Fnode-sdk?logo=npm) ![GitHub Workflow](https://img.shields.io/github/actions/workflow/status/arkahna/featureboard-sdks/main.yml?logo=github)
-
-
+![npm](https://img.shields.io/npm/v/%40featureboard%2Fnode-sdk?logo=npm) ![npm](https://img.shields.io/npm/dt/%40featureboard%2Fnode-sdk?logo=npm) ![GitHub Workflow](https://img.shields.io/github/actions/workflow/status/arkahna/featureboard-sdks/main.yml?logo=github)
 
 Looking for our JS SDK for browser based web applications, you can find it [here](https://www.npmjs.com/package/@featureboard/js-sdk).
 
@@ -15,9 +13,11 @@ The FeatureBoard NodeJS SDK is available on NPM.
 ```bash
 npm add @featureboard/node-sdk
 ```
+
 ```bash
 yarn add @featureboard/node-sdk
 ```
+
 ```bash
 pnpm add @featureboard/node-sdk
 ```
