@@ -1,7 +1,7 @@
 import { debugLog } from '../log'
 
 const maxRetries = 5
-const initialDelayMs = process.env.TEST ? 1 : 1000
+const initialDelayMs = process.env.TEST === 'true' ? 1 : 1000
 const backoffFactor = 2
 
 export async function retry<T>(
