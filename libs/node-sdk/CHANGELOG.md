@@ -1,5 +1,11 @@
 # @featureboard/node-sdk
 
+## 0.17.3
+
+### Patch Changes
+
+- 8680b50: Documentation updates
+
 ## 0.17.2
 
 ### Patch Changes
