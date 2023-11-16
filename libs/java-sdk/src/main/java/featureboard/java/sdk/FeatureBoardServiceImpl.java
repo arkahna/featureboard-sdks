@@ -16,12 +16,13 @@ public class FeatureBoardServiceImpl implements FeatureBoardService {
 
   private final FeatureBoardHttpClient featureBoardHttpClient;
 
-  private final Semaphore semaphore = new Semaphore(1);
+  private final Semaphore semaphore;
 
   public FeatureBoardServiceImpl(@Qualifier("featureBoardHttpClientImpl")
-                                 FeatureBoardHttpClient featureBoardHttpClient) {
+                                 FeatureBoardHttpClient featureBoardHttpClient, Semaphore semaphore) {
 
     this.featureBoardHttpClient = featureBoardHttpClient;
+    this.semaphore = semaphore;
   }
 
   @Override
@@ -34,7 +35,6 @@ public class FeatureBoardServiceImpl implements FeatureBoardService {
     }
 
     try {
-      // Note: may need to specify the "http" client here
       return featureBoardHttpClient.refreshFeatureConfiguration();
     } catch (Exception e) {
       // TODO: fix this logging

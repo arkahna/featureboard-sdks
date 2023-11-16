@@ -1,6 +1,6 @@
 package featureboard.java.sdk.http;
 
-import featureboard.java.sdk.models.FeatureBoardConfiguration;
+import featureboard.java.sdk.config.FeatureBoardConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;

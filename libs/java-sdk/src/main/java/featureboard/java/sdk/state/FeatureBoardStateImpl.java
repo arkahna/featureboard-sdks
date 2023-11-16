@@ -14,6 +14,7 @@ public class FeatureBoardStateImpl  implements FeatureBoardState {
   // TODO: implement a more robust snapshotting system.
   // Without it this SDK may suffer from Performance issues.
   // Need to ensure each request has an update. See FeatureBoardState.cs in the .net SDK
+  // Likewise, consider removing the Get from the interface
   @Override
   public FeatureBoardStateSnapshot GetSnapshot() {
     return new FeatureBoardStateSnapshot(cache);
@@ -26,8 +27,13 @@ public class FeatureBoardStateImpl  implements FeatureBoardState {
     }
   }
 
+  /**
+   * Effectively deprecated - reading directly from the state. This is due for a refactor.
+   *
+   * @param featureKey
+   * @return
+   */
   public FeatureValue Get(String featureKey) {
-    // TODO: OR from snapshot hmm
     return cache.get(featureKey);
   }
 }

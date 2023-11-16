@@ -15,15 +15,15 @@ import java.net.http.HttpClient;
 import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 @Service
 public class FeatureBoardHttpClientImpl implements FeatureBoardHttpClient {
 
+  @Autowired
   private final HttpClient httpClient;
-  private Consumer<List<FeatureValue>> processResult;
   private final Logger _logger = Logger.getLogger(FeatureBoardHttpClientImpl.class.getName());
+  @Autowired
   private final ObjectMapper objectMapper;
 
   @Autowired
@@ -33,20 +33,18 @@ public class FeatureBoardHttpClientImpl implements FeatureBoardHttpClient {
   @Autowired
   private final ETagState eTagState;
 
-  public FeatureBoardHttpClientImpl(HttpRequestBuilder httpRequestBuilder, FeatureBoardState featureBoardState, ETagState eTagState) {
+  public FeatureBoardHttpClientImpl(HttpRequestBuilder httpRequestBuilder, FeatureBoardState featureBoardState, ETagState eTagState, HttpClient httpClient, ObjectMapper objectMapper) {
     this.featureBoardState = featureBoardState;
     this.eTagState = eTagState;
-    this.httpClient = HttpClient.newBuilder().build();
+    this.httpClient = httpClient;
     this.httpRequestBuilder = httpRequestBuilder;
-
-    objectMapper = new ObjectMapper();
-    objectMapper.configure(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT, true);
+    this.objectMapper = objectMapper;
   }
 
   /**
-   * Will refresh all Configuration via a HTTP call
+   * Will refresh all Configuration via a HTTP call to Featureboard.
    *
-   * @return True if new Configuration is found for a refresh, else False if nothing modified
+   * @return True if new Configuration is found for a refresh, else False if nothing is modified
    */
   @Override
   public CompletableFuture<Boolean> refreshFeatureConfiguration() {
@@ -64,7 +62,6 @@ public class FeatureBoardHttpClientImpl implements FeatureBoardHttpClient {
           return false;
         } else if (statusCode != 200) {
           _logger.severe("Failed to get latest toggles: Service returned error {" + statusCode + "} + ({" + response.body() + "}) to the following URI: " + response.uri());
-          // TODO: probably should be false
           return null;
         } else {
           try {
@@ -78,6 +75,7 @@ public class FeatureBoardHttpClientImpl implements FeatureBoardHttpClient {
             eTagState.seteTagValue(responseETag);
           } catch (Exception e) {
             _logger.severe("Error Refreshing Configuration: " + e.getMessage());
+            return false;
           }
 
           return true;
@@ -94,13 +92,5 @@ public class FeatureBoardHttpClientImpl implements FeatureBoardHttpClient {
       _logger.severe("Unable to map JSON: " + e.getMessage());
       throw new RuntimeException(e);
     }
-  }
-
-  public Consumer<List<FeatureValue>> getProcessResult() {
-    return processResult;
-  }
-
-  public void setProcessResult(Consumer<List<FeatureValue>> processResult) {
-    this.processResult = processResult;
   }
 }

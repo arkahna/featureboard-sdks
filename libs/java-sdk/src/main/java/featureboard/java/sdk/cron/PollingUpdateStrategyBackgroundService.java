@@ -4,7 +4,6 @@ import featureboard.java.sdk.FeatureBoardServiceImpl;
 import featureboard.java.sdk.interfaces.FeatureBoardClient;
 import featureboard.java.sdk.interfaces.FeatureBoardService;
 import featureboard.java.sdk.interfaces.FeatureBoardState;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -32,7 +31,6 @@ public class PollingUpdateStrategyBackgroundService {
   private final FeatureBoardClient featureBoardClient;
   private static final Logger logger = Logger.getLogger(PollingUpdateStrategyBackgroundService.class.getName());
 
-  // TODO: ensure the client used has no web request dep
   public PollingUpdateStrategyBackgroundService(FeatureBoardServiceImpl featureBoardService, FeatureBoardState featureBoardState,
                                                 FeatureBoardClient featureBoardClient) {
     this.featureBoardService = featureBoardService;

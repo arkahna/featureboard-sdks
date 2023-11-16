@@ -1,7 +1,7 @@
 package featureboard.java.sdk;
 
 import featureboard.java.sdk.interfaces.FeatureBoardService;
-import featureboard.java.sdk.models.FeatureBoardConfiguration;
+import featureboard.java.sdk.config.FeatureBoardConfiguration;
 import featureboard.java.sdk.state.LastCheckedTimeProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

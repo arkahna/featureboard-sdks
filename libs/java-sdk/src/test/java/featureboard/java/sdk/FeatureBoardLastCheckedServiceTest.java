@@ -1,6 +1,6 @@
 package featureboard.java.sdk;
 
-import featureboard.java.sdk.models.FeatureBoardConfiguration;
+import featureboard.java.sdk.config.FeatureBoardConfiguration;
 import featureboard.java.sdk.state.LastCheckedTimeProvider;
 import org.junit.Before;
 import org.junit.Test;

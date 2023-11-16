@@ -12,5 +12,4 @@ public interface FeatureBoardState {
   void update(Collection<FeatureValue> state);
 
   FeatureValue Get(String featureKey);
-
 }

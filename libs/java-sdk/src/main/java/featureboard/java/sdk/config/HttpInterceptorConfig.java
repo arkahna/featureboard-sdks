@@ -1,4 +1,4 @@
-package featureboard.java.sdk;
+package featureboard.java.sdk.config;
 
 import featureboard.java.sdk.interceptors.OnRequestUpdateStrategyInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
