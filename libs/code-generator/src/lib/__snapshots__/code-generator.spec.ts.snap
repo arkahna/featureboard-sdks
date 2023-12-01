@@ -110,6 +110,38 @@ public class FeatureFilterAttribute : FeatureFilterAttributeBase
 
 exports[`code-generator > template: dotnet-api > should produce the expected features files > apps/my-app/Project.FeatureBoard.MyApp.csproj 1`] = `""`;
 
+exports[`code-generator > template: typescript > should produce the expected features files > apps/my-app/Project.FeatureBoard.MyApp.csproj 1`] = `""`;
+
+exports[`code-generator > template: typescript > should produce the expected features files > apps/my-app/featureboard-features.ts 1`] = `
+"export interface FeatureBoardFeatures {
+
+    // Requires attribution
+    // 
+    'requires-attribution': boolean
+
+    // Allow edits
+    // Allows the user to edit colour, backgrounds
+    'allow-edits': boolean
+
+    // Number custom collections
+    // 
+    'number-custom-collections': number
+
+    // Team management
+    // 
+    'team-management': boolean
+
+    // Custom collections
+    // 
+    'custom-collections': 'Disabled' | 'Enabled' | 'Shared'
+
+    // View subscribers
+    // 
+    'view-subscribers': boolean
+}
+export type FeatureboardFeature = keyof FeatureBoardFeatures"
+`;
+
 exports[`code-generator template: dotnet-api should produce the expected features files: apps/my-app/Features.cs 1`] = `
 "using FeatureBoard.DotnetSdk.Attributes;
 using FeatureBoard.DotnetSdk.Models;

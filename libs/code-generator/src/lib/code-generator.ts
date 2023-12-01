@@ -3,16 +3,16 @@ import prompts from 'prompts'
 import type { FeatureBoardFeature } from './api/get-project-features'
 import { getProjectFeatures } from './api/get-project-features'
 import { getProjects } from './api/get-projects'
-import type { FeatureBoardAuth } from './queryFeatureBoard'
 import {
     getDotNetNameSpace,
     toDotNetType,
     toPascalCase,
 } from './generators/dotnet-api/functions'
 import { generateFiles } from './generators/dotnet-api/generate-files'
+import type { FeatureBoardAuth } from './queryFeatureBoard'
 import type { Tree } from './tree/tree'
 
-export type Template = 'dotnet-api'
+export type Template = 'dotnet-api' | 'typescript'
 
 export interface CodeGeneratorOptions {
     template: Template
@@ -75,6 +75,7 @@ async function getFeatures({
             x.name.toLowerCase() ===
             featureBoardProjectName?.toLocaleLowerCase(),
     )
+
     if (!project && interactive) {
         if (projectResults.projects.length === 1) {
             project = projectResults.projects[0]

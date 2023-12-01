@@ -1,0 +1,16 @@
+export interface FeatureBoardFeatures {<%
+for(let i = 0; i < features.length; i++) {
+    const feature = features[i]
+%>
+
+    // <%=feature.name %>
+    // <%=feature.description %><%
+    if(feature.dataType.kind === 'options') {
+%>
+    '<%= feature.key %>': '<%- feature.dataType.options.join("' | '") %>'<% 
+    } else { %>
+    '<%= feature.key %>': <%= feature.dataType.kind %><% 
+    }
+} %>
+}
+export type FeatureboardFeature = keyof FeatureBoardFeatures
