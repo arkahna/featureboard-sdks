@@ -1,4 +1,4 @@
-package featureboard.java.sdk.models;
+package featureboard.java.sdk.config;
 
 
 import org.springframework.beans.factory.annotation.Value;
