@@ -1,3 +1,5 @@
+import '@featureboard/js-sdk'
+
 export interface <%= project.name.replaceAll(' ', '') %>Features {<%
 for(let i = 0; i < features.length; i++) {
     const feature = features[i]
@@ -15,6 +17,11 @@ for(let i = 0; i < features.length; i++) {
     '<%= feature.key %>': <%= feature.dataType.kind %><% 
     }
 } %>
+}
+
+declare module '@featureboard/js-sdk' {
+    // eslint-disable-next-line @typescript-eslint/no-empty-interface
+    interface Features extends <%= project.name.replaceAll(' ', '') %>Features {}
 }
 
 export type <%= project.name.replaceAll(' ', '') %>Feature = keyof <%= project.name.replaceAll(' ', '') %>Features

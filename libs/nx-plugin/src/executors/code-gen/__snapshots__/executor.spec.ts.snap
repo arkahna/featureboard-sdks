@@ -126,8 +126,10 @@ exports[`code-Executor > template: dotnet-api > should produce the expected feat
 
 exports[`code-Executor > template: typescript > should produce the expected features files > apps/my-app/Project.FeatureBoard.MyApp.csproj 1`] = `""`;
 
-exports[`code-Executor > template: typescript > should produce the expected features files > apps/my-app/featureboard-features.ts 1`] = `
-"export interface SaaSyIconsFeatures {
+exports[`code-Executor > template: typescript > should produce the expected features files > apps/my-app/features.ts 1`] = `
+"import '@featureboard/js-sdk'
+
+export interface SaaSyIconsFeatures {
 
     /**
     * Requires attribution
@@ -164,6 +166,11 @@ exports[`code-Executor > template: typescript > should produce the expected feat
     * @description 
     */
     'view-subscribers': boolean
+}
+
+declare module '@featureboard/js-sdk' {
+    // eslint-disable-next-line @typescript-eslint/no-empty-interface
+    interface Features extends SaaSyIconsFeatures {}
 }
 
 export type SaaSyIconsFeature = keyof SaaSyIconsFeatures"
