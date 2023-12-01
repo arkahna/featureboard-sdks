@@ -1,5 +1,11 @@
 # @featureboard/code-generator
 
+## 0.3.0
+
+### Minor Changes
+
+- 9e22fb1: Add typescript code generator template
+
 ## 0.2.1
 
 ### Patch Changes
