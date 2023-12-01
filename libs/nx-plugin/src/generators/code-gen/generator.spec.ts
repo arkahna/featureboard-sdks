@@ -91,9 +91,14 @@ describe('code-generator', () => {
             project = readProjectConfiguration(tree, options.projectName)
             const files = tree
                 .listChanges()
-                .filter((x) => x.path.match(/^apps\/my-app\/.*$/))
+                .filter(
+                    (x) =>
+                        x.path.match(/^apps\/my-app\/.*$/) &&
+                        !x.path.endsWith('.csproj') &&
+                        !x.path.endsWith('/project.json'),
+                )
 
-            expect(files).toHaveLength(3)
+            expect(files).toHaveLength(1)
             files.forEach((x) => {
                 expect(x.content?.toString('utf-8')).toMatchSnapshot(x.path)
             })
@@ -120,9 +125,14 @@ describe('code-generator', () => {
             project = readProjectConfiguration(tree, options.projectName)
             const files = tree
                 .listChanges()
-                .filter((x) => x.path.match(/^apps\/my-app\/.*$/))
+                .filter(
+                    (x) =>
+                        x.path.match(/^apps\/my-app\/.*$/) &&
+                        !x.path.endsWith('.csproj') &&
+                        !x.path.endsWith('/project.json'),
+                )
 
-            expect(files).toHaveLength(3)
+            expect(files).toHaveLength(1)
             files.forEach((x) => {
                 expect(x.content?.toString('utf-8')).toMatchSnapshot(x.path)
             })

@@ -36,7 +36,6 @@ export async function codeGenerator(
     if (!project || !features) {
         return
     }
-    console.log(project)
     const relativeFilePath = options.relativeFilePath
 
     const templateSpecificOptions: any = {}

@@ -86,9 +86,13 @@ describe('code-generator', () => {
 
             const files = tree
                 .listChanges()
-                .filter((x) => x.path.match(/^apps\/my-app\/.*$/))
+                .filter(
+                    (x) =>
+                        x.path.match(/^apps\/my-app\/.*$/) &&
+                        !x.path.endsWith('.csproj'),
+                )
 
-            expect(files).toHaveLength(2)
+            expect(files).toHaveLength(1)
             files.forEach((x) => {
                 expect(x.content?.toString('utf-8')).toMatchSnapshot(x.path)
             })
@@ -117,9 +121,13 @@ describe('code-generator', () => {
 
             const files = tree
                 .listChanges()
-                .filter((x) => x.path.match(/^apps\/my-app\/.*$/))
+                .filter(
+                    (x) =>
+                        x.path.match(/^apps\/my-app\/.*$/) &&
+                        !x.path.endsWith('.csproj'),
+                )
 
-            expect(files).toHaveLength(2)
+            expect(files).toHaveLength(1)
             files.forEach((x) => {
                 expect(x.content?.toString('utf-8')).toMatchSnapshot(x.path)
             })

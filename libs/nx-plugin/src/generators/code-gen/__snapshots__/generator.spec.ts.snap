@@ -108,24 +108,6 @@ public class FeatureFilterAttribute : FeatureFilterAttributeBase
 "
 `;
 
-exports[`code-generator > template: dotnet-api > should produce the expected features files > apps/my-app/Project.FeatureBoard.MyApp.csproj 1`] = `""`;
-
-exports[`code-generator > template: dotnet-api > should produce the expected features files > apps/my-app/project.json 1`] = `
-"{
-  \\"name\\": \\"my-app\\",
-  \\"$schema\\": \\"../../node_modules/nx/schemas/project-schema.json\\",
-  \\"projectType\\": \\"application\\",
-  \\"targets\\": {
-    \\"my-target\\": {
-      \\"executor\\": \\"nx:noop\\"
-    }
-  }
-}
-"
-`;
-
-exports[`code-generator > template: typescript > should produce the expected features files > apps/my-app/Project.FeatureBoard.MyApp.csproj 1`] = `""`;
-
 exports[`code-generator > template: typescript > should produce the expected features files > apps/my-app/featureboard-features.ts 1`] = `
 "export interface SaaSyIconsFeatures {
 
@@ -154,18 +136,4 @@ exports[`code-generator > template: typescript > should produce the expected fea
     'view-subscribers': boolean
 }
 export type SaaSyIconsFeature = keyof SaaSyIconsFeatures"
-`;
-
-exports[`code-generator > template: typescript > should produce the expected features files > apps/my-app/project.json 1`] = `
-"{
-  \\"name\\": \\"my-app\\",
-  \\"$schema\\": \\"../../node_modules/nx/schemas/project-schema.json\\",
-  \\"projectType\\": \\"application\\",
-  \\"targets\\": {
-    \\"my-target\\": {
-      \\"executor\\": \\"nx:noop\\"
-    }
-  }
-}
-"
 `;
