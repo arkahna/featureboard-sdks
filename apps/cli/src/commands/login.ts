@@ -30,7 +30,7 @@ export function loginCommand() {
             !!process.env['CI'],
         )
         .action(
-            actionRunner(async function codeGen(options) {
+            actionRunner(async function login(options) {
                 if (!options.nonInteractive) {
                     console.log(titleText)
                 }
@@ -46,7 +46,7 @@ export function loginCommand() {
                     })
                 })
 
-                server.listen(REDIRECT_PORT, async () => {
+                server.listen(REDIRECT_PORT, 'localhost', async () => {
                     if (options.nonInteractive) {
                         console.log(
                             `Please authenticate at: http://localhost:${REDIRECT_PORT}`,

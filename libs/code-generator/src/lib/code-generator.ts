@@ -1,18 +1,21 @@
 import path from 'node:path'
 import prompts from 'prompts'
-import type { FeatureBoardFeature } from './api/get-project-features'
+import type {
+    FeatureBoardFeature,
+    FeatureBoardProject,
+} from './api/get-project-features'
 import { getProjectFeatures } from './api/get-project-features'
 import { getProjects } from './api/get-projects'
-import type { FeatureBoardAuth } from './queryFeatureBoard'
 import {
     getDotNetNameSpace,
     toDotNetType,
     toPascalCase,
 } from './generators/dotnet-api/functions'
 import { generateFiles } from './generators/dotnet-api/generate-files'
+import type { FeatureBoardAuth } from './queryFeatureBoard'
 import type { Tree } from './tree/tree'
 
-export type Template = 'dotnet-api'
+export type Template = 'dotnet-api' | 'typescript'
 
 export interface CodeGeneratorOptions {
     template: Template
@@ -29,10 +32,11 @@ export interface CodeGeneratorOptions {
 export async function codeGenerator(
     options: CodeGeneratorOptions,
 ): Promise<void> {
-    const features = await getFeatures(options)
-    if (!features) {
+    const config = await getConfig(options)
+    if (!config) {
         return
     }
+    const [project, features] = config
     const relativeFilePath = options.relativeFilePath
 
     const templateSpecificOptions: any = {}
@@ -52,12 +56,13 @@ export async function codeGenerator(
             toPascalCase,
             toDotNetType,
             ...templateSpecificOptions,
+            project,
             features: features,
         },
     )
 }
 
-async function getFeatures({
+async function getConfig({
     featureBoardProjectName,
     auth,
     interactive,
@@ -67,7 +72,7 @@ async function getFeatures({
     auth: FeatureBoardAuth
     featureBoardProjectName?: string
     apiEndpoint?: string
-}): Promise<null | FeatureBoardFeature[]> {
+}): Promise<null | [FeatureBoardProject, FeatureBoardFeature[]]> {
     const projectResults = await getProjects(apiEndpoint, auth)
 
     let project = projectResults.projects.find(
@@ -75,6 +80,7 @@ async function getFeatures({
             x.name.toLowerCase() ===
             featureBoardProjectName?.toLocaleLowerCase(),
     )
+
     if (!project && interactive) {
         if (projectResults.projects.length === 1) {
             project = projectResults.projects[0]
@@ -105,5 +111,5 @@ async function getFeatures({
 
     const featuresResult = await getProjectFeatures(apiEndpoint, project, auth)
 
-    return featuresResult.features
+    return [project, featuresResult.features]
 }

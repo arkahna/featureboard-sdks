@@ -15,6 +15,10 @@
                     {
                         "value": "dotnet-api",
                         "label": "DotNet API"
+                    },
+                    {
+                        "value": "typescript",
+                        "label": "Typescript"
                     }
                 ]
             }

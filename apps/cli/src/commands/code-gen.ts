@@ -17,13 +17,13 @@ import { promptForOrganization } from '../lib/prompt-for-organization'
 import { titleText } from '../lib/title-text'
 
 // Code Gen
-const templateChoices: Template[] = ['dotnet-api']
+const templateChoices: Template[] = ['dotnet-api', 'typescript']
 
 export function codeGenCommand() {
     return new Command('code-gen')
         .description(`A Code generator for FeatureBoard`)
         .option('-o, --output <path>', 'Output path')
-        .option('-g, --organizationId <id>', 'The Orgnization Id')
+        .option('-g, --organizationId <id>', 'The Organization Id')
         .addOption(
             new Option(
                 '-t, --template <template>',

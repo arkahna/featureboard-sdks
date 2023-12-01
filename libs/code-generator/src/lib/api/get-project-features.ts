@@ -10,6 +10,10 @@ export async function getProjectFeatures(
     }>(apiEndpoint, `projects/${project.id}/features`, auth)
 }
 
+export interface FeatureBoardProject {
+    id: string
+    name: string
+}
 export interface FeatureBoardFeature {
     name: string
     created: string

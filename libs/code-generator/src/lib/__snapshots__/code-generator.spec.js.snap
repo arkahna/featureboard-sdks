@@ -108,4 +108,52 @@ public class FeatureFilterAttribute : FeatureFilterAttributeBase
 "
 `;
 
-exports[`code-generator > template: dotnet-api > should produce the expected features files > apps/my-app/Project.FeatureBoard.MyApp.csproj 1`] = `""`;
+exports[`code-generator > template: typescript > should produce the expected features files > apps/my-app/features.ts 1`] = `
+"import '@featureboard/js-sdk'
+
+export interface SaaSyIconsFeatures {
+
+    /**
+    * Requires attribution
+    * @description 
+    */
+    'requires-attribution': boolean
+
+    /**
+    * Allow edits
+    * @description Allows the user to edit colour, backgrounds
+    */
+    'allow-edits': boolean
+
+    /**
+    * Number custom collections
+    * @description 
+    */
+    'number-custom-collections': number
+
+    /**
+    * Team management
+    * @description 
+    */
+    'team-management': boolean
+
+    /**
+    * Custom collections
+    * @description 
+    */
+    'custom-collections': 'Disabled' | 'Enabled' | 'Shared'
+
+    /**
+    * View subscribers
+    * @description 
+    */
+    'view-subscribers': boolean
+}
+
+declare module '@featureboard/js-sdk' {
+    // eslint-disable-next-line @typescript-eslint/no-empty-interface
+    interface Features extends SaaSyIconsFeatures {}
+}
+
+export type SaaSyIconsFeature = keyof SaaSyIconsFeatures"
+`;
