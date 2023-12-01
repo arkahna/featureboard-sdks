@@ -111,29 +111,42 @@ public class FeatureFilterAttribute : FeatureFilterAttributeBase
 exports[`code-generator > template: typescript > should produce the expected features files > apps/my-app/featureboard-features.ts 1`] = `
 "export interface SaaSyIconsFeatures {
 
-    // Requires attribution
-    // 
+    /**
+    * Requires attribution
+    * @description 
+    */
     'requires-attribution': boolean
 
-    // Allow edits
-    // Allows the user to edit colour, backgrounds
+    /**
+    * Allow edits
+    * @description Allows the user to edit colour, backgrounds
+    */
     'allow-edits': boolean
 
-    // Number custom collections
-    // 
+    /**
+    * Number custom collections
+    * @description 
+    */
     'number-custom-collections': number
 
-    // Team management
-    // 
+    /**
+    * Team management
+    * @description 
+    */
     'team-management': boolean
 
-    // Custom collections
-    // 
+    /**
+    * Custom collections
+    * @description 
+    */
     'custom-collections': 'Disabled' | 'Enabled' | 'Shared'
 
-    // View subscribers
-    // 
+    /**
+    * View subscribers
+    * @description 
+    */
     'view-subscribers': boolean
 }
+
 export type SaaSyIconsFeature = keyof SaaSyIconsFeatures"
 `;

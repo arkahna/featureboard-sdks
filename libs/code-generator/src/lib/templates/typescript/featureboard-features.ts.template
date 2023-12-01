@@ -3,8 +3,11 @@ for(let i = 0; i < features.length; i++) {
     const feature = features[i]
 %>
 
-    // <%=feature.name %>
-    // <%=feature.description %><%
+    /**
+    * <%=feature.name %><%
+    if(feature.description) %>
+    * @description <%-feature.description %>
+    */<%
     if(feature.dataType.kind === 'options') {
 %>
     '<%= feature.key %>': '<%- feature.dataType.options.join("' | '") %>'<% 
@@ -13,4 +16,5 @@ for(let i = 0; i < features.length; i++) {
     }
 } %>
 }
+
 export type <%= project.name.replaceAll(' ', '') %>Feature = keyof <%= project.name.replaceAll(' ', '') %>Features

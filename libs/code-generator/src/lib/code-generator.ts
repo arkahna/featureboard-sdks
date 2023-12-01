@@ -32,10 +32,11 @@ export interface CodeGeneratorOptions {
 export async function codeGenerator(
     options: CodeGeneratorOptions,
 ): Promise<void> {
-    const [project, features] = await getFeatures(options)
-    if (!project || !features) {
+    const config = await getConfig(options)
+    if (!config) {
         return
     }
+    const [project, features] = config
     const relativeFilePath = options.relativeFilePath
 
     const templateSpecificOptions: any = {}
@@ -61,7 +62,7 @@ export async function codeGenerator(
     )
 }
 
-async function getFeatures({
+async function getConfig({
     featureBoardProjectName,
     auth,
     interactive,
@@ -71,7 +72,7 @@ async function getFeatures({
     auth: FeatureBoardAuth
     featureBoardProjectName?: string
     apiEndpoint?: string
-}): Promise<[null | FeatureBoardProject, null | FeatureBoardFeature[]]> {
+}): Promise<null | [FeatureBoardProject, FeatureBoardFeature[]]> {
     const projectResults = await getProjects(apiEndpoint, auth)
 
     let project = projectResults.projects.find(
@@ -100,7 +101,7 @@ async function getFeatures({
             })
 
             if (!promptResult) {
-                return [null, null]
+                return null
             }
 
             project = promptResult.project
