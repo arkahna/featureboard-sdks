@@ -1,4 +1,4 @@
-export interface FeatureBoardFeatures {<%
+export interface <%= project.name.replaceAll(' ', '') %>Features {<%
 for(let i = 0; i < features.length; i++) {
     const feature = features[i]
 %>
@@ -13,4 +13,4 @@ for(let i = 0; i < features.length; i++) {
     }
 } %>
 }
-export type FeatureboardFeature = keyof FeatureBoardFeatures
+export type <%= project.name.replaceAll(' ', '') %>Feature = keyof <%= project.name.replaceAll(' ', '') %>Features

@@ -1,6 +1,9 @@
 import path from 'node:path'
 import prompts from 'prompts'
-import type { FeatureBoardFeature } from './api/get-project-features'
+import type {
+    FeatureBoardFeature,
+    FeatureBoardProject,
+} from './api/get-project-features'
 import { getProjectFeatures } from './api/get-project-features'
 import { getProjects } from './api/get-projects'
 import {
@@ -29,10 +32,11 @@ export interface CodeGeneratorOptions {
 export async function codeGenerator(
     options: CodeGeneratorOptions,
 ): Promise<void> {
-    const features = await getFeatures(options)
-    if (!features) {
+    const [project, features] = await getFeatures(options)
+    if (!project || !features) {
         return
     }
+    console.log(project)
     const relativeFilePath = options.relativeFilePath
 
     const templateSpecificOptions: any = {}
@@ -52,6 +56,7 @@ export async function codeGenerator(
             toPascalCase,
             toDotNetType,
             ...templateSpecificOptions,
+            project,
             features: features,
         },
     )
@@ -67,7 +72,7 @@ async function getFeatures({
     auth: FeatureBoardAuth
     featureBoardProjectName?: string
     apiEndpoint?: string
-}): Promise<null | FeatureBoardFeature[]> {
+}): Promise<[null | FeatureBoardProject, null | FeatureBoardFeature[]]> {
     const projectResults = await getProjects(apiEndpoint, auth)
 
     let project = projectResults.projects.find(
@@ -96,7 +101,7 @@ async function getFeatures({
             })
 
             if (!promptResult) {
-                return null
+                return [null, null]
             }
 
             project = promptResult.project
@@ -106,5 +111,5 @@ async function getFeatures({
 
     const featuresResult = await getProjectFeatures(apiEndpoint, project, auth)
 
-    return featuresResult.features
+    return [project, featuresResult.features]
 }
