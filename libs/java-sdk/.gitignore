@@ -110,4 +110,10 @@ fabric.properties
 # Android studio 3.1+ serialized cache file
 .idea/caches/build_file_checksums.ser
 
+# Extra entries as more general rules were proving sticky
 target/
+/.idea/modules.xml
+/java-springboot-example.iml
+/.idea/modules/FeatureBoard.JavaSDK.test.iml
+/.idea/modules/lib/FeatureBoard.JavaSDK.lib.iml
+/.idea/modules/FeatureBoard.JavaSDK.main.iml
