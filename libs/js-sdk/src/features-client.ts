@@ -3,6 +3,7 @@ import type { FeatureBoardEffectiveStateJS } from './js-state'
 
 export interface FeatureBoardClient {
     getFeatureValue<T extends keyof Features>(
+        this: void,
         featureKey: T,
         defaultValue: Features[T],
     ): Features[T]
@@ -13,10 +14,11 @@ export interface FeatureBoardClient {
      * @returns unsubscribe function
      */
     subscribeToFeatureValue<T extends keyof Features>(
+        this: void,
         featureKey: keyof Features,
         defaultValue: Features[T],
         onValue: (value: Features[T]) => void,
     ): () => void
 
-    getEffectiveValues(): FeatureBoardEffectiveStateJS
+    getEffectiveValues(this: void): FeatureBoardEffectiveStateJS
 }

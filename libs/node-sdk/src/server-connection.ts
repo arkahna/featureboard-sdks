@@ -11,6 +11,7 @@ export interface ServerClient {
      * immediately call back with the current value and will not subscribe to the feature in the state store.
      **/
     request(
+        this: void,
         audiences: string[],
     ): FeatureBoardClient & PromiseLike<FeatureBoardClient>
 
@@ -22,10 +23,10 @@ export interface ServerClient {
      *
      * @throws {Error} If the initialisation process fails an error is thrown
      */
-    waitForInitialised(): Promise<boolean>
+    waitForInitialised(this: void): Promise<boolean>
 
     /** Manually triggers an update to the feature state */
-    updateFeatures(): PromiseLike<void>
+    updateFeatures(this: void): PromiseLike<void>
 
-    close(): void
+    close(this: void): void
 }

@@ -11,7 +11,7 @@ export interface BrowserClient {
      *
      * @throws {Error} If the initialisation process fails an error is thrown
      */
-    waitForInitialised(): Promise<boolean>
+    waitForInitialised(this: void): Promise<boolean>
 
     /** Subscribe to initialised changes, will call back with initialised boolean value
      * Recommended to be used in conjunction with updateAudiences()
@@ -19,15 +19,16 @@ export interface BrowserClient {
      * @returns unsubscribe function
      */
     subscribeToInitialisedChanged(
+        this: void,
         callback: (initialised: boolean) => void,
     ): () => void
 
     /** Will set initialised to false until the new audiences are loaded */
-    updateAudiences(audiences: string[]): PromiseLike<void>
+    updateAudiences(this: void, audiences: string[]): PromiseLike<void>
 
     /** Manually triggers an update to the feature state */
-    updateFeatures(): PromiseLike<void>
+    updateFeatures(this: void): PromiseLike<void>
 
     /** Closes subscription to the FeatureBoard service */
-    close: () => void
+    close: (this: void) => void
 }
