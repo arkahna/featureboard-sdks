@@ -30,16 +30,13 @@
         "cli-prod": "nx build cli --mode development && node apps/cli/dist/main.js"
     },
     "private": true,
-    "dependencies": {
-        "@swc/helpers": "0.5.3",
-        "axios": "^1.5.1",
-        "tslib": "^2.6.2"
-    },
+    "dependencies": {},
     "devDependencies": {
+        "@swc/helpers": "0.5.3",
+        "tslib": "^2.6.2",
         "@changesets/changelog-github": "^0.4.8",
         "@changesets/cli": "^2.26.2",
         "@commander-js/extra-typings": "^11.1.0",
-        "@nrwl/js": "17.0.2",
         "@nx-dotnet/core": "2.1.0",
         "@nx/devkit": "17.0.2",
         "@nx/esbuild": "17.0.2",
