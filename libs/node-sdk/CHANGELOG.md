@@ -1,5 +1,16 @@
 # @featureboard/node-sdk
 
+## 0.18.0
+
+### Minor Changes
+
+- 9384c41: [TypeScript] Annotated SDK functions with 'this: void' to indicate the methods can be destructured without needing to be bound
+
+### Patch Changes
+
+- Updated dependencies [9384c41]
+  - @featureboard/js-sdk@0.16.0
+
 ## 0.17.3
 
 ### Patch Changes

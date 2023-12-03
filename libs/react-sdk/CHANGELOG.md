@@ -1,5 +1,12 @@
 # @featureboard/react-sdk
 
+## 0.11.3
+
+### Patch Changes
+
+- Updated dependencies [9384c41]
+  - @featureboard/js-sdk@0.16.0
+
 ## 0.11.2
 
 ### Patch Changes
