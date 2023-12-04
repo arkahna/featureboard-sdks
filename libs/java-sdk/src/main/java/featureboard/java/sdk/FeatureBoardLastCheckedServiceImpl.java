@@ -41,7 +41,7 @@ public class FeatureBoardLastCheckedServiceImpl implements FeatureBoardService {
     boolean maxAgeHasExpired = OffsetDateTime.now().isAfter(beforeLastChecked.plus(configuration.getMaxAge()));
 
     if (!maxAgeHasExpired) {
-      logger.info("Feature Configuration has not reached {}, skipping refresh", configuration.getMaxAge());
+      logger.info("Feature Configuration has not reached {} seconds, skipping refresh", configuration.getMaxAge());
       return CompletableFuture.completedFuture(false);
     }
 
