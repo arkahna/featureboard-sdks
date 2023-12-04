@@ -1,21 +1,20 @@
 package featureboard.java.sdk;
 
-import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.JsonNode;
 import featureboard.java.sdk.interfaces.AudienceProvider;
 import featureboard.java.sdk.interfaces.FeatureBoardClient;
 import featureboard.java.sdk.interfaces.FeatureBoardState;
 import featureboard.java.sdk.models.AudienceExceptionValue;
 import featureboard.java.sdk.state.FeatureBoardStateSnapshot;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
-import java.util.logging.Logger;
 
-// TODO: ensure the state is fixed for the lifecycle of the request
 @Service
 public class FeatureBoardClientImpl implements FeatureBoardClient {
 
@@ -25,7 +24,7 @@ public class FeatureBoardClientImpl implements FeatureBoardClient {
   private FeatureBoardStateSnapshot _snapshotState;
   @Autowired
   private final AudienceProvider _audienceProvider;
-  private final Logger _logger = Logger.getLogger(FeatureBoardClientImpl.class.getName());
+  private final Logger logger = LoggerFactory.getLogger(FeatureBoardClientImpl.class.getName());
 
   public FeatureBoardClientImpl(FeatureBoardState globalState, AudienceProvider audienceProvider) {
     this.globalState = globalState;
@@ -82,7 +81,7 @@ public class FeatureBoardClientImpl implements FeatureBoardClient {
 
     var feature = _snapshotState.Get(featureKey);
     if (feature == null) {
-      _logger.fine("GetFeatureValue - no value for " + featureKey + " returning user fallback.");
+      logger.info("GetFeatureValue - no value for {} returning user fallback.", featureKey);
       return null;
     }
 
@@ -98,7 +97,8 @@ public class FeatureBoardClientImpl implements FeatureBoardClient {
 
     JsonNode value = (audienceException != null) ? audienceException.value() : feature.defaultValue();
 
-    _logger.fine(String.format("GetFeatureConfigurationValue: {audienceExceptionValue: %s, defaultValue: %s, value: %s}", (audienceException != null) ? audienceException.value() : "null", feature.defaultValue(), value));
+    logger.info(String.format("GetFeatureConfigurationValue: {audienceExceptionValue: %s, defaultValue: %s, value: %s}",
+      (audienceException != null) ? audienceException.value() : "null", feature.defaultValue(), value));
     return value;
   }
 }

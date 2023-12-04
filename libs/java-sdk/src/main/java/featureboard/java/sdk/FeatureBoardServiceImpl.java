@@ -7,12 +7,13 @@ import org.springframework.stereotype.Service;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Semaphore;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class FeatureBoardServiceImpl implements FeatureBoardService {
 
-  private static final Logger logger = Logger.getLogger(FeatureBoardServiceImpl.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(FeatureBoardServiceImpl.class.getName());
 
   private final FeatureBoardHttpClient featureBoardHttpClient;
 
@@ -29,17 +30,14 @@ public class FeatureBoardServiceImpl implements FeatureBoardService {
   public CompletableFuture<Boolean> refreshFeatureConfiguration() {
     // Check if we can acquire the semaphore immediately
     if (!semaphore.tryAcquire()) {
-      // If not, just abort with null because another request must be in process of refreshing state
-      logger.fine("Cannot acquire semaphore - another request must be in process of refreshing state.");
+      logger.info("Cannot acquire semaphore - another request must be in process of refreshing state.");
       return CompletableFuture.completedFuture(null);
     }
 
     try {
       return featureBoardHttpClient.refreshFeatureConfiguration();
     } catch (Exception e) {
-      // TODO: fix this logging
-      logger.severe("Unable to refresh configuration.");
-      logger.severe(e.getMessage());
+      logger.error("Unable to refresh configuration: {}", e.getMessage());
       return CompletableFuture.completedFuture(null); // Or handle the exception accordingly
     } finally {
       semaphore.release();

@@ -11,8 +11,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Refresh the configuration state by a fixed delay (e.g. every 60 seconds).
@@ -29,7 +29,7 @@ public class PollingUpdateStrategyBackgroundService {
   private final FeatureBoardState featureBoardState;
   @Autowired
   private final FeatureBoardClient featureBoardClient;
-  private static final Logger logger = Logger.getLogger(PollingUpdateStrategyBackgroundService.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(PollingUpdateStrategyBackgroundService.class.getName());
 
   public PollingUpdateStrategyBackgroundService(FeatureBoardServiceImpl featureBoardService, FeatureBoardState featureBoardState,
                                                 FeatureBoardClient featureBoardClient) {
@@ -54,7 +54,7 @@ public class PollingUpdateStrategyBackgroundService {
       // 2. For the base client set a snapshot - this snapshot should live for the period between polling
       featureBoardClient.setSnapshot(featureBoardState.GetSnapshot());
     } catch (Exception e) {
-      logger.log(Level.SEVERE, "Error occurred during polling.", e);
+      logger.error("Error occurred during polling.", e);
     }
   }
 }

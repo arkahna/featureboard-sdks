@@ -3,13 +3,14 @@ package featureboard.java.sdk;
 import featureboard.java.sdk.interfaces.FeatureBoardService;
 import featureboard.java.sdk.config.FeatureBoardConfiguration;
 import featureboard.java.sdk.state.LastCheckedTimeProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.logging.Logger;
 
 /**
  * Refreshes the configuration if the configuration state is currently older than maxAge.
@@ -23,7 +24,7 @@ public class FeatureBoardLastCheckedServiceImpl implements FeatureBoardService {
   private final FeatureBoardServiceImpl featureBoardServiceImpl;
   @Autowired
   private final FeatureBoardConfiguration configuration;
-  private final Logger logger = Logger.getLogger(FeatureBoardLastCheckedServiceImpl.class.getName());
+  private final Logger logger = LoggerFactory.getLogger(FeatureBoardLastCheckedServiceImpl.class.getName());
   @Autowired
   private final LastCheckedTimeProvider lastCheckedTimeProvider;
 
@@ -40,7 +41,7 @@ public class FeatureBoardLastCheckedServiceImpl implements FeatureBoardService {
     boolean maxAgeHasExpired = OffsetDateTime.now().isAfter(beforeLastChecked.plus(configuration.getMaxAge()));
 
     if (!maxAgeHasExpired) {
-      logger.info(String.format("Feature Configuration has not reached %s, skipping refresh", configuration.getMaxAge()));
+      logger.info("Feature Configuration has not reached {}, skipping refresh", configuration.getMaxAge());
       return CompletableFuture.completedFuture(false);
     }
 
