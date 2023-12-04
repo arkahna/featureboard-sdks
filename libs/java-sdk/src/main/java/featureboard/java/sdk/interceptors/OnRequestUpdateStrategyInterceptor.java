@@ -1,6 +1,5 @@
 package featureboard.java.sdk.interceptors;
 
-
 import featureboard.java.sdk.FeatureBoardLastCheckedServiceImpl;
 import featureboard.java.sdk.FeatureBoardServiceImpl;
 import featureboard.java.sdk.interfaces.FeatureBoardClient;
@@ -51,7 +50,7 @@ public class OnRequestUpdateStrategyInterceptor implements HandlerInterceptor , 
    * @return
    */
   @Override
-  public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+  public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
     try {
       logger.info("HTTP Interceptor preHandle refreshing Feature Configuration state.");
       // 1. Refresh and set state based on when we last checked it
@@ -59,8 +58,8 @@ public class OnRequestUpdateStrategyInterceptor implements HandlerInterceptor , 
 
       // 2. For the base client set a snapshot
       featureBoardClient.setSnapshot(featureBoardState.GetSnapshot());
-    } catch (Exception ex) {
-      logger.error("Error refreshing Feature Configuration state.", ex);
+    } catch (Exception e) {
+      logger.error("Error refreshing Feature Configuration state.", e);
     }
     return true;
   }
@@ -69,7 +68,7 @@ public class OnRequestUpdateStrategyInterceptor implements HandlerInterceptor , 
    * The intent here is this is executed "on startup" of any container (e.g. Spring Boot)
    */
   @Override
-  public void afterPropertiesSet() throws Exception {
+  public void afterPropertiesSet() {
     logger.info("Refreshing Feature Configuration state on Startup.");
 
     try {
@@ -79,7 +78,7 @@ public class OnRequestUpdateStrategyInterceptor implements HandlerInterceptor , 
       // 2. For the base client set a snapshot - this snapshot should live for the period between polling
       featureBoardClient.setSnapshot(featureBoardState.GetSnapshot());
     } catch (Exception e) {
-      logger.error("Error occurred during polling.",e);
+      logger.error("Error occurred during polling.", e);
     }
   }
 }
