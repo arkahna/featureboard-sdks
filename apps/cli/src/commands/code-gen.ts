@@ -35,7 +35,7 @@ export function codeGenCommand() {
             'FeatureBoard API key',
             process.env.FEATUREBOARD_API_KEY,
         )
-        .option('-p, --project <name>', 'FeatureBoard project name')
+        .option('-p, --product <name>', 'FeatureBoard product name')
         .option('-d, --dryRun', 'Dry run show what files have changed', false)
         .option('-q, --quiet', "Don't show file changes", false)
         .option(
@@ -132,7 +132,7 @@ export function codeGenCommand() {
                     template: options.template as Template,
                     tree: tree,
                     relativeFilePath: options.output!,
-                    featureBoardProjectName: options.project,
+                    featureBoardProductName: options.product,
                     auth: bearerToken
                         ? {
                               featureBoardBearerToken: bearerToken,
