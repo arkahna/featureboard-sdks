@@ -21,7 +21,7 @@ export interface CodeGeneratorOptions {
     template: Template
     auth: FeatureBoardAuth
     apiEndpoint?: string
-    featureBoardProjectName?: string
+    featureBoardProductName?: string
 
     interactive: boolean
 
@@ -63,14 +63,14 @@ export async function codeGenerator(
 }
 
 async function getConfig({
-    featureBoardProjectName,
+    featureBoardProductName,
     auth,
     interactive,
     apiEndpoint = 'https://api.featureboard.app',
 }: {
     interactive: boolean
     auth: FeatureBoardAuth
-    featureBoardProjectName?: string
+    featureBoardProductName?: string
     apiEndpoint?: string
 }): Promise<null | [FeatureBoardProject, FeatureBoardFeature[]]> {
     const projectResults = await getProjects(apiEndpoint, auth)
@@ -78,7 +78,7 @@ async function getConfig({
     let project = projectResults.projects.find(
         (x: any) =>
             x.name.toLowerCase() ===
-            featureBoardProjectName?.toLocaleLowerCase(),
+            featureBoardProductName?.toLocaleLowerCase(),
     )
 
     if (!project && interactive) {
