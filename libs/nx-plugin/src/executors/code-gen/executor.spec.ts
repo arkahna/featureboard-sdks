@@ -55,7 +55,7 @@ describe('code-Executor', () => {
             projectName: 'my-app',
             subFolder: './',
             template: 'dotnet-api',
-            featureBoardProjectName: 'SaaSy Icons',
+            featureBoardProductName: 'SaaSy Icons',
             featureBoardApiKey: 'This is totally a key',
         }
 
