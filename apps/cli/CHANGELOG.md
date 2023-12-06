@@ -1,5 +1,11 @@
 # @featureboard/cli
 
+## 0.3.2
+
+### Patch Changes
+
+- cdc1490: Change the display name of project to product
+
 ## 0.3.1
 
 ### Patch Changes

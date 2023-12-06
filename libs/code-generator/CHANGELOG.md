@@ -1,5 +1,11 @@
 # @featureboard/code-generator
 
+## 0.3.1
+
+### Patch Changes
+
+- cdc1490: Change the display name of project to product
+
 ## 0.3.0
 
 ### Minor Changes

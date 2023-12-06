@@ -1,5 +1,13 @@
 # @featureboard/nx-plugin
 
+## 0.3.3
+
+### Patch Changes
+
+- cdc1490: Change the display name of project to product
+- Updated dependencies [cdc1490]
+  - @featureboard/code-generator@0.3.1
+
 ## 0.3.2
 
 ### Patch Changes
