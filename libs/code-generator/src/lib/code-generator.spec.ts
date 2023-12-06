@@ -59,7 +59,7 @@ describe('code-generator', () => {
             subFolder: subFolder,
             template: 'dotnet-api',
             interactive: false,
-            featureBoardProjectName: 'SaaSy Icons',
+            featureBoardProductName: 'SaaSy Icons',
             auth: { featureBoardApiKey: 'This is totally a key' },
         }
     })
