@@ -1,14 +1,16 @@
 import type { EffectiveFeatureValue } from '@featureboard/contracts'
+import { SpanStatusCode, trace } from '@opentelemetry/api'
 import { PromiseCompletionSource } from 'promise-completion-source'
 import type { BrowserClient } from './client-connection'
 import { createClientInternal } from './create-client'
 import { EffectiveFeatureStateStore } from './effective-feature-state-store'
 import type { FeatureBoardApiConfig } from './featureboard-api-config'
 import { featureBoardHostedService } from './featureboard-service-urls'
-import { debugLog } from './log'
 import { resolveUpdateStrategy } from './update-strategies/resolveUpdateStrategy'
 import type { UpdateStrategies } from './update-strategies/update-strategies'
 import { compareArrays } from './utils/compare-arrays'
+import { getTracer } from './utils/get-tracer'
+import { resolveError } from './utils/resolve-error'
 import { retry } from './utils/retry'
 
 /**
@@ -41,6 +43,8 @@ export function createBrowserClient({
 
     environmentApiKey: string
 }): BrowserClient {
+    const tracer = getTracer()
+
     const initialPromise = new PromiseCompletionSource<boolean>()
     const initialisedState: {
         initialisedCallbacks: Array<(initialised: boolean) => void>
@@ -74,41 +78,55 @@ export function createBrowserClient({
     )
 
     const retryCancellationToken = { cancel: false }
-    retry(async () => {
-        debugLog('SDK connecting in background (%o)', {
-            audiences,
-        })
-        return await updateStrategyImplementation.connect(stateStore)
-    }, retryCancellationToken)
-        .then(() => {
-            if (initialPromise !== initialisedState.initialisedPromise) {
-                return
-            }
-
-            if (!initialPromise.completed) {
-                debugLog('SDK connected (%o)', {
-                    audiences,
-                })
-                initialPromise.resolve(true)
-            }
-        })
-        .catch((err) => {
-            if (!initialisedState.initialisedPromise.completed) {
-                debugLog(
-                    'SDK failed to connect (%o): %o',
+    tracer.startActiveSpan(
+        'connect-with-retry',
+        {
+            attributes: { audiences },
+            // This is asynchronous so we don't want it nested in the current span
+            root: true,
+        },
+        (span) =>
+            retry(async () => {
+                return await tracer.startActiveSpan(
+                    'connect',
                     {
-                        audiences,
+                        attributes: {
+                            audiences,
+                            updateStrategy: updateStrategyImplementation.name,
+                        },
                     },
-                    err,
+                    (operationSpan) =>
+                        updateStrategyImplementation
+                            .connect(stateStore)
+                            .finally(() => operationSpan.end()),
                 )
-                console.error(
-                    'FeatureBoard SDK failed to connect after 5 retries',
-                    err,
-                )
-                initialisedState.initialisedError = err
-                initialisedState.initialisedPromise.resolve(true)
-            }
-        })
+            }, retryCancellationToken)
+                .then(() => {
+                    if (
+                        initialPromise !== initialisedState.initialisedPromise
+                    ) {
+                        return
+                    }
+
+                    if (!initialPromise.completed) {
+                        span.end()
+                        initialPromise.resolve(true)
+                    }
+                })
+                .catch((err) => {
+                    if (!initialisedState.initialisedPromise.completed) {
+                        span.setStatus({ code: SpanStatusCode.ERROR })
+                        span.end()
+                        console.error(
+                            'FeatureBoard SDK failed to connect after 5 retries',
+                            err,
+                        )
+                        initialisedState.initialisedError = err
+                        initialisedState.initialisedPromise.resolve(true)
+                    }
+                }),
+    )
+
     const isInitialised = () => {
         return initialisedState.initialisedPromise.completed
     }
@@ -132,10 +150,6 @@ export function createBrowserClient({
             })
         },
         subscribeToInitialisedChanged(callback) {
-            debugLog('Subscribing to initialised changed: %o', {
-                initialised: isInitialised(),
-            })
-
             initialisedState.initialisedCallbacks.push(callback)
             return () => {
                 initialisedState.initialisedCallbacks.splice(
@@ -145,66 +159,83 @@ export function createBrowserClient({
             }
         },
         async updateAudiences(updatedAudiences: string[]) {
-            if (compareArrays(stateStore.audiences, updatedAudiences)) {
-                debugLog('Skipped updating audiences, no change: %o', {
-                    updatedAudiences,
-                    currentAudiences: stateStore.audiences,
-                    initialised: isInitialised(),
-                })
-                // No need to update audiences
-                return Promise.resolve()
-            }
+            await tracer.startActiveSpan(
+                'connect',
+                {
+                    attributes: {
+                        audiences,
+                        updateStrategy: updateStrategyImplementation.name,
+                    },
+                },
+                (updateAudiencesSpan) => {
+                    if (compareArrays(stateStore.audiences, updatedAudiences)) {
+                        trace
+                            .getActiveSpan()
+                            ?.addEvent('Skipped update audiences', {
+                                updatedAudiences,
+                                currentAudiences: stateStore.audiences,
+                                initialised: isInitialised(),
+                            })
+                        updateAudiencesSpan.end()
 
-            debugLog('Updating audiences: %o', {
-                updatedAudiences,
-                currentAudiences: stateStore.audiences,
-                initialised: isInitialised(),
-            })
+                        // No need to update audiences
+                        return Promise.resolve()
+                    }
 
-            // Close connection and cancel retry
-            updateStrategyImplementation.close()
-            retryCancellationToken.cancel = true
+                    // Close connection and cancel retry
+                    updateStrategyImplementation.close()
+                    retryCancellationToken.cancel = true
 
-            const newPromise = new PromiseCompletionSource<boolean>()
-            initialisedState.initialisedPromise = newPromise
-            initialisedState.initialisedError = undefined
-            initialisedState.initialisedPromise.promise.catch(() => {})
-            initialisedState.initialisedPromise.promise.then(() => {
-                // If the promise has changed, then we don't want to invoke the callback
-                if (newPromise !== initialisedState.initialisedPromise) {
-                    return
-                }
+                    const newPromise = new PromiseCompletionSource<boolean>()
+                    initialisedState.initialisedPromise = newPromise
+                    initialisedState.initialisedError = undefined
+                    initialisedState.initialisedPromise.promise.catch(() => {})
+                    initialisedState.initialisedPromise.promise.then(() => {
+                        // If the promise has changed, then we don't want to invoke the callback
+                        if (
+                            newPromise !== initialisedState.initialisedPromise
+                        ) {
+                            return
+                        }
 
-                // Get the value from the function, just incase it has changed
-                const initialised = isInitialised()
-                initialisedState.initialisedCallbacks.forEach((c) =>
-                    c(initialised),
-                )
-            })
-            debugLog('updateAudiences: invoke initialised callback with false')
-            initialisedState.initialisedCallbacks.forEach((c) => c(false))
-
-            stateStore.audiences = updatedAudiences
-            debugLog(
-                'updateAudiences: Audiences updated (%o), getting new effective values',
-                updatedAudiences,
-            )
-
-            updateStrategyImplementation
-                .connect(stateStore)
-                .then(() => {
-                    newPromise?.resolve(true)
-                    debugLog('Audiences updated: %o', {
-                        updatedAudiences,
-                        currentAudiences: stateStore.audiences,
-                        initialised: isInitialised(),
+                        // Get the value from the function, just incase it has changed
+                        const initialised = isInitialised()
+                        initialisedState.initialisedCallbacks.forEach((c) =>
+                            c(initialised),
+                        )
                     })
-                })
-                .catch((error) => {
-                    console.error('Failed to connect to SDK', error)
-                    initialisedState.initialisedError = error
-                    newPromise?.resolve(true)
-                })
+
+                    initialisedState.initialisedCallbacks.forEach((c) =>
+                        c(false),
+                    )
+
+                    stateStore.audiences = updatedAudiences
+
+                    updateStrategyImplementation
+                        .connect(stateStore)
+                        .then(() => {
+                            newPromise?.resolve(true)
+                            trace
+                                .getActiveSpan()
+                                ?.addEvent('Updated audiences', {
+                                    updatedAudiences,
+                                    currentAudiences: stateStore.audiences,
+                                    initialised: isInitialised(),
+                                })
+                        })
+                        .catch((error) => {
+                            const err = resolveError(error)
+                            updateAudiencesSpan.recordException(err)
+                            updateAudiencesSpan.setStatus({
+                                code: SpanStatusCode.ERROR,
+                                message: 'Failed to update audiences',
+                            })
+                            initialisedState.initialisedError = error
+                            newPromise?.resolve(true)
+                        })
+                        .finally(() => updateAudiencesSpan.end())
+                },
+            )
         },
         updateFeatures() {
             return updateStrategyImplementation.updateFeatures()

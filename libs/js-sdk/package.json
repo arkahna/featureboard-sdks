@@ -33,6 +33,8 @@
     },
     "dependencies": {
         "@featureboard/contracts": "workspace:*",
+        "@opentelemetry/api": "^1.0.0",
+        "@opentelemetry/sdk-trace-base": "^1.18.1",
         "debug": "^4.3.4",
         "promise-completion-source": "^1.0.0"
     }

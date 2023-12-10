@@ -1,9 +1,7 @@
 import type { EffectiveFeatureValue } from '@featureboard/contracts'
-import { debugLog } from './log'
+import { trace } from '@opentelemetry/api'
 
 export type FeatureValue = EffectiveFeatureValue['value'] | undefined
-
-const stateStoreDebug = debugLog.extend('state-store')
 
 export class EffectiveFeatureStateStore {
     private _audiences: string[] = []
@@ -57,7 +55,9 @@ export class EffectiveFeatureStateStore {
     }
 
     set(featureKey: string, value: FeatureValue) {
-        stateStoreDebug("set '%s': %o", featureKey, value)
+        const activeSpan = trace.getActiveSpan()
+        activeSpan?.addEvent('Set', { featureKey, value })
+
         this._store[featureKey] = value
 
         this.valueUpdatedCallbacks.forEach((valueUpdated) =>
@@ -67,7 +67,8 @@ export class EffectiveFeatureStateStore {
 
     get(featureKey: string): FeatureValue {
         const value = this._store[featureKey]
-        stateStoreDebug("get '%s': %o", featureKey, value)
+        const activeSpan = trace.getActiveSpan()
+        activeSpan?.addEvent('Get', { featureKey, value })
         return value
     }
 }

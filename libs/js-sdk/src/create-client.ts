@@ -1,7 +1,7 @@
 import type { EffectiveFeatureValue } from '@featureboard/contracts'
+import { trace } from '@opentelemetry/api'
 import type { EffectiveFeatureStateStore } from './effective-feature-state-store'
 import type { FeatureBoardClient } from './features-client'
-import { debugLog } from './log'
 
 /** Designed for internal SDK use */
 export function createClientInternal(
@@ -10,6 +10,8 @@ export function createClientInternal(
     return {
         getEffectiveValues() {
             const all = stateStore.all()
+            trace.getActiveSpan()?.addEvent('getEffectiveValues', {})
+
             return {
                 audiences: [...stateStore.audiences],
                 effectiveValues: Object.keys(all)
@@ -22,7 +24,7 @@ export function createClientInternal(
         },
         getFeatureValue: (featureKey, defaultValue) => {
             const value = stateStore.get(featureKey as string)
-            debugLog('getFeatureValue: %o', {
+            trace.getActiveSpan()?.addEvent('getFeatureValue', {
                 featureKey,
                 value,
                 defaultValue,
@@ -35,19 +37,20 @@ export function createClientInternal(
             defaultValue: any,
             onValue: (value: any) => void,
         ) {
-            debugLog('subscribeToFeatureValue: %s', featureKey)
+            trace.getActiveSpan()?.addEvent('subscribeToFeatureValue', {
+                featureKey,
+                defaultValue,
+            })
 
             const callback = (updatedFeatureKey: string, value: any): void => {
                 if (featureKey === updatedFeatureKey) {
-                    debugLog(
-                        'subscribeToFeatureValue: %s update: %o',
-                        featureKey,
-                        {
+                    trace
+                        .getActiveSpan()
+                        ?.addEvent('subscribeToFeatureValue:update', {
                             featureKey,
                             value,
                             defaultValue,
-                        },
-                    )
+                        })
                     onValue(value ?? defaultValue)
                 }
             }
@@ -56,7 +59,9 @@ export function createClientInternal(
             onValue(stateStore.get(featureKey) ?? defaultValue)
 
             return () => {
-                debugLog('unsubscribeToFeatureValue: %s', featureKey)
+                trace.getActiveSpan()?.addEvent('unsubscribeToFeatureValue', {
+                    featureKey,
+                })
                 stateStore.off('feature-updated', callback)
             }
         },

@@ -3,18 +3,10 @@
     "compilerOptions": {
         "outDir": "./tsc-out",
         "rootDir": "./src",
-        "lib": [
-            "ES2020",
-            "DOM"
-        ],
-        "types": [
-            "node",
-        ],
+        "lib": ["ES2022", "DOM"],
+        "types": ["node"]
     },
-    "include": [
-        "src/**/*.ts",
-        "src/**/*.tsx"
-    ],
+    "include": ["src/**/*.ts", "src/**/*.tsx"],
     "references": [
         {
             "path": "../contracts"

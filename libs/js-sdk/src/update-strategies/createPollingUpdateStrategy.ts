@@ -1,10 +1,9 @@
 import { createEnsureSingle } from '../ensure-single'
 import { fetchFeaturesConfigurationViaHttp } from '../utils/fetchFeaturesConfiguration'
+import { getTracer } from '../utils/get-tracer'
 import { pollingUpdates } from '../utils/pollingUpdates'
+import { resolveError } from '../utils/resolve-error'
 import type { EffectiveConfigUpdateStrategy } from './update-strategies'
-import { updatesLog } from './updates-log'
-
-export const pollingUpdatesDebugLog = updatesLog.extend('polling')
 
 export function createPollingUpdateStrategy(
     environmentApiKey: string,
@@ -16,6 +15,7 @@ export function createPollingUpdateStrategy(
     let fetchUpdatesSingle: undefined | (() => Promise<void>)
 
     return {
+        name: 'polling',
         async connect(stateStore) {
             // Force update
             etag = undefined
@@ -36,11 +36,20 @@ export function createPollingUpdateStrategy(
                 stopPolling()
             }
             stopPolling = pollingUpdates(() => {
-                if (fetchUpdatesSingle) {
-                    pollingUpdatesDebugLog('Polling for updates (%o)', etag)
-                    // Catch errors here to ensure no unhandled promise rejections after a poll
-                    return fetchUpdatesSingle().catch(() => {})
-                }
+                getTracer().startActiveSpan(
+                    'Polling update',
+                    { attributes: { etag }, root: true },
+                    async (span) => {
+                        // Catch errors here to ensure no unhandled promise rejections after a poll
+                        if (fetchUpdatesSingle) {
+                            await fetchUpdatesSingle()
+                                .catch((err) => {
+                                    span.recordException(resolveError(err))
+                                })
+                                .finally(() => span.end())
+                        }
+                    },
+                )
             }, intervalMs)
 
             return await fetchUpdatesSingle()
