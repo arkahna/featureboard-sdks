@@ -33,7 +33,7 @@
 
         "featureBoardProductName": {
             "type": "string",
-            "description": "The name of the FeatureBoard project you want to pull the types from."
+            "description": "The name of the FeatureBoard product you want to pull the types from."
         },
 
         "featureBoardApiKey": {
@@ -47,5 +47,10 @@
             "default": "./"
         }
     },
-    "required": ["template", "projectName"]
+    "required": [
+        "template",
+        "projectName",
+        "featureBoardProductName",
+        "featureBoardApiKey"
+    ]
 }

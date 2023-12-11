@@ -107,7 +107,14 @@ async function getConfig({
             project = promptResult.project
         }
     }
-    if (!project) throw new Error('Unable to locate Project')
+    if (!project)
+        throw projectResults.projects.length > 0
+            ? new Error(
+                  `Project not specified select one of [${projectResults.projects
+                      .map((x) => x.name)
+                      .join(', ')}]`,
+              )
+            : new Error('Unable to locate Project')
 
     const featuresResult = await getProjectFeatures(apiEndpoint, project, auth)
 

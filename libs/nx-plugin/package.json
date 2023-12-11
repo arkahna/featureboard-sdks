@@ -18,7 +18,7 @@
     "generators": "./generators.json",
     "executors": "./executors.json",
     "peerDependencies": {
-        "@nx/devkit": "~17.0.0"
+        "@nx/devkit": "^17.0.0"
     },
     "dependencies": {
         "@featureboard/code-generator": "workspace:*",
