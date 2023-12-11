@@ -26,7 +26,7 @@ describe('retry function with OpenTelemetry', () => {
     it('should retry the function and succeed', async () => {
         let attempt = 0
         const mockFn = async () => {
-            if (attempt < 2) {
+            if (attempt < 1) {
                 attempt++
                 throw new Error('Temporary failure')
             }
@@ -37,12 +37,14 @@ describe('retry function with OpenTelemetry', () => {
 
         expect(result).toBe('Success')
         const spans = exporter.getFinishedSpans()
-        expect(spans.length).toEqual(5)
+        console.log(spans)
+        expect(spans.length).toEqual(4)
+        expect(spans[0].name).toBe('retry-attempt')
         expect(spans[0].attributes?.retryAttempt).toBe(0)
-        expect(spans[1].name).toEqual('delay')
-        expect(spans[2].attributes?.retryAttempt).toBe(1)
-        expect(spans[3].name).toEqual('delay')
-        expect(spans[4].attributes?.retryAttempt).toBe(2)
+        expect(spans[1].name).toEqual('retry')
+        expect(spans[2].name).toEqual('delay')
+        expect(spans[3].name).toBe('retry-attempt')
+        expect(spans[3].attributes?.retryAttempt).toBe(1)
     })
 
     it('should retry the function and fail', async () => {

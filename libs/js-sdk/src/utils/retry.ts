@@ -19,9 +19,11 @@ export async function retry<T>(
         // eslint-disable-next-line no-constant-condition
         while (true) {
             try {
-                return await retryAttemptFn<T>(tracer, retryAttempt, fn).then(
-                    () => span.end(),
-                )
+                return await retryAttemptFn<T>(
+                    tracer,
+                    retryAttempt,
+                    fn,
+                ).finally(() => span.end())
             } catch (error) {
                 const err = resolveError(error)
                 if (cancellationToken?.cancel) {
