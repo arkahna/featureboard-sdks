@@ -1,5 +1,13 @@
 # @featureboard/nx-plugin
 
+## 0.3.5
+
+### Patch Changes
+
+- 9f1d891: Better error logging for unauthorized requests
+- Updated dependencies [9f1d891]
+  - @featureboard/code-generator@0.3.3
+
 ## 0.3.4
 
 ### Patch Changes
