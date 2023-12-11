@@ -28,11 +28,8 @@ export function featureBoardFixture<Context>(
                 try {
                     await testFn({ ...context, testContext, server })
                 } finally {
-                    tracer.startActiveSpan('msw cleanup', (cleanupSpan) => {
-                        server.resetHandlers()
-                        server.close()
-                        cleanupSpan.end()
-                    })
+                    server.resetHandlers()
+                    server.close()
                     span.end()
                 }
             },

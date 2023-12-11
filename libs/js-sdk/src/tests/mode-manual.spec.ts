@@ -1,30 +1,27 @@
 import type { EffectiveFeatureValue } from '@featureboard/contracts'
 import { HttpResponse, http } from 'msw'
-import { setupServer } from 'msw/node'
-import { describe, expect, it } from 'vitest'
+import { expect, it } from 'vitest'
 import { createBrowserClient } from '../create-browser-client'
-import { openTelemetryTracePassthrough } from '../utils/openTelemetryTracePassthrough'
+import { featureBoardFixture } from '../featureboard-fixture'
 
-describe('Manual update mode', () => {
-    it('fetches initial values', async () => {
-        const values: EffectiveFeatureValue[] = [
-            {
-                featureKey: 'my-feature',
-                value: 'service-default-value',
-            },
-        ]
-
-        const server = setupServer(
-            openTelemetryTracePassthrough,
+it(
+    'fetches initial values',
+    featureBoardFixture(
+        {},
+        () => [
             http.get(
                 'https://client.featureboard.app/effective',
-                () => HttpResponse.json(values),
+                () =>
+                    HttpResponse.json<EffectiveFeatureValue[]>([
+                        {
+                            featureKey: 'my-feature',
+                            value: 'service-default-value',
+                        },
+                    ]),
                 { once: true },
             ),
-        )
-        server.listen({ onUnhandledRequest: 'error' })
-
-        try {
+        ],
+        async () => {
             const client = createBrowserClient({
                 environmentApiKey: 'fake-key',
                 audiences: [],
@@ -37,41 +34,35 @@ describe('Manual update mode', () => {
                 'default-value',
             )
             expect(value).toEqual('service-default-value')
-        } finally {
-            server.resetHandlers()
-            server.close()
-        }
-    })
+        },
+    ),
+)
 
-    it('can manually update values', async () => {
-        const values: EffectiveFeatureValue[] = [
-            {
-                featureKey: 'my-feature',
-                value: 'service-default-value',
-            },
-        ]
-
-        const newValues: EffectiveFeatureValue[] = [
-            {
-                featureKey: 'my-feature',
-                value: 'new-service-default-value',
-            },
-        ]
-        let count = 0
-        const server = setupServer(
-            openTelemetryTracePassthrough,
+it(
+    'can manually update values',
+    featureBoardFixture(
+        { count: 0 },
+        (testContext) => [
             http.get('https://client.featureboard.app/effective', () => {
-                if (count > 0) {
-                    return HttpResponse.json(newValues)
+                if (testContext.count > 0) {
+                    return HttpResponse.json<EffectiveFeatureValue[]>([
+                        {
+                            featureKey: 'my-feature',
+                            value: 'new-service-default-value',
+                        },
+                    ])
                 }
 
-                count++
-                return HttpResponse.json(values)
+                testContext.count++
+                return HttpResponse.json<EffectiveFeatureValue[]>([
+                    {
+                        featureKey: 'my-feature',
+                        value: 'service-default-value',
+                    },
+                ])
             }),
-        )
-        server.listen({ onUnhandledRequest: 'error' })
-
-        try {
+        ],
+        async () => {
             const client = createBrowserClient({
                 environmentApiKey: 'fake-key',
                 audiences: [],
@@ -85,30 +76,28 @@ describe('Manual update mode', () => {
                 'default-value',
             )
             expect(value).toEqual('new-service-default-value')
-        } finally {
-            server.resetHandlers()
-            server.close()
-        }
-    })
+        },
+    ),
+)
 
-    it('close', async () => {
-        const values: EffectiveFeatureValue[] = [
-            {
-                featureKey: 'my-feature',
-                value: 'service-default-value',
-            },
-        ]
-
-        const server = setupServer(
-            openTelemetryTracePassthrough,
+it(
+    'close',
+    featureBoardFixture(
+        {},
+        () => [
             http.get(
                 'https://client.featureboard.app/effective',
-                () => HttpResponse.json(values),
+                () =>
+                    HttpResponse.json<EffectiveFeatureValue[]>([
+                        {
+                            featureKey: 'my-feature',
+                            value: 'service-default-value',
+                        },
+                    ]),
                 { once: true },
             ),
-        )
-        server.listen({ onUnhandledRequest: 'error' })
-        try {
+        ],
+        async () => {
             const client = createBrowserClient({
                 environmentApiKey: 'fake-key',
                 audiences: [],
@@ -116,12 +105,9 @@ describe('Manual update mode', () => {
             })
 
             client.close()
-        } finally {
-            server.resetHandlers()
-            server.close()
-        }
-    })
-})
+        },
+    ),
+)
 
 declare module '@featureboard/js-sdk' {
     interface Features extends Record<string, string | number | boolean> {}

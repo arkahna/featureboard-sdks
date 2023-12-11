@@ -7,14 +7,15 @@ import {
 import { afterAll, beforeAll } from 'vitest'
 
 let sdk: NodeSDK
-let spanProcessor: SimpleSpanProcessor
+let spanProcessor: SimpleSpanProcessor | undefined
 
 beforeAll(({ suite }) => {
-    spanProcessor = new SimpleSpanProcessor(
-        process.env.OTEL_EXPORTER_OTLP_ENDPOINT
-            ? new OTLPTraceExporter()
-            : new ConsoleSpanExporter(),
-    )
+    const exporter = process.env.OTEL_EXPORTER_OTLP_ENDPOINT
+        ? new OTLPTraceExporter()
+        : process.env.OTEL_EXPORTER_OTLP_CONSOLE
+        ? new ConsoleSpanExporter()
+        : undefined
+    spanProcessor = exporter ? new SimpleSpanProcessor(exporter) : undefined
 
     sdk = new NodeSDK({
         serviceName: 'featureboard-js-sdk-test',
@@ -26,6 +27,6 @@ beforeAll(({ suite }) => {
 })
 
 afterAll(async () => {
-    await spanProcessor.forceFlush()
+    await spanProcessor?.forceFlush()
     await sdk.shutdown()
 })
