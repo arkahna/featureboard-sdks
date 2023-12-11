@@ -309,7 +309,7 @@ describe('http client', () => {
                 await expect(async () => {
                     await client.waitForInitialised()
                 }).rejects.toThrowError('500')
-                expect(count).toEqual(5 + 1) // initial request and 5 retry
+                expect(count).toEqual(2 + 1) // initial request and 5 retry
             } finally {
                 server.resetHandlers()
                 server.close()
@@ -398,8 +398,8 @@ describe('http client', () => {
                 await expect(async () => {
                     await client.waitForInitialised()
                 }).rejects.toThrowError('Test External State Store Error')
-                expect(countAPIRequest).toEqual(5 + 1) // initial request and 5 retry
-                expect(countExternalStateStoreRequest).toEqual(5 + 1) // initial request and 5 retry
+                expect(countAPIRequest).toEqual(2 + 1) // initial request and 5 retry
+                expect(countExternalStateStoreRequest).toEqual(2 + 1) // initial request and 5 retry
             } finally {
                 server.resetHandlers()
                 server.close()
