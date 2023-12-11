@@ -2,12 +2,10 @@ export type FeatureBoardAuth =
     | {
           featureBoardBearerToken: string
           organizationId: string
-          featureBoardApiKey?: undefined
       }
     | {
           featureBoardApiKey: string
           organizationId?: string
-          featureBoardBearerToken?: undefined
       }
 
 /**
@@ -19,25 +17,32 @@ export async function queryFeatureBoard<T>(
     auth: FeatureBoardAuth,
 ) {
     return fetch(`${apiEndpoint}/${path}`, {
-        headers: auth.featureBoardBearerToken
-            ? {
-                  Authorization: `Bearer ${auth.featureBoardBearerToken}`,
-                  Accept: 'application/json',
-                  'X-Organization': auth.organizationId,
-              }
-            : auth.featureBoardApiKey
-            ? {
-                  ['x-api-key']: auth.featureBoardApiKey,
-                  Accept: 'application/json',
-                  ...(auth.organizationId
-                      ? { 'X-Organization': auth.organizationId }
-                      : {}),
-              }
-            : // Shouldn't need this branch, unsure why typescript is not narrowing the else branch automatically
-              {},
+        headers:
+            'featureBoardBearerToken' in auth
+                ? {
+                      Authorization: `Bearer ${auth.featureBoardBearerToken}`,
+                      Accept: 'application/json',
+                      'X-Organization': auth.organizationId,
+                  }
+                : {
+                      ['x-api-key']: auth.featureBoardApiKey,
+                      Accept: 'application/json',
+                      ...(auth.organizationId
+                          ? { 'X-Organization': auth.organizationId }
+                          : {}),
+                  },
     }).then(async (response) => {
         if (response.ok) {
             return (await response.json()) as T
+        }
+        if (response.status === 401) {
+            throw new Error(
+                `Unauthorised call the the FeatureBoard API, ${
+                    'featureBoardBearerToken' in auth
+                        ? 'please run `npx @featureboard/cli login`'
+                        : 'please check your API key'
+                }`,
+            )
         }
 
         throw new Error(
