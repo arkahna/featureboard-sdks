@@ -51,4 +51,3 @@ tsconfig.tsbuildinfo
 **/src/**/*.js
 **/src/**/*.d.ts
 **/src/**/*.js.map
-!**/src/**/schema.d.ts
