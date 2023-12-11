@@ -1,37 +1,35 @@
 import type { EffectiveFeatureValue } from '@featureboard/contracts'
 import { HttpResponse, http } from 'msw'
-import { setupServer } from 'msw/node'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, expect, it, vi } from 'vitest'
 import { createBrowserClient } from '../create-browser-client'
+import { featureBoardFixture } from '../featureboard-fixture'
 import { interval } from '../interval'
-import { openTelemetryTracePassthrough } from '../utils/openTelemetryTracePassthrough'
 
 beforeEach(() => {
     interval.set = setInterval
     interval.clear = clearInterval
 })
 
-describe('Polling update mode', () => {
-    it('fetches initial values', async () => {
-        interval.set = vi.fn(() => {}) as any
-        const values: EffectiveFeatureValue[] = [
-            {
-                featureKey: 'my-feature',
-                value: 'service-default-value',
-            },
-        ]
-
-        const server = setupServer(
-            openTelemetryTracePassthrough,
+it(
+    'fetches initial values',
+    featureBoardFixture(
+        {},
+        () => [
             http.get(
                 'https://client.featureboard.app/effective',
-                () => HttpResponse.json(values),
+                () =>
+                    HttpResponse.json<EffectiveFeatureValue[]>([
+                        {
+                            featureKey: 'my-feature',
+                            value: 'service-default-value',
+                        },
+                    ]),
                 { once: true },
             ),
-        )
-        server.listen({ onUnhandledRequest: 'error' })
+        ],
+        async () => {
+            interval.set = vi.fn(() => {}) as any
 
-        try {
             const connection = createBrowserClient({
                 environmentApiKey: 'fake-key',
                 audiences: [],
@@ -45,35 +43,31 @@ describe('Polling update mode', () => {
                 'default-value',
             )
             expect(value).toEqual('service-default-value')
-        } finally {
-            server.resetHandlers()
-            server.close()
-        }
-    })
+        },
+    ),
+)
 
-    it('sets up interval correctly', async () => {
-        const handle = {}
-        interval.set = vi.fn(() => {
-            return handle
-        }) as any
-        interval.clear = vi.fn(() => {})
-
-        const values: EffectiveFeatureValue[] = [
-            {
-                featureKey: 'my-feature',
-                value: 'service-default-value',
-            },
-        ]
-
-        const server = setupServer(
-            openTelemetryTracePassthrough,
+it(
+    'sets up interval correctly',
+    featureBoardFixture(
+        {},
+        () => [
             http.get('https://client.featureboard.app/effective', () =>
-                HttpResponse.json(values),
+                HttpResponse.json<EffectiveFeatureValue[]>([
+                    {
+                        featureKey: 'my-feature',
+                        value: 'service-default-value',
+                    },
+                ]),
             ),
-        )
-        server.listen({ onUnhandledRequest: 'error' })
+        ],
+        async () => {
+            const handle = {}
+            interval.set = vi.fn(() => {
+                return handle
+            }) as any
+            interval.clear = vi.fn(() => {})
 
-        try {
             const connection = createBrowserClient({
                 environmentApiKey: 'fake-key',
                 audiences: [],
@@ -83,44 +77,38 @@ describe('Polling update mode', () => {
 
             expect(interval.set).toBeCalled()
             expect(interval.clear).toBeCalledWith(handle)
-        } finally {
-            server.resetHandlers()
-            server.close()
-        }
-    })
+        },
+    ),
+)
 
-    it('fetches updates when interval fires', async () => {
-        const setMock = vi.fn(() => {})
-        interval.set = setMock as any
-
-        const values: EffectiveFeatureValue[] = [
-            {
-                featureKey: 'my-feature',
-                value: 'service-default-value',
-            },
-        ]
-        const newValues: EffectiveFeatureValue[] = [
-            {
-                featureKey: 'my-feature',
-                value: 'new-service-default-value',
-            },
-        ]
-
-        let count = 0
-        const server = setupServer(
-            openTelemetryTracePassthrough,
+it(
+    'fetches updates when interval fires',
+    featureBoardFixture(
+        { count: 0 },
+        (testContext) => [
             http.get('https://client.featureboard.app/effective', () => {
-                if (count > 0) {
-                    return HttpResponse.json(newValues)
+                if (testContext.count > 0) {
+                    return HttpResponse.json<EffectiveFeatureValue[]>([
+                        {
+                            featureKey: 'my-feature',
+                            value: 'new-service-default-value',
+                        },
+                    ])
                 }
 
-                count++
-                return HttpResponse.json(values)
+                testContext.count++
+                return HttpResponse.json<EffectiveFeatureValue[]>([
+                    {
+                        featureKey: 'my-feature',
+                        value: 'service-default-value',
+                    },
+                ])
             }),
-        )
-        server.listen({ onUnhandledRequest: 'error' })
+        ],
+        async () => {
+            const setMock = vi.fn(() => {})
+            interval.set = setMock as any
 
-        try {
             const client = createBrowserClient({
                 environmentApiKey: 'fake-key',
                 audiences: [],
@@ -136,12 +124,9 @@ describe('Polling update mode', () => {
                 'default-value',
             )
             expect(value).toEqual('new-service-default-value')
-        } finally {
-            server.resetHandlers()
-            server.close()
-        }
-    })
-})
+        },
+    ),
+)
 
 declare module '@featureboard/js-sdk' {
     interface Features extends Record<string, string | number | boolean> {}
