@@ -204,6 +204,27 @@ importers:
         specifier: ^3.22.4
         version: 3.22.4
 
+  apps/cli/dist:
+    devDependencies:
+      '@commander-js/extra-typings':
+        specifier: ^11.1.0
+        version: 11.1.0(commander@11.1.0)
+      '@types/open':
+        specifier: ^6.2.1
+        version: 6.2.1
+      ejs:
+        specifier: ^3.1.9
+        version: 3.1.9
+      open:
+        specifier: ^9.1.0
+        version: 9.1.0
+      prompts:
+        specifier: ^2.4.2
+        version: 2.4.2
+      zod:
+        specifier: ^3.22.4
+        version: 3.22.4
+
   apps/examples/dotnet-api: {}
 
   libs/code-generator: {}
@@ -259,7 +280,7 @@ importers:
         specifier: workspace:*
         version: link:../code-generator
       '@nx/devkit':
-        specifier: ~17.0.0
+        specifier: ^17.0.0
         version: 17.0.2(nx@17.0.2)
       prompts:
         specifier: ^2.4.2
@@ -4855,7 +4876,7 @@ packages:
   /builtins@5.0.1:
     resolution: {integrity: sha512-qwVpFEHNfhYJIzNRBvd2C1kyo6jz3ZSMPyyuR47OPdiKWlbYnZNyDWuyR175qDnAJLiCo5fBBqPb3RiXgWlkOQ==}
     dependencies:
-      semver: 7.5.3
+      semver: 7.5.4
     dev: true
 
   /bundle-name@3.0.0:

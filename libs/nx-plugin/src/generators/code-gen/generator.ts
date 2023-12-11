@@ -1,7 +1,7 @@
 import { codeGenerator } from '@featureboard/code-generator'
 import type { Tree } from '@nx/devkit'
 import { joinPathFragments, readProjectConfiguration } from '@nx/devkit'
-import { isDryRun } from '../../Shared/is-dry-run'
+import { isDryRun } from '../../shared/is-dry-run'
 import type { CodeGenGeneratorSchema } from './schema'
 
 export async function codeGenGenerator(

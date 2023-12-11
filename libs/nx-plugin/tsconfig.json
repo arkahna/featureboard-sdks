@@ -1,7 +1,7 @@
 {
     "extends": "../../tsconfig.settings.json",
     "compilerOptions": {
-        "outDir": "./tsc-out",
+        "outDir": "./src",
         "rootDir": "./src",
         "module": "commonjs",
         "esModuleInterop": true,
