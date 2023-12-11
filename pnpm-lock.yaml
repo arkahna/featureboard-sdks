@@ -204,27 +204,6 @@ importers:
         specifier: ^3.22.4
         version: 3.22.4
 
-  apps/cli/dist:
-    devDependencies:
-      '@commander-js/extra-typings':
-        specifier: ^11.1.0
-        version: 11.1.0(commander@11.1.0)
-      '@types/open':
-        specifier: ^6.2.1
-        version: 6.2.1
-      ejs:
-        specifier: ^3.1.9
-        version: 3.1.9
-      open:
-        specifier: ^9.1.0
-        version: 9.1.0
-      prompts:
-        specifier: ^2.4.2
-        version: 2.4.2
-      zod:
-        specifier: ^3.22.4
-        version: 3.22.4
-
   apps/examples/dotnet-api: {}
 
   libs/code-generator: {}

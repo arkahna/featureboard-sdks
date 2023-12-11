@@ -1,5 +1,11 @@
 # @featureboard/code-generator
 
+## 0.3.2
+
+### Patch Changes
+
+- c0a2eab: Fix build process for NX plugin
+
 ## 0.3.1
 
 ### Patch Changes
