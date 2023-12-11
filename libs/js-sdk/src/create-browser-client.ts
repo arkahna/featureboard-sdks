@@ -1,4 +1,5 @@
 import type { EffectiveFeatureValue } from '@featureboard/contracts'
+import type { Span } from '@opentelemetry/api'
 import { SpanStatusCode, trace } from '@opentelemetry/api'
 import { PromiseCompletionSource } from 'promise-completion-source'
 import type { BrowserClient } from './client-connection'
@@ -45,29 +46,16 @@ export function createBrowserClient({
 }): BrowserClient {
     const tracer = getTracer()
 
-    const initialPromise = new PromiseCompletionSource<boolean>()
+    const waitingForInitialization: Array<PromiseCompletionSource<boolean>> = []
+    const initializedCallbacks: Array<(initialised: boolean) => void> = []
+
     const initialisedState: {
-        initialisedCallbacks: Array<(initialised: boolean) => void>
         initialisedPromise: PromiseCompletionSource<boolean>
-        initialisedError: Error | undefined
+        initializedCancellationToken: { cancel: boolean }
     } = {
-        initialisedCallbacks: [],
-        initialisedPromise: initialPromise,
-        initialisedError: undefined,
+        initialisedPromise: new PromiseCompletionSource<boolean>(),
+        initializedCancellationToken: { cancel: false },
     }
-    initialisedState.initialisedPromise.promise.then(() => {
-        // If the promise has changed, then we don't want to invoke the callback
-        if (initialPromise !== initialisedState.initialisedPromise) {
-            return
-        }
-
-        // Get the value from the function, just incase it has changed
-        const initialised = isInitialised()
-        initialisedState.initialisedCallbacks.forEach((c) => c(initialised))
-    })
-
-    // Ensure that the init promise doesn't cause an unhandled promise rejection
-    initialisedState.initialisedPromise.promise.catch(() => {})
 
     const stateStore = new EffectiveFeatureStateStore(audiences, initialValues)
 
@@ -77,16 +65,22 @@ export function createBrowserClient({
         api || featureBoardHostedService,
     )
 
-    const retryCancellationToken = { cancel: false }
-    tracer.startActiveSpan(
-        'connect-with-retry',
-        {
-            attributes: { audiences },
-            // This is asynchronous so we don't want it nested in the current span
-            root: true,
-        },
-        (span) =>
-            retry(async () => {
+    async function initializeWithAudiences(
+        initializeSpan: Span,
+        audiences: string[],
+    ) {
+        const initialPromise = new PromiseCompletionSource<boolean>()
+        const cancellationToken = { cancel: false }
+        initialPromise.promise.catch(() => {})
+        initialisedState.initialisedPromise = initialPromise
+        initialisedState.initializedCancellationToken = cancellationToken
+
+        try {
+            await retry(async () => {
+                if (cancellationToken.cancel) {
+                    return
+                }
+
                 return await tracer.startActiveSpan(
                     'connect',
                     {
@@ -95,72 +89,103 @@ export function createBrowserClient({
                             updateStrategy: updateStrategyImplementation.name,
                         },
                     },
-                    (operationSpan) =>
+                    (connectSpan) =>
                         updateStrategyImplementation
                             .connect(stateStore)
-                            .finally(() => operationSpan.end()),
+                            .finally(() => connectSpan.end()),
                 )
-            }, retryCancellationToken)
-                .then(() => {
-                    if (
-                        initialPromise !== initialisedState.initialisedPromise
-                    ) {
-                        return
-                    }
+            }, cancellationToken)
+        } catch (error) {
+            if (initialPromise !== initialisedState.initialisedPromise) {
+                initializeSpan.addEvent(
+                    "Ignoring initialization error as it's out of date",
+                )
+                initializeSpan.end()
+                return
+            }
+            const err = resolveError(error)
 
-                    if (!initialPromise.completed) {
-                        span.end()
-                        initialPromise.resolve(true)
-                    }
-                })
-                .catch((err) => {
-                    if (!initialisedState.initialisedPromise.completed) {
-                        span.setStatus({ code: SpanStatusCode.ERROR })
-                        span.end()
-                        console.error(
-                            'FeatureBoard SDK failed to connect after 5 retries',
-                            err,
-                        )
-                        initialisedState.initialisedError = err
-                        initialisedState.initialisedPromise.resolve(true)
-                    }
-                }),
-    )
+            initializeSpan.setStatus({
+                code: SpanStatusCode.ERROR,
+            })
+            console.error(
+                'FeatureBoard SDK failed to connect after 5 retries',
+                err,
+            )
+            initialisedState.initialisedPromise.reject(err)
 
-    const isInitialised = () => {
-        return initialisedState.initialisedPromise.completed
+            waitingForInitialization.forEach((w) => w.reject(err))
+            waitingForInitialization.length = 0
+            initializeSpan.end()
+            return
+        }
+
+        // Successfully completed
+        if (initialPromise !== initialisedState.initialisedPromise) {
+            initializeSpan.addEvent(
+                "Ignoring initialization event as it's out of date",
+            )
+            initializeSpan.end()
+            return
+        }
+
+        initialisedState.initialisedPromise.resolve(true)
+
+        notifyWaitingForInitialization(initializedCallbacks, initializeSpan)
+        waitingForInitialization.forEach((w) => w.resolve(true))
+        waitingForInitialization.length = 0
+        initializeSpan.end()
     }
+
+    void tracer.startActiveSpan(
+        'connect-with-retry',
+        {
+            attributes: { audiences },
+        },
+        (connectWithRetrySpan) =>
+            initializeWithAudiences(connectWithRetrySpan, audiences),
+    )
 
     return {
         client: createClientInternal(stateStore),
         get initialised() {
-            return isInitialised()
+            return initialisedState.initialisedPromise.completed
         },
         waitForInitialised() {
-            return new Promise((resolve, reject) => {
-                const interval = setInterval(() => {
-                    if (initialisedState.initialisedError) {
-                        clearInterval(interval)
-                        reject(initialisedState.initialisedError)
-                    } else if (isInitialised()) {
-                        clearInterval(interval)
-                        resolve(true)
-                    }
-                }, 100)
-            })
+            if (initialisedState.initialisedPromise.completed) {
+                return initialisedState.initialisedPromise.promise
+            }
+
+            const initialized = new PromiseCompletionSource<boolean>()
+            waitingForInitialization.push(initialized)
+            return initialized.promise
         },
         subscribeToInitialisedChanged(callback) {
-            initialisedState.initialisedCallbacks.push(callback)
+            initializedCallbacks.push(callback)
             return () => {
-                initialisedState.initialisedCallbacks.splice(
-                    initialisedState.initialisedCallbacks.indexOf(callback),
+                initializedCallbacks.splice(
+                    initializedCallbacks.indexOf(callback),
                     1,
                 )
             }
         },
         async updateAudiences(updatedAudiences: string[]) {
+            if (compareArrays(stateStore.audiences, updatedAudiences)) {
+                trace.getActiveSpan()?.addEvent('Skipped update audiences', {
+                    updatedAudiences,
+                    currentAudiences: stateStore.audiences,
+                })
+
+                // No need to update audiences
+                return Promise.resolve()
+            }
+
+            // Close connection and cancel retry
+            updateStrategyImplementation.close()
+            initialisedState.initializedCancellationToken.cancel = true
+
             await tracer.startActiveSpan(
-                'connect',
+                'update-audiences',
                 {
                     attributes: {
                         audiences,
@@ -168,81 +193,47 @@ export function createBrowserClient({
                     },
                 },
                 (updateAudiencesSpan) => {
-                    if (compareArrays(stateStore.audiences, updatedAudiences)) {
-                        trace
-                            .getActiveSpan()
-                            ?.addEvent('Skipped update audiences', {
-                                updatedAudiences,
-                                currentAudiences: stateStore.audiences,
-                                initialised: isInitialised(),
-                            })
-                        updateAudiencesSpan.end()
-
-                        // No need to update audiences
-                        return Promise.resolve()
-                    }
-
-                    // Close connection and cancel retry
-                    updateStrategyImplementation.close()
-                    retryCancellationToken.cancel = true
-
-                    const newPromise = new PromiseCompletionSource<boolean>()
-                    initialisedState.initialisedPromise = newPromise
-                    initialisedState.initialisedError = undefined
-                    initialisedState.initialisedPromise.promise.catch(() => {})
-                    initialisedState.initialisedPromise.promise.then(() => {
-                        // If the promise has changed, then we don't want to invoke the callback
-                        if (
-                            newPromise !== initialisedState.initialisedPromise
-                        ) {
-                            return
-                        }
-
-                        // Get the value from the function, just incase it has changed
-                        const initialised = isInitialised()
-                        initialisedState.initialisedCallbacks.forEach((c) =>
-                            c(initialised),
-                        )
-                    })
-
-                    initialisedState.initialisedCallbacks.forEach((c) =>
-                        c(false),
-                    )
-
                     stateStore.audiences = updatedAudiences
-
-                    updateStrategyImplementation
-                        .connect(stateStore)
-                        .then(() => {
-                            newPromise?.resolve(true)
-                            trace
-                                .getActiveSpan()
-                                ?.addEvent('Updated audiences', {
-                                    updatedAudiences,
-                                    currentAudiences: stateStore.audiences,
-                                    initialised: isInitialised(),
-                                })
-                        })
-                        .catch((error) => {
-                            const err = resolveError(error)
-                            updateAudiencesSpan.recordException(err)
-                            updateAudiencesSpan.setStatus({
-                                code: SpanStatusCode.ERROR,
-                                message: 'Failed to update audiences',
-                            })
-                            initialisedState.initialisedError = error
-                            newPromise?.resolve(true)
-                        })
-                        .finally(() => updateAudiencesSpan.end())
+                    return initializeWithAudiences(
+                        updateAudiencesSpan,
+                        updatedAudiences,
+                    )
                 },
             )
         },
         updateFeatures() {
-            return updateStrategyImplementation.updateFeatures()
+            return tracer.startActiveSpan('manual-update', (span) =>
+                updateStrategyImplementation
+                    .updateFeatures()
+                    .then(() => span.end()),
+            )
         },
         close() {
-            retryCancellationToken.cancel = true
+            initialisedState.initializedCancellationToken.cancel = true
             return updateStrategyImplementation.close()
         },
     }
+}
+function notifyWaitingForInitialization(
+    initializedCallbacks: ((initialised: boolean) => void)[],
+    initializeSpan: Span,
+) {
+    const errors: Error[] = []
+    initializedCallbacks.forEach((c) => {
+        try {
+            c(true)
+        } catch (error) {
+            const err = resolveError(error)
+            initializeSpan.recordException(err)
+            errors.push(err)
+        }
+    })
+
+    if (errors.length === 1) {
+        throw errors[0]
+    }
+    if (errors.length > 0) {
+        throw new AggregateError(errors, 'Multiple callback errors occurred')
+    }
+    initializedCallbacks.length = 0
 }

@@ -4,6 +4,7 @@ import { setupServer } from 'msw/node'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createBrowserClient } from '../create-browser-client'
 import { interval } from '../interval'
+import { openTelemetryTracePassthrough } from '../utils/openTelemetryTracePassthrough'
 
 beforeEach(() => {
     interval.set = setInterval
@@ -21,6 +22,7 @@ describe('Polling update mode', () => {
         ]
 
         const server = setupServer(
+            openTelemetryTracePassthrough,
             http.get(
                 'https://client.featureboard.app/effective',
                 () => HttpResponse.json(values),
@@ -64,6 +66,7 @@ describe('Polling update mode', () => {
         ]
 
         const server = setupServer(
+            openTelemetryTracePassthrough,
             http.get('https://client.featureboard.app/effective', () =>
                 HttpResponse.json(values),
             ),
@@ -105,6 +108,7 @@ describe('Polling update mode', () => {
 
         let count = 0
         const server = setupServer(
+            openTelemetryTracePassthrough,
             http.get('https://client.featureboard.app/effective', () => {
                 if (count > 0) {
                     return HttpResponse.json(newValues)

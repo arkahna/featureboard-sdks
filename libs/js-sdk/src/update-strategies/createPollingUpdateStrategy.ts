@@ -36,13 +36,13 @@ export function createPollingUpdateStrategy(
                 stopPolling()
             }
             stopPolling = pollingUpdates(() => {
-                getTracer().startActiveSpan(
+                return getTracer().startActiveSpan(
                     'Polling update',
                     { attributes: { etag }, root: true },
                     async (span) => {
                         // Catch errors here to ensure no unhandled promise rejections after a poll
                         if (fetchUpdatesSingle) {
-                            await fetchUpdatesSingle()
+                            return await fetchUpdatesSingle()
                                 .catch((err) => {
                                     span.recordException(resolveError(err))
                                 })

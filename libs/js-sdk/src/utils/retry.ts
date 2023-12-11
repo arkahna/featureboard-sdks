@@ -1,28 +1,29 @@
+import type { Tracer } from '@opentelemetry/api'
+import { SpanStatusCode } from '@opentelemetry/api'
 import { getTracer } from './get-tracer'
 import { resolveError } from './resolve-error'
 
-const maxRetries = 5
+/** Not including initial execution */
+const maxRetries = process.env.TEST === 'true' ? 2 : 5
 const initialDelayMs = process.env.TEST === 'true' ? 1 : 1000
 const backoffFactor = 2
 
 export async function retry<T>(
     fn: () => Promise<T>,
     cancellationToken = { cancel: false },
-    retryAttempt = 0,
 ): Promise<void | T> {
     const tracer = getTracer()
-    return tracer.startActiveSpan(
-        'retry',
-        { attributes: { retryAttempt } },
-        async (span) => {
+    return tracer.startActiveSpan('retry', async (span) => {
+        let retryAttempt = 0
+
+        // eslint-disable-next-line no-constant-condition
+        while (true) {
             try {
-                const result = await fn()
-                span.end()
-                return result
+                return await retryAttemptFn<T>(tracer, retryAttempt, fn).then(
+                    () => span.end(),
+                )
             } catch (error) {
                 const err = resolveError(error)
-                span.recordException(err)
-
                 if (cancellationToken?.cancel) {
                     span.end()
                     return Promise.resolve()
@@ -35,19 +36,41 @@ export async function retry<T>(
                             { cause: err },
                         ),
                     )
+                    span.setStatus({
+                        code: SpanStatusCode.ERROR,
+                        message: 'Operation failed after max retries exceeded',
+                    })
                     span.end()
                     // Max retries
                     throw error
                 }
-                span.end()
 
                 const delayMs =
                     initialDelayMs * Math.pow(backoffFactor, retryAttempt)
 
                 await tracer.startActiveSpan('delay', (delaySpan) =>
                     delay(delayMs).finally(() => delaySpan.end()),
-                ) // Wait for the calculated delay
-                return retry(fn, cancellationToken, retryAttempt + 1) // Retry the operation recursively
+                )
+
+                retryAttempt++
+            }
+        }
+    })
+}
+
+async function retryAttemptFn<T>(
+    tracer: Tracer,
+    retryAttempt: number,
+    fn: () => Promise<T>,
+) {
+    return await tracer.startActiveSpan(
+        'retry-attempt',
+        { attributes: { retryAttempt } },
+        async (attemptSpan) => {
+            try {
+                return await fn()
+            } finally {
+                attemptSpan.end()
             }
         },
     )

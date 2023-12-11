@@ -88,6 +88,7 @@ export async function fetchFeaturesConfigurationViaHttp(
                     code: SpanStatusCode.ERROR,
                     message: err.message,
                 })
+                throw err
             } finally {
                 span.end()
             }

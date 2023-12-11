@@ -3,6 +3,7 @@ import { HttpResponse, http } from 'msw'
 import { setupServer } from 'msw/node'
 import { describe, expect, it } from 'vitest'
 import { createBrowserClient } from '../create-browser-client'
+import { openTelemetryTracePassthrough } from '../utils/openTelemetryTracePassthrough'
 
 describe('Manual update mode', () => {
     it('fetches initial values', async () => {
@@ -14,6 +15,7 @@ describe('Manual update mode', () => {
         ]
 
         const server = setupServer(
+            openTelemetryTracePassthrough,
             http.get(
                 'https://client.featureboard.app/effective',
                 () => HttpResponse.json(values),
@@ -57,6 +59,7 @@ describe('Manual update mode', () => {
         ]
         let count = 0
         const server = setupServer(
+            openTelemetryTracePassthrough,
             http.get('https://client.featureboard.app/effective', () => {
                 if (count > 0) {
                     return HttpResponse.json(newValues)
@@ -97,6 +100,7 @@ describe('Manual update mode', () => {
         ]
 
         const server = setupServer(
+            openTelemetryTracePassthrough,
             http.get(
                 'https://client.featureboard.app/effective',
                 () => HttpResponse.json(values),
