@@ -235,9 +235,6 @@ importers:
       '@opentelemetry/sdk-trace-base':
         specifier: ^1.18.1
         version: 1.18.1(@opentelemetry/api@1.7.0)
-      '@opentelemetry/sdk-trace-node':
-        specifier: ^1.18.1
-        version: 1.18.1(@opentelemetry/api@1.7.0)
 
   libs/live-connection:
     dependencies:
@@ -273,9 +270,6 @@ importers:
         specifier: ^0.45.1
         version: 0.45.1(@opentelemetry/api@1.7.0)
       '@opentelemetry/sdk-trace-base':
-        specifier: ^1.18.1
-        version: 1.18.1(@opentelemetry/api@1.7.0)
-      '@opentelemetry/sdk-trace-node':
         specifier: ^1.18.1
         version: 1.18.1(@opentelemetry/api@1.7.0)
 
