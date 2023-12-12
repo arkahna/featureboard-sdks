@@ -2,7 +2,6 @@ import type { EffectiveFeatureValue } from '@featureboard/contracts'
 import { SpanStatusCode } from '@opentelemetry/api'
 import type { EffectiveFeatureStateStore } from '../effective-feature-state-store'
 import { getEffectiveEndpoint } from '../update-strategies/getEffectiveEndpoint'
-import { version } from '../version'
 import { addDebugEvent } from './add-debug-event'
 import { compareArrays } from './compare-arrays'
 import { getTracer } from './get-tracer'
@@ -29,7 +28,6 @@ export async function fetchFeaturesConfigurationViaHttp(
                     method: 'GET',
                     headers: {
                         'x-environment-key': environmentApiKey,
-                        'x-sdk-version': version,
                         ...(etag ? { 'if-none-match': etag } : {}),
                     },
                 })
