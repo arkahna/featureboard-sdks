@@ -259,12 +259,25 @@ importers:
       '@featureboard/js-sdk':
         specifier: workspace:*
         version: link:../js-sdk
-      debug:
-        specifier: ^4.3.4
-        version: 4.3.4
+      '@opentelemetry/api':
+        specifier: ^1.0.0
+        version: 1.7.0
       promise-completion-source:
         specifier: ^1.0.0
         version: 1.0.0
+    devDependencies:
+      '@opentelemetry/exporter-trace-otlp-http':
+        specifier: ^0.45.1
+        version: 0.45.1(@opentelemetry/api@1.7.0)
+      '@opentelemetry/sdk-node':
+        specifier: ^0.45.1
+        version: 0.45.1(@opentelemetry/api@1.7.0)
+      '@opentelemetry/sdk-trace-base':
+        specifier: ^1.18.1
+        version: 1.18.1(@opentelemetry/api@1.7.0)
+      '@opentelemetry/sdk-trace-node':
+        specifier: ^1.18.1
+        version: 1.18.1(@opentelemetry/api@1.7.0)
 
   libs/nx-plugin:
     dependencies:
@@ -4226,7 +4239,7 @@ packages:
       debug: 4.3.4
       globby: 11.1.0
       is-glob: 4.0.3
-      semver: 7.5.3
+      semver: 7.5.4
       tsutils: 3.21.0(typescript@5.2.2)
       typescript: 5.2.2
     transitivePeerDependencies:
