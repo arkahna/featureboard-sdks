@@ -6,7 +6,7 @@ import type { FeatureBoardAuth } from '@featureboard/code-generator'
 import { codeGenerator } from '@featureboard/code-generator'
 import type { Tree } from '@nx/devkit'
 import { joinPathFragments, readProjectConfiguration } from '@nx/devkit'
-import { CLIENT_ID } from '../../shared/config'
+import { API_ENDPOINT, CLIENT_ID } from '../../shared/config'
 import { isDryRun } from '../../shared/is-dry-run'
 import { isVerbose } from '../../shared/is-verbose'
 import type { CodeGenExecutorSchema } from './schema'
@@ -41,6 +41,7 @@ export async function codeGenExecutor(
         relativeFilePath: joinPathFragments(project.root, options.subFolder),
         interactive: !dryRun,
         auth,
+        apiEndpoint: API_ENDPOINT,
         ...options,
     })
 }

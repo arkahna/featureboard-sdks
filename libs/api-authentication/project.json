@@ -3,10 +3,6 @@
     "$schema": "../node_modules/nx/schemas/project-schema.json",
     "sourceRoot": "api-authentication/src",
     "projectType": "library",
-
-    "devDependencies": {
-        "zod": "^3.22.4"
-    },
     "targets": {
         "lint": {
             "executor": "@nx/eslint:lint",
