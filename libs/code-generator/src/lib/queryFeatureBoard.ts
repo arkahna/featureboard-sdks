@@ -37,9 +37,9 @@ export async function queryFeatureBoard<T>(
         }
         if (response.status === 401) {
             throw new Error(
-                `Unauthorised call the the FeatureBoard API, ${
+                `Unauthorised call to the FeatureBoard API, ${
                     'featureBoardBearerToken' in auth
-                        ? 'please run `npx @featureboard/cli login`'
+                        ? 'please authenticate by running `npx @featureboard/cli login`'
                         : 'please check your API key'
                 }`,
             )

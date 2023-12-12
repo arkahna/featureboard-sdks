@@ -1,9 +1,8 @@
 {
-    "name": "@featureboard/code-generator",
-    "version": "0.3.3",
+    "name": "@featureboard/api-authentication",
+    "version": "0.0.1",
     "type": "commonjs",
-    "main": "src/index.js",
-    "typings": "./src/index.d.ts",
+    "main": "./src/index.js",
     "license": "MIT",
     "sideEffects": false,
     "repository": {
@@ -18,5 +17,5 @@
     "bugs": {
         "url": "https://github.com/arkahna/featureboard-sdks/issues"
     },
-    "homepage": "https://github.com/arkahna/featureboard-sdks/tree/master/libs/code-generator#readme"
+    "homepage": "https://github.com/arkahna/featureboard-sdks/tree/master/libs/api-authenticationr#readme"
 }

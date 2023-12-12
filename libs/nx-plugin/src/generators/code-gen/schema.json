@@ -50,11 +50,5 @@
             "default": "./"
         }
     },
-    "required": [
-        "template",
-        "projectName",
-        "featureBoardApiKey",
-        "featureBoardProductName",
-        "featureBoardApiKey"
-    ]
+    "required": ["template", "projectName", "featureBoardProductName"]
 }

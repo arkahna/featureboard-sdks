@@ -1,20 +1,17 @@
 import { Command } from '@commander-js/extra-typings'
+import {
+    TOKEN_URL,
+    writeToken,
+    type TokenData,
+} from '@featureboard/api-authentication'
 import http from 'http'
 import open from 'open'
 import prompts from 'prompts'
 import querystring from 'querystring'
 import { actionRunner } from '../lib/action-runner'
-import { CLIENT_ID } from '../lib/config'
+import { AUTH_URL, CLIENT_ID, REDIRECT_PORT, REDIRECT_URI } from '../lib/config'
 import { generateCodeChallenge, generateCodeVerifier } from '../lib/pkce'
 import { titleText } from '../lib/title-text'
-import type { TokenData } from '../lib/token'
-import {
-    AUTH_URL,
-    REDIRECT_PORT,
-    REDIRECT_URI,
-    TOKEN_URL,
-    writeToken,
-} from '../lib/token'
 
 export function loginCommand() {
     return new Command('login')

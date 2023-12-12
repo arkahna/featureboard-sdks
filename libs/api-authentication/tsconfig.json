@@ -1,24 +1,18 @@
 {
     "extends": "../../tsconfig.settings.json",
     "compilerOptions": {
-        "outDir": "./tsc-out",
+        "outDir": "./src",
         "rootDir": "./src",
+        "module": "commonjs",
+        "esModuleInterop": true,
         "types": [
             "node",
             "vitest/globals",
             "vitest/importMeta",
             "vite/client",
             "vitest"
-        ],
-        "resolveJsonModule": true
+        ]
     },
     "include": ["src/**/*.ts"],
-    "references": [
-        {
-            "path": "../../libs/api-authentication"
-        },
-        {
-            "path": "../../libs/code-generator"
-        }
-    ]
+    "exclude": ["node_modules", "tsc-out", "dist", "**/src/*.d.ts", "**/*.js"]
 }
