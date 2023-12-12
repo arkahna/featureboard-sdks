@@ -11,6 +11,9 @@
             "path": "./libs/contracts"
         },
         {
+            "path": "./libs/api-authentication"
+        },
+        {
             "path": "./libs/code-generator"
         },
         {

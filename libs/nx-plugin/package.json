@@ -22,7 +22,11 @@
         "@nx/devkit": "^17.0.0"
     },
     "dependencies": {
+        "@featureboard/api-authentication": "workspace:*",
         "@featureboard/code-generator": "workspace:*",
         "prompts": "^2.4.2"
+    },
+    "devDependencies": {
+        "zod": "^3.22.4"
     }
 }

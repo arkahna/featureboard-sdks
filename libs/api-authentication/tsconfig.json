@@ -14,13 +14,5 @@
         ]
     },
     "include": ["src/**/*.ts"],
-    "exclude": ["src/**/*.spec.ts"],
-    "references": [
-        {
-            "path": "../api-authentication"
-        },
-        {
-            "path": "../code-generator"
-        }
-    ]
+    "exclude": ["node_modules", "tsc-out", "dist", "**/src/*.d.ts", "**/*.js"]
 }

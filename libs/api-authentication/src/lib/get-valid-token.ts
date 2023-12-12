@@ -1,10 +1,14 @@
 import { performTokenRefresh, readToken } from './token'
 
-export async function getValidToken(): Promise<string | null> {
+export async function getValidToken(clientId: string): Promise<string | null> {
     const tokenData = await readToken()
 
     if (!tokenData) {
-        console.error('Please authenticate by running `fb login`.')
+        console.error(
+            !!process.env['CI']
+                ? 'Please check you have provided an API key'
+                : 'Please authenticate by running `npx @featureboard/cli login`.',
+        )
         return null
     }
 
@@ -16,6 +20,7 @@ export async function getValidToken(): Promise<string | null> {
         try {
             const refreshedTokenData = await performTokenRefresh(
                 tokenData.refresh_token,
+                clientId,
             )
             return refreshedTokenData.access_token
         } catch (err) {

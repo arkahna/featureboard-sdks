@@ -3,7 +3,7 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "typescript.preferences.importModuleSpecifier": "project-relative",
     "editor.codeActionsOnSave": {
-        "source.organizeImports": true
+        "source.organizeImports": "explicit"
     },
     "cSpell.enabled": true,
     "vitest.commandLine": "pnpm vitest",
@@ -14,15 +14,9 @@
         "**/cypress/**",
         "**/.{idea,git,cache,output,temp}/**"
     ],
-    "eslint.validate": [
-        "json"
-    ],
-    "cSpell.enableFiletypes": [
-        "typescript"
-    ],
-    "cSpell.words": [
-        "featureboard"
-    ],
+    "eslint.validate": ["json"],
+    "cSpell.enableFiletypes": ["typescript"],
+    "cSpell.words": ["featureboard"],
     "[json]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"
     }

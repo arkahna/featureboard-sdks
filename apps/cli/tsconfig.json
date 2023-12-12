@@ -15,6 +15,9 @@
     "include": ["src/**/*.ts"],
     "references": [
         {
+            "path": "../../libs/api-authentication"
+        },
+        {
             "path": "../../libs/code-generator"
         }
     ]

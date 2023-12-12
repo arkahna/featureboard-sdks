@@ -1,4 +1,8 @@
 import { Command, Option } from '@commander-js/extra-typings'
+import {
+    getValidToken,
+    readCurrentOrganization,
+} from '@featureboard/api-authentication'
 import type { Template } from '@featureboard/code-generator'
 import {
     FsTree,
@@ -10,9 +14,7 @@ import fsAsync from 'fs/promises'
 import path from 'node:path'
 import prompts from 'prompts'
 import { actionRunner } from '../lib/action-runner'
-import { API_ENDPOINT } from '../lib/config'
-import { readCurrentOrganization } from '../lib/current-organization'
-import { getValidToken } from '../lib/get-valid-token'
+import { API_ENDPOINT, CLIENT_ID } from '../lib/config'
 import { promptForOrganization } from '../lib/prompt-for-organization'
 import { titleText } from '../lib/title-text'
 
@@ -103,7 +105,7 @@ export function codeGenCommand() {
 
                 let bearerToken: string | undefined
                 if (!options.featureBoardApiKey && !options.nonInteractive) {
-                    const token = await getValidToken()
+                    const token = await getValidToken(CLIENT_ID)
                     if (!token) {
                         return
                     }
