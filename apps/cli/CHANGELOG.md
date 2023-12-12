@@ -1,5 +1,11 @@
 # @featureboard/cli
 
+## 0.3.3
+
+### Patch Changes
+
+- 3041a28: Move token management code to new project api-authentication and allow nx-plugin to make use of it.
+
 ## 0.3.2
 
 ### Patch Changes
