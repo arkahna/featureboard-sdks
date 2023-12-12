@@ -1,35 +1,35 @@
 import type { FeatureConfiguration } from '@featureboard/contracts'
 import { HttpResponse, http } from 'msw'
-import { setupServer } from 'msw/node'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, expect, it, vi } from 'vitest'
 import { interval } from '../interval'
 import { createServerClient } from '../server-client'
+import { featureBoardFixture } from '../utils/featureboard-fixture'
 
 beforeEach(() => {
     interval.set = setInterval
     interval.clear = clearInterval
 })
 
-describe('Polling update mode', () => {
-    it('fetches initial values', async () => {
-        interval.set = vi.fn(() => {}) as any
-        const values: FeatureConfiguration[] = [
-            {
-                featureKey: 'my-feature',
-                audienceExceptions: [],
-                defaultValue: 'service-default-value',
-            },
-        ]
-        const server = setupServer(
+it(
+    'fetches initial values',
+    featureBoardFixture(
+        {},
+        () => [
             http.get(
                 'https://client.featureboard.app/all',
-                () => HttpResponse.json(values),
+                () =>
+                    HttpResponse.json<FeatureConfiguration[]>([
+                        {
+                            featureKey: 'my-feature',
+                            audienceExceptions: [],
+                            defaultValue: 'service-default-value',
+                        },
+                    ]),
                 { once: true },
             ),
-        )
-        server.listen({ onUnhandledRequest: 'error' })
-
-        try {
+        ],
+        async () => {
+            interval.set = vi.fn(() => {}) as any
             const client = createServerClient({
                 environmentApiKey: 'fake-key',
                 updateStrategy: 'polling',
@@ -40,36 +40,35 @@ describe('Polling update mode', () => {
                 .request([])
                 .getFeatureValue('my-feature', 'default-value')
             expect(value).toEqual('service-default-value')
-        } finally {
-            server.resetHandlers()
-            server.close()
-        }
-    })
+        },
+    ),
+)
 
-    it('sets up interval correctly', async () => {
-        const handle = {}
-        interval.set = vi.fn(() => {
-            return handle
-        }) as any
-        interval.clear = vi.fn(() => {})
-
-        const values: FeatureConfiguration[] = [
-            {
-                featureKey: 'my-feature',
-                audienceExceptions: [],
-                defaultValue: 'service-default-value',
-            },
-        ]
-        const server = setupServer(
+it(
+    'sets up interval correctly',
+    featureBoardFixture(
+        {},
+        () => [
             http.get(
                 'https://client.featureboard.app/all',
-                () => HttpResponse.json(values),
+                () =>
+                    HttpResponse.json<FeatureConfiguration[]>([
+                        {
+                            featureKey: 'my-feature',
+                            audienceExceptions: [],
+                            defaultValue: 'service-default-value',
+                        },
+                    ]),
                 { once: true },
             ),
-        )
-        server.listen({ onUnhandledRequest: 'error' })
+        ],
+        async () => {
+            const handle = {}
+            interval.set = vi.fn(() => {
+                return handle
+            }) as any
+            interval.clear = vi.fn(() => {})
 
-        try {
             const client = createServerClient({
                 environmentApiKey: 'fake-key',
                 updateStrategy: 'polling',
@@ -78,61 +77,59 @@ describe('Polling update mode', () => {
 
             expect(interval.set).toBeCalled()
             expect(interval.clear).toBeCalledWith(handle)
-        } finally {
-            server.resetHandlers()
-            server.close()
-        }
-    })
+        },
+    ),
+)
 
-    it('fetches updates when interval fires', async () => {
-        const setMock = vi.fn(() => {})
-        interval.set = setMock as any
-
-        const values: FeatureConfiguration[] = [
-            {
-                featureKey: 'my-feature',
-                audienceExceptions: [],
-                defaultValue: 'service-default-value',
-            },
-        ]
-        const newValues: FeatureConfiguration[] = [
-            {
-                featureKey: 'my-feature',
-                audienceExceptions: [],
-                defaultValue: 'new-service-default-value',
-            },
-        ]
-        let count = 0
-        const server = setupServer(
+it(
+    'fetches updates when interval fires',
+    featureBoardFixture(
+        { count: 0 },
+        (testContext) => [
             http.get('https://client.featureboard.app/all', () => {
-                if (count > 1) {
+                if (testContext.count > 1) {
                     throw new Error('Too many requests')
                 }
-                if (count > 0) {
-                    return HttpResponse.json(newValues)
+                if (testContext.count > 0) {
+                    return HttpResponse.json<FeatureConfiguration[]>([
+                        {
+                            featureKey: 'my-feature',
+                            audienceExceptions: [],
+                            defaultValue: 'new-service-default-value',
+                        },
+                    ])
                 }
 
-                count++
-                return HttpResponse.json(values)
+                testContext.count++
+                return HttpResponse.json<FeatureConfiguration[]>([
+                    {
+                        featureKey: 'my-feature',
+                        audienceExceptions: [],
+                        defaultValue: 'service-default-value',
+                    },
+                ])
             }),
-        )
-        server.listen({ onUnhandledRequest: 'error' })
+        ],
+        async () => {
+            const setMock = vi.fn(() => {})
+            interval.set = setMock as any
 
-        const client = createServerClient({
-            environmentApiKey: 'fake-key',
-            updateStrategy: 'polling',
-        })
-        await client.waitForInitialised()
+            const client = createServerClient({
+                environmentApiKey: 'fake-key',
+                updateStrategy: 'polling',
+            })
+            await client.waitForInitialised()
 
-        const pollCallback = (setMock.mock.calls[0] as any)[0]
-        await pollCallback()
+            const pollCallback = (setMock.mock.calls[0] as any)[0]
+            await pollCallback()
 
-        const value = client
-            .request([])
-            .getFeatureValue('my-feature', 'default-value')
-        expect(value).toEqual('new-service-default-value')
-    })
-})
+            const value = client
+                .request([])
+                .getFeatureValue('my-feature', 'default-value')
+            expect(value).toEqual('new-service-default-value')
+        },
+    ),
+)
 
 declare module '@featureboard/js-sdk' {
     interface Features extends Record<string, string | number | boolean> {}

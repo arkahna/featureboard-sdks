@@ -124,26 +124,18 @@ export function createServerClient({
             return updateStrategyImplementation.close()
         },
         request: (audienceKeys: string[]) => {
-            const request = updateStrategyImplementation.onRequest()
-
             return tracer.startActiveSpan(
                 'get-request-client',
                 { attributes: { audiences: audienceKeys } },
                 (span) => {
+                    const request = updateStrategyImplementation.onRequest()
+
                     if (request) {
                         return addUserWarnings(
-                            request.then(() =>
-                                syncRequest(stateStore, audienceKeys),
-                            ),
-                        ).then(
-                            (client) => {
+                            request.then(() => {
                                 span.end()
-                                return client
-                            },
-                            (reason) => {
-                                span.end()
-                                throw reason
-                            },
+                                return syncRequest(stateStore, audienceKeys)
+                            }),
                         )
                     }
 
@@ -155,7 +147,7 @@ export function createServerClient({
                         span.end()
                     }
                 },
-            ) as FeatureBoardClient & PromiseLike<FeatureBoardClient>
+            )
         },
         updateFeatures() {
             return updateStrategyImplementation.updateFeatures()
