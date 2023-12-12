@@ -4,15 +4,21 @@ import type {
     FeatureBoardClient,
     Features,
 } from '@featureboard/js-sdk'
-import { featureBoardHostedService, retry } from '@featureboard/js-sdk'
+import {
+    featureBoardHostedService,
+    resolveError,
+    retry,
+} from '@featureboard/js-sdk'
+import { SpanStatusCode } from '@opentelemetry/api'
 import { PromiseCompletionSource } from 'promise-completion-source'
 import type { ExternalStateStore, ServerClient } from '.'
+import type { IFeatureStateStore } from './feature-state-store'
 import { AllFeatureStateStore } from './feature-state-store'
-import { debugLog } from './log'
 import { resolveUpdateStrategy } from './update-strategies/resolveUpdateStrategy'
 import type { UpdateStrategies } from './update-strategies/update-strategies'
-
-const serverConnectionDebug = debugLog.extend('server-connection')
+import { addDebugEvent } from './utils/add-debug-event'
+import { DebugFeatureStateStore } from './utils/debug-store'
+import { getTracer } from './utils/get-tracer'
 
 export interface CreateServerClientOptions {
     /** Connect to a self hosted instance of FeatureBoard */
@@ -44,10 +50,18 @@ export function createServerClient({
     updateStrategy,
     environmentApiKey,
 }: CreateServerClientOptions): ServerClient {
+    const tracer = getTracer()
+
     const initialisedPromise = new PromiseCompletionSource<boolean>()
     // Ensure that the init promise doesn't cause an unhandled promise rejection
     initialisedPromise.promise.catch(() => {})
-    const stateStore = new AllFeatureStateStore(externalStateStore)
+    let stateStore: IFeatureStateStore = new AllFeatureStateStore(
+        externalStateStore,
+    )
+    if (process.env.FEATUREBOARD_SDK_DEBUG) {
+        stateStore = new DebugFeatureStateStore(stateStore)
+    }
+
     const updateStrategyImplementation = resolveUpdateStrategy(
         updateStrategy,
         environmentApiKey,
@@ -55,41 +69,51 @@ export function createServerClient({
     )
 
     const retryCancellationToken = { cancel: false }
-    retry(async () => {
-        try {
-            serverConnectionDebug('Connecting to SDK...')
-            return await updateStrategyImplementation.connect(stateStore)
-        } catch (error) {
-            serverConnectionDebug(
-                'Failed to connect to SDK, try to initialise form external state store',
-                error,
-            )
-            // Try initialise external state store
-            const result = await stateStore.initialiseFromExternalStateStore()
-            if (!result) {
-                // No external state store, throw original error
-                console.error('Failed to connect to SDK', error)
-                throw error
-            }
-            serverConnectionDebug('Initialised from external state store')
-            return Promise.resolve()
-        }
-    }, retryCancellationToken)
-        .then(() => {
-            if (!initialisedPromise.completed) {
-                serverConnectionDebug('Server client is initialised')
-                initialisedPromise.resolve(true)
-            }
-        })
-        .catch((err) => {
-            if (!initialisedPromise.completed) {
-                console.error(
-                    'FeatureBoard SDK failed to connect after 5 retries',
-                    err,
-                )
-                initialisedPromise.reject(err)
-            }
-        })
+
+    void tracer.startActiveSpan(
+        'connect-with-retry',
+        {
+            attributes: {},
+        },
+        (connectWithRetrySpan) =>
+            retry(async () => {
+                try {
+                    return await updateStrategyImplementation.connect(
+                        stateStore,
+                    )
+                } catch (error) {
+                    const err = resolveError(error)
+                    connectWithRetrySpan.recordException(err)
+
+                    // Try initialise external state store
+                    const result =
+                        await stateStore.initialiseFromExternalStateStore()
+
+                    if (!result) {
+                        // No external state store, throw original error
+                        console.error('Failed to connect to SDK', error)
+                        throw error
+                    }
+
+                    return Promise.resolve()
+                }
+            }, retryCancellationToken)
+                .then(() => {
+                    initialisedPromise.resolve(true)
+                })
+                .catch((err) => {
+                    console.error(
+                        'FeatureBoard SDK failed to connect after 5 retries',
+                        err,
+                    )
+                    initialisedPromise.reject(err)
+                    connectWithRetrySpan.setStatus({
+                        code: SpanStatusCode.ERROR,
+                        message: err.message,
+                    })
+                })
+                .finally(() => connectWithRetrySpan.end()),
+    )
 
     return {
         get initialised() {
@@ -102,15 +126,36 @@ export function createServerClient({
         request: (audienceKeys: string[]) => {
             const request = updateStrategyImplementation.onRequest()
 
-            serverConnectionDebug(
-                'Creating request client for audiences: %o',
-                audienceKeys,
-            )
-            return request
-                ? addUserWarnings(
-                      request.then(() => syncRequest(stateStore, audienceKeys)),
-                  )
-                : makeRequestClient(syncRequest(stateStore, audienceKeys))
+            return tracer.startActiveSpan(
+                'get-request-client',
+                { attributes: { audiences: audienceKeys } },
+                (span) => {
+                    if (request) {
+                        return addUserWarnings(
+                            request.then(() =>
+                                syncRequest(stateStore, audienceKeys),
+                            ),
+                        ).then(
+                            (client) => {
+                                span.end()
+                                return client
+                            },
+                            (reason) => {
+                                span.end()
+                                throw reason
+                            },
+                        )
+                    }
+
+                    try {
+                        return makeRequestClient(
+                            syncRequest(stateStore, audienceKeys),
+                        )
+                    } finally {
+                        span.end()
+                    }
+                },
+            ) as FeatureBoardClient & PromiseLike<FeatureBoardClient>
         },
         updateFeatures() {
             return updateStrategyImplementation.updateFeatures()
@@ -147,7 +192,7 @@ export function makeRequestClient(
 }
 
 function syncRequest(
-    stateStore: AllFeatureStateStore,
+    stateStore: IFeatureStateStore,
     audienceKeys: string[],
 ): FeatureBoardClient {
     // Shallow copy the feature state so requests are stable
@@ -185,20 +230,21 @@ function syncRequest(
     ) {
         const featureValues = featuresState[featureKey as string]
         if (!featureValues) {
-            serverConnectionDebug(
+            addDebugEvent(
                 'getFeatureValue - no value, returning user fallback: %o',
-                audienceKeys,
+                { audienceKeys },
             )
+
             return defaultValue
         }
         const audienceException = featureValues.audienceExceptions.find((a) =>
             audienceKeys.includes(a.audienceKey),
         )
         const value = audienceException?.value ?? featureValues.defaultValue
-        serverConnectionDebug('getFeatureValue: %o', {
-            audienceExceptionValue: audienceException?.value,
-            defaultValue: featureValues.defaultValue,
+        addDebugEvent('getFeatureValue', {
+            featureKey,
             value,
+            defaultValue,
         })
         return value
     }

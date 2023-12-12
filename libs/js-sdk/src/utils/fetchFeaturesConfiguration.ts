@@ -1,8 +1,9 @@
 import type { EffectiveFeatureValue } from '@featureboard/contracts'
-import { SpanStatusCode, trace } from '@opentelemetry/api'
+import { SpanStatusCode } from '@opentelemetry/api'
 import type { EffectiveFeatureStateStore } from '../effective-feature-state-store'
 import { getEffectiveEndpoint } from '../update-strategies/getEffectiveEndpoint'
 import { version } from '../version'
+import { addDebugEvent } from './add-debug-event'
 import { compareArrays } from './compare-arrays'
 import { getTracer } from './get-tracer'
 import { resolveError } from './resolve-error'
@@ -54,15 +55,13 @@ export async function fetchFeaturesConfigurationViaHttp(
 
                 const newAudiences = getCurrentAudiences()
                 if (!compareArrays(newAudiences, audiences)) {
-                    trace
-                        .getActiveSpan()
-                        ?.addEvent(
-                            'Audiences changed while fetching, ignoring response',
-                            {
-                                audiences,
-                                newAudiences,
-                            },
-                        )
+                    addDebugEvent(
+                        'Audiences changed while fetching, ignoring response',
+                        {
+                            audiences,
+                            newAudiences,
+                        },
+                    )
                     return etag
                 }
                 const existing = { ...stateStore.all() }
@@ -75,7 +74,7 @@ export async function fetchFeaturesConfigurationViaHttp(
                 unavailableFeatures.forEach((unavailableFeature) => {
                     stateStore.set(unavailableFeature, undefined)
                 })
-                span.addEvent('Feature updates received', {
+                addDebugEvent('Feature updates received', {
                     audiences,
                     unavailableFeatures,
                 })

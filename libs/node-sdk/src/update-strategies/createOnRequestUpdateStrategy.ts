@@ -1,8 +1,8 @@
 import { createEnsureSingle } from '@featureboard/js-sdk'
+import { addDebugEvent } from '../utils/add-debug-event'
 import { fetchFeaturesConfigurationViaHttp } from '../utils/fetchFeaturesConfiguration'
 import { getAllEndpoint } from './getAllEndpoint'
 import type { AllConfigUpdateStrategy } from './update-strategies'
-import { updatesLog } from './updates-log'
 
 export function createOnRequestUpdateStrategy(
     environmentApiKey: string,
@@ -23,7 +23,6 @@ export function createOnRequestUpdateStrategy(
                     environmentApiKey,
                     stateStore,
                     etag,
-                    'on-request',
                 )
             })
 
@@ -48,14 +47,14 @@ export function createOnRequestUpdateStrategy(
                 const now = Date.now()
                 if (!responseExpires || now >= responseExpires) {
                     responseExpires = now + maxAgeMs
-                    updatesLog('Response expired, fetching updates: %o', {
+                    addDebugEvent('Response expired, fetching updates', {
                         maxAgeMs,
                         newExpiry: responseExpires,
                     })
                     return fetchUpdatesSingle()
                 }
 
-                updatesLog('Response not expired: %o', {
+                addDebugEvent('Response not expired', {
                     responseExpires,
                     now,
                 })

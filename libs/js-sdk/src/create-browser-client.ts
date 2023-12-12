@@ -1,6 +1,6 @@
 import type { EffectiveFeatureValue } from '@featureboard/contracts'
 import type { Span } from '@opentelemetry/api'
-import { SpanStatusCode, trace } from '@opentelemetry/api'
+import { SpanStatusCode } from '@opentelemetry/api'
 import { PromiseCompletionSource } from 'promise-completion-source'
 import type { BrowserClient } from './client-connection'
 import { createClientInternal } from './create-client'
@@ -9,6 +9,7 @@ import type { FeatureBoardApiConfig } from './featureboard-api-config'
 import { featureBoardHostedService } from './featureboard-service-urls'
 import { resolveUpdateStrategy } from './update-strategies/resolveUpdateStrategy'
 import type { UpdateStrategies } from './update-strategies/update-strategies'
+import { addDebugEvent } from './utils/add-debug-event'
 import { compareArrays } from './utils/compare-arrays'
 import { getTracer } from './utils/get-tracer'
 import { resolveError } from './utils/resolve-error'
@@ -97,7 +98,7 @@ export function createBrowserClient({
             }, cancellationToken)
         } catch (error) {
             if (initialPromise !== initialisedState.initialisedPromise) {
-                initializeSpan.addEvent(
+                addDebugEvent(
                     "Ignoring initialization error as it's out of date",
                 )
                 initializeSpan.end()
@@ -122,9 +123,7 @@ export function createBrowserClient({
 
         // Successfully completed
         if (initialPromise !== initialisedState.initialisedPromise) {
-            initializeSpan.addEvent(
-                "Ignoring initialization event as it's out of date",
-            )
+            addDebugEvent("Ignoring initialization event as it's out of date")
             initializeSpan.end()
             return
         }
@@ -171,7 +170,7 @@ export function createBrowserClient({
         },
         async updateAudiences(updatedAudiences: string[]) {
             if (compareArrays(stateStore.audiences, updatedAudiences)) {
-                trace.getActiveSpan()?.addEvent('Skipped update audiences', {
+                addDebugEvent('Skipped update audiences', {
                     updatedAudiences,
                     currentAudiences: stateStore.audiences,
                 })

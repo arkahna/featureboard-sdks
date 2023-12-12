@@ -8,7 +8,7 @@
  */
 
 import type { LiveOptions } from '@featureboard/live-connection'
-import type { AllFeatureStateStore } from '../feature-state-store'
+import type { IFeatureStateStore } from '../feature-state-store'
 
 export interface ManualUpdateStrategy {
     kind: 'manual'
@@ -56,7 +56,7 @@ export interface OnRequestOptions {
 
 export interface AllConfigUpdateStrategy {
     state: 'connected' | 'disconnected'
-    connect(state: AllFeatureStateStore): Promise<void>
+    connect(state: IFeatureStateStore): Promise<void>
     close(): Promise<void>
     updateFeatures(): PromiseLike<void>
     /** To be called when creating a request client */

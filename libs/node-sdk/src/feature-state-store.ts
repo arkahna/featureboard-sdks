@@ -1,10 +1,17 @@
 import type { FeatureConfiguration } from '@featureboard/contracts'
+import { resolveError } from '@featureboard/js-sdk'
+import { SpanStatusCode } from '@opentelemetry/api'
 import type { ExternalStateStore } from './external-state-store'
-import { debugLog } from './log'
+import { getTracer } from './utils/get-tracer'
 
-const stateStoreDebug = debugLog.extend('state-store')
+export interface IFeatureStateStore {
+    all(): Record<string, FeatureConfiguration | undefined>
+    get(featureKey: string): FeatureConfiguration | undefined
+    set(featureKey: string, value: FeatureConfiguration | undefined): void
+    initialiseFromExternalStateStore(): Promise<boolean>
+}
 
-export class AllFeatureStateStore {
+export class AllFeatureStateStore implements IFeatureStateStore {
     private _store: Record<string, FeatureConfiguration | undefined> = {}
     private _externalStateStore: ExternalStateStore | undefined
     private featureUpdatedCallbacks: Array<
@@ -19,44 +26,50 @@ export class AllFeatureStateStore {
         if (!this._externalStateStore) {
             return Promise.resolve(false)
         }
-        stateStoreDebug('Initialising external state store')
+        const tracer = getTracer()
 
-        try {
-            const externalStore = await this._externalStateStore.all()
+        await tracer.startActiveSpan(
+            'initialise-from-external-store',
+            async (externalStoreSpan) => {
+                try {
+                    const externalStore = await this._externalStateStore!.all()
 
-            this._store = { ...externalStore }
-            Object.keys(externalStore).forEach((key) => {
-                this.featureUpdatedCallbacks.forEach((valueUpdated) =>
-                    valueUpdated(key, externalStore[key]),
-                )
-            })
-        } catch (error: any) {
-            stateStoreDebug(
-                'Failed to initialise all feature state store with external state store',
-                error,
-            )
-            console.error(
-                'Failed to initialise from external state store',
-                error,
-            )
-            throw error
-        }
+                    this._store = { ...externalStore }
+                    Object.keys(externalStore).forEach((key) => {
+                        this.featureUpdatedCallbacks.forEach((valueUpdated) =>
+                            valueUpdated(key, externalStore[key]),
+                        )
+                    })
+                } catch (error) {
+                    const err = resolveError(error)
+                    externalStoreSpan.recordException(err)
+                    externalStoreSpan.setStatus({
+                        code: SpanStatusCode.ERROR,
+                        message: err.message,
+                    })
+
+                    console.error(
+                        'Failed to initialise from external state store',
+                        error,
+                    )
+                    throw error
+                }
+            },
+        )
         return Promise.resolve(true)
     }
 
     all(): Record<string, FeatureConfiguration | undefined> {
-        stateStoreDebug('all: %o', this._store)
         return { ...this._store }
     }
 
     get(featureKey: string): FeatureConfiguration | undefined {
         const value = this._store[featureKey]
-        stateStoreDebug("get '%s': %o", featureKey, value)
+
         return value
     }
 
     set(featureKey: string, value: FeatureConfiguration | undefined) {
-        stateStoreDebug("set '%s': %o", featureKey, value)
         this._store[featureKey] = value
         this.featureUpdatedCallbacks.forEach((valueUpdated) =>
             valueUpdated(featureKey, value),

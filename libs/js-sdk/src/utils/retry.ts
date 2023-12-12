@@ -16,46 +16,47 @@ export async function retry<T>(
     return tracer.startActiveSpan('retry', async (span) => {
         let retryAttempt = 0
 
-        // eslint-disable-next-line no-constant-condition
-        while (true) {
-            try {
-                return await retryAttemptFn<T>(
-                    tracer,
-                    retryAttempt,
-                    fn,
-                ).finally(() => span.end())
-            } catch (error) {
-                const err = resolveError(error)
-                if (cancellationToken?.cancel) {
-                    span.end()
-                    return Promise.resolve()
-                }
+        try {
+            // eslint-disable-next-line no-constant-condition
+            while (true) {
+                try {
+                    return await retryAttemptFn<T>(tracer, retryAttempt, fn)
+                } catch (error) {
+                    const err = resolveError(error)
+                    if (cancellationToken?.cancel) {
+                        span.end()
+                        return Promise.resolve()
+                    }
 
-                if (retryAttempt >= maxRetries) {
-                    span.recordException(
-                        new Error(
-                            'Operation failed after max retries exceeded',
-                            { cause: err },
-                        ),
+                    if (retryAttempt >= maxRetries) {
+                        span.recordException(
+                            new Error(
+                                'Operation failed after max retries exceeded',
+                                { cause: err },
+                            ),
+                        )
+                        span.setStatus({
+                            code: SpanStatusCode.ERROR,
+                            message:
+                                'Operation failed after max retries exceeded',
+                        })
+                        span.end()
+                        // Max retries
+                        throw error
+                    }
+
+                    const delayMs =
+                        initialDelayMs * Math.pow(backoffFactor, retryAttempt)
+
+                    await tracer.startActiveSpan('delay', (delaySpan) =>
+                        delay(delayMs).finally(() => delaySpan.end()),
                     )
-                    span.setStatus({
-                        code: SpanStatusCode.ERROR,
-                        message: 'Operation failed after max retries exceeded',
-                    })
-                    span.end()
-                    // Max retries
-                    throw error
+
+                    retryAttempt++
                 }
-
-                const delayMs =
-                    initialDelayMs * Math.pow(backoffFactor, retryAttempt)
-
-                await tracer.startActiveSpan('delay', (delaySpan) =>
-                    delay(delayMs).finally(() => delaySpan.end()),
-                )
-
-                retryAttempt++
             }
+        } finally {
+            span.end()
         }
     })
 }
