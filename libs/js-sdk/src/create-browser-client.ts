@@ -47,15 +47,15 @@ export function createBrowserClient({
 }): BrowserClient {
     const tracer = getTracer()
 
-    const waitingForInitialization: Array<PromiseCompletionSource<boolean>> = []
-    const initializedCallbacks: Array<(initialised: boolean) => void> = []
+    const waitingForInitialisation: Array<PromiseCompletionSource<boolean>> = []
+    const initialisedCallbacks: Array<(initialised: boolean) => void> = []
 
     const initialisedState: {
         initialisedPromise: PromiseCompletionSource<boolean>
-        initializedCancellationToken: { cancel: boolean }
+        initialisedCancellationToken: { cancel: boolean }
     } = {
         initialisedPromise: new PromiseCompletionSource<boolean>(),
-        initializedCancellationToken: { cancel: false },
+        initialisedCancellationToken: { cancel: false },
     }
 
     const stateStore = new EffectiveFeatureStateStore(audiences, initialValues)
@@ -74,7 +74,7 @@ export function createBrowserClient({
         const cancellationToken = { cancel: false }
         initialPromise.promise.catch(() => {})
         initialisedState.initialisedPromise = initialPromise
-        initialisedState.initializedCancellationToken = cancellationToken
+        initialisedState.initialisedCancellationToken = cancellationToken
 
         try {
             await retry(async () => {
@@ -99,7 +99,7 @@ export function createBrowserClient({
         } catch (error) {
             if (initialPromise !== initialisedState.initialisedPromise) {
                 addDebugEvent(
-                    "Ignoring initialization error as it's out of date",
+                    "Ignoring initialisation error as it's out of date",
                 )
                 initializeSpan.end()
                 return
@@ -115,24 +115,24 @@ export function createBrowserClient({
             )
             initialisedState.initialisedPromise.reject(err)
 
-            waitingForInitialization.forEach((w) => w.reject(err))
-            waitingForInitialization.length = 0
+            waitingForInitialisation.forEach((w) => w.reject(err))
+            waitingForInitialisation.length = 0
             initializeSpan.end()
             return
         }
 
         // Successfully completed
         if (initialPromise !== initialisedState.initialisedPromise) {
-            addDebugEvent("Ignoring initialization event as it's out of date")
+            addDebugEvent("Ignoring initialisation event as it's out of date")
             initializeSpan.end()
             return
         }
 
         initialisedState.initialisedPromise.resolve(true)
 
-        notifyWaitingForInitialization(initializedCallbacks, initializeSpan)
-        waitingForInitialization.forEach((w) => w.resolve(true))
-        waitingForInitialization.length = 0
+        notifyWaitingForInitialisation(initialisedCallbacks, initializeSpan)
+        waitingForInitialisation.forEach((w) => w.resolve(true))
+        waitingForInitialisation.length = 0
         initializeSpan.end()
     }
 
@@ -155,15 +155,15 @@ export function createBrowserClient({
                 return initialisedState.initialisedPromise.promise
             }
 
-            const initialized = new PromiseCompletionSource<boolean>()
-            waitingForInitialization.push(initialized)
-            return initialized.promise
+            const initialised = new PromiseCompletionSource<boolean>()
+            waitingForInitialisation.push(initialised)
+            return initialised.promise
         },
         subscribeToInitialisedChanged(callback) {
-            initializedCallbacks.push(callback)
+            initialisedCallbacks.push(callback)
             return () => {
-                initializedCallbacks.splice(
-                    initializedCallbacks.indexOf(callback),
+                initialisedCallbacks.splice(
+                    initialisedCallbacks.indexOf(callback),
                     1,
                 )
             }
@@ -181,7 +181,7 @@ export function createBrowserClient({
 
             // Close connection and cancel retry
             updateStrategyImplementation.close()
-            initialisedState.initializedCancellationToken.cancel = true
+            initialisedState.initialisedCancellationToken.cancel = true
 
             await tracer.startActiveSpan(
                 'update-audiences',
@@ -208,17 +208,17 @@ export function createBrowserClient({
             )
         },
         close() {
-            initialisedState.initializedCancellationToken.cancel = true
+            initialisedState.initialisedCancellationToken.cancel = true
             return updateStrategyImplementation.close()
         },
     }
 }
-function notifyWaitingForInitialization(
-    initializedCallbacks: ((initialised: boolean) => void)[],
+function notifyWaitingForInitialisation(
+    initialisedCallbacks: ((initialised: boolean) => void)[],
     initializeSpan: Span,
 ) {
     const errors: Error[] = []
-    initializedCallbacks.forEach((c) => {
+    initialisedCallbacks.forEach((c) => {
         try {
             c(true)
         } catch (error) {
@@ -234,5 +234,5 @@ function notifyWaitingForInitialization(
     if (errors.length > 0) {
         throw new AggregateError(errors, 'Multiple callback errors occurred')
     }
-    initializedCallbacks.length = 0
+    initialisedCallbacks.length = 0
 }
