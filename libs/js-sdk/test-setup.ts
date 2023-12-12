@@ -6,7 +6,7 @@ import {
 } from '@opentelemetry/sdk-trace-node'
 import { afterAll, beforeAll } from 'vitest'
 
-let sdk: NodeSDK
+let sdk: NodeSDK | undefined
 let spanProcessor: SimpleSpanProcessor | undefined
 
 beforeAll(({ suite }) => {
@@ -17,16 +17,18 @@ beforeAll(({ suite }) => {
         : undefined
     spanProcessor = exporter ? new SimpleSpanProcessor(exporter) : undefined
 
-    sdk = new NodeSDK({
-        serviceName: 'featureboard-js-sdk-test',
-        spanProcessor: spanProcessor,
-        instrumentations: [],
-    })
+    sdk = spanProcessor
+        ? new NodeSDK({
+              serviceName: 'featureboard-js-sdk-test',
+              spanProcessor: spanProcessor,
+              instrumentations: [],
+          })
+        : undefined
 
-    sdk.start()
+    sdk?.start()
 })
 
 afterAll(async () => {
     await spanProcessor?.forceFlush()
-    await sdk.shutdown()
+    await sdk?.shutdown()
 })
