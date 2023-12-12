@@ -5,7 +5,7 @@ export async function getValidToken(clientId: string): Promise<string | null> {
 
     if (!tokenData) {
         console.error(
-            !!process.env['CI']
+            process.env['CI']
                 ? 'Please check you have provided an API key'
                 : 'Please authenticate by running `npx @featureboard/cli login`.',
         )
