@@ -24,7 +24,6 @@ export async function retry<T>(
                 } catch (error) {
                     const err = resolveError(error)
                     if (cancellationToken?.cancel) {
-                        span.end()
                         return Promise.resolve()
                     }
 
@@ -40,7 +39,6 @@ export async function retry<T>(
                             message:
                                 'Operation failed after max retries exceeded',
                         })
-                        span.end()
                         // Max retries
                         throw error
                     }
