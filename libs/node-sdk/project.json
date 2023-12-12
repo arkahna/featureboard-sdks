@@ -17,11 +17,19 @@
                 "cwd": "libs/node-sdk"
             }
         },
+        "version": {
+            "executor": "nx:run-commands",
+            "options": {
+                "commands": [
+                    "echo \"export const version = '$(jq -r '.version' package.json)';\" > src/version.ts"
+                ],
+                "cwd": "libs/node-sdk"
+            }
+        },
         "package": {
             "executor": "nx:run-commands",
             "options": {
                 "commands": [
-                    "echo \"export const version = '$(jq -r '.version' package.json)';\" > src/version.ts",
                     "tsup src/index.ts -d dist --sourcemap --format esm --legacy-output --external @featureboard/js-sdk",
                     "tsup src/index.ts -d dist/legacycjs --sourcemap --format cjs --legacy-output --external @featureboard/js-sdk",
                     "tsup src/index.ts -d dist --sourcemap --format esm,cjs --external @featureboard/js-sdk",
@@ -29,7 +37,8 @@
                 ],
                 "cwd": "libs/node-sdk",
                 "parallel": false
-            }
+            },
+            "dependsOn": ["version"]
         }
     }
 }

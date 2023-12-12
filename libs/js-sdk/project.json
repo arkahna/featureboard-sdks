@@ -17,11 +17,17 @@
                 "cwd": "libs/js-sdk"
             }
         },
+        "version": {
+            "executor": "@nrwl/workspace:run-commands",
+            "options": {
+                "command": "echo \"export const version = '$(jq -r '.version' package.json)';\" > src/version.ts",
+                "cwd": "libs/js-sdk"
+            }
+        },
         "package": {
             "executor": "nx:run-commands",
             "options": {
                 "commands": [
-                    "echo \"export const version = '$(jq -r '.version' package.json)';\" > src/version.ts",
                     "tsup src/index.ts -d dist --sourcemap --format esm --legacy-output --external @featureboard/contracts --env.TEST false",
                     "tsup src/index.ts -d dist/legacycjs --sourcemap --format cjs --legacy-output --external @featureboard/contracts --env.TEST false",
                     "tsup src/index.ts -d dist --sourcemap --format esm,cjs --external @featureboard/contracts --env.TEST false",
@@ -29,7 +35,8 @@
                 ],
                 "cwd": "libs/js-sdk",
                 "parallel": false
-            }
+            },
+            "dependsOn": ["version"]
         }
     }
 }
