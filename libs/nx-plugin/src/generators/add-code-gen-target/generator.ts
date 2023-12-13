@@ -26,14 +26,18 @@ export async function addCodeGenTargetGenerator(
 export function getCodeGenExecutorConfiguration(
     options: CodeGenExecutorSchema,
 ): CodeGenExecutorConfiguration {
+    const codeGenOptions: CodeGenExecutorConfiguration['options'] = {
+        template: options.template,
+        featureBoardProductName: options.featureBoardProductName,
+        subFolder: options.subFolder,
+    }
+    if (options.dryRun) {
+        codeGenOptions.dryRun = true
+    }
     return {
         executor: '@featureboard/nx-plugin:code-gen',
         outputs: [`{projectRoot}/${options.subFolder}`],
-        options: {
-            template: options.template,
-            featureBoardProductName: options.featureBoardProductName,
-            subFolder: options.subFolder,
-        },
+        options: codeGenOptions,
         dependsOn: ['build'],
     }
 }
@@ -43,7 +47,7 @@ export function getCodeGenExecutorConfiguration(
  */
 export type CodeGenExecutorConfiguration = TargetConfiguration & {
     executor: '@featureboard/nx-plugin:code-gen'
-    options: CodeGenExecutorSchema
+    options: CodeGenExecutorSchema & { dryRun?: boolean }
 }
 
 export default addCodeGenTargetGenerator
