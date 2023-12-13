@@ -5,7 +5,7 @@
             "schema": "./src/generators/code-gen/schema.json",
             "description": "Generates FeatureBoard types for your chosen language"
         },
-        "AddCodeGenTarget": {
+        "add-code-gen-target": {
             "factory": "./src/generators/add-code-gen-target/generator",
             "schema": "./src/generators/add-code-gen-target/schema.json",
             "description": "Adds code gen to a projects targets"

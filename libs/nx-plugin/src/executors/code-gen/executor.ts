@@ -16,7 +16,7 @@ export async function codeGenExecutor(
     tree?: Tree,
 ) {
     if (!context.projectName) {
-        throw new Error('No projectName')
+        throw new Error('No projectName: name not found in in project.json')
     }
 
     const projectRoot =

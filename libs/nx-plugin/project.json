@@ -31,8 +31,7 @@
             "options": {
                 "passWithNoTests": false,
                 "reportsDirectory": "../../coverage/libs/nx-plugin"
-            },
-            "dependsOn": ["^build"]
+            }
         }
     },
     "tags": []
