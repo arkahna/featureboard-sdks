@@ -1,12 +1,9 @@
-import {
-    Tree,
-    addProjectConfiguration,
-    readProjectConfiguration,
-} from '@nx/devkit'
+import type { Tree } from '@nx/devkit'
+import { addProjectConfiguration, readProjectConfiguration } from '@nx/devkit'
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing'
 
 import { addCodeGenTargetGenerator } from './generator'
-import { AddCodeGenTargetGeneratorSchema } from './schema'
+import type { AddCodeGenTargetGeneratorSchema } from './schema'
 
 describe('AddCodeGenTarget generator', () => {
     let tree: Tree
@@ -21,6 +18,7 @@ describe('AddCodeGenTarget generator', () => {
             featureBoardProductName: 'SaaSy Icons',
             targetName: 'saasy-icons',
             subFolder: './src/features',
+            dryRun: false,
         }
 
         const root = 'apps/my-app'

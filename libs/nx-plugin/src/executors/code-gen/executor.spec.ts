@@ -1,9 +1,5 @@
-import {
-    ExecutorContext,
-    Tree,
-    addProjectConfiguration,
-    joinPathFragments,
-} from '@nx/devkit'
+import type { ExecutorContext, Tree } from '@nx/devkit'
+import { addProjectConfiguration, joinPathFragments } from '@nx/devkit'
 import * as fs from 'fs/promises'
 import { HttpResponse, http } from 'msw'
 import type { SetupServer } from 'msw/node'
