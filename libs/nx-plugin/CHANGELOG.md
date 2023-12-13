@@ -1,5 +1,14 @@
 # @featureboard/nx-plugin
 
+## 0.3.7
+
+### Patch Changes
+
+- 69510ca: Fix code gen generator
+  Add add target executor
+- Updated dependencies [69510ca]
+  - @featureboard/code-generator@0.3.5
+
 ## 0.3.6
 
 ### Patch Changes

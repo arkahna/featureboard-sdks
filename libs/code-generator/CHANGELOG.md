@@ -1,5 +1,12 @@
 # @featureboard/code-generator
 
+## 0.3.5
+
+### Patch Changes
+
+- 69510ca: Fix code gen generator
+  Add add target executor
+
 ## 0.3.4
 
 ### Patch Changes
