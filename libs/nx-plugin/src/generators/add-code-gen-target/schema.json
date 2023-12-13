@@ -1,10 +1,26 @@
 {
     "$schema": "http://json-schema.org/schema",
-    "version": 2,
-    "title": "CodeGen executor",
-    "description": "",
+    "$id": "AddCodeGenTarget",
+    "title": "",
     "type": "object",
     "properties": {
+        "projectName": {
+            "type": "string",
+            "description": "The name of the project to add the component to.",
+            "alias": "p",
+            "$default": {
+                "$source": "projectName"
+            },
+            "x-prompt": "What is the name of the project you want to add the target to?"
+        },
+
+        "targetName": {
+            "type": "string",
+            "description": "The name of the target.",
+            "alias": "t",
+            "x-prompt": "What is the name of the target you want to add?"
+        },
+
         "template": {
             "description": "The type of the component",
             "alias": "t",
@@ -16,6 +32,10 @@
                     {
                         "value": "dotnet-api",
                         "label": "DotNet API"
+                    },
+                    {
+                        "value": "typescript",
+                        "label": "Typescript"
                     }
                 ]
             }
@@ -26,22 +46,11 @@
             "description": "The name of the FeatureBoard product you want to pull the types from."
         },
 
-        "featureBoardApiKey": {
-            "type": "string",
-            "description": "The FeatureBoard API key."
-        },
-
         "subFolder": {
             "type": "string",
             "description": "Sub-folder to add the generated code to.",
             "default": "./"
-        },
-
-        "dryRun": {
-            "type": "boolean",
-            "description": "Only show what would be generated.",
-            "default": false
         }
     },
-    "required": ["template", "projectName", "featureBoardProductName"]
+    "required": ["projectName", "template", "featureBoardProductName"]
 }

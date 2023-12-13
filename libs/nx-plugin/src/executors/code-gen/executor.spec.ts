@@ -1,22 +1,22 @@
-import type { Tree } from '@nx/devkit'
-import {
-    addProjectConfiguration,
-    joinPathFragments,
-    readProjectConfiguration,
-} from '@nx/devkit'
-import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing'
+import type { ExecutorContext, Tree } from '@nx/devkit'
+import { addProjectConfiguration, joinPathFragments } from '@nx/devkit'
 import * as fs from 'fs/promises'
 import { HttpResponse, http } from 'msw'
 import type { SetupServer } from 'msw/node'
 import { setupServer } from 'msw/node'
+import { createTreeWithEmptyWorkspace } from 'nx/src/devkit-testing-exports'
 import * as path from 'path'
 import { codeGenExecutor } from './executor'
 import type { CodeGenExecutorSchema } from './schema'
 
-describe('code-Executor', () => {
+describe('code-gen executor', () => {
+    let context: ExecutorContext
     let tree: Tree
     let options: CodeGenExecutorSchema
     let server: SetupServer
+    const root = '/virtual'
+    const projectName = 'my-app'
+    const projectRoot = `apps/${projectName}`
 
     beforeAll(() => {
         server = setupServer(
@@ -49,24 +49,44 @@ describe('code-Executor', () => {
     })
 
     beforeEach(async () => {
-        tree = createTreeWithEmptyWorkspace({ layout: 'apps-libs' })
+        context = {
+            root: root,
+            cwd: root,
+            projectName: projectName,
+            targetName: 'lint',
+            projectsConfigurations: {
+                version: 2,
+                projects: {
+                    [projectName]: {
+                        root: projectRoot,
+                        sourceRoot: projectRoot,
+                        targets: {
+                            lint: {
+                                executor: '@nx-dotnet/core:format',
+                            },
+                        },
+                    },
+                },
+            },
+            isVerbose: false,
+        }
 
         options = {
-            projectName: 'my-app',
-            subFolder: './',
+            subFolder: './src/features',
             template: 'dotnet-api',
             featureBoardProductName: 'SaaSy Icons',
             featureBoardApiKey: 'This is totally a key',
+            dryRun: true,
         }
 
-        const root = 'apps/my-app'
-        addProjectConfiguration(tree, options.projectName, {
-            root: `apps/${options.projectName}`,
+        tree = createTreeWithEmptyWorkspace({ layout: 'apps-libs' })
+        addProjectConfiguration(tree, projectName, {
+            root: projectRoot,
             projectType: 'application',
             targets: { 'my-target': { executor: 'nx:noop' } },
         })
         tree.write(
-            joinPathFragments(root, 'Project.FeatureBoard.MyApp.csproj'),
+            joinPathFragments(projectRoot, 'Project.FeatureBoard.MyApp.csproj'),
             '',
         )
     })
@@ -77,23 +97,23 @@ describe('code-Executor', () => {
         })
 
         it('should run successfully', async () => {
-            let project = readProjectConfiguration(tree, options.projectName)
-            await codeGenExecutor(tree, options)
+            const output = await codeGenExecutor(options, context, tree)
 
-            project = readProjectConfiguration(tree, options.projectName)
-            expect(project).toBeDefined()
+            expect(output?.success).toBe(true)
         })
 
         it('should produce the expected features files', async () => {
-            let project = readProjectConfiguration(tree, options.projectName)
-            await codeGenExecutor(tree, options)
-
-            project = readProjectConfiguration(tree, options.projectName)
+            await codeGenExecutor(options, context, tree)
             const files = tree
                 .listChanges()
-                .filter((x) => x.path.match(/^apps\/my-app\/.*$/))
+                .filter(
+                    (x) =>
+                        x.path.match(/^apps\/my-app\/.*$/) &&
+                        !x.path.endsWith('.csproj') &&
+                        !x.path.endsWith('/project.json'),
+                )
 
-            expect(files).toHaveLength(3)
+            expect(files).toHaveLength(1)
             files.forEach((x) => {
                 expect(x.content?.toString('utf-8')).toMatchSnapshot(x.path)
             })
@@ -106,23 +126,23 @@ describe('code-Executor', () => {
         })
 
         it('should run successfully', async () => {
-            let project = readProjectConfiguration(tree, options.projectName)
-            await codeGenExecutor(tree, options)
+            const output = await codeGenExecutor(options, context, tree)
 
-            project = readProjectConfiguration(tree, options.projectName)
-            expect(project).toBeDefined()
+            expect(output?.success).toBe(true)
         })
 
         it('should produce the expected features files', async () => {
-            let project = readProjectConfiguration(tree, options.projectName)
-            await codeGenExecutor(tree, options)
-
-            project = readProjectConfiguration(tree, options.projectName)
+            await codeGenExecutor(options, context, tree)
             const files = tree
                 .listChanges()
-                .filter((x) => x.path.match(/^apps\/my-app\/.*$/))
+                .filter(
+                    (x) =>
+                        x.path.match(/^apps\/my-app\/.*$/) &&
+                        !x.path.endsWith('.csproj') &&
+                        !x.path.endsWith('/project.json'),
+                )
 
-            expect(files).toHaveLength(3)
+            expect(files).toHaveLength(1)
             files.forEach((x) => {
                 expect(x.content?.toString('utf-8')).toMatchSnapshot(x.path)
             })

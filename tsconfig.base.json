@@ -15,10 +15,10 @@
         "baseUrl": ".",
         "strict": true,
         "paths": {
-            "@featureboard/cli": ["apps/cli/src/index.ts"],
             "@featureboard/api-authentication": [
                 "libs/api-authentication/src/index.ts"
             ],
+            "@featureboard/cli": ["apps/cli/src/index.ts"],
             "@featureboard/code-generator": [
                 "libs/code-generator/src/index.ts"
             ],
