@@ -66,7 +66,7 @@ export async function codeGenExecutor(
 
 function saveChanges(tree: Tree, dryRun: boolean, verbose: boolean) {
     const changes = tree.listChanges()
-    if (!verbose) {
+    if (verbose) {
         printChanges(changes)
         if (changes.length === 0) {
             console.log(`\nFiles are the same no changes were made.`)
