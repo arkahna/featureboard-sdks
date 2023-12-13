@@ -5,7 +5,6 @@ import {
 import type { FeatureBoardAuth } from '@featureboard/code-generator'
 import { codeGenerator } from '@featureboard/code-generator'
 import type { ExecutorContext, Tree } from '@nx/devkit'
-import { joinPathFragments } from '@nx/devkit'
 import { FsTree, flushChanges, printChanges } from 'nx/src/generators/tree'
 import { API_ENDPOINT, CLIENT_ID } from '../../shared/config'
 import type { CodeGenExecutorSchema } from './schema'
@@ -51,7 +50,7 @@ export async function codeGenExecutor(
 
     await codeGenerator({
         tree: tree,
-        relativeFilePath: joinPathFragments(projectRoot, options.subFolder),
+        relativeFilePath: options.subFolder,
         interactive: false,
         auth,
         apiEndpoint: API_ENDPOINT,

@@ -3,7 +3,7 @@
         "code-gen": {
             "implementation": "./src/executors/code-gen/executor",
             "schema": "./src/executors/code-gen/schema.json",
-            "description": "Generates FeatureBoard types for your chosen language"
+            "description": "Generate code based on the features set in FeatureBoard"
         }
     }
 }
