@@ -1,0 +1,29 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`AddCodeGenTarget generator > should update the project.json > apps/my-app/project.json 1`] = `
+"{
+  \\"name\\": \\"my-app\\",
+  \\"$schema\\": \\"../../node_modules/nx/schemas/project-schema.json\\",
+  \\"projectType\\": \\"application\\",
+  \\"targets\\": {
+    \\"my-target\\": {
+      \\"executor\\": \\"nx:noop\\"
+    },
+    \\"saasy-icons\\": {
+      \\"executor\\": \\"@featureboard/nx-plugin:code-gen\\",
+      \\"outputs\\": [
+        \\"{projectRoot}/./src/features\\"
+      ],
+      \\"options\\": {
+        \\"template\\": \\"dotnet-api\\",
+        \\"featureBoardProductName\\": \\"SaaSy Icons\\",
+        \\"subFolder\\": \\"./src/features\\"
+      },
+      \\"dependsOn\\": [
+        \\"build\\"
+      ]
+    }
+  }
+}
+"
+`;

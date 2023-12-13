@@ -13,7 +13,7 @@ import * as path from 'path'
 import { codeGenGenerator } from './generator'
 import type { CodeGenGeneratorSchema } from './schema'
 
-describe('code-generator', () => {
+describe('code-gen generator', () => {
     let tree: Tree
     let options: CodeGenGeneratorSchema
     let server: SetupServer
@@ -77,18 +77,15 @@ describe('code-generator', () => {
         })
 
         it('should run successfully', async () => {
-            let project = readProjectConfiguration(tree, options.projectName)
             await codeGenGenerator(tree, options)
 
-            project = readProjectConfiguration(tree, options.projectName)
+            const project = readProjectConfiguration(tree, options.projectName)
             expect(project).toBeDefined()
         })
 
         it('should produce the expected features files', async () => {
-            let project = readProjectConfiguration(tree, options.projectName)
             await codeGenGenerator(tree, options)
 
-            project = readProjectConfiguration(tree, options.projectName)
             const files = tree
                 .listChanges()
                 .filter(
@@ -111,18 +108,15 @@ describe('code-generator', () => {
         })
 
         it('should run successfully', async () => {
-            let project = readProjectConfiguration(tree, options.projectName)
             await codeGenGenerator(tree, options)
 
-            project = readProjectConfiguration(tree, options.projectName)
+            const project = readProjectConfiguration(tree, options.projectName)
             expect(project).toBeDefined()
         })
 
         it('should produce the expected features files', async () => {
-            let project = readProjectConfiguration(tree, options.projectName)
             await codeGenGenerator(tree, options)
 
-            project = readProjectConfiguration(tree, options.projectName)
             const files = tree
                 .listChanges()
                 .filter(

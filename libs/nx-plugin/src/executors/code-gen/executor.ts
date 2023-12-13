@@ -4,19 +4,30 @@ import {
 } from '@featureboard/api-authentication'
 import type { FeatureBoardAuth } from '@featureboard/code-generator'
 import { codeGenerator } from '@featureboard/code-generator'
-import type { Tree } from '@nx/devkit'
-import { joinPathFragments, readProjectConfiguration } from '@nx/devkit'
+import type { ExecutorContext, Tree } from '@nx/devkit'
+import { joinPathFragments } from '@nx/devkit'
+import { FsTree, flushChanges, printChanges } from 'nx/src/generators/tree'
 import { API_ENDPOINT, CLIENT_ID } from '../../shared/config'
-import { isDryRun } from '../../shared/is-dry-run'
-import { isVerbose } from '../../shared/is-verbose'
 import type { CodeGenExecutorSchema } from './schema'
+
 export async function codeGenExecutor(
-    tree: Tree,
-    { projectName, ...options }: CodeGenExecutorSchema,
+    options: CodeGenExecutorSchema,
+    context: ExecutorContext,
+    tree?: Tree,
 ) {
-    const project = readProjectConfiguration(tree, projectName)
-    const dryRun = isDryRun()
-    const verbose = isVerbose()
+    if (!context.projectName) {
+        throw new Error('No projectName')
+    }
+
+    const projectRoot =
+        context.projectsConfigurations?.projects[context.projectName]?.root
+
+    if (!projectRoot) {
+        console.error(`Error: Cannot find root for ${context.projectName}.`)
+        return {
+            success: false,
+        }
+    }
 
     let auth: FeatureBoardAuth
     if (options.featureBoardApiKey) {
@@ -25,7 +36,7 @@ export async function codeGenExecutor(
         }
     } else {
         const featureBoardBearerToken = await getValidToken(CLIENT_ID)
-        const organizationId = await readCurrentOrganization(verbose)
+        const organizationId = await readCurrentOrganization(context.isVerbose)
         if (!featureBoardBearerToken || !organizationId) {
             return
         }
@@ -36,13 +47,37 @@ export async function codeGenExecutor(
         }
     }
 
+    tree = tree || new FsTree(projectRoot, context.isVerbose)
+
     await codeGenerator({
         tree: tree,
-        relativeFilePath: joinPathFragments(project.root, options.subFolder),
-        interactive: !dryRun,
+        relativeFilePath: joinPathFragments(projectRoot, options.subFolder),
+        interactive: false,
         auth,
         apiEndpoint: API_ENDPOINT,
         ...options,
     })
+    saveChanges(tree, options.dryRun, context.isVerbose)
+
+    return {
+        success: true,
+    }
+}
+
+function saveChanges(tree: Tree, dryRun: boolean, verbose: boolean) {
+    const changes = tree.listChanges()
+    if (!verbose) {
+        printChanges(changes)
+        if (changes.length === 0) {
+            console.log(`\nFiles are the same no changes were made.`)
+            return
+        }
+    }
+
+    if (!dryRun && changes.length !== 0) {
+        flushChanges(tree.root, changes)
+        return
+    }
+    console.log(`\nNOTE: The "dryRun" flag means no changes were made.`)
 }
 export default codeGenExecutor

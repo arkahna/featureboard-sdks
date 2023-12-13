@@ -33,7 +33,7 @@ export function getDotNetNameSpace(tree: Tree, filePath: string): string {
 
     if (namespace) return namespace
 
-    const parentDir = path.resolve(filePath, '..')
+    const parentDir = path.join(filePath, '..')
     if (parentDir == filePath) throw new Error("Can't find .net project file")
-    return `${getDotNetNameSpace(tree, parentDir)}.${path.dirname(filePath)}`
+    return getDotNetNameSpace(tree, parentDir)
 }
