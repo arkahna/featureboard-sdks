@@ -8,7 +8,7 @@
         "add-code-gen-target": {
             "factory": "./src/generators/add-code-gen-target/generator",
             "schema": "./src/generators/add-code-gen-target/schema.json",
-            "description": "Adds the code gen executor to a projects targets"
+            "description": "Adds the code-gen executor to the project target."
         }
     }
 }
