@@ -12,7 +12,7 @@ exports[`AddCodeGenTarget generator > should update the project.json > apps/my-a
     \\"saasy-icons\\": {
       \\"executor\\": \\"@featureboard/nx-plugin:code-gen\\",
       \\"outputs\\": [
-        \\"{projectRoot}/./src/features\\"
+        \\"{projectRoot}src/features\\"
       ],
       \\"options\\": {
         \\"template\\": \\"dotnet-api\\",

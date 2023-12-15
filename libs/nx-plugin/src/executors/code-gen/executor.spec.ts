@@ -98,7 +98,6 @@ describe('code-gen executor', () => {
 
         it('should run successfully', async () => {
             const output = await codeGenExecutor(options, context, tree)
-
             expect(output?.success).toBe(true)
         })
 

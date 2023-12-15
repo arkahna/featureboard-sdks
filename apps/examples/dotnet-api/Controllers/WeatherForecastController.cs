@@ -23,10 +23,10 @@ public class WeatherForecastController : ControllerBase
   }
 
   [HttpGet(Name = "GetWeatherForecast")]
-  [FeatureFilter(BooleanFeature.AudiencesWrite, false)]
+  [FeatureFilter(BooleanFeature.ViewSubscribers, false)]
   public ActionResult<WeatherForecast[]> Get()
   {
-    if (_featureBoardClient.GetFeatureValue(features => features.AudiencesWrite, false))
+    if (_featureBoardClient.GetFeatureValue(features => features.ViewSubscribers, false))
     {
       return Ok(Enumerable.Range(1, 5).Select(index => new WeatherForecast
       {
