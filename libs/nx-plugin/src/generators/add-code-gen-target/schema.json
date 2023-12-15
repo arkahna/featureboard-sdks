@@ -49,7 +49,7 @@
 
         "subFolder": {
             "type": "string",
-            "description": "The sub-folder of the project to add the generated code to.",
+            "description": "The target sub-folder of the project .",
             "default": "./"
         }
     },
