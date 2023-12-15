@@ -3,7 +3,7 @@
         "code-gen": {
             "factory": "./src/generators/code-gen/generator",
             "schema": "./src/generators/code-gen/schema.json",
-            "description": "Generate code based on the features set in FeatureBoard"
+            "description": "Generate code based on FeatureBoard configuration."
         },
         "add-code-gen-target": {
             "factory": "./src/generators/add-code-gen-target/generator",
