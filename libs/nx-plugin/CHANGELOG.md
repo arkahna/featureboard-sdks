@@ -1,5 +1,12 @@
 # @featureboard/nx-plugin
 
+## 0.3.8
+
+### Patch Changes
+
+- 97a8fc9: Update nx-plugin interface descriptions to match docs
+  Fix location bug with executor
+
 ## 0.3.7
 
 ### Patch Changes

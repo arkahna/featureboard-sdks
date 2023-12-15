@@ -1,6 +1,6 @@
 {
     "name": "@featureboard/nx-plugin",
-    "version": "0.3.7",
+    "version": "0.3.8",
     "type": "commonjs",
     "main": "src/index.js",
     "repository": {
