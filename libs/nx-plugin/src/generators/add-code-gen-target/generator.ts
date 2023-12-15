@@ -36,7 +36,7 @@ export function getCodeGenExecutorConfiguration(
     }
     return {
         executor: '@featureboard/nx-plugin:code-gen',
-        outputs: [`{projectRoot}/${options.subFolder}`],
+        outputs: [`{projectRoot}/${options.subFolder}`.replace('/./', '/')],
         options: codeGenOptions,
         dependsOn: ['build'],
     }

@@ -26,6 +26,9 @@ export interface CodeGeneratorOptions {
     interactive: boolean
 
     tree: Tree
+    /**
+     * Relative path to the tree root
+     */
     relativeFilePath: string
 }
 

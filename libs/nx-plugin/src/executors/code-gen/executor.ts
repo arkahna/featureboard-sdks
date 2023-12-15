@@ -2,10 +2,11 @@ import {
     getValidToken,
     readCurrentOrganization,
 } from '@featureboard/api-authentication'
-import type { FeatureBoardAuth } from '@featureboard/code-generator'
-import { codeGenerator } from '@featureboard/code-generator'
-import type { ExecutorContext, Tree } from '@nx/devkit'
-import { joinPathFragments } from '@nx/devkit'
+import {
+    codeGenerator,
+    type FeatureBoardAuth,
+} from '@featureboard/code-generator'
+import { joinPathFragments, type ExecutorContext, type Tree } from '@nx/devkit'
 import { FsTree, flushChanges, printChanges } from 'nx/src/generators/tree'
 import { API_ENDPOINT, CLIENT_ID } from '../../shared/config'
 import type { CodeGenExecutorSchema } from './schema'
@@ -15,6 +16,7 @@ export async function codeGenExecutor(
     context: ExecutorContext,
     tree?: Tree,
 ) {
+    console.log('codeGenExecutor', options)
     if (!context.projectName) {
         throw new Error('No projectName: name not found in in project.json')
     }

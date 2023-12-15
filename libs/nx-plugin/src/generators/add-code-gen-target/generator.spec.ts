@@ -21,7 +21,6 @@ describe('AddCodeGenTarget generator', () => {
             dryRun: false,
         }
 
-        const root = 'apps/my-app'
         addProjectConfiguration(tree, options.projectName, {
             root: `apps/${options.projectName}`,
             projectType: 'application',
@@ -37,8 +36,6 @@ describe('AddCodeGenTarget generator', () => {
 
     it('should update the project.json', async () => {
         await addCodeGenTargetGenerator(tree, options)
-
-        const project = readProjectConfiguration(tree, options.projectName)
 
         const projectJson = tree
             .listChanges()

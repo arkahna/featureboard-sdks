@@ -34,6 +34,8 @@ export function getDotNetNameSpace(tree: Tree, filePath: string): string {
     if (namespace) return namespace
 
     const parentDir = path.join(filePath, '..')
-    if (parentDir == filePath) throw new Error("Can't find .net project file")
+    if (parentDir == filePath || parentDir == '.')
+        throw new Error("Can't find .net project file")
+
     return getDotNetNameSpace(tree, parentDir)
 }
