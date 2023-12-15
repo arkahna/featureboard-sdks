@@ -39,7 +39,7 @@
 
         "dryRun": {
             "type": "boolean",
-            "description": "Only show what would be generated don't modify files.",
+            "description": "Only show what would be generated, don't modify files.",
             "default": false
         }
     },
