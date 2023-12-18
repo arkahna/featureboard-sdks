@@ -1,5 +1,11 @@
 # dotnet-sdk
 
+## 0.0.3
+
+### Patch Changes
+
+- 9040a4f: Reliability and harding updates
+
 ## 0.0.2
 
 ### Patch Changes
