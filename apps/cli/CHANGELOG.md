@@ -1,5 +1,11 @@
 # @featureboard/cli
 
+## 0.3.4
+
+### Patch Changes
+
+- 4553be3: Fixed issue where open fails crashing the login prompt
+
 ## 0.3.3
 
 ### Patch Changes
