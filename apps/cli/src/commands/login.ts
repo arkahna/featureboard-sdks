@@ -52,8 +52,17 @@ export function loginCommand() {
                         console.log(
                             `Please authenticate at the browser window that has been opened for you or visit http://localhost:${REDIRECT_PORT}.`,
                         )
-                        // Automatically open the authentication URL in the default browser
-                        await open(`http://localhost:${REDIRECT_PORT}`)
+                        try {
+                            // Automatically open the authentication URL in the default browser
+                            await open(`http://localhost:${REDIRECT_PORT}`)
+                        } catch (err) {
+                            if (options.verbose) {
+                                console.error(err)
+                            }
+                            console.error(
+                                `Could not open browser window. Please visit http://localhost:${REDIRECT_PORT} to authenticate.`,
+                            )
+                        }
                     }
                 })
             }),
