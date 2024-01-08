@@ -12,6 +12,7 @@ export function createPollingUpdateStrategy(
     let stopPolling: undefined | (() => void)
     let etag: undefined | string
     let fetchUpdatesSingle: undefined | (() => Promise<void>)
+    const cancellationToken = { cancel: false }
 
     return {
         async connect(stateStore) {
@@ -24,6 +25,7 @@ export function createPollingUpdateStrategy(
                     stateStore,
                     etag,
                     'polling',
+                    cancellationToken,
                 )
             })
 
@@ -32,6 +34,7 @@ export function createPollingUpdateStrategy(
             }
             stopPolling = pollingUpdates(() => {
                 if (fetchUpdatesSingle) {
+                    cancellationToken.cancel = true
                     // Catch errors here to ensure no unhandled promise rejections after a poll
                     return fetchUpdatesSingle().catch(() => {})
                 }

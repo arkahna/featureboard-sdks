@@ -12,6 +12,7 @@ export function createOnRequestUpdateStrategy(
     let responseExpires: number | undefined
     let etag: undefined | string
     let fetchUpdatesSingle: undefined | (() => Promise<void>)
+    const cancellationToken = { cancel: false }
 
     return {
         async connect(stateStore) {
@@ -24,6 +25,7 @@ export function createOnRequestUpdateStrategy(
                     stateStore,
                     etag,
                     'on-request',
+                    cancellationToken,
                 )
             })
 
@@ -33,6 +35,7 @@ export function createOnRequestUpdateStrategy(
             })
         },
         close() {
+            cancellationToken.cancel
             return Promise.resolve()
         },
         get state() {

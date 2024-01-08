@@ -197,6 +197,72 @@ describe('http client', () => {
         }
     })
 
+    it('Can handle 429 response from HTTP Client API', async () => {
+        const values: FeatureConfiguration[] = [
+            {
+                featureKey: 'my-feature',
+                audienceExceptions: [],
+                defaultValue: 'service-default-value',
+            },
+        ]
+
+        let count = 0
+        const server = setupServer(
+            http.get(
+                'https://client.featureboard.app/all',
+                () => {
+                    expect(count).toBe(0)
+                    count++
+                    return HttpResponse.json(values, {
+                        headers: {
+                            etag: new Date().toISOString(),
+                        },
+                    })
+                },
+                { once: true },
+            ),
+            http.get(
+                'https://client.featureboard.app/all',
+                () => {
+                    expect(count).toBe(1)
+                    count++
+                    return new Response(null, {
+                        status: 429,
+                        headers: { 'Retry-After': '1' },
+                    })
+                },
+                { once: true },
+            ),
+            http.get('https://client.featureboard.app/all', () => {
+                expect(count).toBe(2)
+                count++
+                return HttpResponse.json(values, {
+                    headers: {
+                        etag: new Date().toISOString(),
+                    },
+                })
+            }),
+        )
+        server.listen({ onUnhandledRequest: 'error' })
+
+        try {
+            expect.assertions(3)
+            const httpClient = createServerClient({
+                environmentApiKey: 'env-api-key',
+                api: featureBoardHostedService,
+                updateStrategy: { kind: 'manual' },
+            })
+
+            await httpClient.waitForInitialised()
+
+            await httpClient.updateFeatures()
+            httpClient.close()
+        } finally {
+            server.resetHandlers()
+            server.close()
+        }
+    })
+
     // Below tests are testing behavior around https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/If-None-Match
     it('Attaches etag header to update requests', async () => {
         const values: FeatureConfiguration[] = [

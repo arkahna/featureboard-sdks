@@ -9,6 +9,7 @@ export function createManualUpdateStrategy(
 ): AllConfigUpdateStrategy {
     let etag: undefined | string
     let fetchUpdatesSingle: undefined | (() => Promise<void>)
+    const cancellationToken = { cancel: false }
 
     return {
         async connect(stateStore) {
@@ -21,12 +22,14 @@ export function createManualUpdateStrategy(
                     stateStore,
                     etag,
                     'manual',
+                    cancellationToken,
                 )
             })
 
             return fetchUpdatesSingle()
         },
         close() {
+            cancellationToken.cancel = true
             return Promise.resolve()
         },
         get state() {
