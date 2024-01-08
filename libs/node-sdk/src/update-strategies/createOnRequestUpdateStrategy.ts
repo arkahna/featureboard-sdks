@@ -35,7 +35,7 @@ export function createOnRequestUpdateStrategy(
             })
         },
         close() {
-            cancellationToken.cancel
+            cancellationToken.cancel = true
             return Promise.resolve()
         },
         get state() {
