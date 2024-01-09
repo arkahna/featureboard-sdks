@@ -1,4 +1,7 @@
-import type { FeatureConfiguration } from '@featureboard/contracts'
+import {
+    TooManyRequestsError,
+    type FeatureConfiguration,
+} from '@featureboard/contracts'
 import type { AllFeatureStateStore } from '../feature-state-store'
 import { httpClientDebug } from './http-log'
 
@@ -39,12 +42,15 @@ export async function fetchFeaturesConfigurationViaHttp(
         return {
             etag,
             retryAfter,
-            error: new Error(
+            error: new TooManyRequestsError(
                 `Failed to get latest features: Service returned ${
                     response.status
                 }${response.statusText ? ' ' + response.statusText : ''}. ${
-                    retryAfterHeader ? 'Retry after: ' + retryAfter.toUTCString() : ''
+                    retryAfterHeader
+                        ? 'Retry after: ' + retryAfter.toUTCString()
+                        : ''
                 } `,
+                retryAfter,
             ),
         }
     }
