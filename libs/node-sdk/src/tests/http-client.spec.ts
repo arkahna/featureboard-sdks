@@ -197,6 +197,49 @@ describe('http client', () => {
         }
     })
 
+    it('Retry to connect when received 429 from HTTP Client API during initialization', async () => {
+        const values: FeatureConfiguration[] = [
+            {
+                featureKey: 'my-feature',
+                audienceExceptions: [],
+                defaultValue: 'service-default-value',
+            },
+        ]
+
+        let count = 0
+        const server = setupServer(
+            http.get('https://client.featureboard.app/all', () => {
+                count++
+                if (count <= 2) {
+                    return new Response(null, {
+                        status: 429,
+                        headers: { 'Retry-After': '1' },
+                    })
+                }
+                return HttpResponse.json(values, {
+                    headers: {
+                        etag: new Date().toISOString(),
+                    },
+                })
+            }),
+        )
+        server.listen({ onUnhandledRequest: 'error' })
+
+        try {
+            const httpClient = createServerClient({
+                environmentApiKey: 'env-api-key',
+                api: featureBoardHostedService,
+                updateStrategy: { kind: 'manual' },
+            })
+            await httpClient.waitForInitialised()
+            httpClient.close()
+        } finally {
+            server.resetHandlers()
+            server.close()
+        }
+        expect(count).toBe(3)
+    })
+
     it('Can handle 429 response from HTTP Client API', async () => {
         const values: FeatureConfiguration[] = [
             {
