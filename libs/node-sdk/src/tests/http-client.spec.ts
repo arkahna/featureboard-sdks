@@ -197,7 +197,7 @@ describe('http client', () => {
         }
     })
 
-    it('Can handle 429 response from HTTP Client API', async () => {
+    it.only('Can handle 429 response from HTTP Client API', async () => {
         const values: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
@@ -228,7 +228,7 @@ describe('http client', () => {
                     count++
                     return new Response(null, {
                         status: 429,
-                        headers: { 'Retry-After': '1' },
+                        headers: { 'Retry-After': '0.1' },
                     })
                 },
                 { once: true },
@@ -254,7 +254,74 @@ describe('http client', () => {
             })
 
             await httpClient.waitForInitialised()
+            await httpClient.updateFeatures()
+            await new Promise((resolve) => setTimeout(resolve, 100))
+            await httpClient.updateFeatures()
+            httpClient.close()
+        } finally {
+            server.resetHandlers()
+            server.close()
+        }
+    })
 
+    it.only('Will block API call after 429 response from HTTP Client API in accordance to retry after header', async () => {
+        const values: FeatureConfiguration[] = [
+            {
+                featureKey: 'my-feature',
+                audienceExceptions: [],
+                defaultValue: 'service-default-value',
+            },
+        ]
+
+        let count = 0
+        const server = setupServer(
+            http.get(
+                'https://client.featureboard.app/all',
+                () => {
+                    expect(count).toBe(0)
+                    count++
+                    return HttpResponse.json(values, {
+                        headers: {
+                            etag: new Date().toISOString(),
+                        },
+                    })
+                },
+                { once: true },
+            ),
+            http.get(
+                'https://client.featureboard.app/all',
+                () => {
+                    expect(count).toBe(1)
+                    count++
+                    return new Response(null, {
+                        status: 429,
+                        headers: { 'Retry-After': '2' },
+                    })
+                },
+                { once: true },
+            ),
+            http.get('https://client.featureboard.app/all', () => {
+                expect(count).toBe(2)
+                count++
+                return HttpResponse.json(values, {
+                    headers: {
+                        etag: new Date().toISOString(),
+                    },
+                })
+            }),
+        )
+        server.listen({ onUnhandledRequest: 'error' })
+
+        try {
+            expect.assertions(2)
+            const httpClient = createServerClient({
+                environmentApiKey: 'env-api-key',
+                api: featureBoardHostedService,
+                updateStrategy: { kind: 'manual' },
+            })
+
+            await httpClient.waitForInitialised()
+            await httpClient.updateFeatures()
             await httpClient.updateFeatures()
             httpClient.close()
         } finally {

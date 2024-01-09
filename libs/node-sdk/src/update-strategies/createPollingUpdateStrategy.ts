@@ -12,21 +12,24 @@ export function createPollingUpdateStrategy(
     let stopPolling: undefined | (() => void)
     let etag: undefined | string
     let fetchUpdatesSingle: undefined | (() => Promise<void>)
-    const cancellationToken = { cancel: false }
+    let retryAfter: Date | undefined = undefined
 
     return {
         async connect(stateStore) {
             // Ensure that we don't trigger another request while one is in flight
             fetchUpdatesSingle = createEnsureSingle(async () => {
-                const allEndpoint = getAllEndpoint(httpEndpoint)
-                etag = await fetchFeaturesConfigurationViaHttp(
-                    allEndpoint,
-                    environmentApiKey,
-                    stateStore,
-                    etag,
-                    'polling',
-                    cancellationToken,
-                )
+                if (!retryAfter || retryAfter < new Date()) {
+                    const allEndpoint = getAllEndpoint(httpEndpoint)
+                    const response = await fetchFeaturesConfigurationViaHttp(
+                        allEndpoint,
+                        environmentApiKey,
+                        stateStore,
+                        etag,
+                        'polling',
+                    )
+                    etag = response.etag
+                    retryAfter = response.retryAfter
+                }
             })
 
             if (stopPolling) {
@@ -34,7 +37,6 @@ export function createPollingUpdateStrategy(
             }
             stopPolling = pollingUpdates(() => {
                 if (fetchUpdatesSingle) {
-                    cancellationToken.cancel = true
                     // Catch errors here to ensure no unhandled promise rejections after a poll
                     return fetchUpdatesSingle().catch(() => {})
                 }

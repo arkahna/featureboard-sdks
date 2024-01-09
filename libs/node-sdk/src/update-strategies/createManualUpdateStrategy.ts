@@ -9,27 +9,29 @@ export function createManualUpdateStrategy(
 ): AllConfigUpdateStrategy {
     let etag: undefined | string
     let fetchUpdatesSingle: undefined | (() => Promise<void>)
-    const cancellationToken = { cancel: false }
+    let retryAfter: Date | undefined = undefined
 
     return {
         async connect(stateStore) {
             // Ensure that we don't trigger another request while one is in flight
             fetchUpdatesSingle = createEnsureSingle(async () => {
-                const allEndpoint = getAllEndpoint(httpEndpoint)
-                etag = await fetchFeaturesConfigurationViaHttp(
-                    allEndpoint,
-                    environmentApiKey,
-                    stateStore,
-                    etag,
-                    'manual',
-                    cancellationToken,
-                )
+                if (!retryAfter || retryAfter < new Date()) {
+                    const allEndpoint = getAllEndpoint(httpEndpoint)
+                    const response = await fetchFeaturesConfigurationViaHttp(
+                        allEndpoint,
+                        environmentApiKey,
+                        stateStore,
+                        etag,
+                        'manual',
+                    )
+                    etag = response.etag
+                    retryAfter = response.retryAfter
+                }
             })
 
             return fetchUpdatesSingle()
         },
         close() {
-            cancellationToken.cancel = true
             return Promise.resolve()
         },
         get state() {
