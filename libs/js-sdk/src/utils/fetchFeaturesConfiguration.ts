@@ -1,4 +1,4 @@
-import type { EffectiveFeatureValue } from '@featureboard/contracts'
+import { TooManyRequestsError, type EffectiveFeatureValue } from '@featureboard/contracts'
 import type { EffectiveFeatureStateStore } from '../effective-feature-state-store'
 import { getEffectiveEndpoint } from '../update-strategies/getEffectiveEndpoint'
 import { compareArrays } from './compare-arrays'
@@ -11,7 +11,11 @@ export async function fetchFeaturesConfigurationViaHttp(
     stateStore: EffectiveFeatureStateStore,
     etag: string | undefined,
     getCurrentAudiences: () => string[],
-) {
+): Promise<{
+    etag: string | undefined
+    retryAfter: Date | undefined
+    error: Error | undefined
+}> {
     const effectiveEndpoint = getEffectiveEndpoint(
         featureBoardEndpoint,
         audiences,
@@ -28,6 +32,31 @@ export async function fetchFeaturesConfigurationViaHttp(
         },
     })
 
+    if (response.status === 429) {
+        // Too many requests
+        const retryAfterHeader = response.headers.get('Retry-After')
+        const retryAfterTime =
+            new Date().getTime() +
+            (retryAfterHeader ? parseInt(retryAfterHeader, 10) : 60) * 1000
+        const retryAfter = new Date()
+        retryAfter.setTime(retryAfterTime)
+
+        return {
+            etag,
+            retryAfter,
+            error: new TooManyRequestsError(
+                `Failed to get latest features: Service returned ${
+                    response.status
+                }${response.statusText ? ' ' + response.statusText : ''}. ${
+                    retryAfterHeader
+                        ? 'Retry after: ' + retryAfter.toUTCString()
+                        : ''
+                } `,
+                retryAfter,
+            ),
+        }
+    }
+
     if (response.status !== 200 && response.status !== 304) {
         httpClientDebug(
             `Failed to fetch updates (%o): ${
@@ -43,7 +72,7 @@ export async function fetchFeaturesConfigurationViaHttp(
     // Expect most times will just get a response from the HEAD request saying no updates
     if (response.status === 304) {
         httpClientDebug('No changes (%o)', audiences)
-        return etag
+        return { etag, retryAfter: undefined, error: undefined }
     }
 
     const currentEffectiveValues: EffectiveFeatureValue[] =
@@ -51,7 +80,7 @@ export async function fetchFeaturesConfigurationViaHttp(
 
     if (!compareArrays(getCurrentAudiences(), audiences)) {
         httpClientDebug('Audiences changed while fetching (%o)', audiences)
-        return etag
+        return { etag, retryAfter: undefined, error: undefined }
     }
     const existing = { ...stateStore.all() }
 
@@ -68,5 +97,9 @@ export async function fetchFeaturesConfigurationViaHttp(
         unavailableFeatures,
     })
 
-    return response.headers.get('etag') || undefined
+    return {
+        etag: response.headers.get('etag') || undefined,
+        retryAfter: undefined,
+        error: undefined,
+    }
 }
