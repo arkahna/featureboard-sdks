@@ -8,7 +8,11 @@ export async function fetchFeaturesConfigurationViaHttp(
     stateStore: AllFeatureStateStore,
     etag: string | undefined,
     updateTrigger: string,
-): Promise<{ etag: string | undefined; retryAfter: Date | undefined }> {
+): Promise<{
+    etag: string | undefined
+    retryAfter: Date | undefined
+    error: Error | undefined
+}> {
     httpClientDebug(
         'Fetching updates: trigger=%s, lastModified=%s',
         updateTrigger,
@@ -32,7 +36,17 @@ export async function fetchFeaturesConfigurationViaHttp(
         const retryAfter = new Date()
         retryAfter.setTime(retryAfterTime)
 
-        return { etag, retryAfter }
+        return {
+            etag,
+            retryAfter,
+            error: new Error(
+                `Failed to get latest features: Service returned ${
+                    response.status
+                }${response.statusText ? ' ' + response.statusText : ''}. ${
+                    retryAfterHeader ? 'Retry after: ' + retryAfter.toUTCString() : ''
+                } `,
+            ),
+        }
     }
 
     if (response.status !== 200 && response.status !== 304) {
@@ -44,7 +58,7 @@ export async function fetchFeaturesConfigurationViaHttp(
     // Expect most times will just get a response from the HEAD request saying no updates
     if (response.status === 304) {
         httpClientDebug('No changes')
-        return { etag, retryAfter: undefined }
+        return { etag, retryAfter: undefined, error: undefined }
     }
 
     const allValues: FeatureConfiguration[] = await response.json()
@@ -62,5 +76,5 @@ export async function fetchFeaturesConfigurationViaHttp(
 
     const newEtag = response.headers.get('etag') || undefined
     httpClientDebug('Fetching updates done, newEtag=%s', newEtag)
-    return { etag: newEtag, retryAfter: undefined }
+    return { etag: newEtag, retryAfter: undefined, error: undefined }
 }
