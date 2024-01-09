@@ -197,7 +197,7 @@ describe('http client', () => {
         }
     })
 
-    it.only('Can handle 429 response from HTTP Client API', async () => {
+    it('Can handle 429 response from HTTP Client API', async () => {
         const values: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
@@ -264,7 +264,7 @@ describe('http client', () => {
         }
     })
 
-    it.only('Will block API call after 429 response from HTTP Client API in accordance to retry after header', async () => {
+    it('Will block API call after 429 response from HTTP Client API in accordance to retry after header', async () => {
         const values: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
