@@ -33,11 +33,19 @@ export async function fetchFeaturesConfigurationViaHttp(
     if (response.status === 429) {
         // Too many requests
         const retryAfterHeader = response.headers.get('Retry-After')
-        const retryAfterTime =
-            new Date().getTime() +
-            (retryAfterHeader ? parseInt(retryAfterHeader, 10) : 60) * 1000
-        const retryAfter = new Date()
-        retryAfter.setTime(retryAfterTime)
+        const retryAfterInt = retryAfterHeader
+            ? parseInt(retryAfterHeader, 10)
+            : 60
+        const retryAfter =
+            retryAfterHeader && !retryAfterInt
+                ? new Date(retryAfterHeader)
+                : new Date()
+
+        if (retryAfterInt) {
+            const retryAfterTime =
+                retryAfter.getTime() + retryAfterInt * 1000
+            retryAfter.setTime(retryAfterTime)
+        }
 
         return {
             etag,
