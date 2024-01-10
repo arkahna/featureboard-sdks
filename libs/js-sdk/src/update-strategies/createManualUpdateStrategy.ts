@@ -49,7 +49,7 @@ export function createManualUpdateStrategy(
             if (fetchUpdatesSingle) {
                 await fetchUpdatesSingle().then((response) => {
                     if (response.error) {
-                        manualUpdatesDebugLog(response.error)
+                        throw response.error
                     }
                 })
             }

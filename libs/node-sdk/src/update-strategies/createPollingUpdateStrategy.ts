@@ -70,7 +70,7 @@ export function createPollingUpdateStrategy(
             if (fetchUpdatesSingle) {
                 await fetchUpdatesSingle().then((response) => {
                     if (response.error) {
-                        updatesLog(response.error)
+                        throw response.error
                     }
                 })
             }

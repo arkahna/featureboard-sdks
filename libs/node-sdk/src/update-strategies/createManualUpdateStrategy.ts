@@ -2,7 +2,6 @@ import { createEnsureSingle } from '@featureboard/js-sdk'
 import { fetchFeaturesConfigurationViaHttp } from '../utils/fetchFeaturesConfiguration'
 import { getAllEndpoint } from './getAllEndpoint'
 import type { AllConfigUpdateStrategy } from './update-strategies'
-import { updatesLog } from './updates-log'
 
 export function createManualUpdateStrategy(
     environmentApiKey: string,
@@ -45,8 +44,7 @@ export function createManualUpdateStrategy(
             if (fetchUpdatesSingle) {
                 await fetchUpdatesSingle().then((response) => {
                     if (response.error) {
-                        updatesLog(response.error)
-                        //throw response.error
+                        throw response.error
                     }
                 })
             }

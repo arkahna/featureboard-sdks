@@ -1,4 +1,7 @@
-import type { FeatureConfiguration } from '@featureboard/contracts'
+import {
+    TooManyRequestsError,
+    type FeatureConfiguration,
+} from '@featureboard/contracts'
 import { featureBoardHostedService } from '@featureboard/js-sdk'
 import { HttpResponse, http } from 'msw'
 import { setupServer } from 'msw/node'
@@ -240,7 +243,7 @@ describe('http client', () => {
         expect(count).toBe(3)
     })
 
-    it('Can handle 429 response from HTTP Client API', async () => {
+    it('Block HTTP client API call after 429 response from HTTP Client API according to retry-after seconds', async () => {
         const values: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
@@ -254,7 +257,6 @@ describe('http client', () => {
             http.get(
                 'https://client.featureboard.app/all',
                 () => {
-                    expect(count).toBe(0)
                     count++
                     return HttpResponse.json(values, {
                         headers: {
@@ -267,17 +269,15 @@ describe('http client', () => {
             http.get(
                 'https://client.featureboard.app/all',
                 () => {
-                    expect(count).toBe(1)
                     count++
                     return new Response(null, {
                         status: 429,
-                        headers: { 'Retry-After': '0.1' },
+                        headers: { 'Retry-After': '1' },
                     })
                 },
                 { once: true },
             ),
             http.get('https://client.featureboard.app/all', () => {
-                expect(count).toBe(2)
                 count++
                 return HttpResponse.json(values, {
                     headers: {
@@ -289,7 +289,6 @@ describe('http client', () => {
         server.listen({ onUnhandledRequest: 'error' })
 
         try {
-            expect.assertions(3)
             const httpClient = createServerClient({
                 environmentApiKey: 'env-api-key',
                 api: featureBoardHostedService,
@@ -297,17 +296,24 @@ describe('http client', () => {
             })
 
             await httpClient.waitForInitialised()
+            await expect(() =>
+                httpClient.updateFeatures(),
+            ).rejects.toThrowError(TooManyRequestsError)
+            await expect(() =>
+                httpClient.updateFeatures(),
+            ).rejects.toThrowError(TooManyRequestsError)
+            await new Promise((resolve) => setTimeout(resolve, 1000))
             await httpClient.updateFeatures()
-            await new Promise((resolve) => setTimeout(resolve, 100))
-            await httpClient.updateFeatures()
+
             httpClient.close()
         } finally {
             server.resetHandlers()
             server.close()
         }
+        expect(count).toBe(3)
     })
 
-    it('Will block API call after 429 response from HTTP Client API in accordance to retry after header', async () => {
+    it('Block HTTP client API call after 429 response from HTTP Client API according to retry-after date', async () => {
         const values: FeatureConfiguration[] = [
             {
                 featureKey: 'my-feature',
@@ -321,7 +327,6 @@ describe('http client', () => {
             http.get(
                 'https://client.featureboard.app/all',
                 () => {
-                    expect(count).toBe(0)
                     count++
                     return HttpResponse.json(values, {
                         headers: {
@@ -334,17 +339,16 @@ describe('http client', () => {
             http.get(
                 'https://client.featureboard.app/all',
                 () => {
-                    expect(count).toBe(1)
                     count++
+                    const retryAfter = new Date(new Date().getTime() + 1000).toUTCString()
                     return new Response(null, {
                         status: 429,
-                        headers: { 'Retry-After': '2' },
+                        headers: { 'Retry-After': retryAfter },
                     })
                 },
                 { once: true },
             ),
             http.get('https://client.featureboard.app/all', () => {
-                expect(count).toBe(2)
                 count++
                 return HttpResponse.json(values, {
                     headers: {
@@ -356,7 +360,6 @@ describe('http client', () => {
         server.listen({ onUnhandledRequest: 'error' })
 
         try {
-            expect.assertions(2)
             const httpClient = createServerClient({
                 environmentApiKey: 'env-api-key',
                 api: featureBoardHostedService,
@@ -364,13 +367,21 @@ describe('http client', () => {
             })
 
             await httpClient.waitForInitialised()
+            await expect(() =>
+                httpClient.updateFeatures(),
+            ).rejects.toThrowError(TooManyRequestsError)
+            await expect(() =>
+                httpClient.updateFeatures(),
+            ).rejects.toThrowError(TooManyRequestsError)
+            await new Promise((resolve) => setTimeout(resolve, 1000))
             await httpClient.updateFeatures()
-            await httpClient.updateFeatures()
+
             httpClient.close()
         } finally {
             server.resetHandlers()
             server.close()
         }
+        expect(count).toBe(3)
     })
 
     // Below tests are testing behavior around https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/If-None-Match
