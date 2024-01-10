@@ -137,6 +137,67 @@ describe('Polling update mode', () => {
             server.close()
         }
     })
+
+    it('Do NOT throw error or make call to HTTP Client API when Too Many Requests (429) has been returned', async () => {
+        const values: EffectiveFeatureValue[] = [
+            {
+                featureKey: 'my-feature',
+                value: 'service-default-value',
+            },
+        ]
+
+        let countAPICalls = 0
+        const server = setupServer(
+            http.get(
+                'https://client.featureboard.app/effective',
+                () => {
+                    countAPICalls++
+                    return HttpResponse.json(values)
+                },
+                { once: true },
+            ),
+            http.get('https://client.featureboard.app/effective', () => {
+                countAPICalls++
+                return new Response(null, {
+                    status: 429,
+                    headers: { 'Retry-After': '2' },
+                })
+            }),
+        )
+        server.listen({ onUnhandledRequest: 'error' })
+
+        try {
+            const client = createBrowserClient({
+                environmentApiKey: 'fake-key',
+                audiences: [],
+                updateStrategy: {
+                    kind: 'polling',
+                    options: { intervalMs: 100 },
+                },
+            })
+
+            await client.waitForInitialised()
+            // Wait for the interval to expire
+            await new Promise((resolve) => setTimeout(resolve, 100))
+            const value1 = client.client.getFeatureValue(
+                'my-feature',
+                'default-value',
+            )
+            expect(value1).toEqual('service-default-value')
+            // Wait for interval to expire
+            await new Promise((resolve) => setTimeout(resolve, 100))
+            const value2 = client.client.getFeatureValue(
+                'my-feature',
+                'default-value',
+            )
+            expect(value2).toEqual('service-default-value')
+        } finally {
+            server.resetHandlers()
+            server.close()
+        }
+        expect(countAPICalls).toBe(2)
+        expect.assertions(3)
+    })
 })
 
 declare module '@featureboard/js-sdk' {
