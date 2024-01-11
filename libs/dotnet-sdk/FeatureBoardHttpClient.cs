@@ -1,12 +1,14 @@
 using System.Net;
-using System.Net.Http.Json;
-using Microsoft.Extensions.Logging;
-using FeatureBoard.DotnetSdk.Models;
 using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using FeatureBoard.DotnetSdk.Models;
+using Microsoft.Extensions.Logging;
 
 namespace FeatureBoard.DotnetSdk;
 
 public delegate ref EntityTagHeaderValue? LastETagProvider();
+
+public delegate Task FeatureConfigurationUpdated(IReadOnlyCollection<FeatureConfiguration> configuration, CancellationToken cancellationToken);
 
 internal sealed class FeatureBoardHttpClient : IFeatureBoardHttpClient
 {
@@ -14,14 +16,15 @@ internal sealed class FeatureBoardHttpClient : IFeatureBoardHttpClient
 
   private LastETagProvider _eTag;
   private readonly HttpClient _httpClient;
-  private readonly Action<IReadOnlyCollection<FeatureConfiguration>> _processResult;
+  private event FeatureConfigurationUpdated OnFeatureConfigurationUpdated = null!;
   private readonly ILogger _logger;
 
 
-  public FeatureBoardHttpClient(HttpClient httpClient, LastETagProvider lastModifiedTimeProvider, Action<IReadOnlyCollection<FeatureConfiguration>> processResult, ILogger<FeatureBoardHttpClient> logger)
+  public FeatureBoardHttpClient(HttpClient httpClient, LastETagProvider lastModifiedTimeProvider, IEnumerable<FeatureConfigurationUpdated> updateHandlers, ILogger<FeatureBoardHttpClient> logger)
   {
     _httpClient = httpClient;
-    _processResult = processResult;
+    foreach (var handler in updateHandlers)
+      OnFeatureConfigurationUpdated += handler;
     _logger = logger;
     _eTag = lastModifiedTimeProvider;
   }
@@ -33,32 +36,49 @@ internal sealed class FeatureBoardHttpClient : IFeatureBoardHttpClient
     if (null != eTag)
       request.Headers.IfNoneMatch.Add(eTag);
 
-    using var response = await _httpClient.SendAsync(request, cancellationToken);
-
-    switch (response.StatusCode)
+    IReadOnlyCollection<FeatureConfiguration>? features = null;
+    try
     {
-      case HttpStatusCode.NotModified:
-        _logger.LogDebug("No changes");
-        return false;
+      using var response = await _httpClient.SendAsync(request, cancellationToken);
 
-      case not HttpStatusCode.OK:
-        _logger.LogError("Failed to get latest flags: Service returned error {statusCode}({responseBody})", response.StatusCode, await response.Content.ReadAsStringAsync());
-        return null;
+      switch (response.StatusCode)
+      {
+        case HttpStatusCode.NotModified:
+          _logger.LogDebug("No changes");
+          return false;
+
+        case not HttpStatusCode.OK:
+          _logger.LogError("Failed to get latest flags: Service returned error {statusCode}({responseBody})", response.StatusCode, await response.Content.ReadAsStringAsync());
+          return null;
+      }
+
+      features = await response.Content.ReadFromJsonAsync<List<FeatureConfiguration>>(cancellationToken: cancellationToken)
+                      ?? throw new ApplicationException("Unable to retrieve decode response content");
+
+      updateEtagRef(response.Headers.ETag);
+    }
+    catch (HttpRequestException e)
+    {
+      _logger.LogError(e, "Failed to get latest flags");
+      return null;
     }
 
-    var features = await response.Content.ReadFromJsonAsync<List<FeatureConfiguration>>(cancellationToken: cancellationToken)
-                    ?? throw new ApplicationException("Unable to retrieve decode response content");
-
-    _processResult(features);
-    updateEtagRef(response.Headers.ETag);
+    try
+    {
+      await OnFeatureConfigurationUpdated(features, cancellationToken);
+      return true;
+    }
+    catch (ArgumentException e) // eg. thrown due to duplicate feature key
+    {
+      _logger.LogError(e, "Failed to update flags");
+      return null;
+    }
 
     void updateEtagRef(EntityTagHeaderValue? responseTag) // Sync method to allow use of eTag ref-local variable
     {
       ref var eTag = ref _eTag();
       eTag = responseTag ?? eTag; // if didn't get eTag just retain previous eTag
-      _logger.LogDebug("Fetching updates done, eTag={eTag}", _eTag);
+      _logger.LogDebug("Fetching updates done, eTag={eTag}", eTag);
     }
-
-    return true;
   }
 }

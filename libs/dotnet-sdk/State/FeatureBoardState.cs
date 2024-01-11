@@ -1,7 +1,6 @@
-using System.Threading;
+using FeatureBoard.DotnetSdk.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using FeatureBoard.DotnetSdk.Models;
 
 namespace FeatureBoard.DotnetSdk.State;
 
@@ -26,12 +25,10 @@ internal sealed class FeatureBoardState : IFeatureBoardState, IHostedService
 
   public async Task StartAsync(CancellationToken cancellationToken)
   {
-    if (_externalState is null)
-    {
-      using var scope = _scopeFactory.CreateScope();
-      await scope.ServiceProvider.GetRequiredService<IFeatureBoardService>().RefreshFeatureConfiguration(cancellationToken);
+    using var scope = _scopeFactory.CreateScope();
+    var updated = await scope.ServiceProvider.GetRequiredService<IFeatureBoardService>().RefreshFeatureConfiguration(cancellationToken) ?? false;
+    if (updated || _externalState is null)
       return;
-    }
 
     var state = await _externalState.GetState(cancellationToken);
     if (state == null)

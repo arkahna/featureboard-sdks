@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Polly;
 
 namespace FeatureBoard.DotnetSdk.Registration;
 
@@ -25,17 +26,27 @@ public static class RegisterFeatureBoard
       client.BaseAddress = options.Value.HttpEndpoint;
       client.DefaultRequestHeaders.Add("x-environment-key", options.Value.EnvironmentApiKey);
       // client.Timeout = options.Value.MaxAge - TimeSpan.FromMilliseconds(3); //prevent multiple requests running at the same time.
-    });
+    }).AddTransientHttpErrorPolicy(static policyBuilder => // DEBT: Get number retries from config
+      policyBuilder.WaitAndRetryAsync(retryCount: 5, static retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))) // TODO: Consider adding jitter
+    );
 
     services.AddSingleton<LastETagProvider>(() => ref lastETag);
 
-    services.AddScoped<IFeatureBoardClient<TFeatures>, FeatureBoardClient<TFeatures>>();
-    services.AddScoped<IFeatureBoardClient>(static c => c.GetRequiredService<IFeatureBoardClient<TFeatures>>());
+    services.AddScoped<IFeatureBoardClient<TFeatures>, FeatureBoardClient<TFeatures>>()
+      .AddScoped<IFeatureBoardClient>(static c => c.GetRequiredService<IFeatureBoardClient<TFeatures>>());
 
-    services.AddSingleton<FeatureBoardState>();
-    services.AddHostedService(static provider => provider.GetRequiredService<FeatureBoardState>());
-    services.AddTransient<Action<IReadOnlyCollection<FeatureConfiguration>>>(static provider => provider.GetRequiredService<FeatureBoardState>().Update);
-    services.AddScoped(static provider => provider.GetRequiredService<FeatureBoardState>().GetSnapshot());
+    services.AddSingleton<FeatureBoardState>()
+      .AddHostedService(static provider => provider.GetRequiredService<FeatureBoardState>())
+      .AddScoped(static provider => provider.GetRequiredService<FeatureBoardState>().GetSnapshot())
+      .AddTransient<FeatureConfigurationUpdated>(static provider =>
+      {
+        var service = provider.GetRequiredService<FeatureBoardState>();
+        return (config, _) =>
+        {
+          service.Update(config);
+          return Task.CompletedTask;
+        };
+      });
 
     return new FeatureBoardBuilder(services);
   }
@@ -71,7 +82,8 @@ public static class RegisterFeatureBoard
 
   public static FeatureBoardBuilder WithExternalState<TStateStore>(this FeatureBoardBuilder builder) where TStateStore : class, IFeatureBoardExternalState
   {
-    builder.Services.AddSingleton<IFeatureBoardExternalState, TStateStore>();
+    builder.Services.AddSingleton<IFeatureBoardExternalState, TStateStore>()
+      .AddTransient<FeatureConfigurationUpdated>(static provider => provider.GetRequiredService<FeatureBoard.DotnetSdk.State.IFeatureBoardExternalState>().UpdateState);
 
     return builder;
   }

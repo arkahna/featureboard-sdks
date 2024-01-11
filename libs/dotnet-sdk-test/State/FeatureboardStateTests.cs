@@ -22,12 +22,44 @@ public class FeatureBoardStateTests
 
   }
 
-  [Fact]
-  public async Task StartAsyncLoadsStateFromExternalStateIfProvided()
+  [Theory]
+  [InlineData(false)]
+  [InlineData(null)]
+  public async Task StartAsyncLoadsStateFromExternalStateIfFeatureBoardServiceDoesNotUpdate(bool? serviceReturn)
   {
     // Arrange
     var featureConfiguration = CreateFeature();
 
+    Services.AddServiceMock<IFeatureBoardService>((_, mock) =>
+      mock.Setup(x => x.RefreshFeatureConfiguration(It.IsAny<CancellationToken>()))
+       .ReturnsAsync(serviceReturn)
+    );
+    Services.AddServiceMock<IFeatureBoardExternalState>((_, mock) =>
+      mock
+        .Setup(x => x.GetState(It.IsAny<CancellationToken>()))
+        .ReturnsAsync(new[] { featureConfiguration })
+       );
+
+    var featureBoardState = Services.BuildServiceProvider().GetRequiredService<FeatureBoardState>();
+
+    // Act
+    await featureBoardState.StartAsync(CancellationToken.None);
+    var resolvedFeature = featureBoardState.GetSnapshot().Get(featureConfiguration.FeatureKey);
+
+    // Assert
+    resolvedFeature.ShouldBe(featureConfiguration);
+  }
+
+  [Fact(Skip = "Unclear what the behaviour should be in this scenario")]
+  public async Task StartAsyncLoadsStateFromExternalStateIfFeatureBoardServiceThrowsException()
+  {
+    // Arrange
+    var featureConfiguration = CreateFeature();
+
+    Services.AddServiceMock<IFeatureBoardService>((_, mock) =>
+      mock.Setup(x => x.RefreshFeatureConfiguration(It.IsAny<CancellationToken>()))
+       .ThrowsAsync(new Exception("Fail!"))
+      );
     Services.AddServiceMock<IFeatureBoardExternalState>((_, mock) =>
       mock
         .Setup(x => x.GetState(It.IsAny<CancellationToken>()))
@@ -45,7 +77,7 @@ public class FeatureBoardStateTests
   }
 
   [Fact]
-  public async Task StartAsyncLoadsStateFromServiceIfExternalStateNotProvided()
+  public async Task StartAsyncLoadsStateFromServiceEvenIfExternalStateNotProvided()
   {
     // Arrange
     var featureConfiguration = CreateFeature();
