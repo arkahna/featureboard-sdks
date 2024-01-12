@@ -37,7 +37,7 @@ public static class RegisterFeatureBoard
 
     services.AddSingleton<FeatureBoardState>()
       .AddHostedService(static provider => provider.GetRequiredService<FeatureBoardState>())
-      .AddScoped(static provider => provider.GetRequiredService<FeatureBoardState>().GetSnapshot())
+      .AddScoped(static provider => new Lazy<FeatureBoardStateSnapshot>(provider.GetRequiredService<FeatureBoardState>().GetSnapshot))
       .AddTransient<FeatureConfigurationUpdated>(static provider =>
       {
         var service = provider.GetRequiredService<FeatureBoardState>();

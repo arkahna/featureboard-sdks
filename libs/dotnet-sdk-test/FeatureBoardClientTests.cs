@@ -18,6 +18,7 @@ public class FeatureBoardClientTests
   public FeatureBoardClientTests()
   {
     Services.AddTransient(typeof(ILogger<>), typeof(NullLogger<>));
+    Services.AddTransient(typeof(Lazy<>));
     Services.AddTransient<FeatureBoardClient<TestFeatures>>();
 
     var audienceMock = Services.AddServiceMock<IAudienceProvider>((_, mock) =>
