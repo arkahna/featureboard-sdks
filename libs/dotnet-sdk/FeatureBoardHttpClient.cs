@@ -38,7 +38,7 @@ internal sealed class FeatureBoardHttpClient : IFeatureBoardHttpClient
       request.Headers.IfNoneMatch.Add(eTag);
 
     var retryAfter = _retryAfter();
-    if (retryAfter != null && retryAfter.Date > DateTimeOffset.Now ) 
+    if (retryAfter != null && retryAfter.Date > DateTimeOffset.Now)
     {
       // Do not call API
       _logger.LogWarning("Failed to get latest flags. Service returned error 429 (Too Many Requests). Retry after: {retryAfter}", retryAfter.Date.Value.ToString());
@@ -55,7 +55,7 @@ internal sealed class FeatureBoardHttpClient : IFeatureBoardHttpClient
         return false;
 
       case HttpStatusCode.TooManyRequests:
-        if (response.Headers.RetryAfter == null) 
+        if (response.Headers.RetryAfter == null)
         {
           // No retry after header set, hold back call to client api for 60 seconds
           var retryAfterDate = DateTimeOffset.Now.AddMinutes(1);
@@ -85,12 +85,12 @@ internal sealed class FeatureBoardHttpClient : IFeatureBoardHttpClient
     RetryConditionHeaderValue? updateRetryAfterRef(RetryConditionHeaderValue? responseRetryAfter) // Sync method to allow use of eTag ref-local variable
     {
       ref var retryAfter = ref _retryAfter();
-      if (responseRetryAfter?.Date == null && responseRetryAfter?.Delta != null) 
+      if (responseRetryAfter?.Date == null && responseRetryAfter?.Delta != null)
       {
         var retryAfterDate = DateTimeOffset.Now + responseRetryAfter.Delta.Value;
         retryAfter = new RetryConditionHeaderValue(retryAfterDate);
-      } 
-      else 
+      }
+      else
       {
         retryAfter = responseRetryAfter;
       }
