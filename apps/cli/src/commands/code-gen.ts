@@ -15,6 +15,7 @@ import path from 'node:path'
 import prompts from 'prompts'
 import { actionRunner } from '../lib/action-runner'
 import { API_ENDPOINT, CLIENT_ID } from '../lib/config'
+import { promptForNamespaceLocation } from '../lib/prompt-for-namespace'
 import { promptForOrganization } from '../lib/prompt-for-organization'
 import { titleText } from '../lib/title-text'
 
@@ -91,17 +92,6 @@ export function codeGenCommand() {
 
                     options.output = promptResult.output
                 }
-                const outputAbsolutePath = path.join(
-                    process.cwd(),
-                    options.output!,
-                )
-                try {
-                    await fsAsync.access(outputAbsolutePath)
-                } catch {
-                    throw new Error(
-                        `Output path doesn't exist: ${outputAbsolutePath}`,
-                    )
-                }
 
                 let bearerToken: string | undefined
                 if (!options.featureBoardApiKey && !options.nonInteractive) {
@@ -129,7 +119,25 @@ export function codeGenCommand() {
                     throw new Error("Organization isn't set")
                 }
 
-                const tree = new FsTree(process.cwd(), options.verbose)
+                const namespaceLocation = await promptForNamespaceLocation()
+
+                const outputAbsolutePath = path.join(
+                    namespaceLocation || process.cwd(),
+                    options.output!,
+                )
+                try {
+                    await fsAsync.access(outputAbsolutePath)
+                } catch {
+                    throw new Error(
+                        `Output path doesn't exist: ${outputAbsolutePath}`,
+                    )
+                }
+
+                const tree = new FsTree(
+                    namespaceLocation || process.cwd(),
+                    options.verbose,
+                )
+
                 await codeGenerator({
                     template: options.template as Template,
                     tree: tree,
