@@ -54,7 +54,8 @@ internal sealed class FeatureBoardHttpClient : IFeatureBoardHttpClient
         _logger.LogDebug("No changes");
         return false;
 
-      case HttpStatusCode.TooManyRequests:
+      //HttpStatusCode.TooManyRequests not defined in .NET Standards 2.0 
+      case (HttpStatusCode)429:
         if (response.Headers.RetryAfter == null)
         {
           // No retry after header set, hold back call to client api for 60 seconds
