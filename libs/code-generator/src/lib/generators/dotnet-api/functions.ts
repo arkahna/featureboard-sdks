@@ -1,4 +1,3 @@
-import * as path from 'path'
 import type { Tree } from '../../tree/tree'
 
 export function toPascalCase(str: string) {
@@ -33,9 +32,5 @@ export function getDotNetNameSpace(tree: Tree, filePath: string): string {
 
     if (namespace) return namespace
 
-    const parentDir = path.join(filePath, '..')
-    if (parentDir == filePath || parentDir == '.')
-        throw new Error("Can't find .net project file")
-
-    return getDotNetNameSpace(tree, parentDir)
+    throw new Error("Can't find .NET project file")
 }
