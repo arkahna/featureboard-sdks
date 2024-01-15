@@ -22,10 +22,16 @@ export async function retry<T>(
             // Max retries
             throw error
         }
-        if (error instanceof TooManyRequestsError && error.retryAfter > new Date()) {
+        if (
+            error instanceof TooManyRequestsError &&
+            error.retryAfter > new Date()
+        ) {
             retryAfterMs = error.retryAfter.getTime() - new Date().getTime()
         }
-        const delayMs = initialDelayMs * Math.pow(backoffFactor, retryAttempt) + retryAfterMs
+        const delayMs =
+            retryAfterMs === 0
+                ? initialDelayMs * Math.pow(backoffFactor, retryAttempt)
+                : retryAfterMs
         if (delayMs > 180000) {
             // If delay is longer than 3 min throw error
             // Todo: Replace with cancellation token with timeout
