@@ -1,4 +1,4 @@
-import { createEnsureSingle } from '@featureboard/js-sdk'
+import { createEnsureSingleWithBackoff } from '@featureboard/js-sdk'
 import { fetchFeaturesConfigurationViaHttp } from '../utils/fetchFeaturesConfiguration'
 import { pollingUpdates } from '../utils/pollingUpdates'
 import { getAllEndpoint } from './getAllEndpoint'
@@ -19,7 +19,7 @@ export function createPollingUpdateStrategy(
     return {
         async connect(stateStore) {
             // Ensure that we don't trigger another request while one is in flight
-            fetchUpdatesSingle = createEnsureSingle(async () => {
+            fetchUpdatesSingle = createEnsureSingleWithBackoff(async () => {
                 const allEndpoint = getAllEndpoint(httpEndpoint)
                 const response = await fetchFeaturesConfigurationViaHttp(
                     allEndpoint,

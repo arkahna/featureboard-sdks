@@ -1,4 +1,4 @@
-import { createEnsureSingle } from '../ensure-single'
+import { createEnsureSingleWithBackoff } from '../ensure-single'
 import { fetchFeaturesConfigurationViaHttp } from '../utils/fetchFeaturesConfiguration'
 import { pollingUpdates } from '../utils/pollingUpdates'
 import type { EffectiveConfigUpdateStrategy } from './update-strategies'
@@ -23,7 +23,7 @@ export function createPollingUpdateStrategy(
             etag = undefined
 
             // Ensure that we don't trigger another request while one is in flight
-            fetchUpdatesSingle = createEnsureSingle(async () => {
+            fetchUpdatesSingle = createEnsureSingleWithBackoff(async () => {
                 const response = await fetchFeaturesConfigurationViaHttp(
                     httpEndpoint,
                     stateStore.audiences,

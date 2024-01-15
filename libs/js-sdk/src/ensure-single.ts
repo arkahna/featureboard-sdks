@@ -2,7 +2,7 @@ export interface RateLimitProperty {
     retryAfter?: Date
 }
 /** De-dupes calls while the promise is in flight, otherwise will trigger again */
-export function createEnsureSingle<T extends RateLimitProperty>(
+export function createEnsureSingleWithBackoff<T extends RateLimitProperty>(
     cb: () => Promise<T>,
 ): () => Promise<T> {
     let current: Promise<T> | undefined
