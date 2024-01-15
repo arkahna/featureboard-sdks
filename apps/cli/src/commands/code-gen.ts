@@ -91,10 +91,10 @@ export function codeGenCommand() {
 
                     options.output = promptResult.output
                 }
-                const outputAbsolutePath = path.join(
-                    process.cwd(),
-                    options.output!,
-                )
+                const outputAbsolutePath = path.isAbsolute(options.output!)
+                    ? options.output!
+                    : path.join(process.cwd(), options.output!)
+
                 try {
                     await fsAsync.access(outputAbsolutePath)
                 } catch {
@@ -129,11 +129,17 @@ export function codeGenCommand() {
                     throw new Error("Organization isn't set")
                 }
 
-                const tree = new FsTree(process.cwd(), options.verbose)
+                const tree = new FsTree(
+                    path.parse(outputAbsolutePath).root,
+                    options.verbose,
+                )
                 await codeGenerator({
                     template: options.template as Template,
                     tree: tree,
-                    relativeFilePath: options.output!,
+                    relativeFilePath: path.relative(
+                        tree.root,
+                        outputAbsolutePath,
+                    ),
                     featureBoardProductName: options.product,
                     auth: bearerToken
                         ? {
