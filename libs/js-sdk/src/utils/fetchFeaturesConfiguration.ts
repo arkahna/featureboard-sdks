@@ -14,11 +14,7 @@ export async function fetchFeaturesConfigurationViaHttp(
     stateStore: EffectiveFeatureStateStore,
     etag: string | undefined,
     getCurrentAudiences: () => string[],
-): Promise<{
-    etag: string | undefined
-    retryAfter: Date | undefined
-    error: Error | undefined
-}> {
+): Promise<string | undefined> {
     const effectiveEndpoint = getEffectiveEndpoint(
         featureBoardEndpoint,
         audiences,
@@ -51,20 +47,16 @@ export async function fetchFeaturesConfigurationViaHttp(
             retryAfter.setTime(retryAfterTime)
         }
 
-        return {
-            etag,
+        throw new TooManyRequestsError(
+            `Failed to get latest features: Service returned ${
+                response.status
+            }${response.statusText ? ' ' + response.statusText : ''}. ${
+                retryAfterHeader
+                    ? 'Retry after: ' + retryAfter.toUTCString()
+                    : ''
+            } `,
             retryAfter,
-            error: new TooManyRequestsError(
-                `Failed to get latest features: Service returned ${
-                    response.status
-                }${response.statusText ? ' ' + response.statusText : ''}. ${
-                    retryAfterHeader
-                        ? 'Retry after: ' + retryAfter.toUTCString()
-                        : ''
-                } `,
-                retryAfter,
-            ),
-        }
+        )
     }
 
     if (response.status !== 200 && response.status !== 304) {
@@ -82,7 +74,7 @@ export async function fetchFeaturesConfigurationViaHttp(
     // Expect most times will just get a response from the HEAD request saying no updates
     if (response.status === 304) {
         httpClientDebug('No changes (%o)', audiences)
-        return { etag, retryAfter: undefined, error: undefined }
+        return etag
     }
 
     const currentEffectiveValues: EffectiveFeatureValue[] =
@@ -90,7 +82,7 @@ export async function fetchFeaturesConfigurationViaHttp(
 
     if (!compareArrays(getCurrentAudiences(), audiences)) {
         httpClientDebug('Audiences changed while fetching (%o)', audiences)
-        return { etag, retryAfter: undefined, error: undefined }
+        return etag
     }
     const existing = { ...stateStore.all() }
 
@@ -107,9 +99,5 @@ export async function fetchFeaturesConfigurationViaHttp(
         unavailableFeatures,
     })
 
-    return {
-        etag: response.headers.get('etag') || undefined,
-        retryAfter: undefined,
-        error: undefined,
-    }
+    return response.headers.get('etag') || undefined
 }

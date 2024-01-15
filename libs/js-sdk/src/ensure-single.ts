@@ -1,28 +1,31 @@
-export interface RateLimitProperty {
-    retryAfter?: Date
-}
+import { TooManyRequestsError } from '@featureboard/contracts'
+
 /** De-dupes calls while the promise is in flight, otherwise will trigger again */
-export function createEnsureSingleWithBackoff<T extends RateLimitProperty>(
+export function createEnsureSingleWithBackoff<T>(
     cb: () => Promise<T>,
 ): () => Promise<T> {
     let current: Promise<T> | undefined
-    let lastResponse: T | undefined
+    let tooManyRequestsError: TooManyRequestsError | undefined
 
     return () => {
-        if (lastResponse?.retryAfter && lastResponse.retryAfter > new Date()) {
-            return Promise.resolve(lastResponse)
+        if (
+            tooManyRequestsError &&
+            tooManyRequestsError.retryAfter > new Date()
+        ) {
+            return Promise.reject(tooManyRequestsError)
         }
         if (!current) {
             current = cb()
-                .then((response) => {
-                    lastResponse = response
-                    return response
+                .catch((error: Error) => {
+                    if (error instanceof TooManyRequestsError) {
+                        tooManyRequestsError = error
+                    }
+                    throw error
                 })
                 .finally(() => {
                     current = undefined
                 })
         }
-
         return current
     }
 }

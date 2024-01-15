@@ -12,24 +12,20 @@ export function createPollingUpdateStrategy(
 ): AllConfigUpdateStrategy {
     let stopPolling: undefined | (() => void)
     let etag: undefined | string
-    let fetchUpdatesSingle:
-        | undefined
-        | (() => Promise<{ error: Error | undefined }>)
+    let fetchUpdatesSingle: undefined | (() => Promise<void>)
 
     return {
         async connect(stateStore) {
             // Ensure that we don't trigger another request while one is in flight
             fetchUpdatesSingle = createEnsureSingleWithBackoff(async () => {
                 const allEndpoint = getAllEndpoint(httpEndpoint)
-                const response = await fetchFeaturesConfigurationViaHttp(
+                etag = await fetchFeaturesConfigurationViaHttp(
                     allEndpoint,
                     environmentApiKey,
                     stateStore,
                     etag,
                     'polling',
                 )
-                etag = response.etag
-                return response
             })
 
             if (stopPolling) {
@@ -38,22 +34,13 @@ export function createPollingUpdateStrategy(
             stopPolling = pollingUpdates(() => {
                 if (fetchUpdatesSingle) {
                     // Catch errors here to ensure no unhandled promise rejections after a poll
-                    return fetchUpdatesSingle()
-                        .then((response) => {
-                            if (response.error) {
-                                updatesLog(response.error)
-                            }
-                        })
-                        .catch(() => {})
+                    return fetchUpdatesSingle().catch((error: Error) => {
+                        updatesLog(error)
+                    })
                 }
             }, intervalMs)
 
-            return fetchUpdatesSingle().then((response) => {
-                if (response.error) {
-                    // Failed to connect, throw error
-                    throw response.error
-                }
-            })
+            return fetchUpdatesSingle()
         },
         async close() {
             if (stopPolling) {
@@ -68,11 +55,7 @@ export function createPollingUpdateStrategy(
         },
         async updateFeatures() {
             if (fetchUpdatesSingle) {
-                await fetchUpdatesSingle().then((response) => {
-                    if (response.error) {
-                        throw response.error
-                    }
-                })
+                await fetchUpdatesSingle()
             }
         },
         onRequest() {

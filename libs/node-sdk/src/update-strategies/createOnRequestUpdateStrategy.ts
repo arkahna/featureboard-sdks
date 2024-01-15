@@ -11,31 +11,23 @@ export function createOnRequestUpdateStrategy(
 ): AllConfigUpdateStrategy {
     let responseExpires: number | undefined
     let etag: undefined | string
-    let fetchUpdatesSingle:
-        | undefined
-        | (() => Promise<{ error: Error | undefined }>)
+    let fetchUpdatesSingle: undefined | (() => Promise<void>)
 
     return {
         async connect(stateStore) {
             // Ensure that we don't trigger another request while one is in flight
             fetchUpdatesSingle = createEnsureSingleWithBackoff(async () => {
                 const allEndpoint = getAllEndpoint(httpEndpoint)
-                const response = await fetchFeaturesConfigurationViaHttp(
+                etag = await fetchFeaturesConfigurationViaHttp(
                     allEndpoint,
                     environmentApiKey,
                     stateStore,
                     etag,
                     'on-request',
                 )
-                etag = response.etag
-                return response
             })
 
-            return fetchUpdatesSingle().then((response) => {
-                if (response.error) {
-                    // Failed to connect, throw error
-                    throw response.error
-                }
+            return fetchUpdatesSingle().then(() => {
                 responseExpires = Date.now() + maxAgeMs
             })
         },
@@ -47,27 +39,27 @@ export function createOnRequestUpdateStrategy(
         },
         async updateFeatures() {
             if (fetchUpdatesSingle) {
-                await fetchUpdatesSingle().then((response) => {
-                    if (response.error) {
-                        throw response.error
-                    }
-                })
+                await fetchUpdatesSingle()
             }
         },
         async onRequest() {
             if (fetchUpdatesSingle) {
                 const now = Date.now()
                 if (!responseExpires || now >= responseExpires) {
-                    responseExpires = now + maxAgeMs
-                    updatesLog('Response expired, fetching updates: %o', {
-                        maxAgeMs,
-                        newExpiry: responseExpires,
-                    })
-                    return fetchUpdatesSingle().then((response) => {
-                        if (response.error) {
-                            updatesLog(response.error)
-                        }
-                    })
+                    return fetchUpdatesSingle()
+                        .then(() => {
+                            responseExpires = now + maxAgeMs
+                            updatesLog(
+                                'Response expired, fetching updates: %o',
+                                {
+                                    maxAgeMs,
+                                    newExpiry: responseExpires,
+                                },
+                            )
+                        })
+                        .catch((error: Error) => {
+                            updatesLog(error)
+                        })
                 }
 
                 updatesLog('Response not expired: %o', {

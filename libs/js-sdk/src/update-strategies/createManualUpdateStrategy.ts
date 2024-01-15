@@ -12,7 +12,7 @@ export function createManualUpdateStrategy(
     let etag: undefined | string
     let fetchUpdatesSingle:
         | undefined
-        | (() => Promise<{ error: Error | undefined }>)
+        | (() => Promise<void>)
 
     return {
         async connect(stateStore) {
@@ -20,7 +20,7 @@ export function createManualUpdateStrategy(
             etag = undefined
             // Ensure that we don't trigger another request while one is in flight
             fetchUpdatesSingle = createEnsureSingleWithBackoff(async () => {
-                const response = await fetchFeaturesConfigurationViaHttp(
+                etag = await fetchFeaturesConfigurationViaHttp(
                     httpEndpoint,
                     stateStore.audiences,
                     environmentApiKey,
@@ -28,16 +28,9 @@ export function createManualUpdateStrategy(
                     etag,
                     () => stateStore.audiences,
                 )
-                etag = response.etag
-                return response
             })
 
-            return fetchUpdatesSingle().then((response) => {
-                if (response.error) {
-                    /// Failed to connect, throw error
-                    throw response.error
-                }
-            })
+            return fetchUpdatesSingle()
         },
         close() {
             return Promise.resolve()
@@ -47,11 +40,7 @@ export function createManualUpdateStrategy(
         },
         async updateFeatures() {
             if (fetchUpdatesSingle) {
-                await fetchUpdatesSingle().then((response) => {
-                    if (response.error) {
-                        throw response.error
-                    }
-                })
+                await fetchUpdatesSingle()
             }
         },
         onRequest() {
