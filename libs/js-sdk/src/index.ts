@@ -6,7 +6,7 @@ export type { FeatureBoardClient } from './features-client'
 
 // TODO We should make these 'internal' and not export them
 // Need to figure out how to do that with the current build setup
-export { createEnsureSingle } from './ensure-single'
+export { createEnsureSingleWithBackoff } from './ensure-single'
 export { featureBoardHostedService } from './featureboard-service-urls'
 export { retry } from './utils/retry'
 

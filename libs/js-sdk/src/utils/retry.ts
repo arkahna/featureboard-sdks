@@ -1,3 +1,4 @@
+import { TooManyRequestsError } from '@featureboard/contracts'
 import { debugLog } from '../log'
 
 const maxRetries = 5
@@ -12,6 +13,7 @@ export async function retry<T>(
     try {
         return await fn()
     } catch (error) {
+        let retryAfterMs = 0
         if (cancellationToken?.cancel) {
             debugLog('Cancel retry function')
             return Promise.resolve()
@@ -20,7 +22,21 @@ export async function retry<T>(
             // Max retries
             throw error
         }
-        const delayMs = initialDelayMs * Math.pow(backoffFactor, retryAttempt)
+        if (
+            error instanceof TooManyRequestsError &&
+            error.retryAfter > new Date()
+        ) {
+            retryAfterMs = error.retryAfter.getTime() - new Date().getTime()
+        }
+        const delayMs =
+            retryAfterMs === 0
+                ? initialDelayMs * Math.pow(backoffFactor, retryAttempt)
+                : retryAfterMs
+        if (delayMs > 180000) {
+            // If delay is longer than 3 min throw error
+            // Todo: Replace with cancellation token with timeout
+            throw error
+        }
         await delay(delayMs) // Wait for the calculated delay
         return retry(fn, cancellationToken, retryAttempt + 1) // Retry the operation recursively
     }

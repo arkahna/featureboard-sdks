@@ -6,11 +6,11 @@
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>0.0.3</Version>
+    <Version>0.1.0</Version>
     <PackageDescription>FeatureBoard .NET SDK for .NET core and framework applications.</PackageDescription>
     <PackageTags>feature toggles flags</PackageTags>
     <Authors>Arkahna</Authors>
-    <Copyright>Copyright (c) Arkahna 2023</Copyright>
+    <Copyright>Copyright (c) Arkahna 2024</Copyright>
     <PackageIcon>featureboard-logo.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageReleaseNotes>https://github.com/arkahna/featureboard-sdks/blob/main/libs/dotnet-sdk/CHANGELOG.md</PackageReleaseNotes>

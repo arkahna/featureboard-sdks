@@ -4,6 +4,13 @@
 
 ### Patch Changes
 
+- Updated dependencies [ff55fcf]
+  - @featureboard/contracts@0.5.0
+
+## null
+
+### Patch Changes
+
 - Updated dependencies [5755d8f]
   - @featureboard/contracts@0.4.1
 

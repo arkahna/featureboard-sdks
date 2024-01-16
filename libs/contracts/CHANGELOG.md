@@ -1,5 +1,11 @@
 # @featureboard/contracts
 
+## 0.5.0
+
+### Minor Changes
+
+- ff55fcf: Added Too Many Requests error
+
 ## 0.4.1
 
 ### Patch Changes

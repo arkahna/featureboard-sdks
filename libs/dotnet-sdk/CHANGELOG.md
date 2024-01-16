@@ -1,5 +1,11 @@
 # dotnet-sdk
 
+## 0.1.0
+
+### Minor Changes
+
+- ff55fcf: Add support for 429 Too Many Requests with backoff
+
 ## 0.0.3
 
 ### Patch Changes

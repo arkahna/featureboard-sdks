@@ -1,5 +1,11 @@
 # @featureboard/code-generator
 
+## 0.3.6
+
+### Patch Changes
+
+- 59c8364: Added namespace validator to cli
+
 ## 0.3.5
 
 ### Patch Changes

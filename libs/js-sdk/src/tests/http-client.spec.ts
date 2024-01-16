@@ -1,4 +1,7 @@
-import type { EffectiveFeatureValue } from '@featureboard/contracts'
+import {
+    TooManyRequestsError,
+    type EffectiveFeatureValue,
+} from '@featureboard/contracts'
 import { HttpResponse, http } from 'msw'
 import { setupServer } from 'msw/node'
 import { describe, expect, it } from 'vitest'
@@ -698,5 +701,191 @@ describe('http client', () => {
             server.resetHandlers()
             server.close()
         }
+    })
+
+    it('Retry to connect when received 429 from HTTP Client API during initialization', async () => {
+        const values: EffectiveFeatureValue[] = [
+            {
+                featureKey: 'my-feature',
+                value: 'service-value',
+            },
+        ]
+
+        let count = 0
+        const server = setupServer(
+            http.get('https://client.featureboard.app/effective', () => {
+                count++
+                if (count <= 2) {
+                    return new Response(null, {
+                        status: 429,
+                        headers: { 'Retry-After': '1' },
+                    })
+                }
+                return HttpResponse.json(values, {
+                    headers: {
+                        etag: new Date().toISOString(),
+                    },
+                })
+            }),
+        )
+        server.listen({ onUnhandledRequest: 'error' })
+
+        try {
+            const httpClient = createBrowserClient({
+                environmentApiKey: 'env-api-key',
+                audiences: [],
+                api: featureBoardHostedService,
+                updateStrategy: { kind: 'manual' },
+            })
+            await httpClient.waitForInitialised()
+            httpClient.close()
+        } finally {
+            server.resetHandlers()
+            server.close()
+        }
+        expect(count).toBe(3)
+    })
+
+    it('Block HTTP client API call after 429 response from HTTP Client API according to retry-after seconds', async () => {
+        const values: EffectiveFeatureValue[] = [
+            {
+                featureKey: 'my-feature',
+                value: 'service-value',
+            },
+        ]
+
+        let count = 0
+        const server = setupServer(
+            http.get(
+                'https://client.featureboard.app/effective',
+                () => {
+                    count++
+                    return HttpResponse.json(values, {
+                        headers: {
+                            etag: new Date().toISOString(),
+                        },
+                    })
+                },
+                { once: true },
+            ),
+            http.get(
+                'https://client.featureboard.app/effective',
+                () => {
+                    count++
+                    return new Response(null, {
+                        status: 429,
+                        headers: { 'Retry-After': '1' },
+                    })
+                },
+                { once: true },
+            ),
+            http.get('https://client.featureboard.app/effective', () => {
+                count++
+                return HttpResponse.json(values, {
+                    headers: {
+                        etag: new Date().toISOString(),
+                    },
+                })
+            }),
+        )
+        server.listen({ onUnhandledRequest: 'error' })
+
+        try {
+            const httpClient = createBrowserClient({
+                environmentApiKey: 'env-api-key',
+                audiences: [],
+                api: featureBoardHostedService,
+                updateStrategy: { kind: 'manual' },
+            })
+
+            await httpClient.waitForInitialised()
+            await expect(() =>
+                httpClient.updateFeatures(),
+            ).rejects.toThrowError(TooManyRequestsError)
+            await expect(() =>
+                httpClient.updateFeatures(),
+            ).rejects.toThrowError(TooManyRequestsError)
+            await new Promise((resolve) => setTimeout(resolve, 1000))
+            await httpClient.updateFeatures()
+
+            httpClient.close()
+        } finally {
+            server.resetHandlers()
+            server.close()
+        }
+        expect(count).toBe(3)
+    })
+
+    it('Block HTTP client API call after 429 response from HTTP Client API according to retry-after date', async () => {
+        const values: EffectiveFeatureValue[] = [
+            {
+                featureKey: 'my-feature',
+                value: 'service-value',
+            },
+        ]
+
+        let count = 0
+        const server = setupServer(
+            http.get(
+                'https://client.featureboard.app/effective',
+                () => {
+                    count++
+                    return HttpResponse.json(values, {
+                        headers: {
+                            etag: new Date().toISOString(),
+                        },
+                    })
+                },
+                { once: true },
+            ),
+            http.get(
+                'https://client.featureboard.app/effective',
+                () => {
+                    count++
+                    const retryAfter = new Date(
+                        new Date().getTime() + 1000,
+                    ).toUTCString()
+                    return new Response(null, {
+                        status: 429,
+                        headers: { 'Retry-After': retryAfter },
+                    })
+                },
+                { once: true },
+            ),
+            http.get('https://client.featureboard.app/effective', () => {
+                count++
+                return HttpResponse.json(values, {
+                    headers: {
+                        etag: new Date().toISOString(),
+                    },
+                })
+            }),
+        )
+        server.listen({ onUnhandledRequest: 'error' })
+
+        try {
+            const httpClient = createBrowserClient({
+                environmentApiKey: 'env-api-key',
+                audiences: [],
+                api: featureBoardHostedService,
+                updateStrategy: { kind: 'manual' },
+            })
+
+            await httpClient.waitForInitialised()
+            await expect(() =>
+                httpClient.updateFeatures(),
+            ).rejects.toThrowError(TooManyRequestsError)
+            await expect(() =>
+                httpClient.updateFeatures(),
+            ).rejects.toThrowError(TooManyRequestsError)
+            await new Promise((resolve) => setTimeout(resolve, 1000))
+            await httpClient.updateFeatures()
+
+            httpClient.close()
+        } finally {
+            server.resetHandlers()
+            server.close()
+        }
+        expect(count).toBe(3)
     })
 })

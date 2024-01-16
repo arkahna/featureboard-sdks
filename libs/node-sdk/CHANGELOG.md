@@ -1,5 +1,16 @@
 # @featureboard/node-sdk
 
+## 0.19.0
+
+### Minor Changes
+
+- ff55fcf: Add support for 429 Too Many Requests with backoff
+
+### Patch Changes
+
+- Updated dependencies [ff55fcf]
+  - @featureboard/js-sdk@0.17.0
+
 ## 0.18.0
 
 ### Minor Changes

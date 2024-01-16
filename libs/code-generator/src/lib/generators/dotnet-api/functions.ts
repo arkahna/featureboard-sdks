@@ -1,4 +1,5 @@
 import * as path from 'path'
+import prompts from 'prompts'
 import type { Tree } from '../../tree/tree'
 
 export function toPascalCase(str: string) {
@@ -25,7 +26,11 @@ export function toDotNetType(feature: any) {
     }
 }
 
-export function getDotNetNameSpace(tree: Tree, filePath: string): string {
+export async function getDotNetNamespace(
+    tree: Tree,
+    filePath: string,
+    interactive: boolean,
+): Promise<string> {
     const files = tree.children(filePath)
     const namespace = files
         .find((x) => x.endsWith('.csproj'))
@@ -34,8 +39,27 @@ export function getDotNetNameSpace(tree: Tree, filePath: string): string {
     if (namespace) return namespace
 
     const parentDir = path.join(filePath, '..')
-    if (parentDir == filePath || parentDir == '.')
-        throw new Error("Can't find .net project file")
 
-    return getDotNetNameSpace(tree, parentDir)
+    if (parentDir == filePath || parentDir == '.') {
+        if (!interactive) {
+            throw new Error(
+                'Unable to locate .NET csproj file under the output folder.',
+            )
+        }
+
+        console.error(
+            'Unable to locate .NET csproj file under the output folder.',
+        )
+        const response = await prompts({
+            type: 'text',
+            name: 'namespace',
+            message: `Please provide your .NET namespace:`,
+            validate: (x) => !!x || 'You must enter a namespace.',
+        })
+
+        // handle the 'any'
+        return `${response.namespace}`
+    }
+
+    return await getDotNetNamespace(tree, parentDir, interactive)
 }
