@@ -1,3 +1,4 @@
+import { TooManyRequestsError } from '@featureboard/contracts'
 import type { Tracer } from '@opentelemetry/api'
 import { SpanStatusCode } from '@opentelemetry/api'
 import { getTracer } from './get-tracer'
@@ -22,6 +23,7 @@ export async function retry<T>(
                 try {
                     return await retryAttemptFn<T>(tracer, retryAttempt, fn)
                 } catch (error) {
+                    let retryAfterMs = 0
                     const err = resolveError(error)
                     if (cancellationToken?.cancel) {
                         return Promise.resolve()
@@ -43,8 +45,34 @@ export async function retry<T>(
                         throw error
                     }
 
+                    if (
+                        error instanceof TooManyRequestsError &&
+                        error.retryAfter > new Date()
+                    ) {
+                        retryAfterMs =
+                            error.retryAfter.getTime() - new Date().getTime()
+                    }
+
                     const delayMs =
-                        initialDelayMs * Math.pow(backoffFactor, retryAttempt)
+                        retryAfterMs === 0
+                            ? initialDelayMs *
+                              Math.pow(backoffFactor, retryAttempt)
+                            : retryAfterMs
+
+                    if (delayMs > 180000) {
+                        // If delay is longer than 3 min throw error
+                        // Todo: Replace with cancellation token with timeout
+                        span.recordException(
+                            new Error('Operation failed, retry timed out.', {
+                                cause: err,
+                            }),
+                        )
+                        span.setStatus({
+                            code: SpanStatusCode.ERROR,
+                            message: 'Operation failed, retry timed out.',
+                        })
+                        throw error
+                    }
 
                     await tracer.startActiveSpan('delay', (delaySpan) =>
                         delay(delayMs).finally(() => delaySpan.end()),

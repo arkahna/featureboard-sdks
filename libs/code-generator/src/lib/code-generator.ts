@@ -7,7 +7,7 @@ import type {
 import { getProjectFeatures } from './api/get-project-features'
 import { getProjects } from './api/get-projects'
 import {
-    getDotNetNameSpace,
+    getDotNetNamespace,
     toDotNetType,
     toPascalCase,
 } from './generators/dotnet-api/functions'
@@ -26,6 +26,9 @@ export interface CodeGeneratorOptions {
     interactive: boolean
 
     tree: Tree
+    /**
+     * Relative path to the tree root
+     */
     relativeFilePath: string
 }
 
@@ -42,9 +45,10 @@ export async function codeGenerator(
     const templateSpecificOptions: any = {}
     switch (options.template) {
         case 'dotnet-api':
-            templateSpecificOptions.namespace = getDotNetNameSpace(
+            templateSpecificOptions.namespace = await getDotNetNamespace(
                 options.tree,
                 relativeFilePath,
+                options.interactive,
             )
     }
 

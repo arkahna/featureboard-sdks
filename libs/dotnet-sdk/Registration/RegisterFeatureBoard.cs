@@ -14,6 +14,7 @@ public static class RegisterFeatureBoard
   private static UpdateStrategy _updateStrategy = UpdateStrategy.None;
 
   private static EntityTagHeaderValue? lastETag = null;
+  private static RetryConditionHeaderValue? retryAfter = null;
 
   public static FeatureBoardBuilder AddFeatureBoard<TFeatures>(this IServiceCollection services, IConfigurationRoot configuration) where TFeatures : class, IFeatures
   {
@@ -28,6 +29,7 @@ public static class RegisterFeatureBoard
     });
 
     services.AddSingleton<LastETagProvider>(() => ref lastETag);
+    services.AddSingleton<RetryAfterProvider>(() => ref retryAfter);
 
     services.AddScoped<IFeatureBoardClient<TFeatures>, FeatureBoardClient<TFeatures>>();
     services.AddScoped<IFeatureBoardClient>(static c => c.GetRequiredService<IFeatureBoardClient<TFeatures>>());

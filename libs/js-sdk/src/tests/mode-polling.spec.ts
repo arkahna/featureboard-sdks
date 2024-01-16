@@ -127,6 +127,61 @@ it(
         },
     ),
 )
+it(
+    'Polling swallows errors received when updating features',
+    featureBoardFixture(
+        { countAPICalls: 0 },
+        (testContext) => [
+            http.get(
+                'https://client.featureboard.app/effective',
+                () => {
+                    testContext.countAPICalls++
+                    return HttpResponse.json<EffectiveFeatureValue[]>([
+                        {
+                            featureKey: 'my-feature',
+                            value: 'service-default-value',
+                        },
+                    ])
+                },
+                { once: true },
+            ),
+            http.get('https://client.featureboard.app/effective', () => {
+                testContext.countAPICalls++
+                return new Response(null, {
+                    status: 429,
+                    headers: { 'Retry-After': '2' },
+                })
+            }),
+        ],
+        async ({ testContext }) => {
+            const client = createBrowserClient({
+                environmentApiKey: 'fake-key',
+                audiences: [],
+                updateStrategy: {
+                    kind: 'polling',
+                    options: { intervalMs: 100 },
+                },
+            })
+
+            await client.waitForInitialised()
+            // Wait for the interval to expire
+            await new Promise((resolve) => setTimeout(resolve, 100))
+            const value1 = client.client.getFeatureValue(
+                'my-feature',
+                'default-value',
+            )
+            expect(value1).toEqual('service-default-value')
+            // Wait for interval to expire
+            await new Promise((resolve) => setTimeout(resolve, 100))
+            const value2 = client.client.getFeatureValue(
+                'my-feature',
+                'default-value',
+            )
+            expect(value2).toEqual('service-default-value')
+            expect(testContext.countAPICalls).toBe(2)
+        },
+    ),
+)
 
 declare module '@featureboard/js-sdk' {
     interface Features extends Record<string, string | number | boolean> {}

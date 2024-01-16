@@ -1,4 +1,7 @@
-import type { EffectiveFeatureValue } from '@featureboard/contracts'
+import {
+    TooManyRequestsError,
+    type EffectiveFeatureValue,
+} from '@featureboard/contracts'
 import { HttpResponse, http } from 'msw'
 import { expect, it } from 'vitest'
 import { createBrowserClient } from '../create-browser-client'
@@ -683,6 +686,281 @@ it(
             )
 
             await httpClient.waitForInitialised()
+        },
+    ),
+)
+
+it(
+    'Initialisation retries when Too Many Requests (429) returned from Client HTTP API',
+    featureBoardFixture(
+        { count: 0 },
+        (testContext) => [
+            http.get('https://client.featureboard.app/effective', () => {
+                testContext.count++
+                if (testContext.count <= 2) {
+                    return new Response(null, {
+                        status: 429,
+                        headers: { 'Retry-After': '1' },
+                    })
+                }
+                return HttpResponse.json<EffectiveFeatureValue[]>(
+                    [
+                        {
+                            featureKey: 'my-feature',
+                            value: 'service-value',
+                        },
+                    ],
+                    {
+                        headers: {
+                            etag: new Date().toISOString(),
+                        },
+                    },
+                )
+            }),
+        ],
+        async ({ testContext }) => {
+            const httpClient = createBrowserClient({
+                environmentApiKey: 'env-api-key',
+                audiences: [],
+                api: featureBoardHostedService,
+                updateStrategy: { kind: 'manual' },
+            })
+            await httpClient.waitForInitialised()
+            httpClient.close()
+
+            expect(testContext.count).toBe(3)
+        },
+    ),
+)
+
+it(
+    'Update features blocked after Too Many Requests (429) received with retry-after header using seconds',
+    featureBoardFixture(
+        { count: 0 },
+        (testContext) => [
+            http.get(
+                'https://client.featureboard.app/effective',
+                () => {
+                    testContext.count++
+                    return HttpResponse.json<EffectiveFeatureValue[]>(
+                        [
+                            {
+                                featureKey: 'my-feature',
+                                value: 'service-value',
+                            },
+                        ],
+                        {
+                            headers: {
+                                etag: new Date().toISOString(),
+                            },
+                        },
+                    )
+                },
+                { once: true },
+            ),
+            http.get(
+                'https://client.featureboard.app/effective',
+                () => {
+                    testContext.count++
+                    return new Response(null, {
+                        status: 429,
+                        headers: { 'Retry-After': '1' },
+                    })
+                },
+                { once: true },
+            ),
+            http.get('https://client.featureboard.app/effective', () => {
+                testContext.count++
+                return HttpResponse.json<EffectiveFeatureValue[]>(
+                    [
+                        {
+                            featureKey: 'my-feature',
+                            value: 'service-value',
+                        },
+                    ],
+                    {
+                        headers: {
+                            etag: new Date().toISOString(),
+                        },
+                    },
+                )
+            }),
+        ],
+        async ({ testContext }) => {
+            const httpClient = createBrowserClient({
+                environmentApiKey: 'env-api-key',
+                audiences: [],
+                api: featureBoardHostedService,
+                updateStrategy: { kind: 'manual' },
+            })
+
+            await httpClient.waitForInitialised()
+            await expect(() =>
+                httpClient.updateFeatures(),
+            ).rejects.toThrowError(TooManyRequestsError)
+            await expect(() =>
+                httpClient.updateFeatures(),
+            ).rejects.toThrowError(TooManyRequestsError)
+            await new Promise((resolve) => setTimeout(resolve, 1000))
+            await httpClient.updateFeatures()
+
+            httpClient.close()
+
+            expect(testContext.count).toBe(3)
+        },
+    ),
+)
+
+it(
+    'Update features blocked after Too Many Requests (429) received with retry-after header using UTC date time',
+    featureBoardFixture(
+        { count: 0 },
+        (testContext) => [
+            http.get(
+                'https://client.featureboard.app/effective',
+                () => {
+                    testContext.count++
+                    return HttpResponse.json<EffectiveFeatureValue[]>(
+                        [
+                            {
+                                featureKey: 'my-feature',
+                                value: 'service-value',
+                            },
+                        ],
+                        {
+                            headers: {
+                                etag: new Date().toISOString(),
+                            },
+                        },
+                    )
+                },
+                { once: true },
+            ),
+            http.get(
+                'https://client.featureboard.app/effective',
+                () => {
+                    testContext.count++
+                    const retryAfter = new Date(
+                        new Date().getTime() + 1000,
+                    ).toUTCString()
+                    return new Response(null, {
+                        status: 429,
+                        headers: { 'Retry-After': retryAfter },
+                    })
+                },
+                { once: true },
+            ),
+            http.get('https://client.featureboard.app/effective', () => {
+                testContext.count++
+                return HttpResponse.json<EffectiveFeatureValue[]>(
+                    [
+                        {
+                            featureKey: 'my-feature',
+                            value: 'service-value',
+                        },
+                    ],
+                    {
+                        headers: {
+                            etag: new Date().toISOString(),
+                        },
+                    },
+                )
+            }),
+        ],
+        async ({ testContext }) => {
+            const httpClient = createBrowserClient({
+                environmentApiKey: 'env-api-key',
+                audiences: [],
+                api: featureBoardHostedService,
+                updateStrategy: { kind: 'manual' },
+            })
+
+            await httpClient.waitForInitialised()
+            await expect(() =>
+                httpClient.updateFeatures(),
+            ).rejects.toThrowError(TooManyRequestsError)
+            await expect(() =>
+                httpClient.updateFeatures(),
+            ).rejects.toThrowError(TooManyRequestsError)
+            await new Promise((resolve) => setTimeout(resolve, 1000))
+            await httpClient.updateFeatures()
+
+            httpClient.close()
+
+            expect(testContext.count).toBe(3)
+        },
+    ),
+)
+
+it(
+    'Update features blocked after Too Many Requests (429) received with undefined retry-after header',
+    featureBoardFixture(
+        { count: 0 },
+        (testContext) => [
+            http.get(
+                'https://client.featureboard.app/effective',
+                () => {
+                    testContext.count++
+                    return HttpResponse.json<EffectiveFeatureValue[]>(
+                        [
+                            {
+                                featureKey: 'my-feature',
+                                value: 'service-value',
+                            },
+                        ],
+                        {
+                            headers: {
+                                etag: new Date().toISOString(),
+                            },
+                        },
+                    )
+                },
+                { once: true },
+            ),
+            http.get(
+                'https://client.featureboard.app/effective',
+                () => {
+                    testContext.count++
+                    return new Response(null, {
+                        status: 429,
+                    })
+                },
+                { once: true },
+            ),
+            http.get('https://client.featureboard.app/effective', () => {
+                testContext.count++
+                return HttpResponse.json<EffectiveFeatureValue[]>(
+                    [
+                        {
+                            featureKey: 'my-feature',
+                            value: 'service-value',
+                        },
+                    ],
+                    {
+                        headers: {
+                            etag: new Date().toISOString(),
+                        },
+                    },
+                )
+            }),
+        ],
+        async ({ testContext }) => {
+            const httpClient = createBrowserClient({
+                environmentApiKey: 'env-api-key',
+                audiences: [],
+                api: featureBoardHostedService,
+                updateStrategy: { kind: 'manual' },
+            })
+
+            await httpClient.waitForInitialised()
+            await expect(() =>
+                httpClient.updateFeatures(),
+            ).rejects.toThrowError(TooManyRequestsError)
+            await expect(() =>
+                httpClient.updateFeatures(),
+            ).rejects.toThrowError(TooManyRequestsError)
+            httpClient.close()
+            expect(testContext.count).toBe(2)
         },
     ),
 )

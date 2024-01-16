@@ -1,4 +1,8 @@
 import { Command, Option } from '@commander-js/extra-typings'
+import {
+    getValidToken,
+    readCurrentOrganization,
+} from '@featureboard/api-authentication'
 import type { Template } from '@featureboard/code-generator'
 import {
     FsTree,
@@ -10,9 +14,7 @@ import fsAsync from 'fs/promises'
 import path from 'node:path'
 import prompts from 'prompts'
 import { actionRunner } from '../lib/action-runner'
-import { API_ENDPOINT } from '../lib/config'
-import { readCurrentOrganization } from '../lib/current-organization'
-import { getValidToken } from '../lib/get-valid-token'
+import { API_ENDPOINT, CLIENT_ID } from '../lib/config'
 import { promptForOrganization } from '../lib/prompt-for-organization'
 import { titleText } from '../lib/title-text'
 
@@ -89,10 +91,10 @@ export function codeGenCommand() {
 
                     options.output = promptResult.output
                 }
-                const outputAbsolutePath = path.join(
-                    process.cwd(),
-                    options.output!,
-                )
+                const outputAbsolutePath = path.isAbsolute(options.output!)
+                    ? options.output!
+                    : path.join(process.cwd(), options.output!)
+
                 try {
                     await fsAsync.access(outputAbsolutePath)
                 } catch {
@@ -103,7 +105,7 @@ export function codeGenCommand() {
 
                 let bearerToken: string | undefined
                 if (!options.featureBoardApiKey && !options.nonInteractive) {
-                    const token = await getValidToken()
+                    const token = await getValidToken(CLIENT_ID)
                     if (!token) {
                         return
                     }
@@ -127,11 +129,17 @@ export function codeGenCommand() {
                     throw new Error("Organization isn't set")
                 }
 
-                const tree = new FsTree(process.cwd(), options.verbose)
+                const tree = new FsTree(
+                    path.parse(outputAbsolutePath).root,
+                    options.verbose,
+                )
                 await codeGenerator({
                     template: options.template as Template,
                     tree: tree,
-                    relativeFilePath: options.output!,
+                    relativeFilePath: path.relative(
+                        tree.root,
+                        outputAbsolutePath,
+                    ),
                     featureBoardProductName: options.product,
                     auth: bearerToken
                         ? {

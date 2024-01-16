@@ -19,5 +19,5 @@ module.exports = {
       },
     },
   ],
-  ignorePatterns: ['!**/*', 'node_modules', 'out-tsc'],
+  ignorePatterns: ['!**/*', 'src/**/*.d.ts', 'node_modules', 'out-tsc'],
 }

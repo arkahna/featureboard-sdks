@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`code-Executor > template: dotnet-api > should produce the expected features files > apps/my-app/Features.cs 1`] = `
+exports[`code-gen executor > template: dotnet-api > should produce the expected features files > apps/my-app/src/features/Features.cs 1`] = `
 "using FeatureBoard.DotnetSdk.Attributes;
 using FeatureBoard.DotnetSdk.Models;
 using System.Runtime.Serialization;
@@ -108,25 +108,7 @@ public class FeatureFilterAttribute : FeatureFilterAttributeBase
 "
 `;
 
-exports[`code-Executor > template: dotnet-api > should produce the expected features files > apps/my-app/Project.FeatureBoard.MyApp.csproj 1`] = `""`;
-
-exports[`code-Executor > template: dotnet-api > should produce the expected features files > apps/my-app/project.json 1`] = `
-"{
-  \\"name\\": \\"my-app\\",
-  \\"$schema\\": \\"../../node_modules/nx/schemas/project-schema.json\\",
-  \\"projectType\\": \\"application\\",
-  \\"targets\\": {
-    \\"my-target\\": {
-      \\"executor\\": \\"nx:noop\\"
-    }
-  }
-}
-"
-`;
-
-exports[`code-Executor > template: typescript > should produce the expected features files > apps/my-app/Project.FeatureBoard.MyApp.csproj 1`] = `""`;
-
-exports[`code-Executor > template: typescript > should produce the expected features files > apps/my-app/features.ts 1`] = `
+exports[`code-gen executor > template: typescript > should produce the expected features files > apps/my-app/src/features/features.ts 1`] = `
 "import '@featureboard/js-sdk'
 
 export interface SaaSyIconsFeatures {
@@ -174,18 +156,4 @@ declare module '@featureboard/js-sdk' {
 }
 
 export type SaaSyIconsFeature = keyof SaaSyIconsFeatures"
-`;
-
-exports[`code-Executor > template: typescript > should produce the expected features files > apps/my-app/project.json 1`] = `
-"{
-  \\"name\\": \\"my-app\\",
-  \\"$schema\\": \\"../../node_modules/nx/schemas/project-schema.json\\",
-  \\"projectType\\": \\"application\\",
-  \\"targets\\": {
-    \\"my-target\\": {
-      \\"executor\\": \\"nx:noop\\"
-    }
-  }
-}
-"
 `;

@@ -1,8 +1,11 @@
 import { Command } from '@commander-js/extra-typings'
+import {
+    getValidToken,
+    writeCurrentOrganization,
+} from '@featureboard/api-authentication'
 import prompts from 'prompts'
 import { actionRunner } from '../lib/action-runner'
-import { writeCurrentOrganization } from '../lib/current-organization'
-import { getValidToken } from '../lib/get-valid-token'
+import { CLIENT_ID } from '../lib/config'
 import { promptForOrganization } from '../lib/prompt-for-organization'
 import { titleText } from '../lib/title-text'
 
@@ -32,7 +35,7 @@ export function selectOrganizationCommand() {
 
                 let bearerToken: string | undefined
                 if (!options.nonInteractive) {
-                    const token = await getValidToken()
+                    const token = await getValidToken(CLIENT_ID)
                     if (!token) {
                         return
                     }

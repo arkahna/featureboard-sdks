@@ -1,0 +1,21 @@
+{
+    "name": "@featureboard/api-authentication",
+    "version": "0.0.2",
+    "type": "commonjs",
+    "main": "./src/index.js",
+    "license": "MIT",
+    "sideEffects": false,
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/arkahna/featureboard-sdks.git"
+    },
+    "keywords": [
+        "Feature management",
+        "Feature toggles",
+        "Feature flags"
+    ],
+    "bugs": {
+        "url": "https://github.com/arkahna/featureboard-sdks/issues"
+    },
+    "homepage": "https://github.com/arkahna/featureboard-sdks/tree/master/libs/api-authenticationr#readme"
+}

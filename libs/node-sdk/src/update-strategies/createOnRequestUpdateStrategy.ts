@@ -1,8 +1,11 @@
-import { createEnsureSingle } from '@featureboard/js-sdk'
-import { addDebugEvent } from '../utils/add-debug-event'
+import {
+    createEnsureSingleWithBackoff,
+    resolveError,
+} from '@featureboard/js-sdk'
 import { fetchFeaturesConfigurationViaHttp } from '../utils/fetchFeaturesConfiguration'
+import { getTracer } from '../utils/get-tracer'
 import { getAllEndpoint } from './getAllEndpoint'
-import type { AllConfigUpdateStrategy } from './update-strategies'
+import { type AllConfigUpdateStrategy } from './update-strategies'
 
 export function createOnRequestUpdateStrategy(
     environmentApiKey: string,
@@ -16,7 +19,7 @@ export function createOnRequestUpdateStrategy(
     return {
         async connect(stateStore) {
             // Ensure that we don't trigger another request while one is in flight
-            fetchUpdatesSingle = createEnsureSingle(async () => {
+            fetchUpdatesSingle = createEnsureSingleWithBackoff(async () => {
                 const allEndpoint = getAllEndpoint(httpEndpoint)
                 etag = await fetchFeaturesConfigurationViaHttp(
                     allEndpoint,
@@ -26,9 +29,8 @@ export function createOnRequestUpdateStrategy(
                 )
             })
 
-            return fetchUpdatesSingle().then((response) => {
+            return fetchUpdatesSingle().then(() => {
                 responseExpires = Date.now() + maxAgeMs
-                return response
             })
         },
         close() {
@@ -43,23 +45,43 @@ export function createOnRequestUpdateStrategy(
             }
         },
         async onRequest() {
-            if (fetchUpdatesSingle) {
-                const now = Date.now()
-                if (!responseExpires || now >= responseExpires) {
-                    responseExpires = now + maxAgeMs
-                    addDebugEvent('Response expired, fetching updates', {
-                        maxAgeMs,
-                        newExpiry: responseExpires,
-                    })
-                    return fetchUpdatesSingle()
-                }
-
-                addDebugEvent('Response not expired', {
-                    responseExpires,
-                    now,
-                })
-                return Promise.resolve()
-            }
+            return getTracer().startActiveSpan(
+                'on-request',
+                { attributes: { etag } },
+                async (span) => {
+                    if (fetchUpdatesSingle) {
+                        const now = Date.now()
+                        if (!responseExpires || now >= responseExpires) {
+                            span.addEvent('onRequestUpdating', {
+                                message: 'Response expired, fetching updates',
+                                maxAgeMs,
+                                expiry: responseExpires,
+                            })
+                            return fetchUpdatesSingle()
+                                .then(() => {
+                                    responseExpires = now + maxAgeMs
+                                    span.addEvent('onRequestUpdated', {
+                                        message:
+                                            'Successfully updated features',
+                                        maxAgeMs,
+                                        newExpiry: responseExpires,
+                                    })
+                                })
+                                .catch((error) => {
+                                    span.recordException(resolveError(error))
+                                })
+                                .finally(() => span.end())
+                        }
+                        span.addEvent('onRequestNotExpired', {
+                            message: 'Response not expired',
+                            maxAgeMs,
+                            expiry: responseExpires,
+                            now,
+                        })
+                        return Promise.resolve()
+                    }
+                },
+            )
         },
     }
 }

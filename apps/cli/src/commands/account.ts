@@ -1,8 +1,11 @@
 import { Command } from '@commander-js/extra-typings'
+import {
+    getValidToken,
+    readCurrentOrganization,
+} from '@featureboard/api-authentication'
 import prompts from 'prompts'
 import { actionRunner } from '../lib/action-runner'
-import { readCurrentOrganization } from '../lib/current-organization'
-import { getValidToken } from '../lib/get-valid-token'
+import { CLIENT_ID } from '../lib/config'
 
 export function accountCommand() {
     return new Command('account')
@@ -25,7 +28,7 @@ export function accountCommand() {
 
                 let bearerToken: string | undefined
                 if (!options.nonInteractive) {
-                    const token = await getValidToken()
+                    const token = await getValidToken(CLIENT_ID)
                     if (!token) {
                         return
                     }

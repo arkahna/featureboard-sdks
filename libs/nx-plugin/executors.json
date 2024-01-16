@@ -3,7 +3,7 @@
         "code-gen": {
             "implementation": "./src/executors/code-gen/executor",
             "schema": "./src/executors/code-gen/schema.json",
-            "description": "code-gen executor"
+            "description": "Generates code based on FeatureBoard configuration."
         }
     }
 }

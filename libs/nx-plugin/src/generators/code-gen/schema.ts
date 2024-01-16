@@ -4,6 +4,6 @@ export interface CodeGenGeneratorSchema {
     template: Template
     projectName: string
     featureBoardProductName: string
-    featureBoardApiKey: string
+    featureBoardApiKey?: string
     subFolder: string
 }

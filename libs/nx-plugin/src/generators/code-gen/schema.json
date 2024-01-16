@@ -5,11 +5,11 @@
     "type": "object",
     "properties": {
         "template": {
-            "description": "The type of the component",
+            "description": "The type of the generated code.",
             "alias": "t",
             "type": "string",
             "x-prompt": {
-                "message": "The type of the component",
+                "message": "Select the template type",
                 "type": "list",
                 "items": [
                     {
@@ -26,17 +26,18 @@
 
         "projectName": {
             "type": "string",
-            "description": "The name of the project to add the component to.",
+            "description": "The name of the project to add the generated code to.",
             "alias": "p",
             "$default": {
                 "$source": "projectName"
             },
-            "x-prompt": "What is the name of the project you want to add the component to?"
+            "x-prompt": "What is the name of the project you want to add the generated code to?"
         },
 
         "featureBoardProductName": {
             "type": "string",
-            "description": "The name of the FeatureBoard product you want to pull the types from."
+            "description": "The FeatureBoard product to pull the types from.",
+            "alias": "f"
         },
 
         "featureBoardApiKey": {
@@ -46,15 +47,9 @@
 
         "subFolder": {
             "type": "string",
-            "description": "Sub-folder to add the generated code to.",
+            "description": "The target sub-folder of the project.",
             "default": "./"
         }
     },
-    "required": [
-        "template",
-        "projectName",
-        "featureBoardApiKey",
-        "featureBoardProductName",
-        "featureBoardApiKey"
-    ]
+    "required": ["template", "projectName", "featureBoardProductName"]
 }

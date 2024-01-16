@@ -206,6 +206,8 @@ importers:
 
   apps/examples/dotnet-api: {}
 
+  libs/api-authentication: {}
+
   libs/code-generator: {}
 
   libs/contracts: {}
@@ -281,6 +283,9 @@ importers:
 
   libs/nx-plugin:
     dependencies:
+      '@featureboard/api-authentication':
+        specifier: workspace:*
+        version: link:../api-authentication
       '@featureboard/code-generator':
         specifier: workspace:*
         version: link:../code-generator
@@ -290,6 +295,10 @@ importers:
       prompts:
         specifier: ^2.4.2
         version: 2.4.2
+    devDependencies:
+      zod:
+        specifier: ^3.22.4
+        version: 3.22.4
 
   libs/react-sdk:
     dependencies:

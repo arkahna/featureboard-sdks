@@ -1,4 +1,4 @@
-import { createEnsureSingle } from '../ensure-single'
+import { createEnsureSingleWithBackoff } from '../ensure-single'
 import { fetchFeaturesConfigurationViaHttp } from '../utils/fetchFeaturesConfiguration'
 import { getTracer } from '../utils/get-tracer'
 import { pollingUpdates } from '../utils/pollingUpdates'
@@ -21,7 +21,7 @@ export function createPollingUpdateStrategy(
             etag = undefined
 
             // Ensure that we don't trigger another request while one is in flight
-            fetchUpdatesSingle = createEnsureSingle(async () => {
+            fetchUpdatesSingle = createEnsureSingleWithBackoff(async () => {
                 etag = await fetchFeaturesConfigurationViaHttp(
                     httpEndpoint,
                     stateStore.audiences,
@@ -37,7 +37,7 @@ export function createPollingUpdateStrategy(
             }
             stopPolling = pollingUpdates(() => {
                 return getTracer().startActiveSpan(
-                    'Polling update',
+                    'polling-updates',
                     { attributes: { etag }, root: true },
                     async (span) => {
                         // Catch errors here to ensure no unhandled promise rejections after a poll

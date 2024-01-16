@@ -1,7 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import querystring from 'node:querystring'
-import { CLIENT_ID, CONFIG_DIRECTORY } from './config'
+import { CONFIG_DIRECTORY } from './config'
 
 export interface TokenData {
     access_token: string
@@ -11,15 +11,8 @@ export interface TokenData {
     expiration_time?: number // We'll store the exact expiration time for easier checks
 }
 
-// 3524 is alphanumeric for 'FLAG' (on a phone keypad)
-export const REDIRECT_PORT = 3524
-export const REDIRECT_URI = `http://localhost:${REDIRECT_PORT}`
-export const AUTH_URL = `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=${CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(
-    REDIRECT_URI,
-)}/callback&scope=${CLIENT_ID}/.default offline_access`
 export const TOKEN_URL =
     'https://login.microsoftonline.com/common/oauth2/v2.0/token'
-
 const TOKEN_FILE = path.join(CONFIG_DIRECTORY, 'token.json')
 
 export function writeToken(tokenData: TokenData) {
@@ -42,6 +35,7 @@ export async function readToken(): Promise<TokenData | null> {
 
 export async function performTokenRefresh(
     refreshToken: string,
+    clientId: string,
 ): Promise<TokenData> {
     const response = await fetch(TOKEN_URL, {
         method: 'POST',
@@ -49,7 +43,7 @@ export async function performTokenRefresh(
             'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: querystring.stringify({
-            client_id: CLIENT_ID,
+            client_id: clientId,
             refresh_token: refreshToken,
             grant_type: 'refresh_token',
         }),

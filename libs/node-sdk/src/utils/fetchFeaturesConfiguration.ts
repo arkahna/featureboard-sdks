@@ -1,4 +1,7 @@
-import type { FeatureConfiguration } from '@featureboard/contracts'
+import {
+    TooManyRequestsError,
+    type FeatureConfiguration,
+} from '@featureboard/contracts'
 import { resolveError } from '@featureboard/js-sdk'
 import { SpanStatusCode } from '@opentelemetry/api'
 import type { IFeatureStateStore } from '../feature-state-store'
@@ -10,9 +13,9 @@ export async function fetchFeaturesConfigurationViaHttp(
     environmentApiKey: string,
     stateStore: IFeatureStateStore,
     etag: string | undefined,
-) {
+): Promise<string | undefined> {
     return getTracer().startActiveSpan(
-        'fetchEffectiveFeatures(http)',
+        'fetch-features-http',
         { attributes: { etag } },
         async (span) => {
             try {
@@ -23,6 +26,37 @@ export async function fetchFeaturesConfigurationViaHttp(
                         ...(etag ? { 'if-none-match': etag } : {}),
                     },
                 })
+
+                if (response.status === 429) {
+                    // Too many requests
+                    const retryAfterHeader = response.headers.get('Retry-After')
+                    const retryAfterInt = retryAfterHeader
+                        ? parseInt(retryAfterHeader, 10)
+                        : 60
+                    const retryAfter =
+                        retryAfterHeader && !retryAfterInt
+                            ? new Date(retryAfterHeader)
+                            : new Date()
+
+                    if (retryAfterInt) {
+                        const retryAfterTime =
+                            retryAfter.getTime() + retryAfterInt * 1000
+                        retryAfter.setTime(retryAfterTime)
+                    }
+
+                    throw new TooManyRequestsError(
+                        `Failed to get latest features: Service returned ${
+                            response.status
+                        }${
+                            response.statusText ? ' ' + response.statusText : ''
+                        }. ${
+                            retryAfterHeader
+                                ? 'Retry after: ' + retryAfter.toUTCString()
+                                : ''
+                        } `,
+                        retryAfter,
+                    )
+                }
 
                 if (response.status !== 200 && response.status !== 304) {
                     throw new Error(

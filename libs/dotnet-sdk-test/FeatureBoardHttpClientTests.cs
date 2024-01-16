@@ -8,6 +8,7 @@ using Bogus;
 using Moq;
 using FeatureBoard.DotnetSdk.Models;
 using System.Net.Http.Headers;
+using Shouldly;
 
 namespace FeatureBoard.DotnetSdk.Test
 {
@@ -15,6 +16,7 @@ namespace FeatureBoard.DotnetSdk.Test
   {
     private const string TestETag = @"""test""";
     private EntityTagHeaderValue? _nullETag = null;
+    private RetryConditionHeaderValue? _retryAfter = null;
 
     private static readonly Expression<Func<HttpRequestMessage, bool>> _defaultRequestMatcher = msg => msg.Method == HttpMethod.Get && msg.RequestUri!.OriginalString == FeatureBoardHttpClient.Action;
 
@@ -44,7 +46,7 @@ namespace FeatureBoard.DotnetSdk.Test
       IReadOnlyCollection<FeatureConfiguration>? actionArg = null;
       void captureArgAction(IReadOnlyCollection<FeatureConfiguration> features) => actionArg = features;
 
-      var testSubject = new FeatureBoardHttpClient(_mockHttpClient.Object, () => ref _nullETag, captureArgAction, new NullLogger<FeatureBoardHttpClient>());
+      var testSubject = new FeatureBoardHttpClient(_mockHttpClient.Object, () => ref _nullETag, () => ref _retryAfter, captureArgAction, new NullLogger<FeatureBoardHttpClient>());
 
       // Act
       var result = await testSubject.RefreshFeatureConfiguration(CancellationToken.None);
@@ -86,7 +88,7 @@ namespace FeatureBoard.DotnetSdk.Test
         .Setup(client => client.SendAsync(It.Is<HttpRequestMessage>(hasEtagMatcher), It.IsAny<CancellationToken>()))
         .ReturnsAsync(new HttpResponseMessage() { StatusCode = HttpStatusCode.NotModified });
 
-      var testSubject = new FeatureBoardHttpClient(_mockHttpClient.Object, () => ref _nullETag, nopAction, new NullLogger<FeatureBoardHttpClient>());
+      var testSubject = new FeatureBoardHttpClient(_mockHttpClient.Object, () => ref _nullETag, () => ref _retryAfter, nopAction, new NullLogger<FeatureBoardHttpClient>());
 
       // Act
       var initialResult = await testSubject.RefreshFeatureConfiguration(CancellationToken.None);
@@ -95,6 +97,138 @@ namespace FeatureBoard.DotnetSdk.Test
       // Assert
       Assert.True(initialResult);
       Assert.False(subsequentResult);
+    }
+
+    [Fact]
+    public async Task ItDoesNotProcessResponseIfTooManyRequests()
+    {
+      // Arrange
+      var content = JsonContent.Create(new[] { testFeatureConfig });
+      static void nopAction(IReadOnlyCollection<FeatureConfiguration> features) { }
+      var countHttpClient = 0;
+      Expression<Func<HttpRequestMessage, bool>> hasEtagMatcher = msg => _defaultRequestMatcher.Compile()(msg) && msg.Headers.IfNoneMatch.Any(t => t.Equals(new EntityTagHeaderValue(TestETag)));
+      _mockHttpClient
+        .Setup(client => client.SendAsync(It.Is<HttpRequestMessage>(hasEtagMatcher), It.IsAny<CancellationToken>()))
+        .ReturnsAsync((HttpRequestMessage request, CancellationToken _) =>
+        {
+          countHttpClient++;
+          if (countHttpClient == 1)
+          {
+            var response = new HttpResponseMessage(HttpStatusCode.TooManyRequests);
+            response.Headers.RetryAfter = new RetryConditionHeaderValue(new DateTimeOffset(DateTime.UtcNow.AddSeconds(1)));
+            return response;
+          }
+          else
+          {
+            var response = new HttpResponseMessage() { Content = content, RequestMessage = request };
+            response.Headers.ETag = new EntityTagHeaderValue(TestETag);
+            return response;
+          }
+        });
+
+      var testSubject = new FeatureBoardHttpClient(_mockHttpClient.Object, () => ref _nullETag, () => ref _retryAfter, nopAction, new NullLogger<FeatureBoardHttpClient>());
+
+      // Act
+      var initialResult = await testSubject.RefreshFeatureConfiguration(CancellationToken.None);
+      var subsequentResult = await testSubject.RefreshFeatureConfiguration(CancellationToken.None);
+      Assert.Equal(1, countHttpClient);
+      var subsequentResult2 = await testSubject.RefreshFeatureConfiguration(CancellationToken.None);
+      Assert.Equal(1, countHttpClient);
+      Thread.Sleep(1000);
+      var subsequentResult3 = await testSubject.RefreshFeatureConfiguration(CancellationToken.None);
+
+      // Assert
+      Assert.True(initialResult);
+      Assert.False(subsequentResult);
+      Assert.False(subsequentResult2);
+      Assert.True(subsequentResult3);
+      Assert.True(_retryAfter == null);
+      Assert.Equal(2, countHttpClient);
+    }
+
+
+    [Fact]
+    public async Task ItDoesNotProcessResponseIfTooManyRequestsRetryAfterHeaderDate()
+    {
+      // Arrange
+      static void nopAction(IReadOnlyCollection<FeatureConfiguration> features) { }
+      var retryAfterDate = new DateTimeOffset(DateTime.UtcNow.AddSeconds(1));
+
+      Expression<Func<HttpRequestMessage, bool>> hasEtagMatcher = msg => _defaultRequestMatcher.Compile()(msg) && msg.Headers.IfNoneMatch.Any(t => t.Equals(new EntityTagHeaderValue(TestETag)));
+      _mockHttpClient
+        .Setup(client => client.SendAsync(It.Is<HttpRequestMessage>(hasEtagMatcher), It.IsAny<CancellationToken>()))
+        .ReturnsAsync((HttpRequestMessage request, CancellationToken _) =>
+        {
+          var response = new HttpResponseMessage(HttpStatusCode.TooManyRequests);
+          response.Headers.RetryAfter = new RetryConditionHeaderValue(retryAfterDate);
+          return response;
+        });
+
+      var testSubject = new FeatureBoardHttpClient(_mockHttpClient.Object, () => ref _nullETag, () => ref _retryAfter, nopAction, new NullLogger<FeatureBoardHttpClient>());
+
+      // Act
+      var initialResult = await testSubject.RefreshFeatureConfiguration(CancellationToken.None);
+      var subsequentResult = await testSubject.RefreshFeatureConfiguration(CancellationToken.None);
+
+      // Assert
+      Assert.True(initialResult);
+      Assert.False(subsequentResult);
+      Assert.True(_retryAfter != null && _retryAfter.Date == retryAfterDate);
+    }
+
+    [Fact]
+    public async Task ItDoesNotProcessResponseIfTooManyRequestsRetryAfterHeaderSeconds()
+    {
+      // Arrange
+      static void nopAction(IReadOnlyCollection<FeatureConfiguration> features) { }
+
+      Expression<Func<HttpRequestMessage, bool>> hasEtagMatcher = msg => _defaultRequestMatcher.Compile()(msg) && msg.Headers.IfNoneMatch.Any(t => t.Equals(new EntityTagHeaderValue(TestETag)));
+      _mockHttpClient
+        .Setup(client => client.SendAsync(It.Is<HttpRequestMessage>(hasEtagMatcher), It.IsAny<CancellationToken>()))
+        .ReturnsAsync((HttpRequestMessage request, CancellationToken _) =>
+        {
+          var response = new HttpResponseMessage(HttpStatusCode.TooManyRequests);
+          response.Headers.RetryAfter = new RetryConditionHeaderValue(TimeSpan.FromSeconds(1));
+          return response;
+        });
+
+      var testSubject = new FeatureBoardHttpClient(_mockHttpClient.Object, () => ref _nullETag, () => ref _retryAfter, nopAction, new NullLogger<FeatureBoardHttpClient>());
+
+      // Act
+      var initialResult = await testSubject.RefreshFeatureConfiguration(CancellationToken.None);
+      var subsequentResult = await testSubject.RefreshFeatureConfiguration(CancellationToken.None);
+
+      // Assert
+      Assert.True(initialResult);
+      Assert.False(subsequentResult);
+      Assert.True(_retryAfter != null && _retryAfter.Date != null);
+    }
+
+    [Fact]
+    public async Task ItDoesNotProcessResponseIfTooManyRequestsRetryAfterHeaderNull()
+    {
+      // Arrange
+      static void nopAction(IReadOnlyCollection<FeatureConfiguration> features) { }
+
+      Expression<Func<HttpRequestMessage, bool>> hasEtagMatcher = msg => _defaultRequestMatcher.Compile()(msg) && msg.Headers.IfNoneMatch.Any(t => t.Equals(new EntityTagHeaderValue(TestETag)));
+      _mockHttpClient
+        .Setup(client => client.SendAsync(It.Is<HttpRequestMessage>(hasEtagMatcher), It.IsAny<CancellationToken>()))
+        .ReturnsAsync((HttpRequestMessage request, CancellationToken _) =>
+        {
+          var response = new HttpResponseMessage(HttpStatusCode.TooManyRequests);
+          return response;
+        });
+
+      var testSubject = new FeatureBoardHttpClient(_mockHttpClient.Object, () => ref _nullETag, () => ref _retryAfter, nopAction, new NullLogger<FeatureBoardHttpClient>());
+
+      // Act
+      var initialResult = await testSubject.RefreshFeatureConfiguration(CancellationToken.None);
+      var subsequentResult = await testSubject.RefreshFeatureConfiguration(CancellationToken.None);
+
+      // Assert
+      Assert.True(initialResult);
+      Assert.False(subsequentResult);
+      Assert.True(_retryAfter != null && _retryAfter.Date != null);
     }
 
 
@@ -112,7 +246,7 @@ namespace FeatureBoard.DotnetSdk.Test
       _mockHttpClient
         .Setup(client => client.SendAsync(It.Is<HttpRequestMessage>(_defaultRequestMatcher), It.IsAny<CancellationToken>()))
         .ReturnsAsync((HttpRequestMessage request, CancellationToken _) => new HttpResponseMessage(httpStatusCode) { RequestMessage = request });
-      var testSubject = new FeatureBoardHttpClient(_mockHttpClient.Object, () => ref _nullETag, exceptionAction, new NullLogger<FeatureBoardHttpClient>());
+      var testSubject = new FeatureBoardHttpClient(_mockHttpClient.Object, () => ref _nullETag, () => ref _retryAfter, exceptionAction, new NullLogger<FeatureBoardHttpClient>());
 
       // Act
       var result = await testSubject.RefreshFeatureConfiguration(CancellationToken.None);

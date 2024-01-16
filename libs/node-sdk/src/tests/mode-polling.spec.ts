@@ -131,6 +131,64 @@ it(
     ),
 )
 
+it(
+    'Polling swallows errors received when updating features',
+    featureBoardFixture(
+        { countAPICalls: 0 },
+        (testContext) => [
+            http.get(
+                'https://client.featureboard.app/all',
+                () => {
+                    testContext.countAPICalls++
+                    return HttpResponse.json<FeatureConfiguration[]>([
+                        {
+                            featureKey: 'my-feature',
+                            audienceExceptions: [],
+                            defaultValue: 'service-default-value',
+                        },
+                    ])
+                },
+                { once: true },
+            ),
+            http.get('https://client.featureboard.app/all', () => {
+                testContext.countAPICalls++
+                return new Response(null, {
+                    status: 429,
+                    headers: { 'Retry-After': '2' },
+                })
+            }),
+        ],
+        async ({ testContext }) => {
+            const client = createServerClient({
+                environmentApiKey: 'fake-key',
+                updateStrategy: {
+                    kind: 'polling',
+                    options: { intervalMs: 100 },
+                },
+            })
+            await client.waitForInitialised()
+            // Wait for the interval to expire
+            await new Promise((resolve) => setTimeout(resolve, 100))
+            const requestClient1 = await client.request([])
+            const value1 = requestClient1.getFeatureValue(
+                'my-feature',
+                'default-value',
+            )
+            expect(value1).toEqual('service-default-value')
+            // Wait for interval to expire
+            await new Promise((resolve) => setTimeout(resolve, 100))
+            const requestClient2 = await client.request([])
+            const value2 = requestClient2.getFeatureValue(
+                'my-feature',
+                'default-value',
+            )
+            expect(value2).toEqual('service-default-value')
+            expect(testContext.countAPICalls).toBe(2)
+            expect.assertions(3)
+        },
+    ),
+)
+
 declare module '@featureboard/js-sdk' {
     interface Features extends Record<string, string | number | boolean> {}
 }

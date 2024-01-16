@@ -1,5 +1,16 @@
 # @featureboard/js-sdk
 
+## 0.17.0
+
+### Minor Changes
+
+- ff55fcf: Add support for 429 Too Many Requests with backoff
+
+### Patch Changes
+
+- Updated dependencies [ff55fcf]
+  - @featureboard/contracts@0.5.0
+
 ## 0.16.0
 
 ### Minor Changes
