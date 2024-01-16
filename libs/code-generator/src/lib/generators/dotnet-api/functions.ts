@@ -53,7 +53,8 @@ export async function getDotNetNamespace(
         const response = await prompts({
             type: 'text',
             name: 'namespace',
-            message: `Please provide your .net namespace:`,
+            message: `Please provide your .NET namespace:`,
+            validate: (x) => !!x || 'You must enter a namespace.',
         })
 
         // handle the 'any'
