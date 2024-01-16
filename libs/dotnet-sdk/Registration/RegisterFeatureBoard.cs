@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Http.Headers;
 using FeatureBoard.DotnetSdk.Models;
 using FeatureBoard.DotnetSdk.State;
@@ -27,7 +28,19 @@ public static class RegisterFeatureBoard
       client.DefaultRequestHeaders.Add("x-environment-key", options.Value.EnvironmentApiKey);
       // client.Timeout = options.Value.MaxAge - TimeSpan.FromMilliseconds(3); //prevent multiple requests running at the same time.
     }).AddTransientHttpErrorPolicy(static policyBuilder => // DEBT: Get number retries from config
-      policyBuilder.WaitAndRetryAsync(retryCount: 5, static retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))) // TODO: Consider adding jitter
+      policyBuilder
+#if NET6_0_OR_GREATER
+        .OrResult(result => result.StatusCode == HttpStatusCode.TooManyRequests)
+#else
+        .OrResult(result => (int)result.StatusCode == 429)
+#endif
+        .WaitAndRetryAsync(
+          retryCount: 5,
+          sleepDurationProvider: static (retryAttempt, response, context) =>
+            response.Result?.Headers.RetryAfter?.Delta // obey retry-after header if present in response
+              ?? TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), // fallback to basic exponential backoff if not. TODO: Consider adding jitter
+          onRetryAsync: static (response, delay, retryAttempt, context) => Task.CompletedTask
+          )
     );
 
     services.AddSingleton<LastETagProvider>(() => ref lastETag);
