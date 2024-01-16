@@ -39,6 +39,7 @@ describe('On request update mode', () => {
             server.resetHandlers()
             server.close()
         }
+        expect.assertions(1)
     })
 
     it('throws if request() is not awaited in request mode', async () => {
@@ -77,6 +78,7 @@ describe('On request update mode', () => {
             server.resetHandlers()
             server.close()
         }
+        expect.assertions(1)
     })
 
     // To reduce load on the FeatureBoard server, we only fetch the values once they are considered old
@@ -124,6 +126,7 @@ describe('On request update mode', () => {
             server.resetHandlers()
             server.close()
         }
+        expect.assertions(1)
     })
 
     it('fetches update when response is expired', async () => {
@@ -153,20 +156,85 @@ describe('On request update mode', () => {
             }),
         )
         server.listen({ onUnhandledRequest: 'error' })
+        try {
+            const connection = createServerClient({
+                environmentApiKey: 'fake-key',
+                updateStrategy: {
+                    kind: 'on-request',
+                    options: { maxAgeMs: 1 },
+                },
+            })
+            await connection.waitForInitialised()
 
-        const connection = createServerClient({
-            environmentApiKey: 'fake-key',
-            updateStrategy: { kind: 'on-request', options: { maxAgeMs: 1 } },
-        })
-        await connection.waitForInitialised()
+            // Ensure response has expired
+            await new Promise((resolve) => setTimeout(resolve, 10))
 
-        // Ensure response has expired
-        await new Promise((resolve) => setTimeout(resolve, 10))
+            const client = await connection.request([])
+            expect(
+                client.getFeatureValue('my-feature', 'default-value'),
+            ).toEqual('new-service-default-value')
+        } finally {
+            server.resetHandlers()
+            server.close()
+        }
+        expect.assertions(1)
+    })
 
-        const client = await connection.request([])
-        expect(client.getFeatureValue('my-feature', 'default-value')).toEqual(
-            'new-service-default-value',
+    it('Do NOT throw error or make call to HTTP Client API when Too Many Requests (429) has been returned', async () => {
+        const values: FeatureConfiguration[] = [
+            {
+                featureKey: 'my-feature',
+                audienceExceptions: [],
+                defaultValue: 'service-default-value',
+            },
+        ]
+
+        let countAPICalls = 0
+        const server = setupServer(
+            http.get(
+                'https://client.featureboard.app/all',
+                () => {
+                    countAPICalls++
+                    return HttpResponse.json(values)
+                },
+                { once: true },
+            ),
+            http.get('https://client.featureboard.app/all', () => {
+                countAPICalls++
+                return new Response(null, {
+                    status: 429,
+                    headers: { 'Retry-After': '2' },
+                })
+            }),
         )
+        server.listen({ onUnhandledRequest: 'error' })
+
+        try {
+            const client = createServerClient({
+                environmentApiKey: 'fake-key',
+                updateStrategy: {
+                    kind: 'on-request',
+                    options: { maxAgeMs: 100 },
+                },
+            })
+            await client.waitForInitialised()
+            // Wait for the on-request max age to expire
+            await new Promise((resolve) => setTimeout(resolve, 100))
+            await client.request([])
+            // Wait for the on-request max age to expire
+            await new Promise((resolve) => setTimeout(resolve, 100))
+            const requestClient = await client.request([])
+            const value = requestClient.getFeatureValue(
+                'my-feature',
+                'default-value',
+            )
+            expect(value).toEqual('service-default-value')
+        } finally {
+            server.resetHandlers()
+            server.close()
+        }
+        expect(countAPICalls).toBe(2)
+        expect.assertions(2)
     })
 })
 

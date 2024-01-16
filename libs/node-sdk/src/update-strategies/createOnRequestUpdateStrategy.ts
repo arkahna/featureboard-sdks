@@ -1,4 +1,4 @@
-import { createEnsureSingle } from '@featureboard/js-sdk'
+import { createEnsureSingleWithBackoff } from '@featureboard/js-sdk'
 import { fetchFeaturesConfigurationViaHttp } from '../utils/fetchFeaturesConfiguration'
 import { getAllEndpoint } from './getAllEndpoint'
 import type { AllConfigUpdateStrategy } from './update-strategies'
@@ -16,7 +16,7 @@ export function createOnRequestUpdateStrategy(
     return {
         async connect(stateStore) {
             // Ensure that we don't trigger another request while one is in flight
-            fetchUpdatesSingle = createEnsureSingle(async () => {
+            fetchUpdatesSingle = createEnsureSingleWithBackoff(async () => {
                 const allEndpoint = getAllEndpoint(httpEndpoint)
                 etag = await fetchFeaturesConfigurationViaHttp(
                     allEndpoint,
@@ -27,9 +27,8 @@ export function createOnRequestUpdateStrategy(
                 )
             })
 
-            return fetchUpdatesSingle().then((response) => {
+            return fetchUpdatesSingle().then(() => {
                 responseExpires = Date.now() + maxAgeMs
-                return response
             })
         },
         close() {
@@ -47,12 +46,20 @@ export function createOnRequestUpdateStrategy(
             if (fetchUpdatesSingle) {
                 const now = Date.now()
                 if (!responseExpires || now >= responseExpires) {
-                    responseExpires = now + maxAgeMs
-                    updatesLog('Response expired, fetching updates: %o', {
-                        maxAgeMs,
-                        newExpiry: responseExpires,
-                    })
                     return fetchUpdatesSingle()
+                        .then(() => {
+                            responseExpires = now + maxAgeMs
+                            updatesLog(
+                                'Response expired, fetching updates: %o',
+                                {
+                                    maxAgeMs,
+                                    newExpiry: responseExpires,
+                                },
+                            )
+                        })
+                        .catch((error: Error) => {
+                            updatesLog(error)
+                        })
                 }
 
                 updatesLog('Response not expired: %o', {

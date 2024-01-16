@@ -1,8 +1,9 @@
-import { createEnsureSingle } from '@featureboard/js-sdk'
+import { createEnsureSingleWithBackoff } from '@featureboard/js-sdk'
 import { fetchFeaturesConfigurationViaHttp } from '../utils/fetchFeaturesConfiguration'
 import { pollingUpdates } from '../utils/pollingUpdates'
 import { getAllEndpoint } from './getAllEndpoint'
 import type { AllConfigUpdateStrategy } from './update-strategies'
+import { updatesLog } from './updates-log'
 
 export function createPollingUpdateStrategy(
     environmentApiKey: string,
@@ -16,7 +17,7 @@ export function createPollingUpdateStrategy(
     return {
         async connect(stateStore) {
             // Ensure that we don't trigger another request while one is in flight
-            fetchUpdatesSingle = createEnsureSingle(async () => {
+            fetchUpdatesSingle = createEnsureSingleWithBackoff(async () => {
                 const allEndpoint = getAllEndpoint(httpEndpoint)
                 etag = await fetchFeaturesConfigurationViaHttp(
                     allEndpoint,
@@ -33,7 +34,9 @@ export function createPollingUpdateStrategy(
             stopPolling = pollingUpdates(() => {
                 if (fetchUpdatesSingle) {
                     // Catch errors here to ensure no unhandled promise rejections after a poll
-                    return fetchUpdatesSingle().catch(() => {})
+                    return fetchUpdatesSingle().catch((error: Error) => {
+                        updatesLog(error)
+                    })
                 }
             }, intervalMs)
 

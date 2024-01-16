@@ -1,4 +1,7 @@
-import type { EffectiveFeatureValue } from '@featureboard/contracts'
+import {
+    TooManyRequestsError,
+    type EffectiveFeatureValue,
+} from '@featureboard/contracts'
 import type { EffectiveFeatureStateStore } from '../effective-feature-state-store'
 import { getEffectiveEndpoint } from '../update-strategies/getEffectiveEndpoint'
 import { compareArrays } from './compare-arrays'
@@ -11,7 +14,7 @@ export async function fetchFeaturesConfigurationViaHttp(
     stateStore: EffectiveFeatureStateStore,
     etag: string | undefined,
     getCurrentAudiences: () => string[],
-) {
+): Promise<string | undefined> {
     const effectiveEndpoint = getEffectiveEndpoint(
         featureBoardEndpoint,
         audiences,
@@ -27,6 +30,34 @@ export async function fetchFeaturesConfigurationViaHttp(
             ...(etag ? { 'if-none-match': etag } : {}),
         },
     })
+
+    if (response.status === 429) {
+        // Too many requests
+        const retryAfterHeader = response.headers.get('Retry-After')
+        const retryAfterInt = retryAfterHeader
+            ? parseInt(retryAfterHeader, 10)
+            : 60
+        const retryAfter =
+            retryAfterHeader && !retryAfterInt
+                ? new Date(retryAfterHeader)
+                : new Date()
+
+        if (retryAfterInt) {
+            const retryAfterTime = retryAfter.getTime() + retryAfterInt * 1000
+            retryAfter.setTime(retryAfterTime)
+        }
+
+        throw new TooManyRequestsError(
+            `Failed to get latest features: Service returned ${
+                response.status
+            }${response.statusText ? ' ' + response.statusText : ''}. ${
+                retryAfterHeader
+                    ? 'Retry after: ' + retryAfter.toUTCString()
+                    : ''
+            } `,
+            retryAfter,
+        )
+    }
 
     if (response.status !== 200 && response.status !== 304) {
         httpClientDebug(

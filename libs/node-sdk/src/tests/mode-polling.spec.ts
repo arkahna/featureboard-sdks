@@ -44,6 +44,7 @@ describe('Polling update mode', () => {
             server.resetHandlers()
             server.close()
         }
+        expect.assertions(1)
     })
 
     it('sets up interval correctly', async () => {
@@ -82,6 +83,7 @@ describe('Polling update mode', () => {
             server.resetHandlers()
             server.close()
         }
+        expect.assertions(2)
     })
 
     it('fetches updates when interval fires', async () => {
@@ -118,19 +120,87 @@ describe('Polling update mode', () => {
         )
         server.listen({ onUnhandledRequest: 'error' })
 
-        const client = createServerClient({
-            environmentApiKey: 'fake-key',
-            updateStrategy: 'polling',
-        })
-        await client.waitForInitialised()
+        try {
+            const client = createServerClient({
+                environmentApiKey: 'fake-key',
+                updateStrategy: 'polling',
+            })
+            await client.waitForInitialised()
 
-        const pollCallback = (setMock.mock.calls[0] as any)[0]
-        await pollCallback()
+            const pollCallback = (setMock.mock.calls[0] as any)[0]
+            await pollCallback()
 
-        const value = client
-            .request([])
-            .getFeatureValue('my-feature', 'default-value')
-        expect(value).toEqual('new-service-default-value')
+            const value = client
+                .request([])
+                .getFeatureValue('my-feature', 'default-value')
+            expect(value).toEqual('new-service-default-value')
+        } finally {
+            server.resetHandlers()
+            server.close()
+        }
+        expect.assertions(1)
+    })
+
+    it('Do NOT throw error or make call to HTTP Client API when Too Many Requests (429) has been returned', async () => {
+        const values: FeatureConfiguration[] = [
+            {
+                featureKey: 'my-feature',
+                audienceExceptions: [],
+                defaultValue: 'service-default-value',
+            },
+        ]
+
+        let countAPICalls = 0
+        const server = setupServer(
+            http.get(
+                'https://client.featureboard.app/all',
+                () => {
+                    countAPICalls++
+                    return HttpResponse.json(values)
+                },
+                { once: true },
+            ),
+            http.get('https://client.featureboard.app/all', () => {
+                countAPICalls++
+                return new Response(null, {
+                    status: 429,
+                    headers: { 'Retry-After': '2' },
+                })
+            }),
+        )
+        server.listen({ onUnhandledRequest: 'error' })
+
+        try {
+            const client = createServerClient({
+                environmentApiKey: 'fake-key',
+                updateStrategy: {
+                    kind: 'polling',
+                    options: { intervalMs: 100 },
+                },
+            })
+            await client.waitForInitialised()
+            // Wait for the interval to expire
+            await new Promise((resolve) => setTimeout(resolve, 100))
+            const requestClient1 = await client.request([])
+            const value1 = requestClient1.getFeatureValue(
+                'my-feature',
+                'default-value',
+            )
+            expect(value1).toEqual('service-default-value')
+            // Wait for interval to expire
+            await new Promise((resolve) => setTimeout(resolve, 100))
+            const requestClient2 = await client.request([])
+            const value2 = requestClient2.getFeatureValue(
+                'my-feature',
+                'default-value',
+            )
+            expect(value2).toEqual('service-default-value')
+        } finally {
+            server.resetHandlers()
+            server.close()
+        }
+        expect(countAPICalls).toBe(2)
+        expect.assertions(3)
     })
 })
 
