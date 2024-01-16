@@ -1,4 +1,4 @@
-﻿using FeatureBoard.DotnetSdk.Models;
+using FeatureBoard.DotnetSdk.Models;
 
 namespace FeatureBoard.DotnetSdk.State;
 
