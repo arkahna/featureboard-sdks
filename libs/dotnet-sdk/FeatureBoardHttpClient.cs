@@ -8,25 +8,24 @@ namespace FeatureBoard.DotnetSdk;
 
 public delegate ref EntityTagHeaderValue? LastETagProvider();
 
-public delegate Task FeatureConfigurationUpdated(IReadOnlyCollection<FeatureConfiguration> configuration, CancellationToken cancellationToken);
 
 internal sealed class FeatureBoardHttpClient : IFeatureBoardHttpClient
 {
+  private readonly IOrderedEnumerable<State.IFeatureBoardStateUpdateHandler> _featureConfigurationUpdatedHandlers;
+
   internal static readonly string Action = "all";
 
   private LastETagProvider _eTag;
+
   private readonly HttpClient _httpClient;
-  private event FeatureConfigurationUpdated OnFeatureConfigurationUpdated = null!;
   private readonly ILogger _logger;
 
-
-  public FeatureBoardHttpClient(HttpClient httpClient, LastETagProvider lastModifiedTimeProvider, IEnumerable<FeatureConfigurationUpdated> updateHandlers, ILogger<FeatureBoardHttpClient> logger)
+  public FeatureBoardHttpClient(HttpClient httpClient, LastETagProvider lastModifiedTimeProvider, IEnumerable<State.IFeatureBoardStateUpdateHandler> updateHandlers, ILogger<FeatureBoardHttpClient> logger)
   {
     _httpClient = httpClient;
-    foreach (var handler in updateHandlers)
-      OnFeatureConfigurationUpdated += handler;
-    _logger = logger;
     _eTag = lastModifiedTimeProvider;
+    _logger = logger;
+    _featureConfigurationUpdatedHandlers = updateHandlers.OrderByDescending(h => h is State.FeatureBoardStateUpdater); // register state update handlers, ensuring "ours" is always first      
   }
 
   public async Task<bool?> RefreshFeatureConfiguration(CancellationToken cancellationToken)
@@ -55,7 +54,8 @@ internal sealed class FeatureBoardHttpClient : IFeatureBoardHttpClient
       features = await response.Content.ReadFromJsonAsync<List<FeatureConfiguration>>(cancellationToken: cancellationToken)
                       ?? throw new ApplicationException("Unable to retrieve decode response content");
 
-      updateEtagRef(response.Headers.ETag);
+      updateEtagRef(response.Headers.ETag ?? eTag);
+      _logger.LogDebug("Fetching updates done, eTag={eTag}", eTag);
     }
     catch (HttpRequestException e)
     {
@@ -65,20 +65,27 @@ internal sealed class FeatureBoardHttpClient : IFeatureBoardHttpClient
 
     try
     {
-      await OnFeatureConfigurationUpdated(features, cancellationToken);
+      foreach (var handler in _featureConfigurationUpdatedHandlers) // DEBT: find way to use Task.WhenAll but if first task exceptions abort/cancel all others
+        await handler.UpdateState(features, cancellationToken);
       return true;
     }
-    catch (ArgumentException e) // eg. thrown due to duplicate feature key
+    catch (Exception e) when (e is ArgumentException // eg. thrown due to null or duplicate feature key
+                           || e is TaskCanceledException)
+    {
+      updateEtagRef(eTag); // revert to original eTag since we failed to update featureboard internal state
+      _logger.LogError(e, "Failed to update flags");
+    }
+    catch (Exception e) // all other exceptions just log but assume we at least successfully updated featureboard internal state
     {
       _logger.LogError(e, "Failed to update flags");
-      return null;
     }
+
+    return null;
 
     void updateEtagRef(EntityTagHeaderValue? responseTag) // Sync method to allow use of eTag ref-local variable
     {
       ref var eTag = ref _eTag();
-      eTag = responseTag ?? eTag; // if didn't get eTag just retain previous eTag
-      _logger.LogDebug("Fetching updates done, eTag={eTag}", eTag);
+      eTag = responseTag;
     }
   }
 }

@@ -38,15 +38,7 @@ public static class RegisterFeatureBoard
     services.AddSingleton<FeatureBoardState>()
       .AddHostedService(static provider => provider.GetRequiredService<FeatureBoardState>())
       .AddScoped(static provider => new Lazy<FeatureBoardStateSnapshot>(provider.GetRequiredService<FeatureBoardState>().GetSnapshot))
-      .AddTransient<FeatureConfigurationUpdated>(static provider =>
-      {
-        var service = provider.GetRequiredService<FeatureBoardState>();
-        return (config, _) =>
-        {
-          service.Update(config);
-          return Task.CompletedTask;
-        };
-      });
+      .AddTransient<IFeatureBoardStateUpdateHandler, FeatureBoardStateUpdater>();
 
     return new FeatureBoardBuilder(services);
   }
@@ -83,7 +75,7 @@ public static class RegisterFeatureBoard
   public static FeatureBoardBuilder WithExternalState<TStateStore>(this FeatureBoardBuilder builder) where TStateStore : class, IFeatureBoardExternalState
   {
     builder.Services.AddSingleton<IFeatureBoardExternalState, TStateStore>()
-      .AddTransient<FeatureConfigurationUpdated>(static provider => provider.GetRequiredService<FeatureBoard.DotnetSdk.State.IFeatureBoardExternalState>().UpdateState);
+      .AddTransient<IFeatureBoardStateUpdateHandler>(static provider => provider.GetRequiredService<IFeatureBoardExternalState>());
 
     return builder;
   }

@@ -21,7 +21,12 @@ internal sealed class FeatureBoardState : IFeatureBoardState, IHostedService
   public FeatureBoardStateSnapshot GetSnapshot() => new FeatureBoardStateSnapshot(_cache);
 
 
-  public void Update(IReadOnlyCollection<FeatureConfiguration> state) => _cache = state.ToDictionary(s => s.FeatureKey, s => s);
+  /// <summary>
+  /// Update internal cache of feature configuration based on supplied collection
+  /// </summary>
+  /// <param name="state"></param>
+  /// <exception cref="ArgumentException">Thrown if <see cref="FeatureConfiguration.FeatureKey"/> is <c>null</c> or is reused in collection</exception>
+  internal void Update(IReadOnlyCollection<FeatureConfiguration> state) => _cache = state.ToDictionary(s => s.FeatureKey, s => s);
 
   public async Task StartAsync(CancellationToken cancellationToken)
   {

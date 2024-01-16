@@ -1,13 +1,13 @@
 using System.Text.Json.Nodes;
+using Bogus;
+using FeatureBoard.DotnetSdk.Helpers;
+using FeatureBoard.DotnetSdk.Models;
+using FeatureBoard.DotnetSdk.State;
 using FeatureBoard.DotnetSdk.Test.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using Bogus;
 using Shouldly;
-using FeatureBoard.DotnetSdk.Helpers;
-using FeatureBoard.DotnetSdk.Models;
-using FeatureBoard.DotnetSdk.State;
 
 namespace FeatureBoard.DotnetSdk.Test;
 
@@ -30,7 +30,7 @@ public class FeatureBoardClientTests
   [Fact]
   public void ItReturnsTheDefaultValueWhenNoValueIsFound()
   {
-    Services.AddTransient<FeatureBoardStateSnapshot>(_ => new FeatureBoardStateSnapshot(new Dictionary<string, FeatureConfiguration>(0)));
+    Services.AddTransient(_ => new FeatureBoardStateSnapshot(new Dictionary<string, FeatureConfiguration>(0)));
 
     var client = Services.BuildServiceProvider().GetRequiredService<FeatureBoardClient<TestFeatures>>();
 
@@ -45,7 +45,7 @@ public class FeatureBoardClientTests
   {
     var faker = new Faker();
     var defaultFeatureValue = faker.Lorem.Sentence();
-    Services.AddTransient<FeatureBoardStateSnapshot>(_ => new FeatureBoardStateSnapshot(new Dictionary<string, FeatureConfiguration>
+    Services.AddTransient(_ => new FeatureBoardStateSnapshot(new Dictionary<string, FeatureConfiguration>
     {
       {
         nameof(TestFeatures.StringFeature).ToFeatureBoardKey(), new FeatureConfiguration
@@ -67,7 +67,7 @@ public class FeatureBoardClientTests
   {
     var faker = new Faker();
     var defaultAudienceValue = faker.Lorem.Paragraph();
-    Services.AddTransient<FeatureBoardStateSnapshot>(_ => new FeatureBoardStateSnapshot(new Dictionary<string, FeatureConfiguration>
+    Services.AddTransient(_ => new FeatureBoardStateSnapshot(new Dictionary<string, FeatureConfiguration>
       {
         {
           nameof(TestFeatures.StringFeature).ToFeatureBoardKey(), new FeatureConfiguration
@@ -96,7 +96,7 @@ public class FeatureBoardClientTests
   {
     var faker = new Faker();
     var defaultAudienceValue = faker.Random.Decimal();
-    Services.AddTransient<FeatureBoardStateSnapshot>(_ => new FeatureBoardStateSnapshot(new Dictionary<string, FeatureConfiguration>
+    Services.AddTransient(_ => new FeatureBoardStateSnapshot(new Dictionary<string, FeatureConfiguration>
       {
         {
           nameof(TestFeatures.NumberFeature).ToFeatureBoardKey(), new FeatureConfiguration
@@ -126,7 +126,7 @@ public class FeatureBoardClientTests
   {
     var faker = new Faker();
     var defaultAudienceValue = faker.Random.Bool();
-    Services.AddTransient<FeatureBoardStateSnapshot>(_ => new FeatureBoardStateSnapshot(new Dictionary<string, FeatureConfiguration>      {
+    Services.AddTransient(_ => new FeatureBoardStateSnapshot(new Dictionary<string, FeatureConfiguration>      {
         {
           nameof(TestFeatures.BoolFeature).ToFeatureBoardKey(), new FeatureConfiguration
           {
@@ -154,7 +154,7 @@ public class FeatureBoardClientTests
   {
     var faker = new Faker();
     var defaultAudienceValue = Guid.NewGuid().ToString();
-    Services.AddTransient<FeatureBoardStateSnapshot>(_ => new FeatureBoardStateSnapshot(new Dictionary<string, FeatureConfiguration>
+    Services.AddTransient(_ => new FeatureBoardStateSnapshot(new Dictionary<string, FeatureConfiguration>
       {
         {
           nameof(TestFeatures.StringFeature).ToFeatureBoardKey(), new FeatureConfiguration
@@ -183,7 +183,7 @@ public class FeatureBoardClientTests
   {
     var faker = new Faker();
     var defaultAudienceValue = faker.PickRandom<TestEnum>();
-    Services.AddTransient<FeatureBoardStateSnapshot>(_ => new FeatureBoardStateSnapshot(new Dictionary<string, FeatureConfiguration>      {
+    Services.AddTransient(_ => new FeatureBoardStateSnapshot(new Dictionary<string, FeatureConfiguration>      {
         {
           nameof(TestFeatures.EnumFeature).ToFeatureBoardKey(), new FeatureConfiguration
           {
@@ -212,7 +212,7 @@ public class FeatureBoardClientTests
   {
     var faker = new Faker();
     var defaultAudienceValue = Guid.NewGuid().ToString();
-    Services.AddTransient<FeatureBoardStateSnapshot>(_ => new FeatureBoardStateSnapshot(new Dictionary<string, FeatureConfiguration>      {
+    Services.AddTransient(_ => new FeatureBoardStateSnapshot(new Dictionary<string, FeatureConfiguration>      {
         {
           "a-strange-name", new FeatureConfiguration
           {

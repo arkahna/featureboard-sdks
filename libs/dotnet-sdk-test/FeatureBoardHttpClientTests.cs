@@ -5,6 +5,7 @@ using System.Net.Http.Json;
 using System.Text.Json.Nodes;
 using Bogus;
 using FeatureBoard.DotnetSdk.Models;
+using FeatureBoard.DotnetSdk.State;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 
@@ -17,14 +18,15 @@ namespace FeatureBoard.DotnetSdk.Test
 
     private static readonly Expression<Func<HttpRequestMessage, bool>> _defaultRequestMatcher = msg => msg.Method == HttpMethod.Get && msg.RequestUri!.OriginalString == FeatureBoardHttpClient.Action;
 
-    private readonly Mock<HttpClient> _mockHttpClient = new Mock<HttpClient>();
+    private readonly Mock<HttpClient> _mockHttpClient = new();
+    private readonly Mock<FeatureBoardStateUpdater> _mockStateUpdater = new(null);
 
-    private readonly FeatureConfiguration testFeatureConfig = CreateFeature();
+    private readonly FeatureConfiguration _testFeatureConfig = CreateFeature();
 
 
     public FeatureBoardHttpClientTests()
     {
-      var content = JsonContent.Create(new[] { testFeatureConfig });
+      var content = JsonContent.Create(new[] { _testFeatureConfig });
       _mockHttpClient
         .Setup(client => client.SendAsync(It.Is<HttpRequestMessage>(_defaultRequestMatcher), It.IsAny<CancellationToken>()))
         .ReturnsAsync((HttpRequestMessage request, CancellationToken _) =>
@@ -34,6 +36,9 @@ namespace FeatureBoard.DotnetSdk.Test
           return response;
         });
 
+      _mockStateUpdater
+        .Setup(m => m.UpdateState(It.IsAny<IReadOnlyCollection<FeatureConfiguration>>(), It.IsAny<CancellationToken>()))
+        .Verifiable();
     }
 
     [Fact]
@@ -41,13 +46,11 @@ namespace FeatureBoard.DotnetSdk.Test
     {
       // Arrange
       IReadOnlyCollection<FeatureConfiguration>? actionArg = null;
-      Task captureArgAction(IReadOnlyCollection<FeatureConfiguration> features, CancellationToken token)
-      {
-        actionArg = features;
-        return Task.CompletedTask;
-      }
 
-      var testSubject = new FeatureBoardHttpClient(_mockHttpClient.Object, () => ref _nullETag, new FeatureConfigurationUpdated[] { captureArgAction }, new NullLogger<FeatureBoardHttpClient>());
+      _mockStateUpdater.Setup(m => m.UpdateState(It.IsAny<IReadOnlyCollection<FeatureConfiguration>>(), It.IsAny<CancellationToken>()))
+        .Callback((IReadOnlyCollection<FeatureConfiguration> features, CancellationToken token) => actionArg = features);
+
+      var testSubject = new FeatureBoardHttpClient(_mockHttpClient.Object, () => ref _nullETag, new[] { _mockStateUpdater.Object }, new NullLogger<FeatureBoardHttpClient>());
 
       // Act
       var result = await testSubject.RefreshFeatureConfiguration(CancellationToken.None);
@@ -58,18 +61,18 @@ namespace FeatureBoard.DotnetSdk.Test
       // DEBT: Refactor FeatureConfiguration to remove use of JsonValue and override Equals so get *full* ValueType equality semantics hence can just replace below with use of Assert.Equals()
       Assert.Collection(actionArg, item =>
       {
-        Assert.Equal(testFeatureConfig.FeatureKey, item.FeatureKey);
-        Assert.Equal(testFeatureConfig.DefaultValue.GetValue<string>(), item.DefaultValue.GetValue<string>());
+        Assert.Equal(_testFeatureConfig.FeatureKey, item.FeatureKey);
+        Assert.Equal(_testFeatureConfig.DefaultValue.GetValue<string>(), item.DefaultValue.GetValue<string>());
         Assert.Collection(item.AudienceExceptions,
           ex =>
           {
-            var expected = testFeatureConfig.AudienceExceptions[0];
+            var expected = _testFeatureConfig.AudienceExceptions[0];
             Assert.Equal(expected.AudienceKey, ex.AudienceKey);
             Assert.Equal(expected.Value.GetValue<string>(), ex.Value.GetValue<string>());
           },
           ex =>
           {
-            var expected = testFeatureConfig.AudienceExceptions[1];
+            var expected = _testFeatureConfig.AudienceExceptions[1];
             Assert.Equal(expected.AudienceKey, ex.AudienceKey);
             Assert.Equal(expected.Value.GetValue<string>(), ex.Value.GetValue<string>());
           }
@@ -81,15 +84,13 @@ namespace FeatureBoard.DotnetSdk.Test
     public async Task ItDoesNotProcessResponseIfNotModified()
     {
       // Arrange
-      static Task nopAction(IReadOnlyCollection<FeatureConfiguration> features, CancellationToken token) => Task.CompletedTask;
-
       Expression<Func<HttpRequestMessage, bool>> hasEtagMatcher = msg => _defaultRequestMatcher.Compile()(msg) && msg.Headers.IfNoneMatch.Any(t => t.Equals(new EntityTagHeaderValue(TestETag)));
 
       _mockHttpClient
         .Setup(client => client.SendAsync(It.Is<HttpRequestMessage>(hasEtagMatcher), It.IsAny<CancellationToken>()))
         .ReturnsAsync(new HttpResponseMessage() { StatusCode = HttpStatusCode.NotModified });
 
-      var testSubject = new FeatureBoardHttpClient(_mockHttpClient.Object, () => ref _nullETag, new FeatureConfigurationUpdated[] { nopAction }, new NullLogger<FeatureBoardHttpClient>());
+      var testSubject = new FeatureBoardHttpClient(_mockHttpClient.Object, () => ref _nullETag, new[] { _mockStateUpdater.Object }, new NullLogger<FeatureBoardHttpClient>());
 
       // Act
       var initialResult = await testSubject.RefreshFeatureConfiguration(CancellationToken.None);
@@ -113,7 +114,7 @@ namespace FeatureBoard.DotnetSdk.Test
       _mockHttpClient
         .Setup(client => client.SendAsync(It.Is<HttpRequestMessage>(_defaultRequestMatcher), It.IsAny<CancellationToken>()))
         .ReturnsAsync((HttpRequestMessage request, CancellationToken _) => new HttpResponseMessage(httpStatusCode) { RequestMessage = request });
-      var testSubject = new FeatureBoardHttpClient(_mockHttpClient.Object, () => ref _nullETag, Array.Empty<FeatureConfigurationUpdated>(), new NullLogger<FeatureBoardHttpClient>());
+      var testSubject = new FeatureBoardHttpClient(_mockHttpClient.Object, () => ref _nullETag, Array.Empty<IFeatureBoardStateUpdateHandler>(), new NullLogger<FeatureBoardHttpClient>());
 
       // Act
       var result = await testSubject.RefreshFeatureConfiguration(CancellationToken.None);
@@ -123,26 +124,58 @@ namespace FeatureBoard.DotnetSdk.Test
     }
 
 
-    public static object[][] HandlerExceptions => new[]
+    public static object[][] ExternalStateUpdateExceptions => new[]
     {
-      new [] { new ArgumentException() }, // eg. what would happen if duplicate feature keys are returned
+      new [] { new Exception() },
     };
 
     [Theory]
-    [MemberData(nameof(HandlerExceptions))]
-    public async Task ItDoesNotAllowUpdateHandlerExceptionToBubble(Exception exception)
+    [MemberData(nameof(ExternalStateUpdateExceptions))]
+    public async Task ItDoesNotAllowExternalStateUpdateHandlerExceptionToBubble(Exception exception)
     {
       // Arrange
-      static Task nopAction(IReadOnlyCollection<FeatureConfiguration> features, CancellationToken token) => Task.CompletedTask;
-      Task exceptionAction(IReadOnlyCollection<FeatureConfiguration> features, CancellationToken token) => throw exception;
+      var exceptioningUpdater = new Mock<IFeatureBoardStateUpdateHandler>();
+      exceptioningUpdater.Setup(m => m.UpdateState(It.Is((IReadOnlyCollection<FeatureConfiguration> features) => features.Any(config => config.FeatureKey == _testFeatureConfig.FeatureKey)), It.IsAny<CancellationToken>()))
+        .ThrowsAsync(exception);
 
-      var testSubject = new FeatureBoardHttpClient(_mockHttpClient.Object, () => ref _nullETag, new FeatureConfigurationUpdated[] { nopAction, exceptionAction }, new NullLogger<FeatureBoardHttpClient>());
+      var testSubject = new FeatureBoardHttpClient(_mockHttpClient.Object, () => ref _nullETag, new[] { exceptioningUpdater.Object, _mockStateUpdater.Object }, new NullLogger<FeatureBoardHttpClient>());
 
       // Act
       var result = await testSubject.RefreshFeatureConfiguration(CancellationToken.None);
 
       // Assert
       Assert.Null(result);
+      Assert.NotNull(_nullETag);
+      _mockStateUpdater.Verify(); // Verify StateUpdater was called, even though exceptioningUpdater appears 1st in the list of update handlers
+    }
+
+
+    public static object[][] FeatureBoardStateUpdaterExceptions => new[]
+    {
+      new Exception[] { new ArgumentException() },
+      new Exception[] { new TaskCanceledException() }
+    };
+
+    [Theory]
+    [MemberData(nameof(FeatureBoardStateUpdaterExceptions))]
+    public async Task ItDoesNotAllowFeatureBoardUpdateHandlerExceptionToBubbleAndDoesNotUpdateETag(Exception exception)
+    {
+      // Arrange
+      var otherHandler = new Mock<IFeatureBoardStateUpdateHandler>();
+      otherHandler.Setup(m => m.UpdateState(It.IsAny<IReadOnlyCollection<FeatureConfiguration>>(), It.IsAny<CancellationToken>()));
+
+      _mockStateUpdater.Setup(m => m.UpdateState(It.Is((IReadOnlyCollection<FeatureConfiguration> features) => features.Any(config => config.FeatureKey == _testFeatureConfig.FeatureKey)), It.IsAny<CancellationToken>()))
+        .ThrowsAsync(exception); // eg. what would happen if duplicate feature keys are returned
+
+      var testSubject = new FeatureBoardHttpClient(_mockHttpClient.Object, () => ref _nullETag, new[] { otherHandler.Object, _mockStateUpdater.Object, }, new NullLogger<FeatureBoardHttpClient>());
+
+      // Act
+      var result = await testSubject.RefreshFeatureConfiguration(CancellationToken.None);
+
+      // Assert
+      Assert.Null(result);
+      Assert.Null(_nullETag);
+      Assert.Empty(otherHandler.Invocations); // Verify "other" handler is never even called after our FeatureBoardStateUpdater exceptioned
     }
 
 
@@ -154,7 +187,7 @@ namespace FeatureBoard.DotnetSdk.Test
         .Setup(client => client.SendAsync(It.Is<HttpRequestMessage>(_defaultRequestMatcher), It.IsAny<CancellationToken>()))
         .ThrowsAsync(new HttpRequestException());
 
-      var testSubject = new FeatureBoardHttpClient(_mockHttpClient.Object, () => ref _nullETag, Array.Empty<FeatureConfigurationUpdated>(), new NullLogger<FeatureBoardHttpClient>());
+      var testSubject = new FeatureBoardHttpClient(_mockHttpClient.Object, () => ref _nullETag, Array.Empty<IFeatureBoardStateUpdateHandler>(), new NullLogger<FeatureBoardHttpClient>());
 
       // Act
       var result = await testSubject.RefreshFeatureConfiguration(CancellationToken.None);
