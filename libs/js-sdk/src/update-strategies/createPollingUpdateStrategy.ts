@@ -40,7 +40,7 @@ export function createPollingUpdateStrategy(
             stopPolling = pollingUpdates(() => {
                 return startActiveSpan({
                     name: 'polling-updates',
-                    options: { attributes: { etag } },
+                    options: { attributes: { etag }, root: !parentSpan },
                     parentSpan,
                     fn: async (span) => {
                         // Catch errors here to ensure no unhandled promise rejections after a poll
