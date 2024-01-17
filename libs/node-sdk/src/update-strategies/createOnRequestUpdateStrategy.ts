@@ -52,28 +52,27 @@ export function createOnRequestUpdateStrategy(
                     if (fetchUpdatesSingle) {
                         const now = Date.now()
                         if (!responseExpires || now >= responseExpires) {
-                            span.addEvent('onRequestUpdating', {
-                                message: 'Response expired, fetching updates',
+                            span.addEvent('Response expired, fetching update', {
                                 maxAgeMs,
                                 expiry: responseExpires,
                             })
                             return fetchUpdatesSingle()
                                 .then(() => {
                                     responseExpires = now + maxAgeMs
-                                    span.addEvent('onRequestUpdated', {
-                                        message:
-                                            'Successfully updated features',
-                                        maxAgeMs,
-                                        newExpiry: responseExpires,
-                                    })
+                                    span.addEvent(
+                                        'Successfully updated features',
+                                        {
+                                            maxAgeMs,
+                                            newExpiry: responseExpires,
+                                        },
+                                    )
                                 })
                                 .catch((error) => {
                                     span.recordException(resolveError(error))
                                 })
                                 .finally(() => span.end())
                         }
-                        span.addEvent('onRequestNotExpired', {
-                            message: 'Response not expired',
+                        span.addEvent('Response not expired', {
                             maxAgeMs,
                             expiry: responseExpires,
                             now,
