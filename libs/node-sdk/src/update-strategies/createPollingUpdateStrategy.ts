@@ -2,9 +2,10 @@ import {
     createEnsureSingleWithBackoff,
     resolveError,
 } from '@featureboard/js-sdk'
+import { trace } from '@opentelemetry/api'
 import { fetchFeaturesConfigurationViaHttp } from '../utils/fetchFeaturesConfiguration'
-import { getTracer } from '../utils/get-tracer'
 import { pollingUpdates } from '../utils/pollingUpdates'
+import { startActiveSpan } from '../utils/start-active-span'
 import { getAllEndpoint } from './getAllEndpoint'
 import type { AllConfigUpdateStrategy } from './update-strategies'
 
@@ -16,6 +17,8 @@ export function createPollingUpdateStrategy(
     let stopPolling: undefined | (() => void)
     let etag: undefined | string
     let fetchUpdatesSingle: undefined | (() => Promise<void>)
+
+    const parentSpan = trace.getActiveSpan()
 
     return {
         async connect(stateStore) {
@@ -34,10 +37,11 @@ export function createPollingUpdateStrategy(
                 stopPolling()
             }
             stopPolling = pollingUpdates(() => {
-                return getTracer().startActiveSpan(
-                    'polling-updates',
-                    { attributes: { etag }, root: true },
-                    async (span) => {
+                return startActiveSpan({
+                    name: 'polling-updates',
+                    options: { attributes: { etag } },
+                    parentSpan,
+                    fn: async (span) => {
                         if (fetchUpdatesSingle) {
                             // Catch errors here to ensure no unhandled promise rejections after a poll
                             return await fetchUpdatesSingle()
@@ -47,7 +51,7 @@ export function createPollingUpdateStrategy(
                                 .finally(() => span.end())
                         }
                     },
-                )
+                })
             }, intervalMs)
 
             return fetchUpdatesSingle()

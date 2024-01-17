@@ -1,8 +1,9 @@
+import { trace } from '@opentelemetry/api'
 import { createEnsureSingleWithBackoff } from '../ensure-single'
 import { fetchFeaturesConfigurationViaHttp } from '../utils/fetchFeaturesConfiguration'
-import { getTracer } from '../utils/get-tracer'
 import { pollingUpdates } from '../utils/pollingUpdates'
 import { resolveError } from '../utils/resolve-error'
+import { startActiveSpan } from '../utils/start-active-span'
 import type { EffectiveConfigUpdateStrategy } from './update-strategies'
 
 export function createPollingUpdateStrategy(
@@ -13,6 +14,7 @@ export function createPollingUpdateStrategy(
     let stopPolling: undefined | (() => void)
     let etag: undefined | string
     let fetchUpdatesSingle: undefined | (() => Promise<void>)
+    const parentSpan = trace.getActiveSpan()
 
     return {
         name: 'polling',
@@ -36,10 +38,11 @@ export function createPollingUpdateStrategy(
                 stopPolling()
             }
             stopPolling = pollingUpdates(() => {
-                return getTracer().startActiveSpan(
-                    'polling-updates',
-                    { attributes: { etag }, root: true },
-                    async (span) => {
+                return startActiveSpan({
+                    name: 'polling-updates',
+                    options: { attributes: { etag } },
+                    parentSpan,
+                    fn: async (span) => {
                         // Catch errors here to ensure no unhandled promise rejections after a poll
                         if (fetchUpdatesSingle) {
                             return await fetchUpdatesSingle()
@@ -49,7 +52,7 @@ export function createPollingUpdateStrategy(
                                 .finally(() => span.end())
                         }
                     },
-                )
+                })
             }, intervalMs)
 
             return await fetchUpdatesSingle()
