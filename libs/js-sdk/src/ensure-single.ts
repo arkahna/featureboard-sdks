@@ -14,6 +14,7 @@ export function createEnsureSingleWithBackoff<T>(
         ) {
             return Promise.reject(tooManyRequestsError)
         }
+        tooManyRequestsError = undefined
         if (!current) {
             current = cb()
                 .catch((error: Error) => {
