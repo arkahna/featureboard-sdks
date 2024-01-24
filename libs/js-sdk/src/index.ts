@@ -1,4 +1,5 @@
 export type { BrowserClient } from './client-connection'
+export type { ClientOptions } from './client-options'
 export { createBrowserClient } from './create-browser-client'
 export { createManualClient } from './create-manual-client'
 export type { FeatureBoardApiConfig } from './featureboard-api-config'
