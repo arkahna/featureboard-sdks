@@ -9,7 +9,7 @@ nx local-registry
 ## Publish your package
 
 ```bash
-cd libs/js-sdk (or whatever pacakge)
+cd libs/js-sdk (or whatever package)
 pnpm publish --registry http://localhost:4873/ --no-git-checks
 ```
 
