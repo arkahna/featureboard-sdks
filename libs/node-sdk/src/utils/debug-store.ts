@@ -11,19 +11,19 @@ export class DebugFeatureStateStore implements IFeatureStateStore {
 
     all(): Record<string, FeatureConfiguration | undefined> {
         const allValues = this.store.all()
-        addDebugEvent('all', { allValues: JSON.stringify(allValues) })
+        addDebugEvent('Feature store: all features', { allValues: JSON.stringify(allValues) })
         return { ...allValues }
     }
 
     get(featureKey: string): FeatureConfiguration | undefined {
         const value = this.store.get(featureKey)
-        addDebugEvent('get', { featureKey, value: JSON.stringify(value) })
+        addDebugEvent('Feature store: get feature', { featureKey, value: JSON.stringify(value) })
 
         return value
     }
 
     set(featureKey: string, value: FeatureConfiguration | undefined) {
-        addDebugEvent('set', { featureKey, value: JSON.stringify(value) })
+        addDebugEvent('Feature store: set feature', { featureKey, value: JSON.stringify(value) })
         this.store.set(featureKey, value)
     }
 }

@@ -1,222 +1,224 @@
 import type { FeatureConfiguration } from '@featureboard/contracts'
 import { HttpResponse, http } from 'msw'
-import { expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { createServerClient } from '../server-client'
 import { featureBoardFixture } from '../utils/featureboard-fixture'
 
-it(
-    'fetches initial values',
-    featureBoardFixture(
-        {},
-        () => [
-            http.get(
-                'https://client.featureboard.app/all',
-                () =>
-                    HttpResponse.json<FeatureConfiguration[]>([
-                        {
-                            featureKey: 'my-feature',
-                            audienceExceptions: [],
-                            defaultValue: 'service-default-value',
-                        },
-                    ]),
-                { once: true },
-            ),
-        ],
-        async () => {
-            const client = createServerClient({
-                environmentApiKey: 'fake-key',
-                updateStrategy: 'on-request',
-            })
-            await client.waitForInitialised()
-
-            const requestClient = await client.request([])
-            const value = requestClient.getFeatureValue(
-                'my-feature',
-                'default-value',
-            )
-            expect(value).toEqual('service-default-value')
-        },
-    ),
-)
-
-it(
-    'throws if request() is not awaited in request mode',
-    featureBoardFixture(
-        {},
-        () => [
-            http.get(
-                'https://client.featureboard.app/all',
-                () =>
-                    HttpResponse.json<FeatureConfiguration[]>([
-                        {
-                            featureKey: 'my-feature',
-                            audienceExceptions: [],
-                            defaultValue: 'service-default-value',
-                        },
-                    ]),
-                { once: true },
-            ),
-        ],
-        async () => {
-            const client = createServerClient({
-                environmentApiKey: 'fake-key',
-                updateStrategy: 'on-request',
-            })
-
-            await client.waitForInitialised()
-
-            expect(() =>
-                client
-                    .request([])
-                    .getFeatureValue('my-feature', 'default-value'),
-            ).toThrow(
-                'request() must be awaited when using on-request update strategy',
-            )
-        },
-    ),
-)
-
-// To reduce load on the FeatureBoard server, we only fetch the values once they are considered old
-// The maxAge can be configured in the client to be 0 to always check for updates
-it(
-    'does not fetch update when response is not expired',
-    featureBoardFixture(
-        { count: 0 },
-        (testContext) => [
-            http.get('https://client.featureboard.app/all', () => {
-                if (testContext.count > 0) {
-                    return HttpResponse.json<FeatureConfiguration[]>([
-                        {
-                            featureKey: 'my-feature',
-                            audienceExceptions: [],
-                            defaultValue: 'new-service-default-value',
-                        },
-                    ])
-                }
-
-                testContext.count++
-                return HttpResponse.json<FeatureConfiguration[]>([
-                    {
-                        featureKey: 'my-feature',
-                        audienceExceptions: [],
-                        defaultValue: 'service-default-value',
-                    },
-                ])
-            }),
-        ],
-        async () => {
-            const connection = createServerClient({
-                environmentApiKey: 'fake-key',
-                updateStrategy: 'on-request',
-            })
-
-            const client = await connection.request([])
-
-            expect(
-                client.getFeatureValue('my-feature', 'default-value'),
-            ).toEqual('service-default-value')
-        },
-    ),
-)
-
-it(
-    'fetches update when response is expired',
-    featureBoardFixture(
-        { count: 0 },
-        (testContext) => [
-            http.get('https://client.featureboard.app/all', () => {
-                if (testContext.count > 0) {
-                    return HttpResponse.json<FeatureConfiguration[]>([
-                        {
-                            featureKey: 'my-feature',
-                            audienceExceptions: [],
-                            defaultValue: 'new-service-default-value',
-                        },
-                    ])
-                }
-
-                testContext.count++
-                return HttpResponse.json<FeatureConfiguration[]>([
-                    {
-                        featureKey: 'my-feature',
-                        audienceExceptions: [],
-                        defaultValue: 'service-default-value',
-                    },
-                ])
-            }),
-        ],
-        async () => {
-            const connection = createServerClient({
-                environmentApiKey: 'fake-key',
-                updateStrategy: {
-                    kind: 'on-request',
-                    options: { maxAgeMs: 1 },
-                },
-            })
-            await connection.waitForInitialised()
-
-            // Ensure response has expired
-            await new Promise((resolve) => setTimeout(resolve, 10))
-
-            const client = await connection.request([])
-            expect(
-                client.getFeatureValue('my-feature', 'default-value'),
-            ).toEqual('new-service-default-value')
-        },
-    ),
-)
-
-it(
-    'On Request swallows errors received when updating features',
-    featureBoardFixture(
-        { countAPICalls: 0 },
-        (testContext) => [
-            http.get(
-                'https://client.featureboard.app/all',
-                () => {
-                    testContext.countAPICalls++
-                    return HttpResponse.json<FeatureConfiguration[]>([
-                        {
-                            featureKey: 'my-feature',
-                            audienceExceptions: [],
-                            defaultValue: 'service-default-value',
-                        },
-                    ])
-                },
-                { once: true },
-            ),
-            http.get('https://client.featureboard.app/all', () => {
-                testContext.countAPICalls++
-                return new Response(null, {
-                    status: 429,
-                    headers: { 'Retry-After': '2' },
+describe('on request update mode', () => {
+    it(
+        'fetches initial values',
+        featureBoardFixture(
+            {},
+            () => [
+                http.get(
+                    'https://client.featureboard.app/all',
+                    () =>
+                        HttpResponse.json<FeatureConfiguration[]>([
+                            {
+                                featureKey: 'my-feature',
+                                audienceExceptions: [],
+                                defaultValue: 'service-default-value',
+                            },
+                        ]),
+                    { once: true },
+                ),
+            ],
+            async () => {
+                const client = createServerClient({
+                    environmentApiKey: 'fake-key',
+                    updateStrategy: 'on-request',
                 })
-            }),
-        ],
-        async ({ testContext }) => {
-            const client = createServerClient({
-                environmentApiKey: 'fake-key',
-                updateStrategy: {
-                    kind: 'on-request',
-                    options: { maxAgeMs: 100 },
-                },
-            })
-            await client.waitForInitialised()
-            // Wait for the on-request max age to expire
-            await new Promise((resolve) => setTimeout(resolve, 100))
-            await client.request([])
-            // Wait for the on-request max age to expire
-            await new Promise((resolve) => setTimeout(resolve, 100))
-            const requestClient = await client.request([])
-            const value = requestClient.getFeatureValue(
-                'my-feature',
-                'default-value',
-            )
-            expect(value).toEqual('service-default-value')
-            expect(testContext.countAPICalls).toBe(2)
-        },
-    ),
-)
+                await client.waitForInitialised()
+
+                const requestClient = await client.request([])
+                const value = requestClient.getFeatureValue(
+                    'my-feature',
+                    'default-value',
+                )
+                expect(value).toEqual('service-default-value')
+            },
+        ),
+    )
+
+    it(
+        'throws if request() is not awaited in request mode',
+        featureBoardFixture(
+            {},
+            () => [
+                http.get(
+                    'https://client.featureboard.app/all',
+                    () =>
+                        HttpResponse.json<FeatureConfiguration[]>([
+                            {
+                                featureKey: 'my-feature',
+                                audienceExceptions: [],
+                                defaultValue: 'service-default-value',
+                            },
+                        ]),
+                    { once: true },
+                ),
+            ],
+            async () => {
+                const client = createServerClient({
+                    environmentApiKey: 'fake-key',
+                    updateStrategy: 'on-request',
+                })
+
+                await client.waitForInitialised()
+
+                expect(() =>
+                    client
+                        .request([])
+                        .getFeatureValue('my-feature', 'default-value'),
+                ).toThrow(
+                    'request() must be awaited when using on-request update strategy',
+                )
+            },
+        ),
+    )
+
+    // To reduce load on the FeatureBoard server, we only fetch the values once they are considered old
+    // The maxAge can be configured in the client to be 0 to always check for updates
+    it(
+        'does not fetch update when response is not expired',
+        featureBoardFixture(
+            { count: 0 },
+            (testContext) => [
+                http.get('https://client.featureboard.app/all', () => {
+                    if (testContext.count > 0) {
+                        return HttpResponse.json<FeatureConfiguration[]>([
+                            {
+                                featureKey: 'my-feature',
+                                audienceExceptions: [],
+                                defaultValue: 'new-service-default-value',
+                            },
+                        ])
+                    }
+
+                    testContext.count++
+                    return HttpResponse.json<FeatureConfiguration[]>([
+                        {
+                            featureKey: 'my-feature',
+                            audienceExceptions: [],
+                            defaultValue: 'service-default-value',
+                        },
+                    ])
+                }),
+            ],
+            async () => {
+                const connection = createServerClient({
+                    environmentApiKey: 'fake-key',
+                    updateStrategy: 'on-request',
+                })
+
+                const client = await connection.request([])
+
+                expect(
+                    client.getFeatureValue('my-feature', 'default-value'),
+                ).toEqual('service-default-value')
+            },
+        ),
+    )
+
+    it(
+        'fetches update when response is expired',
+        featureBoardFixture(
+            { count: 0 },
+            (testContext) => [
+                http.get('https://client.featureboard.app/all', () => {
+                    if (testContext.count > 0) {
+                        return HttpResponse.json<FeatureConfiguration[]>([
+                            {
+                                featureKey: 'my-feature',
+                                audienceExceptions: [],
+                                defaultValue: 'new-service-default-value',
+                            },
+                        ])
+                    }
+
+                    testContext.count++
+                    return HttpResponse.json<FeatureConfiguration[]>([
+                        {
+                            featureKey: 'my-feature',
+                            audienceExceptions: [],
+                            defaultValue: 'service-default-value',
+                        },
+                    ])
+                }),
+            ],
+            async () => {
+                const connection = createServerClient({
+                    environmentApiKey: 'fake-key',
+                    updateStrategy: {
+                        kind: 'on-request',
+                        options: { maxAgeMs: 1 },
+                    },
+                })
+                await connection.waitForInitialised()
+
+                // Ensure response has expired
+                await new Promise((resolve) => setTimeout(resolve, 10))
+
+                const client = await connection.request([])
+                expect(
+                    client.getFeatureValue('my-feature', 'default-value'),
+                ).toEqual('new-service-default-value')
+            },
+        ),
+    )
+
+    it(
+        'suppress errors during feature updates',
+        featureBoardFixture(
+            { countAPICalls: 0 },
+            (testContext) => [
+                http.get(
+                    'https://client.featureboard.app/all',
+                    () => {
+                        testContext.countAPICalls++
+                        return HttpResponse.json<FeatureConfiguration[]>([
+                            {
+                                featureKey: 'my-feature',
+                                audienceExceptions: [],
+                                defaultValue: 'service-default-value',
+                            },
+                        ])
+                    },
+                    { once: true },
+                ),
+                http.get('https://client.featureboard.app/all', () => {
+                    testContext.countAPICalls++
+                    return new Response(null, {
+                        status: 429,
+                        headers: { 'Retry-After': '2' },
+                    })
+                }),
+            ],
+            async ({ testContext }) => {
+                const client = createServerClient({
+                    environmentApiKey: 'fake-key',
+                    updateStrategy: {
+                        kind: 'on-request',
+                        options: { maxAgeMs: 100 },
+                    },
+                })
+                await client.waitForInitialised()
+                // Wait for the on-request max age to expire
+                await new Promise((resolve) => setTimeout(resolve, 100))
+                await client.request([])
+                // Wait for the on-request max age to expire
+                await new Promise((resolve) => setTimeout(resolve, 100))
+                const requestClient = await client.request([])
+                const value = requestClient.getFeatureValue(
+                    'my-feature',
+                    'default-value',
+                )
+                expect(value).toEqual('service-default-value')
+                expect(testContext.countAPICalls).toBe(2)
+            },
+        ),
+    )
+})
 
 declare module '@featureboard/js-sdk' {
     interface Features extends Record<string, string | number | boolean> {}

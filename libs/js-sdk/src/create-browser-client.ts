@@ -3,17 +3,18 @@ import type { Span } from '@opentelemetry/api'
 import { SpanStatusCode } from '@opentelemetry/api'
 import { PromiseCompletionSource } from 'promise-completion-source'
 import type { BrowserClient } from './client-connection'
+import type { ClientOptions } from './client-options'
 import { createClientInternal } from './create-client'
 import { EffectiveFeatureStateStore } from './effective-feature-state-store'
 import type { FeatureBoardApiConfig } from './featureboard-api-config'
 import { featureBoardHostedService } from './featureboard-service-urls'
 import { resolveUpdateStrategy } from './update-strategies/resolveUpdateStrategy'
 import type { UpdateStrategies } from './update-strategies/update-strategies'
-import { addDebugEvent } from './utils/add-debug-event'
 import { compareArrays } from './utils/compare-arrays'
 import { getTracer } from './utils/get-tracer'
 import { resolveError } from './utils/resolve-error'
 import { retry } from './utils/retry'
+import { setTracingEnabled } from './utils/trace-provider'
 
 /**
  * Create a FeatureBoard client for use in the browser
@@ -26,6 +27,7 @@ export function createBrowserClient({
     api,
     audiences,
     initialValues,
+    options,
 }: {
     /** Connect to a self hosted instance of FeatureBoard */
     api?: FeatureBoardApiConfig
@@ -44,7 +46,11 @@ export function createBrowserClient({
     initialValues?: EffectiveFeatureValue[]
 
     environmentApiKey: string
+
+    options?: ClientOptions
 }): BrowserClient {
+    // enable or disable OpenTelemetry, enabled by default
+    setTracingEnabled(!options || !options.disableOTel)
     const tracer = getTracer()
 
     const waitingForInitialisation: Array<PromiseCompletionSource<boolean>> = []
@@ -82,23 +88,11 @@ export function createBrowserClient({
                     return
                 }
 
-                return await tracer.startActiveSpan(
-                    'connect',
-                    {
-                        attributes: {
-                            audiences,
-                            updateStrategy: updateStrategyImplementation.name,
-                        },
-                    },
-                    (connectSpan) =>
-                        updateStrategyImplementation
-                            .connect(stateStore)
-                            .finally(() => connectSpan.end()),
-                )
+                return await updateStrategyImplementation.connect(stateStore)
             }, cancellationToken)
         } catch (error) {
             if (initialPromise !== initialisedState.initialisedPromise) {
-                addDebugEvent(
+                initializeSpan.addEvent(
                     "Ignoring initialisation error as it's out of date",
                 )
                 initializeSpan.end()
@@ -123,7 +117,9 @@ export function createBrowserClient({
 
         // Successfully completed
         if (initialPromise !== initialisedState.initialisedPromise) {
-            addDebugEvent("Ignoring initialisation event as it's out of date")
+            initializeSpan.addEvent(
+                "Ignoring initialisation event as it's out of date",
+            )
             initializeSpan.end()
             return
         }
@@ -137,9 +133,12 @@ export function createBrowserClient({
     }
 
     void tracer.startActiveSpan(
-        'connect-with-retry',
+        'fbsdk-connect-with-retry',
         {
-            attributes: { audiences },
+            attributes: {
+                audiences,
+                updateStrategy: updateStrategyImplementation.name,
+            },
         },
         (connectWithRetrySpan) =>
             initializeWithAudiences(connectWithRetrySpan, audiences),
@@ -169,22 +168,8 @@ export function createBrowserClient({
             }
         },
         async updateAudiences(updatedAudiences: string[]) {
-            if (compareArrays(stateStore.audiences, updatedAudiences)) {
-                addDebugEvent('Skipped update audiences', {
-                    updatedAudiences,
-                    currentAudiences: stateStore.audiences,
-                })
-
-                // No need to update audiences
-                return Promise.resolve()
-            }
-
-            // Close connection and cancel retry
-            updateStrategyImplementation.close()
-            initialisedState.initialisedCancellationToken.cancel = true
-
             await tracer.startActiveSpan(
-                'update-audiences',
+                'fbsdk-update-audiences',
                 {
                     attributes: {
                         audiences,
@@ -192,19 +177,53 @@ export function createBrowserClient({
                     },
                 },
                 (updateAudiencesSpan) => {
-                    stateStore.audiences = updatedAudiences
-                    return initializeWithAudiences(
-                        updateAudiencesSpan,
-                        updatedAudiences,
-                    )
+                    try {
+                        if (
+                            compareArrays(
+                                stateStore.audiences,
+                                updatedAudiences,
+                            )
+                        ) {
+                            updateAudiencesSpan.addEvent(
+                                'Skipped update audiences',
+                                {
+                                    updatedAudiences,
+                                    currentAudiences: stateStore.audiences,
+                                },
+                            )
+
+                            // No need to update audiences
+                            return Promise.resolve()
+                        }
+
+                        // Close connection and cancel retry
+                        updateStrategyImplementation.close()
+                        initialisedState.initialisedCancellationToken.cancel =
+                            true
+
+                        stateStore.audiences = updatedAudiences
+                        return initializeWithAudiences(
+                            updateAudiencesSpan,
+                            updatedAudiences,
+                        )
+                    } finally {
+                        updateAudiencesSpan.end()
+                    }
                 },
             )
         },
         updateFeatures() {
-            return tracer.startActiveSpan('manual-update', (span) =>
-                updateStrategyImplementation
-                    .updateFeatures()
-                    .then(() => span.end()),
+            return tracer.startActiveSpan(
+                'fbsdk-update-features-manually',
+                (span) => {
+                    try {
+                        return updateStrategyImplementation
+                            .updateFeatures()
+                            .then(() => span.end())
+                    } finally {
+                        span.end()
+                    }
+                },
             )
         },
         close() {

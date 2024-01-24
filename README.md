@@ -33,13 +33,3 @@ To configure the SDK to use a local Open Telemetry Collector, set the following 
 OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 
 You can put this in a `.env` file in the root of the project.
-
-## Debugging
-
-To enable debug logging, set the following environment variable:
-
-```
-FEATUREBOARD_SDK_DEBUG=true
-```
-
-In the browser set `window.FEATUREBOARD_SDK_DEBUG = true`

@@ -29,11 +29,10 @@ export class AllFeatureStateStore implements IFeatureStateStore {
         const tracer = getTracer()
 
         await tracer.startActiveSpan(
-            'initialise-from-external-store',
+            'fbsdk-initialise-from-external-store',
             async (externalStoreSpan) => {
                 try {
                     const externalStore = await this._externalStateStore!.all()
-
                     this._store = { ...externalStore }
                     Object.keys(externalStore).forEach((key) => {
                         this.featureUpdatedCallbacks.forEach((valueUpdated) =>
@@ -53,6 +52,8 @@ export class AllFeatureStateStore implements IFeatureStateStore {
                         error,
                     )
                     throw error
+                } finally {
+                    externalStoreSpan.end()
                 }
             },
         )

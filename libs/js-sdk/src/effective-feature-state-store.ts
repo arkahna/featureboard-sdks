@@ -55,7 +55,7 @@ export class EffectiveFeatureStateStore {
     }
 
     set(featureKey: string, value: FeatureValue) {
-        addDebugEvent('Set', { featureKey, value })
+        addDebugEvent('Feature store: set feature', { featureKey, value })
 
         this._store[featureKey] = value
 
@@ -66,7 +66,7 @@ export class EffectiveFeatureStateStore {
 
     get(featureKey: string): FeatureValue {
         const value = this._store[featureKey]
-        addDebugEvent('Get', { featureKey, value })
+        addDebugEvent('Feature store: get feature', { featureKey, value })
         return value
     }
 }

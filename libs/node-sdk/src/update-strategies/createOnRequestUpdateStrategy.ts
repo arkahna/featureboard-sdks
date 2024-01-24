@@ -6,6 +6,7 @@ import { fetchFeaturesConfigurationViaHttp } from '../utils/fetchFeaturesConfigu
 import { getTracer } from '../utils/get-tracer'
 import { getAllEndpoint } from './getAllEndpoint'
 import { type AllConfigUpdateStrategy } from './update-strategies'
+import { addDebugEvent } from '../utils/add-debug-event'
 
 export function createOnRequestUpdateStrategy(
     environmentApiKey: string,
@@ -46,7 +47,7 @@ export function createOnRequestUpdateStrategy(
         },
         async onRequest() {
             return getTracer().startActiveSpan(
-                'on-request',
+                'fbsdk-on-request',
                 { attributes: { etag } },
                 async (span) => {
                     if (fetchUpdatesSingle) {
@@ -77,7 +78,7 @@ export function createOnRequestUpdateStrategy(
                             expiry: responseExpires,
                             now,
                         })
-                        return Promise.resolve()
+                        return Promise.resolve().finally(() => span.end())
                     }
                 },
             )

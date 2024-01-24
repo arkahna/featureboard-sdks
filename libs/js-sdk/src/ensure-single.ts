@@ -1,4 +1,5 @@
 import { TooManyRequestsError } from '@featureboard/contracts'
+import { trace } from '@opentelemetry/api'
 
 /** De-dupes calls while the promise is in flight, otherwise will trigger again */
 export function createEnsureSingleWithBackoff<T>(
@@ -12,6 +13,7 @@ export function createEnsureSingleWithBackoff<T>(
             tooManyRequestsError &&
             tooManyRequestsError.retryAfter > new Date()
         ) {
+            trace.getActiveSpan()?.recordException(tooManyRequestsError)
             return Promise.reject(tooManyRequestsError)
         }
         tooManyRequestsError = undefined

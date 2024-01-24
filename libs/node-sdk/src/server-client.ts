@@ -1,5 +1,6 @@
 import type { EffectiveFeatureValue } from '@featureboard/contracts'
 import type {
+    ClientOptions,
     FeatureBoardApiConfig,
     FeatureBoardClient,
     Features,
@@ -16,9 +17,9 @@ import type { IFeatureStateStore } from './feature-state-store'
 import { AllFeatureStateStore } from './feature-state-store'
 import { resolveUpdateStrategy } from './update-strategies/resolveUpdateStrategy'
 import type { UpdateStrategies } from './update-strategies/update-strategies'
-import { addDebugEvent } from './utils/add-debug-event'
 import { DebugFeatureStateStore } from './utils/debug-store'
 import { getTracer } from './utils/get-tracer'
+import { setTracingEnabled } from './utils/trace-provider'
 
 export interface CreateServerClientOptions {
     /** Connect to a self hosted instance of FeatureBoard */
@@ -42,6 +43,8 @@ export interface CreateServerClientOptions {
     updateStrategy?: UpdateStrategies | UpdateStrategies['kind']
 
     environmentApiKey: string
+
+    options?: ClientOptions
 }
 
 export function createServerClient({
@@ -49,7 +52,10 @@ export function createServerClient({
     externalStateStore,
     updateStrategy,
     environmentApiKey,
+    options,
 }: CreateServerClientOptions): ServerClient {
+    // enable or disable OpenTelemetry, enabled by default
+    setTracingEnabled(!options || !options.disableOTel)
     const tracer = getTracer()
 
     const initialisedPromise = new PromiseCompletionSource<boolean>()
@@ -71,7 +77,7 @@ export function createServerClient({
     const retryCancellationToken = { cancel: false }
 
     void tracer.startActiveSpan(
-        'connect-with-retry',
+        'fbsdk-connect-with-retry',
         {
             attributes: {},
         },
@@ -125,7 +131,7 @@ export function createServerClient({
         },
         request: (audienceKeys: string[]) => {
             return tracer.startActiveSpan(
-                'get-request-client',
+                'fbsdk-get-request-client',
                 { attributes: { audiences: audienceKeys } },
                 (span) => {
                     const request = updateStrategyImplementation.onRequest()
@@ -150,7 +156,18 @@ export function createServerClient({
             )
         },
         updateFeatures() {
-            return updateStrategyImplementation.updateFeatures()
+            return tracer.startActiveSpan(
+                'fbsdk-update-features-manually',
+                (span) => {
+                    try {
+                        return updateStrategyImplementation
+                            .updateFeatures()
+                            .then(() => span.end())
+                    } finally {
+                        span.end()
+                    }
+                },
+            )
         },
         waitForInitialised() {
             return initialisedPromise.promise
@@ -192,18 +209,28 @@ function syncRequest(
 
     const client: FeatureBoardClient = {
         getEffectiveValues: () => {
-            return {
-                audiences: audienceKeys,
-                effectiveValues: Object.keys(featuresState)
-                    .map<EffectiveFeatureValue>((key) => ({
-                        featureKey: key,
-                        // We will filter the invalid undefined in the next filter
-                        value: getFeatureValue(key, undefined!),
-                    }))
-                    .filter(
-                        (effectiveValue) => effectiveValue.value !== undefined,
-                    ),
-            }
+            return getTracer().startActiveSpan(
+                'fbsdk-get-effective-values',
+                (span) => {
+                    try {
+                        return {
+                            audiences: audienceKeys,
+                            effectiveValues: Object.keys(featuresState)
+                                .map<EffectiveFeatureValue>((key) => ({
+                                    featureKey: key,
+                                    // We will filter the invalid undefined in the next filter
+                                    value: getFeatureValue(key, undefined!),
+                                }))
+                                .filter(
+                                    (effectiveValue) =>
+                                        effectiveValue.value !== undefined,
+                                ),
+                        }
+                    } finally {
+                        span.end()
+                    }
+                },
+            )
         },
         getFeatureValue,
         subscribeToFeatureValue: (
@@ -220,25 +247,40 @@ function syncRequest(
         featureKey: T,
         defaultValue: Features[T],
     ) {
-        const featureValues = featuresState[featureKey as string]
-        if (!featureValues) {
-            addDebugEvent(
-                'getFeatureValue - no value, returning user fallback: %o',
-                { audienceKeys },
-            )
+        return getTracer().startActiveSpan(
+            'fbsdk-get-feature-value',
+            (span) => {
+                try {
+                    const featureValues = featuresState[featureKey as string]
+                    if (!featureValues) {
+                        span.addEvent(
+                            'getFeatureValue - no value, returning user fallback: ',
+                            {
+                                audienceKeys,
+                                'feature.key': featureKey,
+                                'feature.defaultValue': defaultValue,
+                            },
+                        )
 
-            return defaultValue
-        }
-        const audienceException = featureValues.audienceExceptions.find((a) =>
-            audienceKeys.includes(a.audienceKey),
+                        return defaultValue
+                    }
+                    const audienceException =
+                        featureValues.audienceExceptions.find((a) =>
+                            audienceKeys.includes(a.audienceKey),
+                        )
+                    const value =
+                        audienceException?.value ?? featureValues.defaultValue
+                    span.setAttributes({
+                        'feature.key': featureKey,
+                        'feature.value': value,
+                        'feature.defaultValue': defaultValue,
+                    })
+                    return value
+                } finally {
+                    span.end()
+                }
+            },
         )
-        const value = audienceException?.value ?? featureValues.defaultValue
-        addDebugEvent('getFeatureValue', {
-            featureKey,
-            value,
-            defaultValue,
-        })
-        return value
     }
 
     return client

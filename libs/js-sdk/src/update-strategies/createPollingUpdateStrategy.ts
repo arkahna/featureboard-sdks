@@ -39,7 +39,7 @@ export function createPollingUpdateStrategy(
             }
             stopPolling = pollingUpdates(() => {
                 return startActiveSpan({
-                    name: 'polling-updates',
+                    name: 'fbsdk-polling-updates',
                     options: { attributes: { etag }, root: !parentSpan },
                     parentSpan,
                     fn: async (span) => {
@@ -51,6 +51,7 @@ export function createPollingUpdateStrategy(
                                 })
                                 .finally(() => span.end())
                         }
+                        span.end()
                     },
                 })
             }, intervalMs)

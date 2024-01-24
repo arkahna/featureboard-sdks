@@ -1,6 +1,6 @@
-import { trace } from '@opentelemetry/api'
 import { version } from '../version'
+import { traceProvider } from './trace-provider'
 
 export function getTracer() {
-    return trace.getTracer('featureboard-js-sdk', version)
+    return traceProvider.getTracer('featureboard-js-sdk', version)
 }

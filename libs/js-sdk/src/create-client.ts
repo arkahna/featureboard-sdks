@@ -1,7 +1,7 @@
 import type { EffectiveFeatureValue } from '@featureboard/contracts'
 import type { EffectiveFeatureStateStore } from './effective-feature-state-store'
 import type { FeatureBoardClient } from './features-client'
-import { addDebugEvent } from './utils/add-debug-event'
+import { getTracer } from './utils/get-tracer'
 
 /** Designed for internal SDK use */
 export function createClientInternal(
@@ -9,59 +9,119 @@ export function createClientInternal(
 ): FeatureBoardClient {
     return {
         getEffectiveValues() {
-            const all = stateStore.all()
-            addDebugEvent('getEffectiveValues', { store: JSON.stringify(all) })
+            return getTracer().startActiveSpan(
+                'fbsdk-get-effective-values',
+                (span) => {
+                    try {
+                        const all = stateStore.all()
+                        span.setAttributes({
+                            store: JSON.stringify(all),
+                        })
 
-            return {
-                audiences: [...stateStore.audiences],
-                effectiveValues: Object.keys(all)
-                    .filter((key) => all[key])
-                    .map<EffectiveFeatureValue>((key) => ({
-                        featureKey: key,
-                        value: all[key]!,
-                    })),
-            }
+                        return {
+                            audiences: [...stateStore.audiences],
+                            effectiveValues: Object.keys(all)
+                                .filter((key) => all[key])
+                                .map<EffectiveFeatureValue>((key) => ({
+                                    featureKey: key,
+                                    value: all[key]!,
+                                })),
+                        }
+                    } finally {
+                        span.end()
+                    }
+                },
+            )
         },
         getFeatureValue: (featureKey, defaultValue) => {
-            const value = stateStore.get(featureKey as string)
-            addDebugEvent('getFeatureValue', {
-                featureKey,
-                value,
-                defaultValue,
-            })
+            return getTracer().startActiveSpan(
+                'fbsdk-get-feature-value',
+                (span) => {
+                    try {
+                        const value = stateStore.get(featureKey as string)
+                        span.setAttributes({
+                            'feature.key': featureKey,
+                            'feature.value': value,
+                            'feature.defaultValue': defaultValue,
+                        })
 
-            return value ?? defaultValue
+                        return value ?? defaultValue
+                    } finally {
+                        span.end()
+                    }
+                },
+            )
         },
         subscribeToFeatureValue(
             featureKey: string,
             defaultValue: any,
             onValue: (value: any) => void,
         ) {
-            addDebugEvent('subscribeToFeatureValue', {
-                featureKey,
-                defaultValue,
-            })
+            return getTracer().startActiveSpan(
+                'fbsdk-subscribe-to-feature-value',
+                {
+                    attributes: {
+                        'feature.key': featureKey,
+                        'feature.defaultValue': defaultValue,
+                    },
+                },
+                (span) => {
+                    try {
+                        const callback = (
+                            updatedFeatureKey: string,
+                            value: any,
+                        ): void => {
+                            if (featureKey === updatedFeatureKey) {
+                                getTracer().startActiveSpan(
+                                    'fbsdk-subscribeToFeatureValue-onValue',
+                                    {
+                                        attributes: {
+                                            'feature.key': featureKey,
+                                            'feature.value': value,
+                                            'feature.defaultValue':
+                                                defaultValue,
+                                        },
+                                    },
+                                    (span) => {
+                                        try {
+                                            onValue(value ?? defaultValue)
+                                        } finally {
+                                            span.end()
+                                        }
+                                    },
+                                )
+                            }
+                        }
 
-            const callback = (updatedFeatureKey: string, value: any): void => {
-                if (featureKey === updatedFeatureKey) {
-                    addDebugEvent('subscribeToFeatureValue:update', {
-                        featureKey,
-                        value,
-                        defaultValue,
-                    })
-                    onValue(value ?? defaultValue)
-                }
-            }
+                        stateStore.on('feature-updated', callback)
+                        onValue(stateStore.get(featureKey) ?? defaultValue)
 
-            stateStore.on('feature-updated', callback)
-            onValue(stateStore.get(featureKey) ?? defaultValue)
-
-            return () => {
-                addDebugEvent('unsubscribeToFeatureValue', {
-                    featureKey,
-                })
-                stateStore.off('feature-updated', callback)
-            }
+                        return () => {
+                            getTracer().startActiveSpan(
+                                'fbsdk-unsubscribe-to-feature-value',
+                                {
+                                    attributes: {
+                                        'feature.key': featureKey,
+                                        'feature.defaultValue': defaultValue,
+                                    },
+                                },
+                                (span) => {
+                                    try {
+                                        stateStore.off(
+                                            'feature-updated',
+                                            callback,
+                                        )
+                                    } finally {
+                                        span.end()
+                                    }
+                                },
+                            )
+                        }
+                    } finally {
+                        span.end()
+                    }
+                },
+            )
         },
     }
 }

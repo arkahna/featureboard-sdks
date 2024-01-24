@@ -1,8 +1,10 @@
-import { TooManyRequestsError, type EffectiveFeatureValue } from '@featureboard/contracts'
+import {
+    TooManyRequestsError,
+    type EffectiveFeatureValue,
+} from '@featureboard/contracts'
 import { SpanStatusCode } from '@opentelemetry/api'
 import type { EffectiveFeatureStateStore } from '../effective-feature-state-store'
 import { getEffectiveEndpoint } from '../update-strategies/getEffectiveEndpoint'
-import { addDebugEvent } from './add-debug-event'
 import { compareArrays } from './compare-arrays'
 import { getTracer } from './get-tracer'
 import { resolveError } from './resolve-error'
@@ -20,7 +22,7 @@ export async function fetchFeaturesConfigurationViaHttp(
         audiences,
     )
     return getTracer().startActiveSpan(
-        'fetch-effective-features-http',
+        'fbsdk-fetch-effective-features-http',
         { attributes: { audiences, etag } },
         async (span) => {
             try {
@@ -42,19 +44,25 @@ export async function fetchFeaturesConfigurationViaHttp(
                         retryAfterHeader && !retryAfterInt
                             ? new Date(retryAfterHeader)
                             : new Date()
-            
+
                     if (retryAfterInt) {
-                        const retryAfterTime = retryAfter.getTime() + retryAfterInt * 1000
+                        const retryAfterTime =
+                            retryAfter.getTime() + retryAfterInt * 1000
                         retryAfter.setTime(retryAfterTime)
                     }
 
-                    throw new TooManyRequestsError(`Failed to get latest features: Service returned ${
-                        response.status
-                    }${response.statusText ? ' ' + response.statusText : ''}. ${
-                        retryAfterHeader
-                            ? 'Retry after: ' + retryAfter.toUTCString()
-                            : ''
-                    }`, retryAfter)
+                    throw new TooManyRequestsError(
+                        `Failed to get latest features: Service returned ${
+                            response.status
+                        }${
+                            response.statusText ? ' ' + response.statusText : ''
+                        }. ${
+                            retryAfterHeader
+                                ? 'Retry after: ' + retryAfter.toUTCString()
+                                : ''
+                        }`,
+                        retryAfter,
+                    )
                 }
 
                 if (response.status !== 200 && response.status !== 304) {
@@ -65,6 +73,7 @@ export async function fetchFeaturesConfigurationViaHttp(
 
                 // Expect most times will just get a response from the HEAD request saying no updates
                 if (response.status === 304) {
+                    span.addEvent('Fetch succeeded without changes')
                     return etag
                 }
 
@@ -73,7 +82,7 @@ export async function fetchFeaturesConfigurationViaHttp(
 
                 const newAudiences = getCurrentAudiences()
                 if (!compareArrays(newAudiences, audiences)) {
-                    addDebugEvent(
+                    span.addEvent(
                         'Audiences changed while fetching, ignoring response',
                         {
                             audiences,
@@ -92,12 +101,14 @@ export async function fetchFeaturesConfigurationViaHttp(
                 unavailableFeatures.forEach((unavailableFeature) => {
                     stateStore.set(unavailableFeature, undefined)
                 })
-                addDebugEvent('Feature updates received', {
+                const newEtag = response.headers.get('etag') || undefined
+                span.addEvent('Fetch succeeded with updates', {
                     audiences,
                     unavailableFeatures,
+                    newEtag,
                 })
 
-                return response.headers.get('etag') || undefined
+                return newEtag
             } catch (error) {
                 const err = resolveError(error)
                 span.recordException(err)

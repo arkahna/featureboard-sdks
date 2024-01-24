@@ -5,7 +5,6 @@ import {
 import { resolveError } from '@featureboard/js-sdk'
 import { SpanStatusCode } from '@opentelemetry/api'
 import type { IFeatureStateStore } from '../feature-state-store'
-import { addDebugEvent } from './add-debug-event'
 import { getTracer } from './get-tracer'
 
 export async function fetchFeaturesConfigurationViaHttp(
@@ -15,7 +14,7 @@ export async function fetchFeaturesConfigurationViaHttp(
     etag: string | undefined,
 ): Promise<string | undefined> {
     return getTracer().startActiveSpan(
-        'fetch-features-http',
+        'fbsdk-fetch-features-http',
         { attributes: { etag } },
         async (span) => {
             try {
@@ -66,7 +65,7 @@ export async function fetchFeaturesConfigurationViaHttp(
 
                 // Expect most times will just get a response from the HEAD request saying no updates
                 if (response.status === 304) {
-                    addDebugEvent('No changes')
+                    span.addEvent('Fetch succeeded without changes')
                     return etag
                 }
 
@@ -85,7 +84,7 @@ export async function fetchFeaturesConfigurationViaHttp(
                 }
 
                 const newEtag = response.headers.get('etag') || undefined
-                addDebugEvent('fetching updates done', { newEtag })
+                span.addEvent('Fetch succeeded with updates', { newEtag })
                 return newEtag
             } catch (error) {
                 const err = resolveError(error)

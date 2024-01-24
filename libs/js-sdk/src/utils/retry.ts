@@ -14,7 +14,7 @@ export async function retry<T>(
     cancellationToken = { cancel: false },
 ): Promise<void | T> {
     const tracer = getTracer()
-    return tracer.startActiveSpan('retry', async (span) => {
+    return tracer.startActiveSpan(`fbsdk-retry`, async (span) => {
         let retryAttempt = 0
 
         try {
@@ -74,8 +74,11 @@ export async function retry<T>(
                         throw error
                     }
 
-                    await tracer.startActiveSpan('delay', (delaySpan) =>
-                        delay(delayMs).finally(() => delaySpan.end()),
+                    await tracer.startActiveSpan(
+                        'fbsdk-trigger-retry-delay',
+                        { attributes: { delayMs } },
+                        (delaySpan) =>
+                            delay(delayMs).finally(() => delaySpan.end()),
                     )
 
                     retryAttempt++
@@ -93,7 +96,7 @@ async function retryAttemptFn<T>(
     fn: () => Promise<T>,
 ) {
     return await tracer.startActiveSpan(
-        'retry-attempt',
+        `fbsdk-retry-attempt-${retryAttempt}`,
         { attributes: { retryAttempt } },
         async (attemptSpan) => {
             try {

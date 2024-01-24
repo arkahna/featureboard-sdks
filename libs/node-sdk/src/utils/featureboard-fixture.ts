@@ -19,7 +19,7 @@ export function featureBoardFixture<Context>(
         server.listen({ onUnhandledRequest: 'error' })
 
         await tracer.startActiveSpan(
-            task.name,
+            `${task.suite.name ? task.suite.name + ': ' : ''}${task.name}`,
             {
                 root: true,
                 attributes: {},
