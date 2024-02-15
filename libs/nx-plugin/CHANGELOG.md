@@ -1,5 +1,11 @@
 # @featureboard/nx-plugin
 
+## 0.3.12
+
+### Patch Changes
+
+- 1b43477: Update project dropdown to work with newer versions of NX
+
 ## 0.3.11
 
 ### Patch Changes
