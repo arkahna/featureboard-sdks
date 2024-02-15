@@ -49,7 +49,7 @@ export async function codeGenExecutor(
         }
     }
 
-    tree = tree || new FsTree(projectRoot, context.isVerbose)
+    tree = tree || new FsTree(context.root, context.isVerbose)
 
     await codeGenerator({
         tree: tree,
