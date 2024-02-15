@@ -1,9 +1,6 @@
 import { createEnsureSingleWithBackoff } from '../ensure-single'
 import { fetchFeaturesConfigurationViaHttp } from '../utils/fetchFeaturesConfiguration'
 import type { EffectiveConfigUpdateStrategy } from './update-strategies'
-import { updatesLog } from './updates-log'
-
-export const manualUpdatesDebugLog = updatesLog.extend('manual')
 
 export function createManualUpdateStrategy(
     environmentApiKey: string,
@@ -15,6 +12,7 @@ export function createManualUpdateStrategy(
         | (() => Promise<void>)
 
     return {
+        name: 'manual',
         async connect(stateStore) {
             // Force update
             etag = undefined

@@ -1,11 +1,10 @@
-import { error } from 'console'
+import { trace } from '@opentelemetry/api'
 import { createEnsureSingleWithBackoff } from '../ensure-single'
 import { fetchFeaturesConfigurationViaHttp } from '../utils/fetchFeaturesConfiguration'
 import { pollingUpdates } from '../utils/pollingUpdates'
+import { resolveError } from '../utils/resolve-error'
+import { startActiveSpan } from '../utils/start-active-span'
 import type { EffectiveConfigUpdateStrategy } from './update-strategies'
-import { updatesLog } from './updates-log'
-
-export const pollingUpdatesDebugLog = updatesLog.extend('polling')
 
 export function createPollingUpdateStrategy(
     environmentApiKey: string,
@@ -15,8 +14,10 @@ export function createPollingUpdateStrategy(
     let stopPolling: undefined | (() => void)
     let etag: undefined | string
     let fetchUpdatesSingle: undefined | (() => Promise<void>)
+    const parentSpan = trace.getActiveSpan()
 
     return {
+        name: 'polling',
         async connect(stateStore) {
             // Force update
             etag = undefined
@@ -37,13 +38,22 @@ export function createPollingUpdateStrategy(
                 stopPolling()
             }
             stopPolling = pollingUpdates(() => {
-                if (fetchUpdatesSingle) {
-                    pollingUpdatesDebugLog('Polling for updates (%o)', etag)
-                    // Catch errors here to ensure no unhandled promise rejections after a poll
-                    return fetchUpdatesSingle().catch((error: Error) => {
-                        updatesLog(error)
-                    })
-                }
+                return startActiveSpan({
+                    name: 'fbsdk-polling-updates',
+                    options: { attributes: { etag }, root: !parentSpan },
+                    parentSpan,
+                    fn: async (span) => {
+                        // Catch errors here to ensure no unhandled promise rejections after a poll
+                        if (fetchUpdatesSingle) {
+                            return await fetchUpdatesSingle()
+                                .catch((err) => {
+                                    span.recordException(resolveError(err))
+                                })
+                                .finally(() => span.end())
+                        }
+                        span.end()
+                    },
+                })
             }, intervalMs)
 
             return await fetchUpdatesSingle()

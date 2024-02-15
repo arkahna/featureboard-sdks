@@ -1,4 +1,5 @@
 export type { BrowserClient } from './client-connection'
+export type { ClientOptions } from './client-options'
 export { createBrowserClient } from './create-browser-client'
 export { createManualClient } from './create-manual-client'
 export type { FeatureBoardApiConfig } from './featureboard-api-config'
@@ -8,6 +9,7 @@ export type { FeatureBoardClient } from './features-client'
 // Need to figure out how to do that with the current build setup
 export { createEnsureSingleWithBackoff } from './ensure-single'
 export { featureBoardHostedService } from './featureboard-service-urls'
+export { resolveError } from './utils/resolve-error'
 export { retry } from './utils/retry'
 
 export interface Features {}

@@ -2,9 +2,6 @@ import type { NotificationType } from '@featureboard/contracts'
 import type { LiveOptions } from '@featureboard/live-connection'
 import type { EffectiveFeatureStateStore } from '../effective-feature-state-store'
 import type { EffectiveConfigUpdateStrategy } from './update-strategies'
-import { updatesLog } from './updates-log'
-
-export const liveDebugLog = updatesLog.extend('live')
 
 export function createLiveUpdateStrategy(
     environmentApiKey: string,
@@ -26,6 +23,7 @@ export function createLiveUpdateStrategy(
     let connectionState: 'connected' | 'disconnected' = 'disconnected'
 
     return {
+        name: 'live',
         async connect(stateStore: EffectiveFeatureStateStore) {
             const liveConnection = await liveConnectionAsync
 

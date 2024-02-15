@@ -16,5 +16,11 @@ module.exports = {
       },
     },
   ],
-  ignorePatterns: ['!**/*', 'node_modules', 'out-tsc'],
+  ignorePatterns: [
+    '!**/*',
+    'node_modules',
+    'tsc-out',
+    'test-setup.ts',
+    'vitest.config.ts',
+  ],
 }

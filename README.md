@@ -21,3 +21,15 @@ Go to [our website](https://featureboard.app) to find out more.
 ## Documentation
 
 Installation and usage instructions can be found on our [docs site](https://docs.featureboard.app).
+
+## Open Telemetry
+
+The FeatureBoard SDKs are instrumented with Open Telemetry natively, so you can easily integrate with your existing observability tools.
+
+### Unit tests
+
+To configure the SDK to use a local Open Telemetry Collector, set the following environment variables:
+
+OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
+
+You can put this in a `.env` file in the root of the project.

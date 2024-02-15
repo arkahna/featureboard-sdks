@@ -17,6 +17,15 @@
                 "cwd": "libs/node-sdk"
             }
         },
+        "version": {
+            "executor": "nx:run-commands",
+            "options": {
+                "commands": [
+                    "echo \"export const version = '$(jq -r '.version' package.json)';\" > src/version.ts"
+                ],
+                "cwd": "libs/node-sdk"
+            }
+        },
         "package": {
             "executor": "nx:run-commands",
             "options": {
@@ -28,7 +37,8 @@
                 ],
                 "cwd": "libs/node-sdk",
                 "parallel": false
-            }
+            },
+            "dependsOn": ["version"]
         }
     }
 }

@@ -48,6 +48,7 @@ export interface OnRequestOptions {
 }
 
 export interface EffectiveConfigUpdateStrategy {
+    name: string
     state: 'connected' | 'disconnected'
     connect(stateStore: EffectiveFeatureStateStore): Promise<void>
     close(): Promise<void>

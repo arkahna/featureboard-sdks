@@ -69,6 +69,10 @@ jobs:
           sed -i "s/<Version>.*<\/Version>/<Version>$version<\/Version>/" $csproj_path
           sed -i "s/<Copyright>.*<\/Copyright>/<Copyright>Copyright (c) Arkahna $currentYear<\/Copyright>/" $csproj_path
 
+      - name: Update Node/JS SDK version
+        run: |
+          pnpm nx run-many --target version --all
+
       - name: Push changes
         run: |
           pnpm i -r --no-frozen-lockfile

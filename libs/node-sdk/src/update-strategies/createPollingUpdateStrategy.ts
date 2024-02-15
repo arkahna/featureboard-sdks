@@ -1,9 +1,13 @@
-import { createEnsureSingleWithBackoff } from '@featureboard/js-sdk'
+import {
+    createEnsureSingleWithBackoff,
+    resolveError,
+} from '@featureboard/js-sdk'
+import { trace } from '@opentelemetry/api'
 import { fetchFeaturesConfigurationViaHttp } from '../utils/fetchFeaturesConfiguration'
 import { pollingUpdates } from '../utils/pollingUpdates'
+import { startActiveSpan } from '../utils/start-active-span'
 import { getAllEndpoint } from './getAllEndpoint'
 import type { AllConfigUpdateStrategy } from './update-strategies'
-import { updatesLog } from './updates-log'
 
 export function createPollingUpdateStrategy(
     environmentApiKey: string,
@@ -13,6 +17,8 @@ export function createPollingUpdateStrategy(
     let stopPolling: undefined | (() => void)
     let etag: undefined | string
     let fetchUpdatesSingle: undefined | (() => Promise<void>)
+
+    const parentSpan = trace.getActiveSpan()
 
     return {
         async connect(stateStore) {
@@ -24,7 +30,6 @@ export function createPollingUpdateStrategy(
                     environmentApiKey,
                     stateStore,
                     etag,
-                    'polling',
                 )
             })
 
@@ -32,12 +37,22 @@ export function createPollingUpdateStrategy(
                 stopPolling()
             }
             stopPolling = pollingUpdates(() => {
-                if (fetchUpdatesSingle) {
-                    // Catch errors here to ensure no unhandled promise rejections after a poll
-                    return fetchUpdatesSingle().catch((error: Error) => {
-                        updatesLog(error)
-                    })
-                }
+                return startActiveSpan({
+                    name: 'fbsdk-polling-updates',
+                    options: { attributes: { etag }, root: !parentSpan },
+                    parentSpan,
+                    fn: async (span) => {
+                        if (fetchUpdatesSingle) {
+                            // Catch errors here to ensure no unhandled promise rejections after a poll
+                            return await fetchUpdatesSingle()
+                                .catch((error) => {
+                                    span.recordException(resolveError(error))
+                                })
+                                .finally(() => span.end())
+                        }
+                        span.end()
+                    },
+                })
             }, intervalMs)
 
             return fetchUpdatesSingle()
