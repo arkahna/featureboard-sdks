@@ -1,5 +1,15 @@
 # @featureboard/code-generator
 
+## 0.3.7
+
+### Patch Changes
+
+- c46cc31: Find \*.csproj files as long as they are in a parent folder when trying to find a namespace
+  Prompt for a namespace if once can't be resolved
+  Allow users to specify an absolute path for the output file
+- c46cc31: Change error message names to product
+  Fix path in executor
+
 ## 0.3.6
 
 ### Patch Changes

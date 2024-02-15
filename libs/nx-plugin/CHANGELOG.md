@@ -1,5 +1,15 @@
 # @featureboard/nx-plugin
 
+## 0.3.10
+
+### Patch Changes
+
+- c46cc31: Change error message names to product
+  Fix path in executor
+- Updated dependencies [c46cc31]
+- Updated dependencies [c46cc31]
+  - @featureboard/code-generator@0.3.7
+
 ## 0.3.9
 
 ### Patch Changes

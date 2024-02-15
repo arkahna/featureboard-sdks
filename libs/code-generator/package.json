@@ -1,6 +1,6 @@
 {
     "name": "@featureboard/code-generator",
-    "version": "0.3.6",
+    "version": "0.3.7",
     "type": "commonjs",
     "main": "src/index.js",
     "typings": "./src/index.d.ts",
