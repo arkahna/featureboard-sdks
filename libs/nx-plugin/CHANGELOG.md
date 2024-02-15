@@ -1,5 +1,11 @@
 # @featureboard/nx-plugin
 
+## 0.3.11
+
+### Patch Changes
+
+- 5c601e7: Version bump
+
 ## 0.3.10
 
 ### Patch Changes
