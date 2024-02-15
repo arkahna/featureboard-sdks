@@ -89,13 +89,13 @@ async function getConfig({
         if (projectResults.projects.length === 1) {
             project = projectResults.projects[0]
             console.log(
-                `One project found. Setting FeatureBoard project to ${project.name}`,
+                `One project found. Setting FeatureBoard product to ${project.name}`,
             )
         } else {
             const promptResult = await prompts({
                 type: 'select',
                 name: 'project',
-                message: `Pick your FeatureBoard project?`,
+                message: `Pick your FeatureBoard product?`,
                 validate: (x) =>
                     projectResults.projects.map((x) => x.name).includes(x),
                 choices: projectResults.projects.map((x) => ({
@@ -114,11 +114,11 @@ async function getConfig({
     if (!project)
         throw projectResults.projects.length > 0
             ? new Error(
-                  `Project not specified select one of [${projectResults.projects
+                  `Product not specified select one of [${projectResults.projects
                       .map((x) => x.name)
                       .join(', ')}]`,
               )
-            : new Error('Unable to locate Project')
+            : new Error('Unable to locate Product')
 
     const featuresResult = await getProjectFeatures(apiEndpoint, project, auth)
 
