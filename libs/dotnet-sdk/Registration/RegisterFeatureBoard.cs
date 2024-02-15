@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Http.Headers;
 using FeatureBoard.DotnetSdk.Models;
 using FeatureBoard.DotnetSdk.State;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Polly;
 
 namespace FeatureBoard.DotnetSdk.Registration;
 
@@ -14,7 +16,6 @@ public static class RegisterFeatureBoard
   private static UpdateStrategy _updateStrategy = UpdateStrategy.None;
 
   private static EntityTagHeaderValue? lastETag = null;
-  private static RetryConditionHeaderValue? retryAfter = null;
 
   public static FeatureBoardBuilder AddFeatureBoard<TFeatures>(this IServiceCollection services, IConfigurationRoot configuration) where TFeatures : class, IFeatures
   {
@@ -26,18 +27,31 @@ public static class RegisterFeatureBoard
       client.BaseAddress = options.Value.HttpEndpoint;
       client.DefaultRequestHeaders.Add("x-environment-key", options.Value.EnvironmentApiKey);
       // client.Timeout = options.Value.MaxAge - TimeSpan.FromMilliseconds(3); //prevent multiple requests running at the same time.
-    });
+    }).AddTransientHttpErrorPolicy(static policyBuilder => // DEBT: Get number retries from config
+      policyBuilder
+#if NET6_0_OR_GREATER
+        .OrResult(result => result.StatusCode == HttpStatusCode.TooManyRequests)
+#else
+        .OrResult(result => (int)result.StatusCode == 429)
+#endif
+        .WaitAndRetryAsync(
+          retryCount: 5,
+          sleepDurationProvider: static (retryAttempt, response, context) =>
+            response.Result?.Headers.RetryAfter?.Delta // obey retry-after header if present in response
+              ?? TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), // fallback to basic exponential backoff if not. TODO: Consider adding jitter
+          onRetryAsync: static (response, delay, retryAttempt, context) => Task.CompletedTask
+          )
+    );
 
     services.AddSingleton<LastETagProvider>(() => ref lastETag);
-    services.AddSingleton<RetryAfterProvider>(() => ref retryAfter);
 
-    services.AddScoped<IFeatureBoardClient<TFeatures>, FeatureBoardClient<TFeatures>>();
-    services.AddScoped<IFeatureBoardClient>(static c => c.GetRequiredService<IFeatureBoardClient<TFeatures>>());
+    services.AddScoped<IFeatureBoardClient<TFeatures>, FeatureBoardClient<TFeatures>>()
+      .AddScoped<IFeatureBoardClient>(static c => c.GetRequiredService<IFeatureBoardClient<TFeatures>>());
 
-    services.AddSingleton<FeatureBoardState>();
-    services.AddHostedService(static provider => provider.GetRequiredService<FeatureBoardState>());
-    services.AddTransient<Action<IReadOnlyCollection<FeatureConfiguration>>>(static provider => provider.GetRequiredService<FeatureBoardState>().Update);
-    services.AddScoped(static provider => provider.GetRequiredService<FeatureBoardState>().GetSnapshot());
+    services.AddSingleton<FeatureBoardState>()
+      .AddHostedService(static provider => provider.GetRequiredService<FeatureBoardState>())
+      .AddScoped(static provider => new Lazy<FeatureBoardStateSnapshot>(provider.GetRequiredService<FeatureBoardState>().GetSnapshot))
+      .AddTransient<IFeatureBoardStateUpdateHandler, FeatureBoardStateUpdater>();
 
     return new FeatureBoardBuilder(services);
   }
@@ -73,7 +87,8 @@ public static class RegisterFeatureBoard
 
   public static FeatureBoardBuilder WithExternalState<TStateStore>(this FeatureBoardBuilder builder) where TStateStore : class, IFeatureBoardExternalState
   {
-    builder.Services.AddSingleton<IFeatureBoardExternalState, TStateStore>();
+    builder.Services.AddSingleton<IFeatureBoardExternalState, TStateStore>()
+      .AddTransient<IFeatureBoardStateUpdateHandler>(static provider => provider.GetRequiredService<IFeatureBoardExternalState>());
 
     return builder;
   }

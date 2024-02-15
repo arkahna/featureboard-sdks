@@ -1,22 +1,21 @@
-using System;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.Json.Nodes;
-using Microsoft.Extensions.Logging;
 using FeatureBoard.DotnetSdk.Attributes;
 using FeatureBoard.DotnetSdk.Helpers;
 using FeatureBoard.DotnetSdk.Models;
 using FeatureBoard.DotnetSdk.State;
+using Microsoft.Extensions.Logging;
 
 namespace FeatureBoard.DotnetSdk;
 
 internal class FeatureBoardClient<TFeatures> : IFeatureBoardClient<TFeatures> where TFeatures : class, IFeatures
 {
-  private readonly FeatureBoardStateSnapshot _state;
+  private readonly Lazy<FeatureBoardStateSnapshot> _state;
   private readonly IAudienceProvider _audienceProvider;
   private readonly ILogger _logger;
 
-  public FeatureBoardClient(FeatureBoardStateSnapshot state, IAudienceProvider audienceProvider, ILogger<FeatureBoardClient<TFeatures>> logger)
+  public FeatureBoardClient(Lazy<FeatureBoardStateSnapshot> state, IAudienceProvider audienceProvider, ILogger<FeatureBoardClient<TFeatures>> logger)
   {
     _state = state;
     _audienceProvider = audienceProvider;
@@ -84,7 +83,7 @@ internal class FeatureBoardClient<TFeatures> : IFeatureBoardClient<TFeatures> wh
 
   private JsonValue? GetFeatureConfigurationValue(string featureKey, string? defaultValue)
   {
-    var feature = _state.Get(featureKey);
+    var feature = _state.Value.Get(featureKey);
     if (feature == null)
     {
       _logger.LogDebug("GetFeatureValue - no value, returning user fallback: {defaultValue}", defaultValue);

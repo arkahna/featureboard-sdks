@@ -1,7 +1,6 @@
-using System.Threading;
+using FeatureBoard.DotnetSdk.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using FeatureBoard.DotnetSdk.Models;
 
 namespace FeatureBoard.DotnetSdk.State;
 
@@ -22,16 +21,19 @@ internal sealed class FeatureBoardState : IFeatureBoardState, IHostedService
   public FeatureBoardStateSnapshot GetSnapshot() => new FeatureBoardStateSnapshot(_cache);
 
 
-  public void Update(IReadOnlyCollection<FeatureConfiguration> state) => _cache = state.ToDictionary(s => s.FeatureKey, s => s);
+  /// <summary>
+  /// Update internal cache of feature configuration based on supplied collection
+  /// </summary>
+  /// <param name="state"></param>
+  /// <exception cref="ArgumentException">Thrown if <see cref="FeatureConfiguration.FeatureKey"/> is <c>null</c> or is reused in collection</exception>
+  internal void Update(IReadOnlyCollection<FeatureConfiguration> state) => _cache = state.ToDictionary(s => s.FeatureKey, s => s);
 
   public async Task StartAsync(CancellationToken cancellationToken)
   {
-    if (_externalState is null)
-    {
-      using var scope = _scopeFactory.CreateScope();
-      await scope.ServiceProvider.GetRequiredService<IFeatureBoardService>().RefreshFeatureConfiguration(cancellationToken);
+    using var scope = _scopeFactory.CreateScope();
+    var updated = await scope.ServiceProvider.GetRequiredService<IFeatureBoardService>().RefreshFeatureConfiguration(cancellationToken) ?? false;
+    if (updated || _externalState is null)
       return;
-    }
 
     var state = await _externalState.GetState(cancellationToken);
     if (state == null)
