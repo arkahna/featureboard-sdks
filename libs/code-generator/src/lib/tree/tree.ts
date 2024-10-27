@@ -425,3 +425,24 @@ export function printChanges(fileChanges: FileChange[], indent = ''): void {
         }
     })
 }
+
+export function saveChanges(tree: Tree, dryRun: boolean, verbose: boolean) {
+    const changes = tree.listChanges()
+    if (verbose) {
+        printChanges(changes)
+    }
+
+    if (changes.length === 0) {
+        if (verbose) {
+            console.log(`\nFiles are the same no changes were made.`)
+        }
+        return
+    }
+
+    if (!dryRun) {
+        flushChanges(tree.root, changes)
+        return
+    }
+
+    console.log(`\nNOTE: The "dryRun" flag means no changes were made.`)
+}

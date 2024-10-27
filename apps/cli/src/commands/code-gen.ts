@@ -7,8 +7,7 @@ import type { Template } from '@featureboard/code-generator'
 import {
     FsTree,
     codeGenerator,
-    flushChanges,
-    printChanges,
+    saveChanges,
 } from '@featureboard/code-generator'
 import fsAsync from 'fs/promises'
 import path from 'node:path'
@@ -155,24 +154,7 @@ export function codeGenCommand() {
                     apiEndpoint: API_ENDPOINT,
                 })
 
-                const changes = tree.listChanges()
-                if (!options.quiet) {
-                    printChanges(changes)
-                    if (changes.length === 0) {
-                        console.log(
-                            `\nFiles are the same no changes were made.`,
-                        )
-                        return
-                    }
-                }
-
-                if (!options.dryRun && changes.length !== 0) {
-                    flushChanges(tree.root, changes)
-                    return
-                }
-                console.log(
-                    `\nNOTE: The "dryRun" flag means no changes were made.`,
-                )
+                saveChanges(tree, options.dryRun, !options.quiet)
             }),
         )
 }

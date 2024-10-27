@@ -6,5 +6,10 @@ export { codeGenerator } from './lib/code-generator'
 export type { CodeGeneratorOptions, Template } from './lib/code-generator'
 export { queryFeatureBoard } from './lib/queryFeatureBoard'
 export type { FeatureBoardAuth } from './lib/queryFeatureBoard'
-export { FsTree, flushChanges, printChanges } from './lib/tree/tree'
+export {
+    FsTree,
+    flushChanges,
+    printChanges,
+    saveChanges,
+} from './lib/tree/tree'
 export type { Tree } from './lib/tree/tree'
