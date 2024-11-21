@@ -1,9 +1,7 @@
 import type { EffectiveFeatureValue } from '@featureboard/contracts'
-import { debugLog } from './log'
+import { addDebugEvent } from './utils/add-debug-event'
 
 export type FeatureValue = EffectiveFeatureValue['value'] | undefined
-
-const stateStoreDebug = debugLog.extend('state-store')
 
 export class EffectiveFeatureStateStore {
     private _audiences: string[] = []
@@ -57,7 +55,8 @@ export class EffectiveFeatureStateStore {
     }
 
     set(featureKey: string, value: FeatureValue) {
-        stateStoreDebug("set '%s': %o", featureKey, value)
+        addDebugEvent('Feature store: set feature', { featureKey, value })
+
         this._store[featureKey] = value
 
         this.valueUpdatedCallbacks.forEach((valueUpdated) =>
@@ -67,7 +66,7 @@ export class EffectiveFeatureStateStore {
 
     get(featureKey: string): FeatureValue {
         const value = this._store[featureKey]
-        stateStoreDebug("get '%s': %o", featureKey, value)
+        addDebugEvent('Feature store: get feature', { featureKey, value })
         return value
     }
 }

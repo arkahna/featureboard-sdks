@@ -42,24 +42,4 @@ jobs:
         run: pnpm tsc -b
 
       - name: Lint, build and test
-        run: pnpm nx run-many --target build,lint,test --all --exclude examples-dotnet-api
-
-      - name: Version command
-        id: version
-        run: |
-          npx changeset version
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Update DotNet SDK version and copyright year
-        run: |
-          version=$(node -pe "require('./libs/dotnet-sdk/package.json').version")
-          echo "Version: $version"
-          currentYear=$(node -pe "new Date().getFullYear()")
-          csproj_path=libs/dotnet-sdk/FeatureBoard.DotnetSdk.csproj
-          sed -i "s/<Version>.*<\/Version>/<Version>$version<\/Version>/" $csproj_path
-          sed -i "s/<Copyright>.*<\/Copyright>/<Copyright>Copyright (c) Arkahna $currentYear<\/Copyright>/" $csproj_path
-          cat $csproj_path
-
-      - name: Package libs
-        run: pnpm package
+        run: pnpm nx run-many --target build,lint,test,package --all --exclude examples-dotnet-api

@@ -14,9 +14,16 @@
         "**/cypress/**",
         "**/.{idea,git,cache,output,temp}/**"
     ],
-    "eslint.validate": ["json"],
-    "cSpell.enableFiletypes": ["typescript"],
-    "cSpell.words": ["featureboard"],
+    "eslint.validate": [
+        "json"
+    ],
+    "cSpell.enableFiletypes": [
+        "typescript"
+    ],
+    "cSpell.words": [
+        "fbsdk",
+        "featureboard"
+    ],
     "[json]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"
     }

@@ -1,18 +1,25 @@
 import type { EffectiveFeatureValue } from '@featureboard/contracts'
 import type {
+    ClientOptions,
     FeatureBoardApiConfig,
     FeatureBoardClient,
     Features,
 } from '@featureboard/js-sdk'
-import { featureBoardHostedService, retry } from '@featureboard/js-sdk'
+import {
+    featureBoardHostedService,
+    resolveError,
+    retry,
+} from '@featureboard/js-sdk'
+import { SpanStatusCode } from '@opentelemetry/api'
 import { PromiseCompletionSource } from 'promise-completion-source'
 import type { ExternalStateStore, ServerClient } from '.'
+import type { IFeatureStateStore } from './feature-state-store'
 import { AllFeatureStateStore } from './feature-state-store'
-import { debugLog } from './log'
 import { resolveUpdateStrategy } from './update-strategies/resolveUpdateStrategy'
 import type { UpdateStrategies } from './update-strategies/update-strategies'
-
-const serverConnectionDebug = debugLog.extend('server-connection')
+import { DebugFeatureStateStore } from './utils/debug-store'
+import { getTracer } from './utils/get-tracer'
+import { setTracingEnabled } from './utils/trace-provider'
 
 export interface CreateServerClientOptions {
     /** Connect to a self hosted instance of FeatureBoard */
@@ -36,6 +43,8 @@ export interface CreateServerClientOptions {
     updateStrategy?: UpdateStrategies | UpdateStrategies['kind']
 
     environmentApiKey: string
+
+    options?: ClientOptions
 }
 
 export function createServerClient({
@@ -43,11 +52,22 @@ export function createServerClient({
     externalStateStore,
     updateStrategy,
     environmentApiKey,
+    options,
 }: CreateServerClientOptions): ServerClient {
+    // enable or disable OpenTelemetry, enabled by default
+    setTracingEnabled(!options || !options.disableOTel)
+    const tracer = getTracer()
+
     const initialisedPromise = new PromiseCompletionSource<boolean>()
     // Ensure that the init promise doesn't cause an unhandled promise rejection
     initialisedPromise.promise.catch(() => {})
-    const stateStore = new AllFeatureStateStore(externalStateStore)
+    let stateStore: IFeatureStateStore = new AllFeatureStateStore(
+        externalStateStore,
+    )
+    if (process.env.FEATUREBOARD_SDK_DEBUG) {
+        stateStore = new DebugFeatureStateStore(stateStore)
+    }
+
     const updateStrategyImplementation = resolveUpdateStrategy(
         updateStrategy,
         environmentApiKey,
@@ -55,41 +75,51 @@ export function createServerClient({
     )
 
     const retryCancellationToken = { cancel: false }
-    retry(async () => {
-        try {
-            serverConnectionDebug('Connecting to SDK...')
-            return await updateStrategyImplementation.connect(stateStore)
-        } catch (error) {
-            serverConnectionDebug(
-                'Failed to connect to SDK, try to initialise form external state store',
-                error,
-            )
-            // Try initialise external state store
-            const result = await stateStore.initialiseFromExternalStateStore()
-            if (!result) {
-                // No external state store, throw original error
-                console.error('Failed to connect to SDK', error)
-                throw error
-            }
-            serverConnectionDebug('Initialised from external state store')
-            return Promise.resolve()
-        }
-    }, retryCancellationToken)
-        .then(() => {
-            if (!initialisedPromise.completed) {
-                serverConnectionDebug('Server client is initialised')
-                initialisedPromise.resolve(true)
-            }
-        })
-        .catch((err) => {
-            if (!initialisedPromise.completed) {
-                console.error(
-                    'FeatureBoard SDK failed to connect after 5 retries',
-                    err,
-                )
-                initialisedPromise.reject(err)
-            }
-        })
+
+    void tracer.startActiveSpan(
+        'fbsdk-connect-with-retry',
+        {
+            attributes: {},
+        },
+        (connectWithRetrySpan) =>
+            retry(async () => {
+                try {
+                    return await updateStrategyImplementation.connect(
+                        stateStore,
+                    )
+                } catch (error) {
+                    const err = resolveError(error)
+                    connectWithRetrySpan.recordException(err)
+
+                    // Try initialise external state store
+                    const result =
+                        await stateStore.initialiseFromExternalStateStore()
+
+                    if (!result) {
+                        // No external state store, throw original error
+                        console.error('Failed to connect to SDK', error)
+                        throw error
+                    }
+
+                    return Promise.resolve()
+                }
+            }, retryCancellationToken)
+                .then(() => {
+                    initialisedPromise.resolve(true)
+                })
+                .catch((err) => {
+                    console.error(
+                        'FeatureBoard SDK failed to connect after 5 retries',
+                        err,
+                    )
+                    initialisedPromise.reject(err)
+                    connectWithRetrySpan.setStatus({
+                        code: SpanStatusCode.ERROR,
+                        message: err.message,
+                    })
+                })
+                .finally(() => connectWithRetrySpan.end()),
+    )
 
     return {
         get initialised() {
@@ -100,20 +130,44 @@ export function createServerClient({
             return updateStrategyImplementation.close()
         },
         request: (audienceKeys: string[]) => {
-            const request = updateStrategyImplementation.onRequest()
+            return tracer.startActiveSpan(
+                'fbsdk-get-request-client',
+                { attributes: { audiences: audienceKeys } },
+                (span) => {
+                    const request = updateStrategyImplementation.onRequest()
 
-            serverConnectionDebug(
-                'Creating request client for audiences: %o',
-                audienceKeys,
+                    if (request) {
+                        return addUserWarnings(
+                            request.then(() => {
+                                span.end()
+                                return syncRequest(stateStore, audienceKeys)
+                            }),
+                        )
+                    }
+
+                    try {
+                        return makeRequestClient(
+                            syncRequest(stateStore, audienceKeys),
+                        )
+                    } finally {
+                        span.end()
+                    }
+                },
             )
-            return request
-                ? addUserWarnings(
-                      request.then(() => syncRequest(stateStore, audienceKeys)),
-                  )
-                : makeRequestClient(syncRequest(stateStore, audienceKeys))
         },
         updateFeatures() {
-            return updateStrategyImplementation.updateFeatures()
+            return tracer.startActiveSpan(
+                'fbsdk-update-features-manually',
+                (span) => {
+                    try {
+                        return updateStrategyImplementation
+                            .updateFeatures()
+                            .then(() => span.end())
+                    } finally {
+                        span.end()
+                    }
+                },
+            )
         },
         waitForInitialised() {
             return initialisedPromise.promise
@@ -147,7 +201,7 @@ export function makeRequestClient(
 }
 
 function syncRequest(
-    stateStore: AllFeatureStateStore,
+    stateStore: IFeatureStateStore,
     audienceKeys: string[],
 ): FeatureBoardClient {
     // Shallow copy the feature state so requests are stable
@@ -155,18 +209,28 @@ function syncRequest(
 
     const client: FeatureBoardClient = {
         getEffectiveValues: () => {
-            return {
-                audiences: audienceKeys,
-                effectiveValues: Object.keys(featuresState)
-                    .map<EffectiveFeatureValue>((key) => ({
-                        featureKey: key,
-                        // We will filter the invalid undefined in the next filter
-                        value: getFeatureValue(key, undefined!),
-                    }))
-                    .filter(
-                        (effectiveValue) => effectiveValue.value !== undefined,
-                    ),
-            }
+            return getTracer().startActiveSpan(
+                'fbsdk-get-effective-values',
+                (span) => {
+                    try {
+                        return {
+                            audiences: audienceKeys,
+                            effectiveValues: Object.keys(featuresState)
+                                .map<EffectiveFeatureValue>((key) => ({
+                                    featureKey: key,
+                                    // We will filter the invalid undefined in the next filter
+                                    value: getFeatureValue(key, undefined!),
+                                }))
+                                .filter(
+                                    (effectiveValue) =>
+                                        effectiveValue.value !== undefined,
+                                ),
+                        }
+                    } finally {
+                        span.end()
+                    }
+                },
+            )
         },
         getFeatureValue,
         subscribeToFeatureValue: (
@@ -183,24 +247,40 @@ function syncRequest(
         featureKey: T,
         defaultValue: Features[T],
     ) {
-        const featureValues = featuresState[featureKey as string]
-        if (!featureValues) {
-            serverConnectionDebug(
-                'getFeatureValue - no value, returning user fallback: %o',
-                audienceKeys,
-            )
-            return defaultValue
-        }
-        const audienceException = featureValues.audienceExceptions.find((a) =>
-            audienceKeys.includes(a.audienceKey),
+        return getTracer().startActiveSpan(
+            'fbsdk-get-feature-value',
+            (span) => {
+                try {
+                    const featureValues = featuresState[featureKey as string]
+                    if (!featureValues) {
+                        span.addEvent(
+                            'getFeatureValue - no value, returning user fallback: ',
+                            {
+                                audienceKeys,
+                                'feature.key': featureKey,
+                                'feature.defaultValue': defaultValue,
+                            },
+                        )
+
+                        return defaultValue
+                    }
+                    const audienceException =
+                        featureValues.audienceExceptions.find((a) =>
+                            audienceKeys.includes(a.audienceKey),
+                        )
+                    const value =
+                        audienceException?.value ?? featureValues.defaultValue
+                    span.setAttributes({
+                        'feature.key': featureKey,
+                        'feature.value': value,
+                        'feature.defaultValue': defaultValue,
+                    })
+                    return value
+                } finally {
+                    span.end()
+                }
+            },
         )
-        const value = audienceException?.value ?? featureValues.defaultValue
-        serverConnectionDebug('getFeatureValue: %o', {
-            audienceExceptionValue: audienceException?.value,
-            defaultValue: featureValues.defaultValue,
-            value,
-        })
-        return value
     }
 
     return client

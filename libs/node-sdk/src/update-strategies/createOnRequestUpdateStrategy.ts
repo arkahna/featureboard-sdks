@@ -1,8 +1,12 @@
-import { createEnsureSingleWithBackoff } from '@featureboard/js-sdk'
+import {
+    createEnsureSingleWithBackoff,
+    resolveError,
+} from '@featureboard/js-sdk'
 import { fetchFeaturesConfigurationViaHttp } from '../utils/fetchFeaturesConfiguration'
+import { getTracer } from '../utils/get-tracer'
 import { getAllEndpoint } from './getAllEndpoint'
-import type { AllConfigUpdateStrategy } from './update-strategies'
-import { updatesLog } from './updates-log'
+import { type AllConfigUpdateStrategy } from './update-strategies'
+import { addDebugEvent } from '../utils/add-debug-event'
 
 export function createOnRequestUpdateStrategy(
     environmentApiKey: string,
@@ -23,7 +27,6 @@ export function createOnRequestUpdateStrategy(
                     environmentApiKey,
                     stateStore,
                     etag,
-                    'on-request',
                 )
             })
 
@@ -43,31 +46,42 @@ export function createOnRequestUpdateStrategy(
             }
         },
         async onRequest() {
-            if (fetchUpdatesSingle) {
-                const now = Date.now()
-                if (!responseExpires || now >= responseExpires) {
-                    return fetchUpdatesSingle()
-                        .then(() => {
-                            responseExpires = now + maxAgeMs
-                            updatesLog(
-                                'Response expired, fetching updates: %o',
-                                {
-                                    maxAgeMs,
-                                    newExpiry: responseExpires,
-                                },
-                            )
+            return getTracer().startActiveSpan(
+                'fbsdk-on-request',
+                { attributes: { etag } },
+                async (span) => {
+                    if (fetchUpdatesSingle) {
+                        const now = Date.now()
+                        if (!responseExpires || now >= responseExpires) {
+                            span.addEvent('Response expired, fetching update', {
+                                maxAgeMs,
+                                expiry: responseExpires,
+                            })
+                            return fetchUpdatesSingle()
+                                .then(() => {
+                                    responseExpires = now + maxAgeMs
+                                    span.addEvent(
+                                        'Successfully updated features',
+                                        {
+                                            maxAgeMs,
+                                            newExpiry: responseExpires,
+                                        },
+                                    )
+                                })
+                                .catch((error) => {
+                                    span.recordException(resolveError(error))
+                                })
+                                .finally(() => span.end())
+                        }
+                        span.addEvent('Response not expired', {
+                            maxAgeMs,
+                            expiry: responseExpires,
+                            now,
                         })
-                        .catch((error: Error) => {
-                            updatesLog(error)
-                        })
-                }
-
-                updatesLog('Response not expired: %o', {
-                    responseExpires,
-                    now,
-                })
-                return Promise.resolve()
-            }
+                        return Promise.resolve().finally(() => span.end())
+                    }
+                },
+            )
         },
     }
 }

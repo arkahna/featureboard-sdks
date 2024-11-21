@@ -33,7 +33,16 @@
     },
     "dependencies": {
         "@featureboard/contracts": "workspace:*",
-        "debug": "^4.3.4",
         "promise-completion-source": "^1.0.0"
+    },
+    "peerDependencies": {
+        "@opentelemetry/api": "^1.0.0"
+    },
+    "devDependencies": {
+        "@opentelemetry/api": "^1.7.0",
+        "@opentelemetry/exporter-trace-otlp-http": "^0.45.1",
+        "@opentelemetry/sdk-node": "^0.45.1",
+        "@opentelemetry/sdk-trace-base": "^1.18.1",
+        "@opentelemetry/sdk-trace-node": "^1.18.1"
     }
 }

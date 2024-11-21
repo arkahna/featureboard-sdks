@@ -2,6 +2,7 @@ export type {
     FeatureBoardApiConfig,
     FeatureBoardClient,
     Features,
+    createManualClient,
 } from '@featureboard/js-sdk'
 export type { ExternalStateStore } from './external-state-store'
 export { createManualServerClient } from './manual-server-client'

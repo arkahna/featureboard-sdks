@@ -4,478 +4,290 @@ import {
 } from '@featureboard/contracts'
 import { featureBoardHostedService } from '@featureboard/js-sdk'
 import { HttpResponse, http } from 'msw'
-import { setupServer } from 'msw/node'
 import { describe, expect, it } from 'vitest'
 import { createServerClient } from '../server-client'
+import { featureBoardFixture } from '../utils/featureboard-fixture'
 import { MockExternalStateStore } from './mock-external-state-store'
 
-describe('http client', () => {
-    it('calls featureboard /all endpoint on creation', async () => {
-        const values: FeatureConfiguration[] = [
-            {
-                featureKey: 'my-feature',
-                audienceExceptions: [],
-                defaultValue: 'service-default-value',
-            },
-        ]
-        const server = setupServer(
-            http.get(
-                'https://client.featureboard.app/all',
-                () => HttpResponse.json(values),
-                { once: true },
-            ),
-        )
-        server.listen({ onUnhandledRequest: 'error' })
-
-        try {
-            const httpClient = createServerClient({
-                environmentApiKey: 'env-api-key',
-                api: featureBoardHostedService,
-                updateStrategy: { kind: 'manual' },
-            })
-
-            const valueBeforeInit = httpClient
-                .request([])
-                .getFeatureValue('my-feature', 'default-value')
-            expect(httpClient.initialised).toBe(false)
-            expect(valueBeforeInit).toBe('default-value')
-
-            await httpClient.waitForInitialised()
-
-            const valueAfterInit = httpClient
-                .request([])
-                .getFeatureValue('my-feature', 'default-value')
-            expect(httpClient.initialised).toBe(true)
-            expect(valueAfterInit).toBe('service-default-value')
-        } finally {
-            server.resetHandlers()
-            server.close()
-        }
-    })
-
-    it('can wait for initialisation', async () => {
-        const values: FeatureConfiguration[] = [
-            {
-                featureKey: 'my-feature',
-                audienceExceptions: [],
-                defaultValue: 'service-default-value',
-            },
-        ]
-        const server = setupServer(
-            http.get(
-                'https://client.featureboard.app/all',
-                () => HttpResponse.json(values),
-                { once: true },
-            ),
-        )
-        server.listen({ onUnhandledRequest: 'error' })
-
-        try {
-            const httpClient = createServerClient({
-                environmentApiKey: 'env-api-key',
-                api: featureBoardHostedService,
-                updateStrategy: { kind: 'manual' },
-            })
-            await httpClient.waitForInitialised()
-
-            const value = httpClient
-                .request([])
-                .getFeatureValue('my-feature', 'default-value')
-            expect(httpClient.initialised).toBe(true)
-            expect(value).toBe('service-default-value')
-        } finally {
-            server.resetHandlers()
-            server.close()
-        }
-    })
-
-    it('Gets value using audience exceptions', async () => {
-        const values: FeatureConfiguration[] = [
-            {
-                featureKey: 'my-feature',
-                audienceExceptions: [
-                    {
-                        audienceKey: 'my-audience',
-                        value: 'audience-exception-value',
-                    },
-                ],
-                defaultValue: 'service-default-value',
-            },
-        ]
-        const server = setupServer(
-            http.get(
-                'https://client.featureboard.app/all',
-                () => HttpResponse.json(values),
-                { once: true },
-            ),
-        )
-        server.listen({ onUnhandledRequest: 'error' })
-
-        try {
-            const httpClient = createServerClient({
-                environmentApiKey: 'env-api-key',
-                api: featureBoardHostedService,
-                updateStrategy: { kind: 'manual' },
-            })
-            await httpClient.waitForInitialised()
-
-            const value = httpClient
-                .request(['my-audience'])
-                .getFeatureValue('my-feature', 'default-value')
-            expect(httpClient.initialised).toBe(true)
-            expect(value).toBe('audience-exception-value')
-        } finally {
-            server.resetHandlers()
-            server.close()
-        }
-    })
-
-    it('can manually fetch updates', async () => {
-        const values: FeatureConfiguration[] = [
-            {
-                featureKey: 'my-feature',
-                audienceExceptions: [],
-                defaultValue: 'service-default-value',
-            },
-            {
-                featureKey: 'my-feature-2',
-                audienceExceptions: [],
-                defaultValue: 'service-default-value',
-            },
-        ]
-        const newValues: FeatureConfiguration[] = [
-            {
-                featureKey: 'my-feature',
-                audienceExceptions: [],
-                defaultValue: 'new-service-default-value',
-            },
-            {
-                featureKey: 'my-feature-3',
-                audienceExceptions: [],
-                defaultValue: 'new-service-default-value',
-            },
-        ]
-
-        let count = 0
-        const server = setupServer(
-            http.get('https://client.featureboard.app/all', () => {
-                if (count > 0) {
-                    return HttpResponse.json(newValues)
-                }
-
-                count++
-                return HttpResponse.json(values)
-            }),
-        )
-        server.listen({ onUnhandledRequest: 'error' })
-
-        try {
-            const httpClient = createServerClient({
-                environmentApiKey: 'env-api-key',
-                api: featureBoardHostedService,
-                updateStrategy: { kind: 'manual' },
-            })
-            await httpClient.waitForInitialised()
-            await httpClient.updateFeatures()
-
-            const value = httpClient
-                .request([])
-                .getFeatureValue('my-feature', 'default-value')
-
-            const value2 = httpClient
-                .request([])
-                .getFeatureValue('my-feature-2', 'default-value')
-
-            const value3 = httpClient
-                .request([])
-                .getFeatureValue('my-feature-3', 'default-value')
-            expect(httpClient.initialised).toBe(true)
-            expect(value).toBe('new-service-default-value')
-            // This was removed from the server
-            expect(value2).toBe('default-value')
-            expect(value3).toBe('new-service-default-value')
-        } finally {
-            server.resetHandlers()
-            server.close()
-        }
-    })
-
-    it('Retry to connect when received 429 from HTTP Client API during initialization', async () => {
-        const values: FeatureConfiguration[] = [
-            {
-                featureKey: 'my-feature',
-                audienceExceptions: [],
-                defaultValue: 'service-default-value',
-            },
-        ]
-
-        let count = 0
-        const server = setupServer(
-            http.get('https://client.featureboard.app/all', () => {
-                count++
-                if (count <= 2) {
-                    return new Response(null, {
-                        status: 429,
-                        headers: { 'Retry-After': '1' },
-                    })
-                }
-                return HttpResponse.json(values, {
-                    headers: {
-                        etag: new Date().toISOString(),
-                    },
+describe('Http client', () => {
+    it(
+        'calls featureboard /all endpoint on creation',
+        featureBoardFixture(
+            {},
+            () => [
+                http.get(
+                    'https://client.featureboard.app/all',
+                    () =>
+                        HttpResponse.json<FeatureConfiguration[]>([
+                            {
+                                featureKey: 'my-feature',
+                                audienceExceptions: [],
+                                defaultValue: 'service-default-value',
+                            },
+                        ]),
+                    { once: true },
+                ),
+            ],
+            async () => {
+                const httpClient = createServerClient({
+                    environmentApiKey: 'env-api-key',
+                    api: featureBoardHostedService,
+                    updateStrategy: { kind: 'manual' },
                 })
-            }),
-        )
-        server.listen({ onUnhandledRequest: 'error' })
 
-        try {
-            const httpClient = createServerClient({
-                environmentApiKey: 'env-api-key',
-                api: featureBoardHostedService,
-                updateStrategy: { kind: 'manual' },
-            })
-            await httpClient.waitForInitialised()
-            httpClient.close()
-        } finally {
-            server.resetHandlers()
-            server.close()
-        }
-        expect(count).toBe(3)
-    })
+                const valueBeforeInit = httpClient
+                    .request([])
+                    .getFeatureValue('my-feature', 'default-value')
+                expect(httpClient.initialised).toBe(false)
+                expect(valueBeforeInit).toBe('default-value')
 
-    it('Block HTTP client API call after 429 response from HTTP Client API according to retry-after seconds', async () => {
-        const values: FeatureConfiguration[] = [
-            {
-                featureKey: 'my-feature',
-                audienceExceptions: [],
-                defaultValue: 'service-default-value',
+                await httpClient.waitForInitialised()
+
+                const valueAfterInit = httpClient
+                    .request([])
+                    .getFeatureValue('my-feature', 'default-value')
+                expect(httpClient.initialised).toBe(true)
+                expect(valueAfterInit).toBe('service-default-value')
             },
-        ]
+        ),
+    )
 
-        let count = 0
-        const server = setupServer(
-            http.get(
-                'https://client.featureboard.app/all',
-                () => {
-                    count++
-                    return HttpResponse.json(values, {
-                        headers: {
-                            etag: new Date().toISOString(),
+    it(
+        'can wait for initialisation',
+        featureBoardFixture(
+            {},
+            () => [
+                http.get(
+                    'https://client.featureboard.app/all',
+                    () =>
+                        HttpResponse.json<FeatureConfiguration[]>([
+                            {
+                                featureKey: 'my-feature',
+                                audienceExceptions: [],
+                                defaultValue: 'service-default-value',
+                            },
+                        ]),
+                    { once: true },
+                ),
+            ],
+            async () => {
+                const httpClient = createServerClient({
+                    environmentApiKey: 'env-api-key',
+                    api: featureBoardHostedService,
+                    updateStrategy: { kind: 'manual' },
+                })
+                await httpClient.waitForInitialised()
+
+                const value = httpClient
+                    .request([])
+                    .getFeatureValue('my-feature', 'default-value')
+                expect(httpClient.initialised).toBe(true)
+                expect(value).toBe('service-default-value')
+            },
+        ),
+    )
+
+    it(
+        'Gets value using audience exceptions',
+        featureBoardFixture(
+            {},
+            () => [
+                http.get(
+                    'https://client.featureboard.app/all',
+                    () =>
+                        HttpResponse.json<FeatureConfiguration[]>([
+                            {
+                                featureKey: 'my-feature',
+                                audienceExceptions: [
+                                    {
+                                        audienceKey: 'my-audience',
+                                        value: 'audience-exception-value',
+                                    },
+                                ],
+                                defaultValue: 'service-default-value',
+                            },
+                        ]),
+                    { once: true },
+                ),
+            ],
+            async () => {
+                const httpClient = createServerClient({
+                    environmentApiKey: 'env-api-key',
+                    api: featureBoardHostedService,
+                    updateStrategy: { kind: 'manual' },
+                })
+                await httpClient.waitForInitialised()
+
+                const value = httpClient
+                    .request(['my-audience'])
+                    .getFeatureValue('my-feature', 'default-value')
+                expect(httpClient.initialised).toBe(true)
+                expect(value).toBe('audience-exception-value')
+            },
+        ),
+    )
+
+    it(
+        'can manually fetch updates',
+        featureBoardFixture(
+            { count: 0 },
+            (testContext) => [
+                http.get('https://client.featureboard.app/all', () => {
+                    if (testContext.count > 0) {
+                        return HttpResponse.json<FeatureConfiguration[]>([
+                            {
+                                featureKey: 'my-feature',
+                                audienceExceptions: [],
+                                defaultValue: 'new-service-default-value',
+                            },
+                            {
+                                featureKey: 'my-feature-3',
+                                audienceExceptions: [],
+                                defaultValue: 'new-service-default-value',
+                            },
+                        ])
+                    }
+
+                    testContext.count++
+                    return HttpResponse.json<FeatureConfiguration[]>([
+                        {
+                            featureKey: 'my-feature',
+                            audienceExceptions: [],
+                            defaultValue: 'service-default-value',
                         },
-                    })
-                },
-                { once: true },
-            ),
-            http.get(
-                'https://client.featureboard.app/all',
-                () => {
-                    count++
-                    return new Response(null, {
-                        status: 429,
-                        headers: { 'Retry-After': '1' },
-                    })
-                },
-                { once: true },
-            ),
-            http.get('https://client.featureboard.app/all', () => {
-                count++
-                return HttpResponse.json(values, {
-                    headers: {
-                        etag: new Date().toISOString(),
-                    },
-                })
-            }),
-        )
-        server.listen({ onUnhandledRequest: 'error' })
-
-        try {
-            const httpClient = createServerClient({
-                environmentApiKey: 'env-api-key',
-                api: featureBoardHostedService,
-                updateStrategy: { kind: 'manual' },
-            })
-
-            await httpClient.waitForInitialised()
-            await expect(() =>
-                httpClient.updateFeatures(),
-            ).rejects.toThrowError(TooManyRequestsError)
-            await expect(() =>
-                httpClient.updateFeatures(),
-            ).rejects.toThrowError(TooManyRequestsError)
-            await new Promise((resolve) => setTimeout(resolve, 1000))
-            await httpClient.updateFeatures()
-
-            httpClient.close()
-        } finally {
-            server.resetHandlers()
-            server.close()
-        }
-        expect(count).toBe(3)
-    })
-
-    it('Block HTTP client API call after 429 response from HTTP Client API according to retry-after date', async () => {
-        const values: FeatureConfiguration[] = [
-            {
-                featureKey: 'my-feature',
-                audienceExceptions: [],
-                defaultValue: 'service-default-value',
-            },
-        ]
-
-        let count = 0
-        const server = setupServer(
-            http.get(
-                'https://client.featureboard.app/all',
-                () => {
-                    count++
-                    return HttpResponse.json(values, {
-                        headers: {
-                            etag: new Date().toISOString(),
+                        {
+                            featureKey: 'my-feature-2',
+                            audienceExceptions: [],
+                            defaultValue: 'service-default-value',
                         },
-                    })
-                },
-                { once: true },
-            ),
-            http.get(
-                'https://client.featureboard.app/all',
-                () => {
-                    count++
-                    const retryAfter = new Date(new Date().getTime() + 1000).toUTCString()
-                    return new Response(null, {
-                        status: 429,
-                        headers: { 'Retry-After': retryAfter },
-                    })
-                },
-                { once: true },
-            ),
-            http.get('https://client.featureboard.app/all', () => {
-                count++
-                return HttpResponse.json(values, {
-                    headers: {
-                        etag: new Date().toISOString(),
-                    },
+                    ])
+                }),
+            ],
+            async () => {
+                const httpClient = createServerClient({
+                    environmentApiKey: 'env-api-key',
+                    api: featureBoardHostedService,
+                    updateStrategy: { kind: 'manual' },
                 })
-            }),
-        )
-        server.listen({ onUnhandledRequest: 'error' })
+                await httpClient.waitForInitialised()
+                await httpClient.updateFeatures()
 
-        try {
-            const httpClient = createServerClient({
-                environmentApiKey: 'env-api-key',
-                api: featureBoardHostedService,
-                updateStrategy: { kind: 'manual' },
-            })
+                const value = httpClient
+                    .request([])
+                    .getFeatureValue('my-feature', 'default-value')
 
-            await httpClient.waitForInitialised()
-            await expect(() =>
-                httpClient.updateFeatures(),
-            ).rejects.toThrowError(TooManyRequestsError)
-            await expect(() =>
-                httpClient.updateFeatures(),
-            ).rejects.toThrowError(TooManyRequestsError)
-            await new Promise((resolve) => setTimeout(resolve, 1000))
-            await httpClient.updateFeatures()
+                const value2 = httpClient
+                    .request([])
+                    .getFeatureValue('my-feature-2', 'default-value')
 
-            httpClient.close()
-        } finally {
-            server.resetHandlers()
-            server.close()
-        }
-        expect(count).toBe(3)
-    })
+                const value3 = httpClient
+                    .request([])
+                    .getFeatureValue('my-feature-3', 'default-value')
+                expect(httpClient.initialised).toBe(true)
+                expect(value).toBe('new-service-default-value')
+                // This was removed from the server
+                expect(value2).toBe('default-value')
+                expect(value3).toBe('new-service-default-value')
+            },
+        ),
+    )
 
     // Below tests are testing behavior around https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/If-None-Match
-    it('Attaches etag header to update requests', async () => {
-        const values: FeatureConfiguration[] = [
-            {
-                featureKey: 'my-feature',
-                audienceExceptions: [],
-                defaultValue: 'service-default-value',
-            },
-        ]
-        const lastModified = new Date().toISOString()
+    it(
+        'Attaches etag header to update requests',
+        featureBoardFixture(
+            { lastModified: new Date().toISOString() },
+            (testContext) => [
+                http.get(
+                    'https://client.featureboard.app/all',
+                    ({ request }) => {
+                        if (
+                            request.headers.get('if-none-match') ===
+                            testContext.lastModified
+                        ) {
+                            return new Response(null, { status: 304 })
+                        }
 
-        const server = setupServer(
-            http.get('https://client.featureboard.app/all', ({ request }) => {
-                if (request.headers.get('if-none-match') === lastModified) {
-                    return new Response(null, { status: 304 })
-                }
-
-                return HttpResponse.json(values, {
-                    headers: {
-                        etag: lastModified,
+                        return HttpResponse.json<FeatureConfiguration[]>(
+                            [
+                                {
+                                    featureKey: 'my-feature',
+                                    audienceExceptions: [],
+                                    defaultValue: 'service-default-value',
+                                },
+                            ],
+                            {
+                                headers: {
+                                    etag: testContext.lastModified,
+                                },
+                            },
+                        )
                     },
+                ),
+            ],
+            async () => {
+                const httpClient = createServerClient({
+                    environmentApiKey: 'env-api-key',
+                    api: featureBoardHostedService,
+                    updateStrategy: { kind: 'manual' },
                 })
-            }),
-        )
-        server.listen({ onUnhandledRequest: 'error' })
 
-        try {
-            const httpClient = createServerClient({
-                environmentApiKey: 'env-api-key',
-                api: featureBoardHostedService,
-                updateStrategy: { kind: 'manual' },
-            })
-
-            await httpClient.updateFeatures()
-        } finally {
-            server.resetHandlers()
-            server.close()
-        }
-    })
-
-    it('Initialisation fails, reties and succeeds, no external state store', async () => {
-        const values: FeatureConfiguration[] = [
-            {
-                featureKey: 'my-feature',
-                audienceExceptions: [],
-                defaultValue: 'service-value',
+                await httpClient.updateFeatures()
             },
-        ]
-        const server = setupServer(
-            http.get(
-                'https://client.featureboard.app/all',
-                () =>
-                    HttpResponse.json(
-                        { message: 'Test FeatureBoard API Error' },
-                        { status: 500 },
-                    ),
-                { once: true },
-            ),
-            http.get(
-                'https://client.featureboard.app/all',
-                () => HttpResponse.json(values),
-                { once: true },
-            ),
-        )
-        server.listen({ onUnhandledRequest: 'error' })
+        ),
+    )
 
-        try {
-            const client = createServerClient({
-                environmentApiKey: 'env-api-key',
-                api: featureBoardHostedService,
-                updateStrategy: { kind: 'manual' },
-            })
+    it(
+        'Initialisation fails, reties and succeeds, no external state store',
+        featureBoardFixture(
+            {},
+            () => [
+                http.get(
+                    'https://client.featureboard.app/all',
+                    () =>
+                        HttpResponse.json(
+                            { message: 'Test FeatureBoard API Error' },
+                            { status: 500 },
+                        ),
+                    { once: true },
+                ),
+                http.get(
+                    'https://client.featureboard.app/all',
+                    () =>
+                        HttpResponse.json<FeatureConfiguration[]>([
+                            {
+                                featureKey: 'my-feature',
+                                audienceExceptions: [],
+                                defaultValue: 'service-value',
+                            },
+                        ]),
+                    { once: true },
+                ),
+            ],
+            async () => {
+                const client = createServerClient({
+                    environmentApiKey: 'env-api-key',
+                    api: featureBoardHostedService,
+                    updateStrategy: { kind: 'manual' },
+                })
 
-            await client.waitForInitialised()
-            expect(client.initialised).toEqual(true)
-            const value = client
-                .request([])
-                .getFeatureValue('my-feature', 'default-value')
-            expect(value).toEqual('service-value')
-        } finally {
-            server.resetHandlers()
-            server.close()
-        }
-    })
+                await client.waitForInitialised()
+                expect(client.initialised).toEqual(true)
+                const value = client
+                    .request([])
+                    .getFeatureValue('my-feature', 'default-value')
+                expect(value).toEqual('service-value')
+            },
+        ),
+    )
 
     it(
         'Initialisation retries 5 time then throws an error, no external state store',
-        async () => {
-            let count = 0
-            const server = setupServer(
+        featureBoardFixture(
+            { count: 0 },
+            (testContext) => [
                 http.get('https://client.featureboard.app/all', () => {
-                    count++
+                    testContext.count++
                     return HttpResponse.json(
                         {
                             message: 'Test FeatureBoard API Error',
@@ -483,10 +295,8 @@ describe('http client', () => {
                         { status: 500 },
                     )
                 }),
-            )
-            server.listen({ onUnhandledRequest: 'error' })
-
-            try {
+            ],
+            async ({ testContext }) => {
                 const client = createServerClient({
                     environmentApiKey: 'env-api-key',
                     api: featureBoardHostedService,
@@ -496,75 +306,68 @@ describe('http client', () => {
                 await expect(async () => {
                     await client.waitForInitialised()
                 }).rejects.toThrowError('500')
-                expect(count).toEqual(5 + 1) // initial request and 5 retry
-            } finally {
-                server.resetHandlers()
-                server.close()
-            }
-        },
-        { timeout: 60000 },
+                expect(testContext.count).toEqual(2 + 1) // initial request and 5 retry
+            },
+        ),
     )
 
-    it('Use external state store when API request fails', async () => {
-        const server = setupServer(
-            http.get('https://client.featureboard.app/all', () => {
-                return HttpResponse.json(
-                    { message: 'Test FeatureBoard API Error' },
-                    { status: 500 },
-                )
-            }),
-        )
-        server.listen({ onUnhandledRequest: 'error' })
-
-        try {
-            const client = createServerClient({
-                environmentApiKey: 'env-api-key',
-                api: featureBoardHostedService,
-                updateStrategy: { kind: 'manual' },
-                externalStateStore: new MockExternalStateStore(
-                    () =>
-                        Promise.resolve({
-                            'my-feature': {
-                                featureKey: 'my-feature',
-                                defaultValue: 'external-state-store-value',
-                                audienceExceptions: [],
-                            },
-                        }),
-                    () => {
-                        return Promise.resolve()
-                    },
-                ),
-            })
-
-            await client.waitForInitialised()
-            expect(client.initialised).toEqual(true)
-            const value = client
-                .request([])
-                .getFeatureValue('my-feature', 'default-value')
-            expect(value).toEqual('external-state-store-value')
-        } finally {
-            server.resetHandlers()
-            server.close()
-        }
-    })
-
     it(
-        'Initialisation retries 5 time then throws an error with external state store',
-        async () => {
-            let countAPIRequest = 0
-            let countExternalStateStoreRequest = 0
-            const server = setupServer(
+        'Use external state store when API request fails',
+        featureBoardFixture(
+            {},
+            () => [
                 http.get('https://client.featureboard.app/all', () => {
-                    countAPIRequest++
                     return HttpResponse.json(
                         { message: 'Test FeatureBoard API Error' },
                         { status: 500 },
                     )
                 }),
-            )
-            server.listen({ onUnhandledRequest: 'error' })
+            ],
+            async () => {
+                const client = createServerClient({
+                    environmentApiKey: 'env-api-key',
+                    api: featureBoardHostedService,
+                    updateStrategy: { kind: 'manual' },
+                    externalStateStore: new MockExternalStateStore(
+                        () =>
+                            Promise.resolve({
+                                'my-feature': {
+                                    featureKey: 'my-feature',
+                                    defaultValue: 'external-state-store-value',
+                                    audienceExceptions: [],
+                                },
+                            }),
+                        () => {
+                            return Promise.resolve()
+                        },
+                    ),
+                })
 
-            try {
+                await client.waitForInitialised()
+                expect(client.initialised).toEqual(true)
+                const value = client
+                    .request([])
+                    .getFeatureValue('my-feature', 'default-value')
+                expect(value).toEqual('external-state-store-value')
+            },
+        ),
+    )
+
+    it(
+        'Initialisation retries 5 time then throws an error with external state store',
+        featureBoardFixture(
+            { countAPIRequest: 0 },
+            (testContext) => [
+                http.get('https://client.featureboard.app/all', () => {
+                    testContext.countAPIRequest++
+                    return HttpResponse.json(
+                        { message: 'Test FeatureBoard API Error' },
+                        { status: 500 },
+                    )
+                }),
+            ],
+            async ({ testContext }) => {
+                let countExternalStateStoreRequest = 0
                 const client = createServerClient({
                     environmentApiKey: 'env-api-key',
                     api: featureBoardHostedService,
@@ -585,171 +388,440 @@ describe('http client', () => {
                 await expect(async () => {
                     await client.waitForInitialised()
                 }).rejects.toThrowError('Test External State Store Error')
-                expect(countAPIRequest).toEqual(5 + 1) // initial request and 5 retry
-                expect(countExternalStateStoreRequest).toEqual(5 + 1) // initial request and 5 retry
-            } finally {
-                server.resetHandlers()
-                server.close()
-            }
-        },
-        { timeout: 60000 },
+                expect(testContext.countAPIRequest).toEqual(2 + 1) // initial request and 5 retry
+                expect(countExternalStateStoreRequest).toEqual(2 + 1) // initial request and 5 retry
+            },
+        ),
     )
 
-    it('Update external state store when internal store updates', async () => {
-        expect.assertions(1)
-
-        const values: FeatureConfiguration[] = [
-            {
-                featureKey: 'my-feature',
-                audienceExceptions: [],
-                defaultValue: 'service-value',
-            },
-        ]
-
-        const server = setupServer(
-            http.get(
-                'https://client.featureboard.app/all',
-                () => HttpResponse.json(values),
-                { once: true },
-            ),
-        )
-        server.listen({ onUnhandledRequest: 'error' })
-
-        try {
-            const client = createServerClient({
-                environmentApiKey: 'env-api-key',
-                api: featureBoardHostedService,
-                updateStrategy: { kind: 'manual' },
-                externalStateStore: new MockExternalStateStore(
+    it(
+        'Update external state store when internal store updates',
+        featureBoardFixture(
+            {},
+            () => [
+                http.get(
+                    'https://client.featureboard.app/all',
                     () =>
-                        Promise.resolve({
-                            'my-feature': {
+                        HttpResponse.json<FeatureConfiguration[]>([
+                            {
                                 featureKey: 'my-feature',
-                                defaultValue: 'external-state-store-value',
                                 audienceExceptions: [],
+                                defaultValue: 'service-value',
                             },
-                        }),
-                    (store) => {
-                        expect(store['my-feature']?.defaultValue).toEqual(
-                            'service-value',
-                        )
-                        return Promise.resolve()
-                    },
+                        ]),
+                    { once: true },
                 ),
-            })
-            await client.waitForInitialised()
-        } finally {
-            server.resetHandlers()
-            server.close()
-        }
-    })
+            ],
+            async () => {
+                expect.assertions(1)
 
-    it('Catch error when update external state store throws error', async () => {
-        expect.assertions(1)
-
-        const values: FeatureConfiguration[] = [
-            {
-                featureKey: 'my-feature',
-                audienceExceptions: [],
-                defaultValue: 'service-value',
+                const client = createServerClient({
+                    environmentApiKey: 'env-api-key',
+                    api: featureBoardHostedService,
+                    updateStrategy: { kind: 'manual' },
+                    externalStateStore: new MockExternalStateStore(
+                        () =>
+                            Promise.resolve({
+                                'my-feature': {
+                                    featureKey: 'my-feature',
+                                    defaultValue: 'external-state-store-value',
+                                    audienceExceptions: [],
+                                },
+                            }),
+                        (store) => {
+                            expect(store['my-feature']?.defaultValue).toEqual(
+                                'service-value',
+                            )
+                            return Promise.resolve()
+                        },
+                    ),
+                })
+                await client.waitForInitialised()
             },
-        ]
+        ),
+    )
 
-        const server = setupServer(
-            http.get(
-                'https://client.featureboard.app/all',
-                () => HttpResponse.json(values),
-                { once: true },
-            ),
-        )
-        server.listen({ onUnhandledRequest: 'error' })
-
-        try {
-            const client = createServerClient({
-                environmentApiKey: 'env-api-key',
-                api: featureBoardHostedService,
-                updateStrategy: { kind: 'manual' },
-                externalStateStore: new MockExternalStateStore(
+    it(
+        'Catch error when update external state store throws error',
+        featureBoardFixture(
+            {},
+            () => [
+                http.get(
+                    'https://client.featureboard.app/all',
                     () =>
-                        Promise.resolve({
-                            'my-feature': {
+                        HttpResponse.json<FeatureConfiguration[]>([
+                            {
                                 featureKey: 'my-feature',
-                                defaultValue: 'external-state-store-value',
                                 audienceExceptions: [],
+                                defaultValue: 'service-value',
                             },
-                        }),
-                    (store) => {
-                        expect(store['my-feature']?.defaultValue).toEqual(
-                            'service-value',
-                        )
-                        return Promise.reject()
-                    },
+                        ]),
+                    { once: true },
                 ),
-            })
-            await client.waitForInitialised()
-        } finally {
-            server.resetHandlers()
-            server.close()
-        }
-    })
+            ],
+            async () => {
+                expect.assertions(1)
 
-    it('Subscription to feature value immediately return current value but will not be called again', async () => {
-        let count = 0
-        expect.assertions(2)
-
-        const values: FeatureConfiguration[] = [
-            {
-                featureKey: 'my-feature',
-                audienceExceptions: [],
-                defaultValue: 'service-value',
+                const client = createServerClient({
+                    environmentApiKey: 'env-api-key',
+                    api: featureBoardHostedService,
+                    updateStrategy: { kind: 'manual' },
+                    externalStateStore: new MockExternalStateStore(
+                        () =>
+                            Promise.resolve({
+                                'my-feature': {
+                                    featureKey: 'my-feature',
+                                    defaultValue: 'external-state-store-value',
+                                    audienceExceptions: [],
+                                },
+                            }),
+                        (store) => {
+                            expect(store['my-feature']?.defaultValue).toEqual(
+                                'service-value',
+                            )
+                            return Promise.reject(
+                                'Error occurred in external state store',
+                            )
+                        },
+                    ),
+                })
+                await client.waitForInitialised()
             },
-        ]
+        ),
+    )
 
-        const values2ndRequest: FeatureConfiguration[] = [
-            {
-                featureKey: 'my-feature',
-                audienceExceptions: [],
-                defaultValue: 'service-value2',
+    it(
+        'Subscription to feature value immediately return current value but will not be called again',
+        featureBoardFixture(
+            {},
+            () => [
+                http.get(
+                    'https://client.featureboard.app/all',
+                    () =>
+                        HttpResponse.json<FeatureConfiguration[]>([
+                            {
+                                featureKey: 'my-feature',
+                                audienceExceptions: [],
+                                defaultValue: 'service-value',
+                            },
+                        ]),
+                    { once: true },
+                ),
+                http.get('https://client.featureboard.app/all', () =>
+                    HttpResponse.json<FeatureConfiguration[]>([
+                        {
+                            featureKey: 'my-feature',
+                            audienceExceptions: [],
+                            defaultValue: 'service-value2',
+                        },
+                    ]),
+                ),
+            ],
+            async () => {
+                let count = 0
+                expect.assertions(2)
+
+                const client = createServerClient({
+                    environmentApiKey: 'env-api-key',
+                    api: featureBoardHostedService,
+                    updateStrategy: { kind: 'manual' },
+                })
+
+                await client.waitForInitialised()
+
+                client
+                    .request([])
+                    .subscribeToFeatureValue(
+                        'my-feature',
+                        'default-value',
+                        (value) => {
+                            count++
+                            expect(value).toEqual('service-value')
+                        },
+                    )
+
+                await client.updateFeatures()
+
+                expect(count).toEqual(1)
             },
-        ]
-        const server = setupServer(
-            http.get(
-                'https://client.featureboard.app/all',
-                () => HttpResponse.json(values),
-                { once: true },
-            ),
-            http.get('https://client.featureboard.app/all', () =>
-                HttpResponse.json(values2ndRequest),
-            ),
-        )
-        server.listen({ onUnhandledRequest: 'error' })
+        ),
+    )
 
-        try {
-            const client = createServerClient({
-                environmentApiKey: 'env-api-key',
-                api: featureBoardHostedService,
-                updateStrategy: { kind: 'manual' },
-            })
+    it(
+        'Initialisation retries when Too Many Requests (429) returned from Client HTTP API',
+        featureBoardFixture(
+            { count: 0 },
+            (testContext) => [
+                http.get('https://client.featureboard.app/all', () => {
+                    testContext.count++
+                    if (testContext.count <= 2) {
+                        return new Response(null, {
+                            status: 429,
+                            headers: { 'Retry-After': '1' },
+                        })
+                    }
+                    return HttpResponse.json<FeatureConfiguration[]>(
+                        [
+                            {
+                                featureKey: 'my-feature',
+                                audienceExceptions: [],
+                                defaultValue: 'service-default-value',
+                            },
+                        ],
+                        {
+                            headers: {
+                                etag: new Date().toISOString(),
+                            },
+                        },
+                    )
+                }),
+            ],
+            async ({ testContext }) => {
+                const httpClient = createServerClient({
+                    environmentApiKey: 'env-api-key',
+                    api: featureBoardHostedService,
+                    updateStrategy: { kind: 'manual' },
+                })
+                await httpClient.waitForInitialised()
+                httpClient.close()
 
-            await client.waitForInitialised()
+                expect(testContext.count).toBe(3)
+            },
+        ),
+    )
 
-            client
-                .request([])
-                .subscribeToFeatureValue(
-                    'my-feature',
-                    'default-value',
-                    (value) => {
-                        count++
-                        expect(value).toEqual('service-value')
+    it(
+        'Update features blocked after Too Many Requests (429) received with retry-after header using seconds',
+        featureBoardFixture(
+            { count: 0 },
+            (testContext) => [
+                http.get(
+                    'https://client.featureboard.app/all',
+                    () => {
+                        testContext.count++
+                        return HttpResponse.json<FeatureConfiguration[]>(
+                            [
+                                {
+                                    featureKey: 'my-feature',
+                                    audienceExceptions: [],
+                                    defaultValue: 'service-default-value',
+                                },
+                            ],
+                            {
+                                headers: {
+                                    etag: new Date().toISOString(),
+                                },
+                            },
+                        )
                     },
-                )
+                    { once: true },
+                ),
+                http.get(
+                    'https://client.featureboard.app/all',
+                    () => {
+                        testContext.count++
+                        return new Response(null, {
+                            status: 429,
+                            headers: { 'Retry-After': '1' },
+                        })
+                    },
+                    { once: true },
+                ),
+                http.get('https://client.featureboard.app/all', () => {
+                    testContext.count++
+                    return HttpResponse.json<FeatureConfiguration[]>(
+                        [
+                            {
+                                featureKey: 'my-feature',
+                                audienceExceptions: [],
+                                defaultValue: 'service-default-value',
+                            },
+                        ],
+                        {
+                            headers: {
+                                etag: new Date().toISOString(),
+                            },
+                        },
+                    )
+                }),
+            ],
+            async ({ testContext }) => {
+                const httpClient = createServerClient({
+                    environmentApiKey: 'env-api-key',
+                    api: featureBoardHostedService,
+                    updateStrategy: { kind: 'manual' },
+                })
 
-            await client.updateFeatures()
+                await httpClient.waitForInitialised()
+                await expect(() =>
+                    httpClient.updateFeatures(),
+                ).rejects.toThrowError(TooManyRequestsError)
+                await expect(() =>
+                    httpClient.updateFeatures(),
+                ).rejects.toThrowError(TooManyRequestsError)
+                await new Promise((resolve) => setTimeout(resolve, 1000))
+                await httpClient.updateFeatures()
 
-            expect(count).toEqual(1)
-        } finally {
-            server.resetHandlers()
-            server.close()
-        }
-    })
+                httpClient.close()
+
+                expect(testContext.count).toBe(3)
+            },
+        ),
+    )
+
+    it(
+        'Update features blocked after Too Many Requests (429) received with retry-after header using UTC date time',
+        featureBoardFixture(
+            { count: 0 },
+            (testContext) => [
+                http.get(
+                    'https://client.featureboard.app/all',
+                    () => {
+                        testContext.count++
+                        return HttpResponse.json<FeatureConfiguration[]>(
+                            [
+                                {
+                                    featureKey: 'my-feature',
+                                    audienceExceptions: [],
+                                    defaultValue: 'service-default-value',
+                                },
+                            ],
+                            {
+                                headers: {
+                                    etag: new Date().toISOString(),
+                                },
+                            },
+                        )
+                    },
+                    { once: true },
+                ),
+                http.get(
+                    'https://client.featureboard.app/all',
+                    () => {
+                        testContext.count++
+                        const retryAfter = new Date(
+                            new Date().getTime() + 1000,
+                        ).toUTCString()
+                        return new Response(null, {
+                            status: 429,
+                            headers: { 'Retry-After': retryAfter },
+                        })
+                    },
+                    { once: true },
+                ),
+                http.get('https://client.featureboard.app/all', () => {
+                    testContext.count++
+                    return HttpResponse.json<FeatureConfiguration[]>(
+                        [
+                            {
+                                featureKey: 'my-feature',
+                                audienceExceptions: [],
+                                defaultValue: 'service-default-value',
+                            },
+                        ],
+                        {
+                            headers: {
+                                etag: new Date().toISOString(),
+                            },
+                        },
+                    )
+                }),
+            ],
+            async ({ testContext }) => {
+                const httpClient = createServerClient({
+                    environmentApiKey: 'env-api-key',
+                    api: featureBoardHostedService,
+                    updateStrategy: { kind: 'manual' },
+                })
+
+                await httpClient.waitForInitialised()
+                await expect(() =>
+                    httpClient.updateFeatures(),
+                ).rejects.toThrowError(TooManyRequestsError)
+                await expect(() =>
+                    httpClient.updateFeatures(),
+                ).rejects.toThrowError(TooManyRequestsError)
+                await new Promise((resolve) => setTimeout(resolve, 1000))
+                await httpClient.updateFeatures()
+
+                httpClient.close()
+
+                expect(testContext.count).toBe(3)
+            },
+        ),
+    )
+
+    it(
+        'Update features blocked after Too Many Requests (429) received with undefined retry-after header',
+        featureBoardFixture(
+            { count: 0 },
+            (testContext) => [
+                http.get(
+                    'https://client.featureboard.app/all',
+                    () => {
+                        testContext.count++
+                        return HttpResponse.json<FeatureConfiguration[]>(
+                            [
+                                {
+                                    featureKey: 'my-feature',
+                                    audienceExceptions: [],
+                                    defaultValue: 'service-default-value',
+                                },
+                            ],
+                            {
+                                headers: {
+                                    etag: new Date().toISOString(),
+                                },
+                            },
+                        )
+                    },
+                    { once: true },
+                ),
+                http.get(
+                    'https://client.featureboard.app/all',
+                    () => {
+                        testContext.count++
+                        return new Response(null, {
+                            status: 429,
+                        })
+                    },
+                    { once: true },
+                ),
+                http.get('https://client.featureboard.app/all', () => {
+                    testContext.count++
+                    return HttpResponse.json<FeatureConfiguration[]>(
+                        [
+                            {
+                                featureKey: 'my-feature',
+                                audienceExceptions: [],
+                                defaultValue: 'service-default-value',
+                            },
+                        ],
+                        {
+                            headers: {
+                                etag: new Date().toISOString(),
+                            },
+                        },
+                    )
+                }),
+            ],
+            async ({ testContext }) => {
+                const httpClient = createServerClient({
+                    environmentApiKey: 'env-api-key',
+                    api: featureBoardHostedService,
+                    updateStrategy: { kind: 'manual' },
+                })
+
+                await httpClient.waitForInitialised()
+                await expect(() =>
+                    httpClient.updateFeatures(),
+                ).rejects.toThrowError(TooManyRequestsError)
+                await expect(() =>
+                    httpClient.updateFeatures(),
+                ).rejects.toThrowError(TooManyRequestsError)
+                httpClient.close()
+                expect(testContext.count).toBe(2)
+            },
+        ),
+    )
 })
