@@ -1,0 +1,50 @@
+{
+    "name": "@featureboard/openfeature-provider",
+    "version": "0.1.0",
+    "main": "src/index.ts",
+    "license": "MIT",
+    "sideEffects": false,
+    "type": "module",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/arkahna/featureboard-sdks.git"
+    },
+    "keywords": [
+        "Feature management",
+        "Feature toggles",
+        "Feature flags",
+        "OpenFeature",
+        "Provider"
+    ],
+    "bugs": {
+        "url": "https://github.com/arkahna/featureboard-sdks/issues"
+    },
+    "homepage": "https://github.com/arkahna/featureboard-sdks/tree/master/libs/openfeature-provider#readme",
+    "publishConfig": {
+        "main": "dist/legacycjs/index.js",
+        "module": "dist/esm/index.js",
+        "types": "dist/index.d.ts",
+        "exports": {
+            "./package.json": "./package.json",
+            ".": {
+                "types": "./dist/index.d.ts",
+                "import": "./dist/index.js",
+                "default": "./dist/index.cjs"
+            }
+        }
+    },
+    "peerDependencies": {
+        "@openfeature/web-sdk": "^1.0.0",
+        "@openfeature/react-sdk": "^1.0.0"
+    },
+    "dependencies": {
+        "@featureboard/js-sdk": "workspace:*",
+        "@featureboard/contracts": "workspace:*",
+        "debug": "^4.3.4"
+    },
+    "devDependencies": {
+        "@openfeature/web-sdk": "^1.0.0",
+        "@openfeature/react-sdk": "^1.0.0",
+        "@types/node": "20.8.9"
+    }
+}
