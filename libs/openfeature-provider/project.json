@@ -1,0 +1,35 @@
+{
+    "name": "openfeature-provider",
+    "$schema": "../../node_modules/nx/schemas/project-schema.json",
+    "projectType": "library",
+    "sourceRoot": "libs/openfeature-provider/src",
+    "targets": {
+        "lint": {
+            "executor": "@nx/eslint:lint",
+            "options": {
+                "lintFilePatterns": ["libs/openfeature-provider/src/**/*.ts"]
+            }
+        },
+        "test": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "pnpm vitest --run --passWithNoTests",
+                "cwd": "libs/openfeature-provider"
+            }
+        },
+        "package": {
+            "executor": "nx:run-commands",
+            "options": {
+                "commands": [
+                    "tsup src/index.ts -d dist --sourcemap --format esm --legacy-output --external @featureboard/js-sdk --external @openfeature/web-sdk --env.TEST false",
+                    "tsup src/index.ts -d dist/legacycjs --sourcemap --format cjs --legacy-output --external @featureboard/js-sdk --external @openfeature/web-sdk --env.TEST false",
+                    "tsup src/index.ts -d dist --sourcemap --format esm,cjs --external @featureboard/js-sdk --external @openfeature/web-sdk --env.TEST false",
+                    "tsc --emitDeclarationOnly --declaration --outDir dist"
+                ],
+                "cwd": "libs/openfeature-provider",
+                "parallel": false
+            },
+            "dependsOn": ["js-sdk:package"]
+        }
+    }
+}
