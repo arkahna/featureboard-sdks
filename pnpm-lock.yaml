@@ -7,10 +7,6 @@ settings:
 importers:
 
   .:
-    dependencies:
-      promise-completion-source:
-        specifier: ^1.0.0
-        version: 1.0.0
     devDependencies:
       '@changesets/changelog-github':
         specifier: ^0.4.8

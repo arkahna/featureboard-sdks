@@ -3,6 +3,7 @@
     "compilerOptions": {
         "outDir": "./tsc-out",
         "rootDir": "./src",
+        "forceConsistentCasingInFileNames": true,
         "types": ["node"]
     },
     "include": ["src/**/*.ts", "src/**/*.tsx"],

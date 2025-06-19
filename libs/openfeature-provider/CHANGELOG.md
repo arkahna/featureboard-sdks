@@ -8,7 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
 - Initial release of FeatureBoard OpenFeature provider
 - Support for boolean, string, number, and object feature values
 - Integration with FeatureBoard JS SDK
-- OpenFeature provider interface implementation 
+- OpenFeature provider interface implementation

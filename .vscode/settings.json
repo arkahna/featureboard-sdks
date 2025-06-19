@@ -16,7 +16,7 @@
     ],
     "eslint.validate": ["json"],
     "cSpell.enableFiletypes": ["typescript"],
-    "cSpell.words": ["featureboard"],
+    "cSpell.words": ["featureboard", "legacycjs", "openfeature"],
     "[json]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
