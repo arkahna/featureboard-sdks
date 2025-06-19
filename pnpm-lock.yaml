@@ -47,6 +47,9 @@ importers:
       '@nx/workspace':
         specifier: 17.0.2
         version: 17.0.2(@swc-node/register@1.6.8(@swc/core@1.3.95(@swc/helpers@0.5.3))(@swc/types@0.1.23)(typescript@5.2.2))(@swc/core@1.3.95(@swc/helpers@0.5.3))
+      '@playwright/test':
+        specifier: ^1.53.1
+        version: 1.53.1
       '@swc-node/register':
         specifier: 1.6.8
         version: 1.6.8(@swc/core@1.3.95(@swc/helpers@0.5.3))(@swc/types@0.1.23)(typescript@5.2.2)
@@ -61,7 +64,7 @@ importers:
         version: 0.5.3
       '@testing-library/react':
         specifier: ^14.0.0
-        version: 14.3.1(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 14.3.1(@types/react@18.3.23)(react-dom@19.1.0(react@18.3.1))(react@18.3.1)
       '@types/debug':
         specifier: ^4.1.10
         version: 4.1.12
@@ -181,7 +184,7 @@ importers:
         version: 4.3.2(typescript@5.2.2)(vite@4.5.14(@types/node@20.8.9))
       vitest:
         specifier: ~0.34.6
-        version: 0.34.6(@vitest/ui@0.34.7)(happy-dom@12.10.3)
+        version: 0.34.6(@vitest/ui@0.34.7)(happy-dom@12.10.3)(playwright@1.53.1)
 
   apps/cli:
     devDependencies:
@@ -205,6 +208,40 @@ importers:
         version: 3.25.67
 
   apps/examples/dotnet-api: {}
+
+  apps/test-app:
+    dependencies:
+      '@featureboard/openfeature-provider':
+        specifier: link:../../libs/openfeature-provider
+        version: link:../../libs/openfeature-provider
+      '@openfeature/react-sdk':
+        specifier: ^1.0.0
+        version: 1.0.0(@openfeature/web-sdk@1.5.0(@openfeature/core@1.8.0))(react@18.3.1)
+      '@openfeature/web-sdk':
+        specifier: ^1.5.0
+        version: 1.5.0(@openfeature/core@1.8.0)
+      react:
+        specifier: ^18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: ^19.1.0
+        version: 19.1.0(react@18.3.1)
+    devDependencies:
+      '@types/react':
+        specifier: ^18.3.23
+        version: 18.3.23
+      '@types/react-dom':
+        specifier: ^19.1.6
+        version: 19.1.6(@types/react@18.3.23)
+      '@vitejs/plugin-react':
+        specifier: ^4.5.2
+        version: 4.5.2(vite@4.5.14(@types/node@20.8.9))
+      typescript:
+        specifier: 5.2.2
+        version: 5.2.2
+      vite:
+        specifier: ^4.5.14
+        version: 4.5.14(@types/node@20.8.9)
 
   libs/api-authentication: {}
 
@@ -1674,6 +1711,11 @@ packages:
     resolution: {integrity: sha512-YLT9Zo3oNPJoBjBc4q8G2mjU4tqIbf5CEOORbUUr48dCD9q3umJ3IPlVqOqDakPfd2HuwccBaqlGhN4Gmr5OWg==}
     engines: {node: ^12.20.0 || ^14.18.0 || >=16.0.0}
 
+  '@playwright/test@1.53.1':
+    resolution: {integrity: sha512-Z4c23LHV0muZ8hfv4jw6HngPJkbbtZxTkxPNIg7cJcTc9C28N/p2q7g3JZS2SiKBBHJ3uM1dgDye66bB7LEk5w==}
+    engines: {node: '>=18'}
+    hasBin: true
+
   '@polka/url@1.0.0-next.29':
     resolution: {integrity: sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww==}
 
@@ -2019,6 +2061,11 @@ packages:
     resolution: {integrity: sha512-MEe3UeoENYVFXzoXEWsvcpg6ZvlrFNlOQ7EOsvhI3CfAXwzPfO8Qwuxd40nepsYKqyyVQnTdEfv68q91yLcKrQ==}
     peerDependencies:
       '@types/react': ^18.0.0
+
+  '@types/react-dom@19.1.6':
+    resolution: {integrity: sha512-4hOiT/dwO8Ko0gV1m/TJZYk3y0KBnY9vzDh7W+DH17b2HFSOGgdj33dhihPeuy3l0q23+4e+hoXHV6hCC4dCXw==}
+    peerDependencies:
+      '@types/react': ^19.0.0
 
   '@types/react@18.3.23':
     resolution: {integrity: sha512-/LDXMQh55EzZQ0uVAZmKKhfENivEvWz6E+EYzh+/MCjMhNsotd+ZHhBGIjFDTi6+fz0OhQQQLbTgdQIxxCsC0w==}
@@ -3510,6 +3557,11 @@ packages:
   fs.realpath@1.0.0:
     resolution: {integrity: sha512-OO0pH2lK6a0hZnAdau5ItzHPI6pUlvI7jMVnxUQRtw4owF2wk8lOSabtGDCTP4Ggrg2MbGnWO9X8K1t4+fGMDw==}
 
+  fsevents@2.3.2:
+    resolution: {integrity: sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==}
+    engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
+    os: [darwin]
+
   fsevents@2.3.3:
     resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
@@ -4846,6 +4898,16 @@ packages:
     resolution: {integrity: sha512-8xCNE/aT/EXKenuMDZ+xTVwkT8gsoHN2z/Q29l80u0ppGEXVvsKRzNMbtKhg8LS8k1tJLAHHylf6p4VFmP6XUQ==}
     engines: {node: '>= 0.4.0'}
 
+  playwright-core@1.53.1:
+    resolution: {integrity: sha512-Z46Oq7tLAyT0lGoFx4DOuB1IA9D1TPj0QkYxpPVUnGDqHHvDpCftu1J2hM2PiWsNMoZh8+LQaarAWcDfPBc6zg==}
+    engines: {node: '>=18'}
+    hasBin: true
+
+  playwright@1.53.1:
+    resolution: {integrity: sha512-LJ13YLr/ocweuwxyGf1XNFWIU4M2zUSo149Qbp+A4cpwDjsxRPj7k6H25LBrEHiEwxvRbD8HdwvQmRMSvquhYw==}
+    engines: {node: '>=18'}
+    hasBin: true
+
   possible-typed-array-names@1.1.0:
     resolution: {integrity: sha512-/+5VFTchJDoVj3bhoqi6UeymcD00DAwb1nJwamzPvHEszJ4FpF6SNNbUbOS8yI56qHzdV8eK0qEfOSiodkTdxg==}
     engines: {node: '>= 0.4'}
@@ -4976,10 +5038,10 @@ packages:
     resolution: {integrity: sha512-8zGqypfENjCIqGhgXToC8aB2r7YrBX+AQAfIPs/Mlk+BtPTztOvTS01NRW/3Eh60J+a48lt8qsCzirQ6loCVfA==}
     engines: {node: '>= 0.8'}
 
-  react-dom@18.3.1:
-    resolution: {integrity: sha512-5m4nQKp+rZRb09LNH59GM4BxTh9251/ylbKIbpe7TpGxfJ+9kv6BLkLBXIjjspbgbnIBNqlI23tRnTWT0snUIw==}
+  react-dom@19.1.0:
+    resolution: {integrity: sha512-Xs1hdnE+DyKgeHJeJznQmYMIBG3TKIHJJT95Q58nHLSrElKlGQqDTR2HQ9fx5CN/Gk6Vh/kupBTDLU11/nDk/g==}
     peerDependencies:
-      react: ^18.3.1
+      react: ^19.1.0
 
   react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
@@ -5182,6 +5244,9 @@ packages:
 
   scheduler@0.23.2:
     resolution: {integrity: sha512-UOShsPwz7NrMUqhR6t0hWjFduvOzbtv7toDH1/hIrfRNIDBnnBWd0CwJTGvTpngVlmwGCdP9/Zl/tVrDqcuYzQ==}
+
+  scheduler@0.26.0:
+    resolution: {integrity: sha512-NlHwttCI/l5gCPR3D1nNXtWABUmBwvZpEQiD4IXSbIDq8BzLIK/7Ir5gTFSGZDUu37K5cMNp0hFtzO38sC7gWA==}
 
   semver-regex@4.0.5:
     resolution: {integrity: sha512-hunMQrEy1T6Jr2uEVjrAIqjwWcQTgOAcIM52C8MY1EZSD3DDNft04XzvYKPqjED65bNVVko0YI38nYeEHCX3yw==}
@@ -8018,7 +8083,7 @@ snapshots:
       enquirer: 2.3.6
       tsconfig-paths: 4.2.0
       vite: 4.5.14(@types/node@20.8.9)
-      vitest: 0.34.6(@vitest/ui@0.34.7)(happy-dom@12.10.3)
+      vitest: 0.34.6(@vitest/ui@0.34.7)(happy-dom@12.10.3)(playwright@1.53.1)
     transitivePeerDependencies:
       - '@babel/traverse'
       - '@swc-node/register'
@@ -8079,6 +8144,10 @@ snapshots:
     optional: true
 
   '@pkgr/core@0.2.7': {}
+
+  '@playwright/test@1.53.1':
+    dependencies:
+      playwright: 1.53.1
 
   '@polka/url@1.0.0-next.29': {}
 
@@ -8267,13 +8336,13 @@ snapshots:
       lz-string: 1.5.0
       pretty-format: 27.5.1
 
-  '@testing-library/react@14.3.1(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@testing-library/react@14.3.1(@types/react@18.3.23)(react-dom@19.1.0(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@babel/runtime': 7.27.6
       '@testing-library/dom': 9.3.4
       '@types/react-dom': 18.3.7(@types/react@18.3.23)
       react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
+      react-dom: 19.1.0(react@18.3.1)
     transitivePeerDependencies:
       - '@types/react'
 
@@ -8379,6 +8448,10 @@ snapshots:
   '@types/prop-types@15.7.15': {}
 
   '@types/react-dom@18.3.7(@types/react@18.3.23)':
+    dependencies:
+      '@types/react': 18.3.23
+
+  '@types/react-dom@19.1.6(@types/react@18.3.23)':
     dependencies:
       '@types/react': 18.3.23
 
@@ -8729,7 +8802,7 @@ snapshots:
       std-env: 3.9.0
       test-exclude: 6.0.0
       v8-to-istanbul: 9.3.0
-      vitest: 0.34.6(@vitest/ui@0.34.7)(happy-dom@12.10.3)
+      vitest: 0.34.6(@vitest/ui@0.34.7)(happy-dom@12.10.3)(playwright@1.53.1)
     transitivePeerDependencies:
       - supports-color
 
@@ -8764,7 +8837,7 @@ snapshots:
       pathe: 1.1.2
       picocolors: 1.1.1
       sirv: 2.0.4
-      vitest: 0.34.6(@vitest/ui@0.34.7)(happy-dom@12.10.3)
+      vitest: 0.34.6(@vitest/ui@0.34.7)(happy-dom@12.10.3)(playwright@1.53.1)
 
   '@vitest/utils@0.34.6':
     dependencies:
@@ -10338,6 +10411,9 @@ snapshots:
 
   fs.realpath@1.0.0: {}
 
+  fsevents@2.3.2:
+    optional: true
+
   fsevents@2.3.3:
     optional: true
 
@@ -11879,6 +11955,14 @@ snapshots:
 
   pkginfo@0.4.1: {}
 
+  playwright-core@1.53.1: {}
+
+  playwright@1.53.1:
+    dependencies:
+      playwright-core: 1.53.1
+    optionalDependencies:
+      fsevents: 2.3.2
+
   possible-typed-array-names@1.1.0: {}
 
   postcss-load-config@4.0.2(postcss@8.5.6)(ts-node@10.9.2(@swc/core@1.3.95(@swc/helpers@0.5.3))(@types/node@20.8.9)(typescript@5.2.2)):
@@ -11996,11 +12080,10 @@ snapshots:
       iconv-lite: 0.4.24
       unpipe: 1.0.0
 
-  react-dom@18.3.1(react@18.3.1):
+  react-dom@19.1.0(react@18.3.1):
     dependencies:
-      loose-envify: 1.4.0
       react: 18.3.1
-      scheduler: 0.23.2
+      scheduler: 0.26.0
 
   react-is@16.13.1: {}
 
@@ -12241,6 +12324,8 @@ snapshots:
   scheduler@0.23.2:
     dependencies:
       loose-envify: 1.4.0
+
+  scheduler@0.26.0: {}
 
   semver-regex@4.0.5: {}
 
@@ -13081,7 +13166,7 @@ snapshots:
       '@types/node': 20.8.9
       fsevents: 2.3.3
 
-  vitest@0.34.6(@vitest/ui@0.34.7)(happy-dom@12.10.3):
+  vitest@0.34.6(@vitest/ui@0.34.7)(happy-dom@12.10.3)(playwright@1.53.1):
     dependencies:
       '@types/chai': 4.3.20
       '@types/chai-subset': 1.3.6(@types/chai@4.3.20)
@@ -13110,6 +13195,7 @@ snapshots:
     optionalDependencies:
       '@vitest/ui': 0.34.7(vitest@0.34.6)
       happy-dom: 12.10.3
+      playwright: 1.53.1
     transitivePeerDependencies:
       - less
       - lightningcss
