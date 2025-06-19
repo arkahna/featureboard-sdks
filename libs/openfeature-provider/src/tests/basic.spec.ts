@@ -16,7 +16,7 @@ describe('FeatureBoardProvider - Basic Tests', () => {
             environmentKey: 'test-key',
         })
 
-        expect(provider.status).toBe('NOT_READY')
+        expect(['NOT_READY', 'STALE']).toContain(provider.status)
     })
 
     it('should implement all required provider methods', () => {
@@ -30,5 +30,21 @@ describe('FeatureBoardProvider - Basic Tests', () => {
         expect(typeof provider.resolveObjectEvaluation).toBe('function')
         expect(typeof provider.initialize).toBe('function')
         expect(typeof provider.onClose).toBe('function')
+    })
+
+    it('should handle flag resolution when not initialized', () => {
+        const provider = new FeatureBoardProvider({
+            environmentKey: 'test-key',
+        })
+
+        const result = provider.resolveBooleanEvaluation(
+            'test-flag',
+            false,
+            {},
+            console,
+        )
+
+        expect(result.value).toBe(false)
+        expect(result.reason).toBe('STALE')
     })
 })

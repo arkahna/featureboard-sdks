@@ -8,9 +8,9 @@ importers:
 
   .:
     dependencies:
-      '@openfeature/web-sdk':
-        specifier: ^1.5.0
-        version: 1.5.0(@openfeature/core@1.8.0)
+      promise-completion-source:
+        specifier: ^1.0.0
+        version: 1.0.0
     devDependencies:
       '@changesets/changelog-github':
         specifier: ^0.4.8
@@ -290,6 +290,9 @@ importers:
         specifier: ^4.3.4
         version: 4.4.1
     devDependencies:
+      '@openfeature/react-sdk':
+        specifier: ^1.0.0
+        version: 1.0.0(@openfeature/web-sdk@1.5.0(@openfeature/core@1.8.0))(react@18.3.1)
       '@openfeature/web-sdk':
         specifier: ^1.0.0
         version: 1.5.0(@openfeature/core@1.8.0)
@@ -1650,6 +1653,12 @@ packages:
 
   '@openfeature/core@1.8.0':
     resolution: {integrity: sha512-FX/B6yMD2s4BlMKtB0PqSMl94eLaTwh0VK9URcMvjww0hqMOeGZnGv4uv9O5E58krAan7yCOCm4NBCoh2IATqw==}
+
+  '@openfeature/react-sdk@1.0.0':
+    resolution: {integrity: sha512-662enepQyWu5eT8Cr1L0kNOrvIkucrUjDcaJacB4bP99B9VMnEBwWTF/8zEhRqrwNJ/gMIpzGm9fu0dfinu2+Q==}
+    peerDependencies:
+      '@openfeature/web-sdk': ^1.5.0
+      react: '>=16.8.0'
 
   '@openfeature/web-sdk@1.5.0':
     resolution: {integrity: sha512-AK9A4X6vRKQf/OvCue1LKM6thSDqbx/Sf3dHBTZ6p7DfpIKsD8mzCTgMhb5jukVlqwdKMlewU/rlYTYqqfnnTw==}
@@ -8050,6 +8059,11 @@ snapshots:
   '@open-draft/until@2.1.0': {}
 
   '@openfeature/core@1.8.0': {}
+
+  '@openfeature/react-sdk@1.0.0(@openfeature/web-sdk@1.5.0(@openfeature/core@1.8.0))(react@18.3.1)':
+    dependencies:
+      '@openfeature/web-sdk': 1.5.0(@openfeature/core@1.8.0)
+      react: 18.3.1
 
   '@openfeature/web-sdk@1.5.0(@openfeature/core@1.8.0)':
     dependencies:
