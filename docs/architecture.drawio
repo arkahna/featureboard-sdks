@@ -1,0 +1,314 @@
+<mxfile host="app.diagrams.net" modified="2024-01-01T00:00:00.000Z" agent="5.0" etag="xxx" version="22.1.16" type="device">
+  <diagram name="FeatureBoard SDKs Architecture" id="architecture">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- Title -->
+        <mxCell id="title" value="FeatureBoard SDKs Architecture" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=24;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="400" y="20" width="350" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- External Services -->
+        <mxCell id="featureboard-api" value="FeatureBoard API" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="100" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="featureboard-websocket" value="FeatureBoard&#xa;WebSocket" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="200" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Shared Libraries -->
+        <mxCell id="shared-libs-group" value="Shared Libraries" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="250" y="80" width="200" height="200" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="contracts" value="Contracts&#xa;(TypeScript types)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" vertex="1" parent="shared-libs-group">
+          <mxGeometry x="10" y="40" width="180" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="live-connection" value="Live Connection&#xa;(WebSocket)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" vertex="1" parent="shared-libs-group">
+          <mxGeometry x="10" y="90" width="180" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="api-authentication" value="API Authentication" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" vertex="1" parent="shared-libs-group">
+          <mxGeometry x="10" y="140" width="180" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="code-generator" value="Code Generator" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" vertex="1" parent="shared-libs-group">
+          <mxGeometry x="10" y="160" width="180" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- Traditional FeatureBoard SDKs -->
+        <mxCell id="fb-sdks-group" value="FeatureBoard SDKs&#xa;(Traditional)" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="500" y="80" width="200" height="200" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="js-sdk" value="JavaScript SDK&#xa;(Browser)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" vertex="1" parent="fb-sdks-group">
+          <mxGeometry x="10" y="40" width="180" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="node-sdk" value="Node.js SDK&#xa;(Server)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" vertex="1" parent="fb-sdks-group">
+          <mxGeometry x="10" y="90" width="180" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="react-sdk" value="React SDK" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" vertex="1" parent="fb-sdks-group">
+          <mxGeometry x="10" y="140" width="180" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="dotnet-sdk" value=".NET SDK" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" vertex="1" parent="fb-sdks-group">
+          <mxGeometry x="10" y="160" width="180" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- OpenFeature SDKs -->
+        <mxCell id="of-sdks-group" value="OpenFeature SDKs&#xa;(Industry Standard)" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#d4edda;strokeColor=#28a745;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="750" y="80" width="200" height="200" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="openfeature-provider" value="OpenFeature Provider&#xa;(FeatureBoard Backend)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c3e6cb;strokeColor=#28a745;fontSize=12;" vertex="1" parent="of-sdks-group">
+          <mxGeometry x="10" y="40" width="180" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="openfeature-web-sdk" value="OpenFeature Web SDK&#xa;(External Dependency)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8d7da;strokeColor=#dc3545;fontSize=12;" vertex="1" parent="of-sdks-group">
+          <mxGeometry x="10" y="90" width="180" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="openfeature-react-sdk" value="OpenFeature React SDK&#xa;(External Dependency)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8d7da;strokeColor=#dc3545;fontSize=12;" vertex="1" parent="of-sdks-group">
+          <mxGeometry x="10" y="140" width="180" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- Tools and Applications -->
+        <mxCell id="tools-group" value="Tools &amp; Applications" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="1000" y="80" width="200" height="200" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="cli" value="CLI Tool" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;" vertex="1" parent="tools-group">
+          <mxGeometry x="10" y="40" width="180" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="nx-plugin" value="NX Plugin" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;" vertex="1" parent="tools-group">
+          <mxGeometry x="10" y="90" width="180" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- Examples -->
+        <mxCell id="examples-group" value="Examples" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#e6f3ff;strokeColor=#0066cc;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="1250" y="80" width="150" height="200" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="dotnet-api-example" value=".NET API Example" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" vertex="1" parent="examples-group">
+          <mxGeometry x="10" y="40" width="130" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="openfeature-examples" value="OpenFeature Examples&#xa;(Basic &amp; React)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c3e6cb;strokeColor=#28a745;fontSize=12;" vertex="1" parent="examples-group">
+          <mxGeometry x="10" y="90" width="130" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- Package Managers -->
+        <mxCell id="package-managers-group" value="Package Managers" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#f0f0f0;strokeColor=#666666;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="50" y="350" width="200" height="120" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="npm" value="NPM" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" vertex="1" parent="package-managers-group">
+          <mxGeometry x="10" y="40" width="180" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="nuget" value="NuGet" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" vertex="1" parent="package-managers-group">
+          <mxGeometry x="10" y="80" width="180" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- Build System -->
+        <mxCell id="build-system-group" value="Build System" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#f0f0f0;strokeColor=#666666;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="300" y="350" width="200" height="120" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="nx" value="NX Monorepo" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" vertex="1" parent="build-system-group">
+          <mxGeometry x="10" y="40" width="180" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="pnpm" value="PNPM Workspace" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" vertex="1" parent="build-system-group">
+          <mxGeometry x="10" y="80" width="180" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- Testing -->
+        <mxCell id="testing-group" value="Testing" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#f0f0f0;strokeColor=#666666;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="550" y="350" width="200" height="120" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="vitest" value="Vitest" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" vertex="1" parent="testing-group">
+          <mxGeometry x="10" y="40" width="180" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="dotnet-test" value=".NET Test" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" vertex="1" parent="testing-group">
+          <mxGeometry x="10" y="80" width="180" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- Connections -->
+        <!-- External to Shared Libraries -->
+        <mxCell id="edge1" edge="1" parent="1" source="featureboard-api" target="api-authentication">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="edge2" edge="1" parent="1" source="featureboard-websocket" target="live-connection">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Shared Libraries to Traditional SDKs -->
+        <mxCell id="edge3" edge="1" parent="1" source="contracts" target="js-sdk">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="edge4" edge="1" parent="1" source="contracts" target="node-sdk">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="edge5" edge="1" parent="1" source="contracts" target="react-sdk">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="edge6" edge="1" parent="1" source="live-connection" target="js-sdk">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="edge7" edge="1" parent="1" source="live-connection" target="node-sdk">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Shared Libraries to OpenFeature Provider -->
+        <mxCell id="edge8" edge="1" parent="1" source="api-authentication" target="openfeature-provider">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="edge9" edge="1" parent="1" source="live-connection" target="openfeature-provider">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- OpenFeature Provider to External SDKs -->
+        <mxCell id="edge10" edge="1" parent="1" source="openfeature-provider" target="openfeature-web-sdk">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="edge11" edge="1" parent="1" source="openfeature-provider" target="openfeature-react-sdk">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Tools Connections -->
+        <mxCell id="edge12" edge="1" parent="1" source="api-authentication" target="cli">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="edge13" edge="1" parent="1" source="code-generator" target="cli">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="edge14" edge="1" parent="1" source="code-generator" target="nx-plugin">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Traditional SDKs to Package Managers -->
+        <mxCell id="edge15" edge="1" parent="1" source="js-sdk" target="npm">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="edge16" edge="1" parent="1" source="node-sdk" target="npm">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="edge17" edge="1" parent="1" source="react-sdk" target="npm">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="edge18" edge="1" parent="1" source="dotnet-sdk" target="nuget">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- OpenFeature Provider to Package Managers -->
+        <mxCell id="edge19" edge="1" parent="1" source="openfeature-provider" target="npm">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Tools to Package Managers -->
+        <mxCell id="edge20" edge="1" parent="1" source="cli" target="npm">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="edge21" edge="1" parent="1" source="nx-plugin" target="npm">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Examples -->
+        <mxCell id="edge22" edge="1" parent="1" source="dotnet-sdk" target="dotnet-api-example">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="edge23" edge="1" parent="1" source="openfeature-provider" target="openfeature-examples">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Build System Connections -->
+        <mxCell id="edge24" edge="1" parent="1" source="nx" target="shared-libs-group">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="edge25" edge="1" parent="1" source="nx" target="fb-sdks-group">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="edge26" edge="1" parent="1" source="nx" target="of-sdks-group">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="edge27" edge="1" parent="1" source="nx" target="tools-group">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Testing Connections -->
+        <mxCell id="edge28" edge="1" parent="1" source="vitest" target="js-sdk">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="edge29" edge="1" parent="1" source="vitest" target="node-sdk">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="edge30" edge="1" parent="1" source="vitest" target="react-sdk">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="edge31" edge="1" parent="1" source="vitest" target="openfeature-provider">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="edge32" edge="1" parent="1" source="dotnet-test" target="dotnet-sdk">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Legend -->
+        <mxCell id="legend" value="Legend" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#f8f9fa;strokeColor=#dee2e6;fontColor=#495057;" vertex="1" parent="1">
+          <mxGeometry x="800" y="350" width="200" height="160" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="legend-external" value="External Services" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="legend">
+          <mxGeometry x="10" y="40" width="180" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="legend-shared" value="Shared Libraries" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="legend">
+          <mxGeometry x="10" y="70" width="180" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="legend-fb-sdk" value="FeatureBoard SDKs (Traditional)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="legend">
+          <mxGeometry x="10" y="100" width="180" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="legend-of-sdk" value="OpenFeature SDKs (Industry Standard)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c3e6cb;strokeColor=#28a745;fontSize=10;" vertex="1" parent="legend">
+          <mxGeometry x="10" y="130" width="180" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="legend-external-dep" value="External Dependencies" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8d7da;strokeColor=#dc3545;fontSize=10;" vertex="1" parent="legend">
+          <mxGeometry x="10" y="160" width="180" height="20" as="geometry" />
+        </mxCell>
+        
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
