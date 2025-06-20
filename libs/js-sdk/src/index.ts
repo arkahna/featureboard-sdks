@@ -10,4 +10,6 @@ export { createEnsureSingleWithBackoff } from './ensure-single'
 export { featureBoardHostedService } from './featureboard-service-urls'
 export { retry } from './utils/retry'
 
-export interface Features {}
+export interface Features {
+    [key: string]: string | number | boolean
+}

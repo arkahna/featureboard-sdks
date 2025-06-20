@@ -60,7 +60,7 @@ export class FeatureBoardProvider implements Provider {
     resolveBooleanEvaluation(
         flagKey: string,
         defaultValue: boolean,
-        context: EvaluationContext,
+        _context: EvaluationContext,
         logger: Logger,
     ): ResolutionDetails<boolean> {
         try {
@@ -96,7 +96,7 @@ export class FeatureBoardProvider implements Provider {
     resolveStringEvaluation(
         flagKey: string,
         defaultValue: string,
-        context: EvaluationContext,
+        _context: EvaluationContext,
         logger: Logger,
     ): ResolutionDetails<string> {
         try {
@@ -132,7 +132,7 @@ export class FeatureBoardProvider implements Provider {
     resolveNumberEvaluation(
         flagKey: string,
         defaultValue: number,
-        context: EvaluationContext,
+        _context: EvaluationContext,
         logger: Logger,
     ): ResolutionDetails<number> {
         try {
@@ -168,7 +168,7 @@ export class FeatureBoardProvider implements Provider {
     resolveObjectEvaluation<T>(
         flagKey: string,
         defaultValue: T,
-        context: EvaluationContext,
+        _context: EvaluationContext,
         logger: Logger,
     ): ResolutionDetails<T> {
         try {

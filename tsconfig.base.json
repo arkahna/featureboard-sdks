@@ -29,6 +29,9 @@
             ],
             "@featureboard/node-sdk": ["libs/node-sdk/src/index.ts"],
             "@featureboard/nx-plugin": ["libs/nx-plugin/src/index.ts"],
+            "@featureboard/openfeature-provider": [
+                "libs/openfeature-provider/src/index.ts"
+            ],
             "@featureboard/react-sdk": ["libs/react-sdk/src/index.ts"]
         }
     },
