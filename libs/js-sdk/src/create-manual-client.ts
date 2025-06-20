@@ -10,7 +10,7 @@ import type { FeatureBoardClient } from './features-client'
 export function createManualClient(initialState: {
     audiences: string[]
     values: {
-        [K in keyof Features]: Features[K]
+        [key: string]: string | number | boolean
     }
 }): FeatureBoardClient & {
     set<T extends keyof Features>(featureKey: T, value: Features[T]): void
