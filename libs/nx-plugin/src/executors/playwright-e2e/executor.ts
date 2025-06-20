@@ -47,8 +47,10 @@ export async function playwrightE2EExecutor(
             const output = data.toString()
             console.log(output.trim())
 
+            // Look for Vite ready message with local URL
             if (
-                output.includes('Local:') &&
+                output.includes('ready in') &&
+                (output.includes('Local:') || output.includes('➜  Local:')) &&
                 output.includes('http://localhost:')
             ) {
                 appStarted = true
