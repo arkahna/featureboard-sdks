@@ -18,7 +18,7 @@ The Playwright tests verify that the OpenFeature React SDK integration works cor
 
 ```bash
 # Run all e2e tests
-nx run e2e
+pnpm nx run e2e
 
 # Or use the npm script
 pnpm test:e2e
@@ -90,20 +90,19 @@ The following Nx targets are available for running e2e tests:
 
 ```bash
 # Basic e2e tests
-nx run e2e
+pnpm nx run e2e
 
-# Run tests in headed mode
-nx run e2e:headed
-pnpm test:e2e:headed
+# Run tests in headed mode (see browsers)
+pnpm nx run e2e:headed
 
 # Run tests in debug mode
-nx run e2e:debug
-pnpm test:e2e:debug
+pnpm nx run e2e:debug
 
 # Run tests with Playwright UI
-nx run e2e:ui
-pnpm test:e2e:ui
+pnpm nx run e2e:ui
 ```
+
+**Note**: Use `pnpm nx` instead of just `nx` if nx is not installed globally.
 
 ## Test Configuration
 
@@ -179,13 +178,13 @@ define: {
 #### Run Tests in Debug Mode
 
 ```bash
-nx run e2e:debug
+pnpm nx run e2e:debug
 ```
 
 #### Run with UI
 
 ```bash
-nx run e2e:ui
+pnpm nx run e2e:ui
 ```
 
 #### Check Test App Manually
