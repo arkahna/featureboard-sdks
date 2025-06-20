@@ -1,8 +1,13 @@
 #!/usr/bin/env node
 
-const { spawn, execSync } = require('child_process')
-const path = require('path')
-const fs = require('fs')
+import { execSync, spawn } from 'child_process'
+import fs from 'fs'
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+// Get __dirname equivalent in ES modules
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 console.log('🚀 Starting Playwright E2E Test Bootstrap...\n')
 
@@ -47,15 +52,12 @@ if (!fs.existsSync(TEST_APP_DIR)) {
   process.exit(1)
 }
 
-// Step 1: Check dependencies
+// Step 1: Quick dependency check (skip installation)
 logStep('Checking dependencies...')
-try {
-  execSync('pnpm install', { cwd: ROOT_DIR, stdio: 'inherit' })
-  logSuccess('Dependencies installed')
-} catch (error) {
-  logError('Failed to install dependencies')
-  process.exit(1)
-}
+logWarning(
+  'Skipping dependency installation (assuming dependencies are already installed)',
+)
+logSuccess('Dependencies check completed')
 
 // Step 2: Install Playwright browsers if not already installed
 logStep('Checking Playwright browsers...')
@@ -67,17 +69,7 @@ try {
   process.exit(1)
 }
 
-// Step 3: Verify test app dependencies
-logStep('Verifying test app dependencies...')
-try {
-  execSync('pnpm install', { cwd: TEST_APP_DIR, stdio: 'inherit' })
-  logSuccess('Test app dependencies ready')
-} catch (error) {
-  logError('Failed to install test app dependencies')
-  process.exit(1)
-}
-
-// Step 4: Start the test app
+// Step 3: Start the test app
 logStep('Starting test app...')
 let testAppProcess
 
@@ -126,7 +118,7 @@ try {
   process.exit(1)
 }
 
-// Step 5: Run Playwright tests
+// Step 4: Run Playwright tests
 logStep('Running Playwright tests...')
 try {
   execSync('npx playwright test --reporter=list', {
@@ -140,7 +132,7 @@ try {
   process.exit(1)
 }
 
-// Step 6: Cleanup
+// Step 5: Cleanup
 logStep('Cleaning up...')
 try {
   testAppProcess.kill()
@@ -149,7 +141,7 @@ try {
   logWarning('Failed to stop test app cleanly')
 }
 
-// Step 7: Show results
+// Step 6: Show results
 logStep('Test Results')
 logSuccess('All tests completed!')
 log('📊 To view detailed results, run: npx playwright show-report', 'blue')

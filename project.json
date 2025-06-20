@@ -9,6 +9,31 @@
                 "config": ".verdaccio/config.yml",
                 "storage": "tmp/local-registry/storage"
             }
+        },
+        "e2e": {
+            "executor": "@featureboard/nx-plugin:playwright-e2e",
+            "options": {
+                "reporter": "list"
+            }
+        },
+        "e2e:headed": {
+            "executor": "@featureboard/nx-plugin:playwright-e2e",
+            "options": {
+                "headed": true,
+                "reporter": "list"
+            }
+        },
+        "e2e:debug": {
+            "executor": "@featureboard/nx-plugin:playwright-e2e",
+            "options": {
+                "debug": true
+            }
+        },
+        "e2e:ui": {
+            "executor": "@featureboard/nx-plugin:playwright-e2e",
+            "options": {
+                "ui": true
+            }
         }
     }
 }

@@ -1,0 +1,41 @@
+{
+    "$schema": "http://json-schema.org/schema",
+    "$id": "PlaywrightE2E",
+    "title": "Playwright E2E Executor",
+    "description": "Run Playwright end-to-end tests with automatic test app startup",
+    "type": "object",
+    "properties": {
+        "headed": {
+            "type": "boolean",
+            "description": "Run tests in headed browsers",
+            "default": false
+        },
+        "debug": {
+            "type": "boolean",
+            "description": "Run tests in debug mode",
+            "default": false
+        },
+        "ui": {
+            "type": "boolean",
+            "description": "Run tests with Playwright UI",
+            "default": false
+        },
+        "reporter": {
+            "type": "string",
+            "description": "Playwright reporter to use",
+            "enum": ["list", "dot", "line", "html", "json", "junit", "null"],
+            "default": "list"
+        },
+        "project": {
+            "type": "string",
+            "description": "Specific browser project to run (chromium, firefox, webkit)",
+            "enum": ["chromium", "firefox", "webkit"]
+        },
+        "port": {
+            "type": "number",
+            "description": "Port for the test app (will auto-detect if not specified)",
+            "default": 3000
+        }
+    },
+    "additionalProperties": false
+}

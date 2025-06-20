@@ -14,21 +14,38 @@ The Playwright tests verify that the OpenFeature React SDK integration works cor
 
 ## Quick Start
 
-### Option 1: Use the Bootstrap Script (Recommended)
+### Option 1: Use Nx Commands (Recommended)
 
 ```bash
-# From the project root
-pnpm run test:e2e:bootstrap
+# Run all e2e tests
+nx run e2e
+
+# Or use the npm script
+pnpm test:e2e
 ```
 
-This script will:
+This will automatically:
 
 1. Start the test app on the correct port
 2. Run all Playwright tests
 3. Generate a test report
 4. Clean up the test app
 
-### Option 2: Manual Process
+### Option 2: Use Bootstrap Scripts (Backup)
+
+If you encounter issues with the Nx commands, you can use the backup bootstrap scripts:
+
+```bash
+# Node.js bootstrap script
+pnpm test:e2e:bootstrap
+
+# Bash bootstrap script (Unix systems)
+pnpm test:e2e:bootstrap:sh
+```
+
+These scripts provide the same functionality but use a different approach to starting the test app and running tests.
+
+### Option 3: Manual Process
 
 #### Step 1: Start the Test App
 
@@ -65,6 +82,27 @@ npx playwright test --project=chromium
 ```bash
 # Open the HTML report
 npx playwright show-report
+```
+
+## Available Nx Commands
+
+The following Nx targets are available for running e2e tests:
+
+```bash
+# Basic e2e tests
+nx run e2e
+
+# Run tests in headed mode
+nx run e2e:headed
+pnpm test:e2e:headed
+
+# Run tests in debug mode
+nx run e2e:debug
+pnpm test:e2e:debug
+
+# Run tests with Playwright UI
+nx run e2e:ui
+pnpm test:e2e:ui
 ```
 
 ## Test Configuration
@@ -141,13 +179,13 @@ define: {
 #### Run Tests in Debug Mode
 
 ```bash
-npx playwright test --debug
+nx run e2e:debug
 ```
 
 #### Run with UI
 
 ```bash
-npx playwright test --ui
+nx run e2e:ui
 ```
 
 #### Check Test App Manually

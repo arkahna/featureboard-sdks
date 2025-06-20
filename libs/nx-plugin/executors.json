@@ -4,6 +4,11 @@
             "implementation": "./src/executors/code-gen/executor",
             "schema": "./src/executors/code-gen/schema.json",
             "description": "Generates code based on FeatureBoard configuration."
+        },
+        "playwright-e2e": {
+            "implementation": "./src/executors/playwright-e2e/executor",
+            "schema": "./src/executors/playwright-e2e/schema.json",
+            "description": "Run Playwright end-to-end tests with automatic test app startup."
         }
     }
 }
