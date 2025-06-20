@@ -1,4 +1,3 @@
-import { ExecutorContext, joinPathFragments } from '@nx/devkit'
 import { execSync, spawn } from 'child_process'
 import { existsSync } from 'fs'
 
@@ -13,8 +12,9 @@ export interface PlaywrightE2EExecutorSchema {
 
 export async function playwrightE2EExecutor(
     options: PlaywrightE2EExecutorSchema,
-    context: ExecutorContext,
+    context: any,
 ) {
+    const { joinPathFragments } = require('@nx/devkit')
     const testAppDir = joinPathFragments(context.root, 'apps', 'test-app')
 
     if (!existsSync(testAppDir)) {
@@ -33,6 +33,8 @@ export async function playwrightE2EExecutor(
 
     let appStarted = false
     let startupTimeout: NodeJS.Timeout
+    let actualPort: number | null = null
+    let seenReady = false
 
     // Wait for app to start
     await new Promise<void>((resolve, reject) => {
@@ -44,15 +46,31 @@ export async function playwrightE2EExecutor(
         }, 30000)
 
         testAppProcess.stdout?.on('data', (data) => {
-            const output = data.toString()
-            console.log(output.trim())
+            const output = data.toString().trim()
+            // Print all output for debugging
+            console.log(output)
 
-            // Look for Vite ready message with local URL
+            // Detect 'ready in' line
+            if (output.includes('ready in')) {
+                seenReady = true
+            }
+
+            // After 'ready in', look for 'Local:' or 'Network:' line with URL
             if (
-                output.includes('ready in') &&
-                (output.includes('Local:') || output.includes('➜  Local:')) &&
-                output.includes('http://localhost:')
+                seenReady &&
+                (output.match(/Local:\s*http:\/\/localhost:(\d+)/) ||
+                    output.match(/Network:\s*http:\/\/[^:]+:(\d+)/))
             ) {
+                let portMatch = output.match(
+                    /Local:\s*http:\/\/localhost:(\d+)/,
+                )
+                if (!portMatch) {
+                    portMatch = output.match(/Network:\s*http:\/\/[^:]+:(\d+)/)
+                }
+                if (portMatch) {
+                    actualPort = parseInt(portMatch[1], 10)
+                    console.log(`📍 Detected app running on port ${actualPort}`)
+                }
                 appStarted = true
                 clearTimeout(startupTimeout)
                 console.log('✅ Test app started successfully')
@@ -62,6 +80,7 @@ export async function playwrightE2EExecutor(
 
         testAppProcess.stderr?.on('data', (data) => {
             const output = data.toString()
+            // Only log non-deprecation warnings
             if (!output.includes('Deprecation') && !output.includes('WARN')) {
                 console.log(output.trim())
             }
