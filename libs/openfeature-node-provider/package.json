@@ -1,0 +1,44 @@
+{
+    "name": "@featureboard/openfeature-node-provider",
+    "version": "0.1.0",
+    "description": "OpenFeature Provider for FeatureBoard node-sdk",
+    "main": "tsc-out/index.js",
+    "license": "MIT",
+    "sideEffects": false,
+    "type": "module",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/arkahna/featureboard-sdks.git"
+    },
+    "keywords": [
+        "featureboard",
+        "openfeature",
+        "feature-flags",
+        "Feature management",
+        "Feature toggles"
+    ],
+    "bugs": {
+        "url": "https://github.com/arkahna/featureboard-sdks/issues"
+    },
+    "homepage": "https://github.com/arkahna/featureboard-sdks/tree/master/libs/openfeature-node-provider",
+    "publishConfig": {
+        "main": "dist/legacycjs/index.js",
+        "module": "dist/esm/index.js",
+        "types": "dist/index.d.ts",
+        "exports": {
+            "./package.json": "./package.json",
+            ".": {
+                "types": "./dist/index.d.ts",
+                "import": "./dist/index.js",
+                "default": "./dist/index.cjs"
+            }
+        }
+    },
+    "dependencies": {
+        "@featureboard/node-sdk": "workspace:*",
+        "debug": "^4.3.4"
+    },
+    "peerDependencies": {
+        "@openfeature/server-sdk": "^1.0.0"
+    }
+}
