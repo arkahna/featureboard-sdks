@@ -35,10 +35,8 @@ jobs:
           nuget-api-key: ${{ secrets.NUGET_API_KEY }}
           nuget-version: '5.x'
 
-      - uses: pnpm/action-setup@v2
-        name: Install pnpm
-        with:
-          version: 8
+      - name: Enable corepack
+        run: corepack enable
 
       - name: Cache .pnpm-store
         uses: actions/cache@v3
