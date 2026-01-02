@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest'
-import { extractAudiences } from '../audience-extractor'
 import type { EvaluationContext } from '@openfeature/server-sdk'
+import { describe, expect, it } from 'vitest'
+import { extractAudiences } from '../audience-extractor'
 import type { PropertyMapping } from '../types'
 
 describe('extractAudiences', () => {

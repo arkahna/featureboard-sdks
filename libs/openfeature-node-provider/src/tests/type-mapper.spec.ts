@@ -1,10 +1,10 @@
-import { describe, it, expect } from 'vitest'
-import { mapToFlagValue } from '../type-mapper'
 import {
     ErrorCode,
     StandardResolutionReasons,
     type JsonValue,
 } from '@openfeature/server-sdk'
+import { describe, expect, it } from 'vitest'
+import { mapToFlagValue } from '../type-mapper'
 
 describe('mapToFlagValue', () => {
     describe('boolean type', () => {
@@ -18,7 +18,11 @@ describe('mapToFlagValue', () => {
         })
 
         it('should map boolean false correctly', () => {
-            const result = mapToFlagValue<boolean>(false, 'boolean', 'test-flag')
+            const result = mapToFlagValue<boolean>(
+                false,
+                'boolean',
+                'test-flag',
+            )
 
             expect(result).toEqual({
                 value: false,
@@ -123,7 +127,11 @@ describe('mapToFlagValue', () => {
     describe('object type', () => {
         it('should map object correctly', () => {
             const obj = { key: 'value', nested: { a: 1 } }
-            const result = mapToFlagValue<typeof obj>(obj, 'object', 'test-flag')
+            const result = mapToFlagValue<typeof obj>(
+                obj,
+                'object',
+                'test-flag',
+            )
 
             expect(result).toEqual({
                 value: obj,
@@ -161,7 +169,11 @@ describe('mapToFlagValue', () => {
 
         it('should map array correctly (arrays are objects)', () => {
             const arr = [1, 2, 3]
-            const result = mapToFlagValue<typeof arr>(arr, 'object', 'test-flag')
+            const result = mapToFlagValue<typeof arr>(
+                arr,
+                'object',
+                'test-flag',
+            )
 
             expect(result).toEqual({
                 value: arr,
@@ -170,11 +182,7 @@ describe('mapToFlagValue', () => {
         })
 
         it('should map empty object correctly', () => {
-            const result = mapToFlagValue<JsonValue>(
-                {},
-                'object',
-                'test-flag',
-            )
+            const result = mapToFlagValue<JsonValue>({}, 'object', 'test-flag')
 
             expect(result).toEqual({
                 value: {},

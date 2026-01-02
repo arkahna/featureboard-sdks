@@ -14,17 +14,17 @@ This document outlines the step-by-step plan to implement `@featureboard/openfea
 
 The provider has been implemented following this plan with the following results:
 
-| Component | Status | Tests |
-|-----------|--------|-------|
-| Package Structure | ✅ Complete | - |
-| `types.ts` | ✅ Complete | - |
-| `log.ts` | ✅ Complete | - |
-| `audience-extractor.ts` | ✅ Complete | 19 tests |
-| `type-mapper.ts` | ✅ Complete | 18 tests |
-| `featureboard-provider.ts` | ✅ Complete | 21 tests |
-| `index.ts` | ✅ Complete | - |
-| README.md | ✅ Complete | - |
-| **Total** | **✅ Complete** | **57 passing, 1 skipped** |
+| Component                  | Status          | Tests                     |
+| -------------------------- | --------------- | ------------------------- |
+| Package Structure          | ✅ Complete     | -                         |
+| `types.ts`                 | ✅ Complete     | -                         |
+| `log.ts`                   | ✅ Complete     | -                         |
+| `audience-extractor.ts`    | ✅ Complete     | 19 tests                  |
+| `type-mapper.ts`           | ✅ Complete     | 18 tests                  |
+| `featureboard-provider.ts` | ✅ Complete     | 21 tests                  |
+| `index.ts`                 | ✅ Complete     | -                         |
+| README.md                  | ✅ Complete     | -                         |
+| **Total**                  | **✅ Complete** | **57 passing, 1 skipped** |
 
 ### Key Implementation Decisions
 
@@ -43,6 +43,7 @@ The provider has been implemented following this plan with the following results
 ### **Current Focus: Node.js / Server-side Only**
 
 This plan targets the **server-side** OpenFeature SDK (`@openfeature/server-sdk`) which uses:
+
 - **Dynamic context**: Context passed on each evaluation call
 - **Request-scoped**: Each request can have different audiences
 
@@ -51,13 +52,15 @@ This aligns perfectly with FeatureBoard's `node-sdk` which uses `serverClient.re
 ### **Future Consideration: Web Provider**
 
 A separate `@featureboard/openfeature-web-provider` could be created later for `@openfeature/web-sdk`:
+
 - **Static context**: Context set globally via `OpenFeature.setContext()`
-- **Context change handler**: Provider implements `onContextChange()` 
+- **Context change handler**: Provider implements `onContextChange()`
 - Would wrap `@featureboard/js-sdk` and its `createBrowserClient()`
 
 ### **Potential Shared Core (Extract Later If Needed)**
 
 If a web provider is built, the following could be extracted to `@featureboard/openfeature-core`:
+
 - `extractAudiences()` - audience extraction logic
 - `PropertyMapping` type and related types
 - Type mapper utilities
@@ -94,6 +97,7 @@ libs/openfeature-node-provider/
 ### 1.2 Dependencies
 
 **Required** (matches node-sdk patterns):
+
 ```json
 {
   "dependencies": {
@@ -117,6 +121,7 @@ libs/openfeature-node-provider/
 ### 1.3 Package Configuration
 
 **package.json**:
+
 ```json
 {
   "name": "@featureboard/openfeature-node-provider",
@@ -130,13 +135,7 @@ libs/openfeature-node-provider/
     "type": "git",
     "url": "git+https://github.com/arkahna/featureboard-sdks.git"
   },
-  "keywords": [
-    "featureboard",
-    "openfeature",
-    "feature-flags",
-    "Feature management",
-    "Feature toggles"
-  ],
+  "keywords": ["featureboard", "openfeature", "feature-flags", "Feature management", "Feature toggles"],
   "bugs": {
     "url": "https://github.com/arkahna/featureboard-sdks/issues"
   },
@@ -165,6 +164,7 @@ libs/openfeature-node-provider/
 ```
 
 **project.json** (Nx):
+
 ```json
 {
   "name": "openfeature-node-provider",
@@ -188,12 +188,7 @@ libs/openfeature-node-provider/
     "package": {
       "executor": "nx:run-commands",
       "options": {
-        "commands": [
-          "tsup src/index.ts -d dist --sourcemap --format esm --legacy-output --external @featureboard/node-sdk --external @openfeature/server-sdk",
-          "tsup src/index.ts -d dist/legacycjs --sourcemap --format cjs --legacy-output --external @featureboard/node-sdk --external @openfeature/server-sdk",
-          "tsup src/index.ts -d dist --sourcemap --format esm,cjs --external @featureboard/node-sdk --external @openfeature/server-sdk",
-          "tsc --emitDeclarationOnly --declaration --outDir dist"
-        ],
+        "commands": ["tsup src/index.ts -d dist --sourcemap --format esm --legacy-output --external @featureboard/node-sdk --external @openfeature/server-sdk", "tsup src/index.ts -d dist/legacycjs --sourcemap --format cjs --legacy-output --external @featureboard/node-sdk --external @openfeature/server-sdk", "tsup src/index.ts -d dist --sourcemap --format esm,cjs --external @featureboard/node-sdk --external @openfeature/server-sdk", "tsc --emitDeclarationOnly --declaration --outDir dist"],
         "cwd": "libs/openfeature-node-provider",
         "parallel": false
       }
@@ -203,6 +198,7 @@ libs/openfeature-node-provider/
 ```
 
 **tsconfig.json** (matches node-sdk pattern):
+
 ```json
 {
   "extends": "../../tsconfig.settings.json",
@@ -236,8 +232,8 @@ import type { EvaluationContext } from '@openfeature/server-sdk'
  */
 export type PropertyMapping = {
   [contextProperty: string]:
-    | string                              // Template: 'org:{value}'
-    | ((value: any) => string | null)     // Function: custom logic
+    | string // Template: 'org:{value}'
+    | ((value: any) => string | null) // Function: custom logic
 }
 
 /**
@@ -254,13 +250,13 @@ export interface FeatureBoardProviderOptions {
    * Note: 'live' is currently disabled in node-sdk
    * @default 'polling'
    */
-  updateStrategy?: 'manual' | 'polling' | 'on-request'  // 'live' disabled
+  updateStrategy?: 'manual' | 'polling' | 'on-request' // 'live' disabled
 
   /**
    * Update interval in milliseconds (for polling strategy)
    * @default 30000
    */
-  intervalMs?: number  // Match node-sdk naming
+  intervalMs?: number // Match node-sdk naming
 
   /**
    * Max age in milliseconds before checking for updates (for on-request strategy)
@@ -282,12 +278,12 @@ export interface FeatureBoardProviderOptions {
 
   /**
    * Map context properties to audience strings (declarative approach)
-   * 
+   *
    * Examples:
    * - Direct value: { tier: '{value}' } → context.tier='premium' → 'premium'
    * - Template: { organizationId: 'org:{value}' } → 'org:acme'
    * - Function: { isPremium: (v) => v ? 'premium' : null }
-   * 
+   *
    * Takes precedence over default mappings but can be overridden by audienceMapper
    */
   audiencePropertyMap?: PropertyMapping
@@ -335,18 +331,14 @@ function applyTemplate(template: string, value: string | number): string {
 
 /**
  * Extract audiences from OpenFeature EvaluationContext
- * 
+ *
  * Priority order:
  * 1. Custom mapper function (highest priority - full control)
  * 2. Explicit audiences array (clear - direct pass-through)
  * 3. User-provided property map (configurable)
  * 4. Default property mappings (fallback - sensible defaults)
  */
-export function extractAudiences(
-  context: EvaluationContext,
-  propertyMap?: PropertyMapping,
-  customMapper?: (ctx: EvaluationContext) => string[]
-): string[] {
+export function extractAudiences(context: EvaluationContext, propertyMap?: PropertyMapping, customMapper?: (ctx: EvaluationContext) => string[]): string[] {
   // Strategy 1: Custom mapper function (HIGHEST PRIORITY - full control)
   if (customMapper) {
     return customMapper(context)
@@ -386,7 +378,7 @@ export function extractAudiences(
   }
 
   // Strategy 4: Default property mapping (FALLBACK - sensible defaults)
-  
+
   // Include targetingKey as-is (OpenFeature standard)
   if (context.targetingKey) {
     audiences.push(context.targetingKey)
@@ -414,11 +406,7 @@ import { ErrorCode, StandardResolutionReasons } from '@openfeature/server-sdk'
  * Map FeatureBoard value to OpenFeature FlagValue
  * Handles type conversion and validation
  */
-export function mapToFlagValue<T extends FlagValue>(
-  value: unknown,
-  expectedType: 'boolean' | 'string' | 'number' | 'object',
-  flagKey: string
-): ResolutionDetails<T> {
+export function mapToFlagValue<T extends FlagValue>(value: unknown, expectedType: 'boolean' | 'string' | 'number' | 'object', flagKey: string): ResolutionDetails<T> {
   // Handle undefined/null
   if (value === undefined || value === null) {
     return {
@@ -429,7 +417,7 @@ export function mapToFlagValue<T extends FlagValue>(
 
   // Type validation
   const actualType = typeof value
-  
+
   if (expectedType === 'object') {
     if (typeof value === 'object') {
       return {
@@ -463,21 +451,18 @@ Both js-sdk and node-sdk use an internal event system:
 ```typescript
 // AllFeatureStateStore (node-sdk)
 class AllFeatureStateStore {
-  private featureUpdatedCallbacks: Array<
-    (featureKey: string, values: FeatureConfiguration | undefined) => void
-  > = []
-  
+  private featureUpdatedCallbacks: Array<(featureKey: string, values: FeatureConfiguration | undefined) => void> = []
+
   set(featureKey: string, value: FeatureConfiguration | undefined) {
     this._store[featureKey] = value
     // Notify all subscribers
-    this.featureUpdatedCallbacks.forEach(callback => 
-      callback(featureKey, value)
-    )
+    this.featureUpdatedCallbacks.forEach((callback) => callback(featureKey, value))
   }
 }
 ```
 
 **Update Sources**:
+
 - **Polling Strategy**: Periodically fetches and updates state
 - **Live Strategy**: WebSocket receives real-time updates
 - **On-Request Strategy**: Fetches before each request
@@ -486,6 +471,7 @@ class AllFeatureStateStore {
 All strategies call `stateStore.set()` → triggers callbacks → we emit OpenFeature events
 
 **Implementation**:
+
 1. Subscribe to `AllFeatureStateStore.featureUpdatedCallbacks` after initialization
 2. On each callback, emit `ProviderEvents.ConfigurationChanged` with feature key
 3. OpenFeature SDK handles re-evaluation and caching
@@ -496,16 +482,7 @@ All strategies call `stateStore.set()` → triggers callbacks → we emit OpenFe
 ### 2.5 Provider Implementation (`src/featureboard-provider.ts`)
 
 ```typescript
-import {
-  Provider,
-  ResolutionDetails,
-  EvaluationContext,
-  JsonValue,
-  ProviderStatus,
-  ProviderEvents,
-  ErrorCode,
-  StandardResolutionReasons,
-} from '@openfeature/server-sdk'
+import { Provider, ResolutionDetails, EvaluationContext, JsonValue, ProviderStatus, ProviderEvents, ErrorCode, StandardResolutionReasons } from '@openfeature/server-sdk'
 import { createServerClient, ServerClient } from '@featureboard/node-sdk'
 import type { FeatureBoardProviderOptions, FeatureBoardProviderMetadata } from './types'
 import { extractAudiences } from './audience-extractor'
@@ -595,7 +572,7 @@ export class FeatureBoardProvider implements Provider {
 
     // Access internal state store (not public API - may need to be exposed)
     const stateStore = (this.serverClient as any)._stateStore
-    
+
     if (!stateStore || !stateStore.featureUpdatedCallbacks) {
       console.warn('Unable to subscribe to FeatureBoard state changes - internal API may have changed')
       return
@@ -605,7 +582,7 @@ export class FeatureBoardProvider implements Provider {
     const callback = (featureKey: string, _value: any) => {
       // Emit OpenFeature CONFIGURATION_CHANGED event
       this.events?.emit(ProviderEvents.ConfigurationChanged, {
-        flagsChanged: [featureKey]
+        flagsChanged: [featureKey],
       })
     }
 
@@ -623,56 +600,35 @@ export class FeatureBoardProvider implements Provider {
   /**
    * Resolve boolean flag value
    */
-  resolveBooleanEvaluation(
-    flagKey: string,
-    defaultValue: boolean,
-    context: EvaluationContext
-  ): ResolutionDetails<boolean> {
+  resolveBooleanEvaluation(flagKey: string, defaultValue: boolean, context: EvaluationContext): ResolutionDetails<boolean> {
     return this.resolveValue(flagKey, defaultValue, context, 'boolean')
   }
 
   /**
    * Resolve string flag value
    */
-  resolveStringEvaluation(
-    flagKey: string,
-    defaultValue: string,
-    context: EvaluationContext
-  ): ResolutionDetails<string> {
+  resolveStringEvaluation(flagKey: string, defaultValue: string, context: EvaluationContext): ResolutionDetails<string> {
     return this.resolveValue(flagKey, defaultValue, context, 'string')
   }
 
   /**
    * Resolve number flag value
    */
-  resolveNumberEvaluation(
-    flagKey: string,
-    defaultValue: number,
-    context: EvaluationContext
-  ): ResolutionDetails<number> {
+  resolveNumberEvaluation(flagKey: string, defaultValue: number, context: EvaluationContext): ResolutionDetails<number> {
     return this.resolveValue(flagKey, defaultValue, context, 'number')
   }
 
   /**
    * Resolve object flag value
    */
-  resolveObjectEvaluation<T extends JsonValue>(
-    flagKey: string,
-    defaultValue: T,
-    context: EvaluationContext
-  ): ResolutionDetails<T> {
+  resolveObjectEvaluation<T extends JsonValue>(flagKey: string, defaultValue: T, context: EvaluationContext): ResolutionDetails<T> {
     return this.resolveValue(flagKey, defaultValue, context, 'object')
   }
 
   /**
    * Core resolution logic
    */
-  private resolveValue<T>(
-    flagKey: string,
-    defaultValue: T,
-    context: EvaluationContext,
-    expectedType: 'boolean' | 'string' | 'number' | 'object'
-  ): ResolutionDetails<T> {
+  private resolveValue<T>(flagKey: string, defaultValue: T, context: EvaluationContext, expectedType: 'boolean' | 'string' | 'number' | 'object'): ResolutionDetails<T> {
     // Check if provider is ready
     if (!this.serverClient || this._status !== ProviderStatus.READY) {
       return {
@@ -685,11 +641,7 @@ export class FeatureBoardProvider implements Provider {
 
     try {
       // Extract audiences from context
-      const audiences = extractAudiences(
-        context,
-        this.options.audiencePropertyMap,
-        this.options.audienceMapper
-      )
+      const audiences = extractAudiences(context, this.options.audiencePropertyMap, this.options.audienceMapper)
 
       // Create request-scoped client
       const client = this.serverClient.request(audiences)
@@ -716,11 +668,7 @@ export class FeatureBoardProvider implements Provider {
 ```typescript
 export { FeatureBoardProvider } from './featureboard-provider'
 export { extractAudiences } from './audience-extractor'
-export type {
-  FeatureBoardProviderOptions,
-  FeatureBoardProviderMetadata,
-  PropertyMapping,
-} from './types'
+export type { FeatureBoardProviderOptions, FeatureBoardProviderMetadata, PropertyMapping } from './types'
 
 // Re-export commonly needed types from dependencies
 export type { EvaluationContext } from '@openfeature/server-sdk'
@@ -742,6 +690,7 @@ src/tests/                                # Match node-sdk pattern (not __tests_
 ### 3.2 Key Test Cases
 
 **Audience Extractor Tests**:
+
 - ✅ Explicit audiences array takes priority
 - ✅ Custom mapper function overrides everything
 - ✅ Property map with templates works correctly
@@ -752,6 +701,7 @@ src/tests/                                # Match node-sdk pattern (not __tests_
 - ✅ Handles empty context
 
 **Provider Tests**:
+
 - ✅ Provider initializes correctly
 - ✅ Provider emits READY event on initialization
 - ✅ Provider resolves boolean flags correctly
@@ -768,6 +718,7 @@ src/tests/                                # Match node-sdk pattern (not __tests_
 - ✅ Provider handles multiple state updates efficiently
 
 **Type Mapper Tests**:
+
 - ✅ Maps values correctly for each type
 - ✅ Detects type mismatches
 - ✅ Handles null/undefined values
@@ -784,58 +735,58 @@ describe('extractAudiences', () => {
   it('should use explicit audiences array when provided', () => {
     const context = {
       targetingKey: 'user-123',
-      audiences: ['premium', 'org:acme', 'role:admin']
+      audiences: ['premium', 'org:acme', 'role:admin'],
     }
-    
+
     const result = extractAudiences(context)
-    
+
     expect(result).toEqual(['premium', 'org:acme', 'role:admin'])
   })
 
   it('should use custom mapper when provided', () => {
     const context = {
       targetingKey: 'user-123',
-      tier: 'premium'
+      tier: 'premium',
     }
-    
+
     const customMapper = (ctx: any) => {
       return [ctx.targetingKey, `tier-${ctx.tier}`]
     }
-    
+
     const result = extractAudiences(context, undefined, customMapper)
-    
+
     expect(result).toEqual(['user-123', 'tier-premium'])
   })
 
   it('should apply property map templates', () => {
     const context = {
       organizationId: 'acme',
-      role: 'admin'
+      role: 'admin',
     }
-    
+
     const propertyMap = {
       organizationId: 'org:{value}',
-      role: 'role:{value}'
+      role: 'role:{value}',
     }
-    
+
     const result = extractAudiences(context, propertyMap)
-    
+
     expect(result).toEqual(['org:acme', 'role:admin'])
   })
 
   it('should apply property map functions', () => {
     const context = {
       isPremium: true,
-      subscriptionLevel: 3
+      subscriptionLevel: 3,
     }
-    
+
     const propertyMap = {
-      isPremium: (v: boolean) => v ? 'premium' : null,
-      subscriptionLevel: (level: number) => level >= 3 ? 'enterprise' : 'basic'
+      isPremium: (v: boolean) => (v ? 'premium' : null),
+      subscriptionLevel: (level: number) => (level >= 3 ? 'enterprise' : 'basic'),
     }
-    
+
     const result = extractAudiences(context, propertyMap)
-    
+
     expect(result).toEqual(['premium', 'enterprise'])
   })
 
@@ -844,24 +795,19 @@ describe('extractAudiences', () => {
       targetingKey: 'user-123',
       userId: '123',
       organizationId: 'acme',
-      role: 'admin'
+      role: 'admin',
     }
-    
+
     const result = extractAudiences(context)
-    
-    expect(result).toEqual([
-      'user-123',
-      'user:123',
-      'org:acme',
-      'role:admin'
-    ])
+
+    expect(result).toEqual(['user-123', 'user:123', 'org:acme', 'role:admin'])
   })
 
   it('should handle empty context', () => {
     const context = {}
-    
+
     const result = extractAudiences(context)
-    
+
     expect(result).toEqual([])
   })
 })
@@ -873,7 +819,7 @@ describe('extractAudiences', () => {
 
 ### 4.1 README.md Structure
 
-```markdown
+````markdown
 # @featureboard/openfeature-node-provider
 
 OpenFeature Provider for FeatureBoard - enables using FeatureBoard with the OpenFeature SDK.
@@ -883,6 +829,7 @@ OpenFeature Provider for FeatureBoard - enables using FeatureBoard with the Open
 ```bash
 npm install @featureboard/openfeature-node-provider @openfeature/server-sdk
 ```
+````
 
 ## Quick Start
 
@@ -903,6 +850,7 @@ npm install @featureboard/openfeature-node-provider @openfeature/server-sdk
 ## Migration Guide
 
 [If migrating from direct node-sdk usage]
+
 ```
 
 ### 4.2 Key Documentation Sections
@@ -929,11 +877,13 @@ npm install @featureboard/openfeature-node-provider @openfeature/server-sdk
 Create example apps in `apps/examples/`:
 
 ```
+
 apps/examples/
-├── openfeature-basic/          # Basic usage
-├── openfeature-express/        # Express.js integration
-└── openfeature-advanced/       # Advanced scenarios
-```
+├── openfeature-basic/ # Basic usage
+├── openfeature-express/ # Express.js integration
+└── openfeature-advanced/ # Advanced scenarios
+
+````
 
 ### 5.2 Example Scenarios
 
@@ -1015,7 +965,7 @@ Based on examination of existing FeatureBoard SDKs:
 // Request-scoped client creation
 const client = serverClient.request(['premium', 'org:acme'])
 const value = client.getFeatureValue('feature', false)
-```
+````
 
 The `request()` method creates a **snapshot** of the current state with audiences baked in. Each request gets its own isolated client with shallow-copied state (`const featuresState = stateStore.all()`).
 
@@ -1046,14 +996,14 @@ await client.waitForInitialised() // May reject if failed
 
 ```typescript
 function syncRequest(stateStore, audienceKeys) {
-    // Shallow copy the feature state so requests are stable
-    const featuresState = stateStore.all()
-    
-    // All evaluations use this snapshot
-    function getFeatureValue(featureKey, defaultValue) {
-        const featureValues = featuresState[featureKey]
-        // ... evaluation logic
-    }
+  // Shallow copy the feature state so requests are stable
+  const featuresState = stateStore.all()
+
+  // All evaluations use this snapshot
+  function getFeatureValue(featureKey, defaultValue) {
+    const featureValues = featuresState[featureKey]
+    // ... evaluation logic
+  }
 }
 ```
 
@@ -1068,12 +1018,12 @@ State updates happening during evaluation **don't affect current request** - eac
 ```typescript
 // Production environment
 const prodClient = createServerClient({
-    environmentApiKey: 'prod-key',
+  environmentApiKey: 'prod-key',
 })
 
-// Staging environment  
+// Staging environment
 const stagingClient = createServerClient({
-    environmentApiKey: 'staging-key',
+  environmentApiKey: 'staging-key',
 })
 ```
 
@@ -1090,11 +1040,11 @@ Each has independent state store and update strategy.
 ```typescript
 // Generated by @featureboard/code-generator
 declare module '@featureboard/js-sdk' {
-    interface Features {
-        'my-feature': boolean
-        'pricing-tier': 'free' | 'premium' | 'enterprise'
-        'max-uploads': number
-    }
+  interface Features {
+    'my-feature': boolean
+    'pricing-tier': 'free' | 'premium' | 'enterprise'
+    'max-uploads': number
+  }
 }
 ```
 
@@ -1118,27 +1068,26 @@ client.getFeatureValue('my-feature', false) // TypeScript knows it's boolean
 
 ```typescript
 function getFeatureValue(featureKey, defaultValue) {
-    const featureValues = featuresState[featureKey]
-    
-    // Scenario 1: Feature doesn't exist
-    if (!featureValues) {
-        return defaultValue // User's fallback
-    }
-    
-    // Scenario 2: Audience exception matches
-    const audienceException = featureValues.audienceExceptions.find(a =>
-        audienceKeys.includes(a.audienceKey)
-    )
-    if (audienceException) {
-        return audienceException.value
-    }
-    
-    // Scenario 3: Use feature's default value
-    return featureValues.defaultValue
+  const featureValues = featuresState[featureKey]
+
+  // Scenario 1: Feature doesn't exist
+  if (!featureValues) {
+    return defaultValue // User's fallback
+  }
+
+  // Scenario 2: Audience exception matches
+  const audienceException = featureValues.audienceExceptions.find((a) => audienceKeys.includes(a.audienceKey))
+  if (audienceException) {
+    return audienceException.value
+  }
+
+  // Scenario 3: Use feature's default value
+  return featureValues.defaultValue
 }
 ```
 
 **For OpenFeature Provider**:
+
 - Feature doesn't exist → `DEFAULT` reason + user's default value
 - Audience matches → `TARGETING_MATCH` reason + feature value
 - Audience doesn't match → `TARGETING_MATCH` reason + feature's default value (NOT user's fallback)
@@ -1165,46 +1114,50 @@ All SDK packages follow `@featureboard/<name>` scoping.
 
 ### Technical Risks
 
-| Risk | Impact | Mitigation |
-|------|--------|------------|
-| Audience mapping confusion | **HIGH** - Users won't know how to configure | Excellent documentation, clear examples, helpful error messages |
-| Type mismatches | **MEDIUM** - Runtime errors | Strong TypeScript types, validation, clear error messages |
-| Performance overhead | **LOW** - Additional layer | Minimal abstraction, benchmarking |
-| Event sync issues | **MEDIUM** - Stale flags | Thorough testing of event bridging |
-| Internal API dependency | **MEDIUM** - Accessing non-public state store | May need to expose state change subscription in node-sdk public API |
-| Event flooding | **LOW** - Many events with polling/live | OpenFeature SDK handles debouncing, minimal overhead |
-| Type safety loss | **MEDIUM** - No generated types with OpenFeature | Document limitation, recommend direct SDK for type safety |
-| Default value semantics | **MEDIUM** - FeatureBoard default ≠ OpenFeature default | Clear documentation of behavior difference |
+| Risk                       | Impact                                                  | Mitigation                                                          |
+| -------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------- |
+| Audience mapping confusion | **HIGH** - Users won't know how to configure            | Excellent documentation, clear examples, helpful error messages     |
+| Type mismatches            | **MEDIUM** - Runtime errors                             | Strong TypeScript types, validation, clear error messages           |
+| Performance overhead       | **LOW** - Additional layer                              | Minimal abstraction, benchmarking                                   |
+| Event sync issues          | **MEDIUM** - Stale flags                                | Thorough testing of event bridging                                  |
+| Internal API dependency    | **MEDIUM** - Accessing non-public state store           | May need to expose state change subscription in node-sdk public API |
+| Event flooding             | **LOW** - Many events with polling/live                 | OpenFeature SDK handles debouncing, minimal overhead                |
+| Type safety loss           | **MEDIUM** - No generated types with OpenFeature        | Document limitation, recommend direct SDK for type safety           |
+| Default value semantics    | **MEDIUM** - FeatureBoard default ≠ OpenFeature default | Clear documentation of behavior difference                          |
 
 ### Documentation Risks
 
-| Risk | Impact | Mitigation |
-|------|--------|------------|
+| Risk                            | Impact       | Mitigation                                                 |
+| ------------------------------- | ------------ | ---------------------------------------------------------- |
 | Audience mapping not understood | **CRITICAL** | Multiple examples, comparison table, troubleshooting guide |
-| Migration path unclear | **HIGH** | Migration guide with before/after examples |
-| API reference incomplete | **MEDIUM** | JSDoc on all public APIs, generated docs |
+| Migration path unclear          | **HIGH**     | Migration guide with before/after examples                 |
+| API reference incomplete        | **MEDIUM**   | JSDoc on all public APIs, generated docs                   |
 
 ---
 
 ## Success Criteria
 
 ✅ **Functional**:
+
 - Provider implements full OpenFeature Provider interface
 - All OpenFeature SDK tests pass against provider
 - Can evaluate all FeatureBoard flag types
 
 ✅ **Usability**:
+
 - Clear examples for all three audience mapping approaches
 - Users can get started in <5 minutes
 - Error messages are helpful and actionable
 
 ✅ **Quality**:
-- >90% test coverage
+
+- > 90% test coverage
 - Zero TypeScript errors
 - Passes all linting rules
 - Documentation is comprehensive
 
 ✅ **Performance**:
+
 - <1ms overhead vs direct node-sdk usage
 - No memory leaks
 - Handles high throughput scenarios
@@ -1393,19 +1346,19 @@ export const debugLog = debug('@featureboard/openfeature-node-provider')
 
 ### **Verification Checklist**
 
-| Pattern | node-sdk | Plan (Fixed) | Match |
-|---------|----------|--------------|-------|
-| Build tool | tsup | tsup | ✅ |
-| Module type | ESM (`"type": "module"`) | ESM | ✅ |
-| Test runner | vitest | vitest | ✅ |
-| Test directory | `src/tests/` | `src/tests/` | ✅ |
-| Test file naming | `*.spec.ts` | `*.spec.ts` | ✅ |
-| Package scope | `@featureboard/` | `@featureboard/` | ✅ |
-| Output structure | dist/esm, dist/legacycjs, dist/index.cjs | Same | ✅ |
-| External deps | marked as --external | marked as --external | ✅ |
-| Update strategies | manual, polling, on-request | Same (no live) | ✅ |
-| Debug logging | debug package | debug package | ✅ |
-| Workspace refs | `workspace:*` | `workspace:*` | ✅ |
-| Peer deps | N/A | @openfeature/server-sdk | ✅ |
-| tsconfig references | `"references": [...]` | Includes node-sdk | ✅ |
-| tsconfig extends | `tsconfig.settings.json` | Same | ✅ |
+| Pattern             | node-sdk                                 | Plan (Fixed)            | Match |
+| ------------------- | ---------------------------------------- | ----------------------- | ----- |
+| Build tool          | tsup                                     | tsup                    | ✅    |
+| Module type         | ESM (`"type": "module"`)                 | ESM                     | ✅    |
+| Test runner         | vitest                                   | vitest                  | ✅    |
+| Test directory      | `src/tests/`                             | `src/tests/`            | ✅    |
+| Test file naming    | `*.spec.ts`                              | `*.spec.ts`             | ✅    |
+| Package scope       | `@featureboard/`                         | `@featureboard/`        | ✅    |
+| Output structure    | dist/esm, dist/legacycjs, dist/index.cjs | Same                    | ✅    |
+| External deps       | marked as --external                     | marked as --external    | ✅    |
+| Update strategies   | manual, polling, on-request              | Same (no live)          | ✅    |
+| Debug logging       | debug package                            | debug package           | ✅    |
+| Workspace refs      | `workspace:*`                            | `workspace:*`           | ✅    |
+| Peer deps           | N/A                                      | @openfeature/server-sdk | ✅    |
+| tsconfig references | `"references": [...]`                    | Includes node-sdk       | ✅    |
+| tsconfig extends    | `tsconfig.settings.json`                 | Same                    | ✅    |

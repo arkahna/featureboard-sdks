@@ -6,19 +6,19 @@ export { extractAudiences } from './audience-extractor'
 
 // Type exports
 export type {
-    FeatureBoardProviderOptions,
     FeatureBoardProviderMetadata,
+    FeatureBoardProviderOptions,
     PropertyMapping,
 } from './types'
 
 // Re-export commonly needed types from dependencies for convenience
 export type {
-    EvaluationContext,
-    ResolutionDetails,
-    ProviderStatus,
-} from '@openfeature/server-sdk'
-export type {
-    ServerClient,
     ExternalStateStore,
     FeatureBoardApiConfig,
+    ServerClient,
 } from '@featureboard/node-sdk'
+export type {
+    EvaluationContext,
+    ProviderStatus,
+    ResolutionDetails,
+} from '@openfeature/server-sdk'

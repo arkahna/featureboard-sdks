@@ -1,6 +1,6 @@
 import type { EvaluationContext } from '@openfeature/server-sdk'
-import type { PropertyMapping } from './types'
 import { debugLog } from './log'
+import type { PropertyMapping } from './types'
 
 const audienceExtractorDebug = debugLog.extend('audience-extractor')
 

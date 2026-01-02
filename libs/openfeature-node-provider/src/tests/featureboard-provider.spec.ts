@@ -1,15 +1,15 @@
 import type { FeatureConfiguration } from '@featureboard/contracts'
-import { HttpResponse, http } from 'msw'
-import { setupServer } from 'msw/node'
-import { describe, expect, it, beforeAll, afterAll, afterEach } from 'vitest'
-import { FeatureBoardProvider } from '../featureboard-provider'
 import {
+    ErrorCode,
     OpenFeature,
     ProviderStatus,
-    ErrorCode,
     StandardResolutionReasons,
     type Logger,
 } from '@openfeature/server-sdk'
+import { HttpResponse, http } from 'msw'
+import { setupServer } from 'msw/node'
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
+import { FeatureBoardProvider } from '../featureboard-provider'
 
 // Create a mock logger for testing
 const mockLogger: Logger = {
@@ -160,7 +160,9 @@ describe('FeatureBoardProvider', () => {
             )
 
             expect(result.value).toBe(true)
-            expect(result.reason).toBe(StandardResolutionReasons.TARGETING_MATCH)
+            expect(result.reason).toBe(
+                StandardResolutionReasons.TARGETING_MATCH,
+            )
         })
 
         it('should return default for unknown flag', async () => {
@@ -197,7 +199,9 @@ describe('FeatureBoardProvider', () => {
             )
 
             expect(result.value).toBe('default-string')
-            expect(result.reason).toBe(StandardResolutionReasons.TARGETING_MATCH)
+            expect(result.reason).toBe(
+                StandardResolutionReasons.TARGETING_MATCH,
+            )
         })
     })
 
@@ -217,7 +221,9 @@ describe('FeatureBoardProvider', () => {
             )
 
             expect(result.value).toBe(42)
-            expect(result.reason).toBe(StandardResolutionReasons.TARGETING_MATCH)
+            expect(result.reason).toBe(
+                StandardResolutionReasons.TARGETING_MATCH,
+            )
         })
     })
 
@@ -237,7 +243,9 @@ describe('FeatureBoardProvider', () => {
             )
 
             expect(result.value).toEqual({ key: 'value' })
-            expect(result.reason).toBe(StandardResolutionReasons.TARGETING_MATCH)
+            expect(result.reason).toBe(
+                StandardResolutionReasons.TARGETING_MATCH,
+            )
         })
     })
 

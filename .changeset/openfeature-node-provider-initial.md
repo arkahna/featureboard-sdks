@@ -1,5 +1,5 @@
 ---
-"@featureboard/openfeature-node-provider": minor
+'@featureboard/openfeature-node-provider': minor
 ---
 
 Initial release of `@featureboard/openfeature-node-provider`

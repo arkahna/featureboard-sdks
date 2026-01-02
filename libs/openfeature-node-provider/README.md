@@ -24,7 +24,7 @@ import { FeatureBoardProvider } from '@featureboard/openfeature-node-provider'
 
 // Create and register the provider
 const provider = new FeatureBoardProvider({
-    environmentApiKey: 'your-environment-api-key',
+  environmentApiKey: 'your-environment-api-key',
 })
 
 await OpenFeature.setProviderAndWait(provider)
@@ -33,7 +33,7 @@ await OpenFeature.setProviderAndWait(provider)
 const client = OpenFeature.getClient()
 
 const isEnabled = await client.getBooleanValue('my-feature', false, {
-    audiences: ['premium', 'org:acme'],
+  audiences: ['premium', 'org:acme'],
 })
 ```
 
@@ -47,24 +47,24 @@ Full control over audience extraction:
 
 ```typescript
 const provider = new FeatureBoardProvider({
-    environmentApiKey: 'your-key',
-    audienceMapper: (context) => {
-        const audiences: string[] = []
-        
-        if (context.targetingKey) {
-            audiences.push(context.targetingKey)
-        }
-        if (context.organization) {
-            audiences.push(`org:${context.organization}`)
-        }
-        if (context.roles && Array.isArray(context.roles)) {
-            for (const role of context.roles) {
-                audiences.push(`role:${role}`)
-            }
-        }
-        
-        return audiences
-    },
+  environmentApiKey: 'your-key',
+  audienceMapper: (context) => {
+    const audiences: string[] = []
+
+    if (context.targetingKey) {
+      audiences.push(context.targetingKey)
+    }
+    if (context.organization) {
+      audiences.push(`org:${context.organization}`)
+    }
+    if (context.roles && Array.isArray(context.roles)) {
+      for (const role of context.roles) {
+        audiences.push(`role:${role}`)
+      }
+    }
+
+    return audiences
+  },
 })
 ```
 
@@ -74,7 +74,7 @@ Pass audiences directly in the context:
 
 ```typescript
 const value = await client.getBooleanValue('feature', false, {
-    audiences: ['premium', 'org:acme', 'role:admin'],
+  audiences: ['premium', 'org:acme', 'role:admin'],
 })
 ```
 
@@ -84,25 +84,25 @@ Configure property-to-audience mappings:
 
 ```typescript
 const provider = new FeatureBoardProvider({
-    environmentApiKey: 'your-key',
-    audiencePropertyMap: {
-        // Template: replace {value} with property value
-        organizationId: 'org:{value}',    // organizationId: 'acme' → 'org:acme'
-        tier: 'tier:{value}',              // tier: 'premium' → 'tier:premium'
-        
-        // Direct value
-        segment: '{value}',                // segment: 'beta' → 'beta'
-        
-        // Function for complex logic
-        isPremium: (v) => v ? 'premium' : null,
-        subscriptionLevel: (level) => level >= 3 ? 'enterprise' : 'basic',
-    },
+  environmentApiKey: 'your-key',
+  audiencePropertyMap: {
+    // Template: replace {value} with property value
+    organizationId: 'org:{value}', // organizationId: 'acme' → 'org:acme'
+    tier: 'tier:{value}', // tier: 'premium' → 'tier:premium'
+
+    // Direct value
+    segment: '{value}', // segment: 'beta' → 'beta'
+
+    // Function for complex logic
+    isPremium: (v) => (v ? 'premium' : null),
+    subscriptionLevel: (level) => (level >= 3 ? 'enterprise' : 'basic'),
+  },
 })
 
 // Usage
 const value = await client.getBooleanValue('feature', false, {
-    organizationId: 'acme',
-    tier: 'gold',
+  organizationId: 'acme',
+  tier: 'gold',
 })
 ```
 
@@ -110,43 +110,43 @@ const value = await client.getBooleanValue('feature', false, {
 
 If no explicit configuration is provided, sensible defaults are applied:
 
-| Context Property | Audience Format |
-|-----------------|-----------------|
-| `targetingKey` | As-is (e.g., `user-123`) |
-| `userId` | `user:{value}` |
-| `organizationId` | `org:{value}` |
-| `teamId` | `team:{value}` |
-| `role` | `role:{value}` |
-| `tier` | `tier:{value}` |
-| `segment` | `segment:{value}` |
+| Context Property | Audience Format          |
+| ---------------- | ------------------------ |
+| `targetingKey`   | As-is (e.g., `user-123`) |
+| `userId`         | `user:{value}`           |
+| `organizationId` | `org:{value}`            |
+| `teamId`         | `team:{value}`           |
+| `role`           | `role:{value}`           |
+| `tier`           | `tier:{value}`           |
+| `segment`        | `segment:{value}`        |
 
 ## Configuration Options
 
 ```typescript
 interface FeatureBoardProviderOptions {
-    /** FeatureBoard environment API key (required) */
-    environmentApiKey: string
+  /** FeatureBoard environment API key (required) */
+  environmentApiKey: string
 
-    /** Update strategy: 'manual' | 'polling' | 'on-request' */
-    updateStrategy?: 'manual' | 'polling' | 'on-request'
+  /** Update strategy: 'manual' | 'polling' | 'on-request' */
+  updateStrategy?: 'manual' | 'polling' | 'on-request'
 
-    /** Polling interval in ms (for 'polling' strategy) */
-    intervalMs?: number
+  /** Polling interval in ms (for 'polling' strategy) */
+  intervalMs?: number
 
-    /** Max age in ms before refresh (for 'on-request' strategy) */
-    maxAgeMs?: number
+  /** Max age in ms before refresh (for 'on-request' strategy) */
+  maxAgeMs?: number
 
-    /** External state store for fallback initialization */
-    externalStateStore?: ExternalStateStore
+  /** External state store for fallback initialization */
+  externalStateStore?: ExternalStateStore
 
-    /** Custom API endpoint */
-    api?: FeatureBoardApiConfig | string
+  /** Custom API endpoint */
+  api?: FeatureBoardApiConfig | string
 
-    /** Declarative property-to-audience mapping */
-    audiencePropertyMap?: PropertyMapping
+  /** Declarative property-to-audience mapping */
+  audiencePropertyMap?: PropertyMapping
 
-    /** Custom audience extraction function */
-    audienceMapper?: (context: EvaluationContext) => string[]
+  /** Custom audience extraction function */
+  audienceMapper?: (context: EvaluationContext) => string[]
 }
 ```
 
@@ -158,8 +158,8 @@ Features are only updated when explicitly requested:
 
 ```typescript
 const provider = new FeatureBoardProvider({
-    environmentApiKey: 'your-key',
-    updateStrategy: 'manual',
+  environmentApiKey: 'your-key',
+  updateStrategy: 'manual',
 })
 ```
 
@@ -169,9 +169,9 @@ Features are updated at regular intervals:
 
 ```typescript
 const provider = new FeatureBoardProvider({
-    environmentApiKey: 'your-key',
-    updateStrategy: 'polling',
-    intervalMs: 30000, // 30 seconds (default)
+  environmentApiKey: 'your-key',
+  updateStrategy: 'polling',
+  intervalMs: 30000, // 30 seconds (default)
 })
 ```
 
@@ -181,9 +181,9 @@ Features are checked for updates on each request:
 
 ```typescript
 const provider = new FeatureBoardProvider({
-    environmentApiKey: 'your-key',
-    updateStrategy: 'on-request',
-    maxAgeMs: 30000, // Cache for 30 seconds
+  environmentApiKey: 'your-key',
+  updateStrategy: 'on-request',
+  maxAgeMs: 30000, // Cache for 30 seconds
 })
 ```
 
@@ -200,11 +200,11 @@ const app = express()
 
 // Initialize provider
 const provider = new FeatureBoardProvider({
-    environmentApiKey: process.env.FEATUREBOARD_API_KEY!,
-    audiencePropertyMap: {
-        userId: 'user:{value}',
-        organizationId: 'org:{value}',
-    },
+  environmentApiKey: process.env.FEATUREBOARD_API_KEY!,
+  audiencePropertyMap: {
+    userId: 'user:{value}',
+    organizationId: 'org:{value}',
+  },
 })
 
 await OpenFeature.setProviderAndWait(provider)
@@ -212,18 +212,18 @@ const client = OpenFeature.getClient()
 
 // Feature flag middleware
 app.use(async (req, res, next) => {
-    const context = {
-        targetingKey: req.user?.id,
-        userId: req.user?.id,
-        organizationId: req.user?.organizationId,
-    }
-    
-    req.features = {
-        newDashboard: await client.getBooleanValue('new-dashboard', false, context),
-        maxUploads: await client.getNumberValue('max-uploads', 10, context),
-    }
-    
-    next()
+  const context = {
+    targetingKey: req.user?.id,
+    userId: req.user?.id,
+    organizationId: req.user?.organizationId,
+  }
+
+  req.features = {
+    newDashboard: await client.getBooleanValue('new-dashboard', false, context),
+    maxUploads: await client.getNumberValue('max-uploads', 10, context),
+  }
+
+  next()
 })
 ```
 

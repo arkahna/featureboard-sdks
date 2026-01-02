@@ -1,8 +1,8 @@
-import type { EvaluationContext } from '@openfeature/server-sdk'
 import type {
-    FeatureBoardApiConfig,
     ExternalStateStore,
+    FeatureBoardApiConfig,
 } from '@featureboard/node-sdk'
+import type { EvaluationContext } from '@openfeature/server-sdk'
 
 /**
  * Property mapping configuration.

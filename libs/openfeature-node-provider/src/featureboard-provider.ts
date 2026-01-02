@@ -1,26 +1,25 @@
-import type {
-    Provider,
-    ResolutionDetails,
-    EvaluationContext,
-    JsonValue,
-    ProviderMetadata,
-    Hook,
-    Logger,
-    FlagValue,
-} from '@openfeature/server-sdk'
-import {
-    OpenFeatureEventEmitter,
-    ProviderEvents,
-    ProviderStatus,
-    ErrorCode,
-    StandardResolutionReasons,
-} from '@openfeature/server-sdk'
 import type { ServerClient } from '@featureboard/node-sdk'
 import { createServerClient } from '@featureboard/node-sdk'
-import type { FeatureBoardProviderOptions } from './types'
+import type {
+    EvaluationContext,
+    FlagValue,
+    Hook,
+    JsonValue,
+    Logger,
+    Provider,
+    ProviderMetadata,
+    ResolutionDetails,
+} from '@openfeature/server-sdk'
+import {
+    ErrorCode,
+    OpenFeatureEventEmitter,
+    ProviderStatus,
+    StandardResolutionReasons,
+} from '@openfeature/server-sdk'
 import { extractAudiences } from './audience-extractor'
-import { mapToFlagValue } from './type-mapper'
 import { debugLog } from './log'
+import { mapToFlagValue } from './type-mapper'
+import type { FeatureBoardProviderOptions } from './types'
 
 const providerDebug = debugLog.extend('provider')
 

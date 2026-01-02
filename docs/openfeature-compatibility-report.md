@@ -13,20 +13,21 @@
 This report analyzes the compatibility between FeatureBoard and OpenFeature. The **FeatureBoard OpenFeature Provider** has been implemented and provides a bridge between OpenFeature's standardized API and FeatureBoard's feature management platform.
 
 **Architecture Overview:**
+
 ```
 Application → OpenFeature SDK → FeatureBoard Provider → FeatureBoard node-sdk → FeatureBoard Service
 ```
 
 ### Implementation Status
 
-| Aspect | Status | Notes |
-|--------|--------|-------|
-| **Overall Compatibility** | 🟢 **Implemented** | Provider implements all required OpenFeature interfaces |
-| **Core Flag Evaluation** | 🟢 **Complete** | Boolean, string, number, object (via JSON strings) supported |
-| **Provider Implementation** | 🟢 **Complete** | All required provider methods implemented |
-| **FeatureBoard Features** | 🟢 **Preserved** | All FeatureBoard capabilities accessible via context mapping |
-| **OpenFeature Standard** | 🟢 **Compliant** | Follows OpenFeature provider specification and best practices |
-| **Tests** | 🟢 **57 passing** | Comprehensive test coverage for all components |
+| Aspect                      | Status             | Notes                                                         |
+| --------------------------- | ------------------ | ------------------------------------------------------------- |
+| **Overall Compatibility**   | 🟢 **Implemented** | Provider implements all required OpenFeature interfaces       |
+| **Core Flag Evaluation**    | 🟢 **Complete**    | Boolean, string, number, object (via JSON strings) supported  |
+| **Provider Implementation** | 🟢 **Complete**    | All required provider methods implemented                     |
+| **FeatureBoard Features**   | 🟢 **Preserved**   | All FeatureBoard capabilities accessible via context mapping  |
+| **OpenFeature Standard**    | 🟢 **Compliant**   | Follows OpenFeature provider specification and best practices |
+| **Tests**                   | 🟢 **57 passing**  | Comprehensive test coverage for all components                |
 
 ---
 
@@ -55,6 +56,7 @@ Application → OpenFeature SDK → FeatureBoard Provider → FeatureBoard node-
 FeatureBoard uses an **audience-based targeting model** where you explicitly specify which audiences a user belongs to. OpenFeature uses a **context-based model** with arbitrary key-value pairs. **OpenFeature has no concept of "audiences" in its specification.**
 
 ### **FeatureBoard: Audience-Based Targeting**
+
 ```typescript
 // FeatureBoard requires an array of audience strings
 const audiences = ['premium', 'beta-users', 'org:acme', 'role:admin']
@@ -75,12 +77,13 @@ serverClient.request(audiences)
 ```
 
 ### **OpenFeature: Context-Based Targeting**
+
 ```typescript
 // OpenFeature uses EvaluationContext - a flat key-value object
 // Contains properties ABOUT the user, but doesn't declare membership
 const context = {
-  targetingKey: 'user-123',    // PRIMARY: Who is being evaluated (REQUIRED for targeting)
-  
+  targetingKey: 'user-123', // PRIMARY: Who is being evaluated (REQUIRED for targeting)
+
   // Additional properties that describe the user/request
   userId: '123',
   email: 'user@example.com',
@@ -98,32 +101,33 @@ client.getBooleanValue('feature-1', false, context)
 
 **Key Difference in Philosophy:**
 
-| Aspect | FeatureBoard (Audience-Based) | OpenFeature (Context-Based) |
-|--------|------------------------------|----------------------------|
-| **What you provide** | **Explicit membership list** - "user belongs to these groups" | **Properties about the user** - "here's what we know about the user" |
-| **Example input** | `['premium', 'org:acme', 'role:admin']` | `{ tier: 'premium', organizationId: 'acme', role: 'admin' }` |
-| **Who decides flag value?** | FeatureBoard service checks if any audience matches `audienceExceptions` | **Provider decides** how to interpret context |
-| **Semantic** | "Is user IN any of these audiences?" | "Given this information about the user, what should the flag value be?" |
-| **Standard** | FeatureBoard-specific concept | OpenFeature standard, but interpretation varies by provider |
+| Aspect                      | FeatureBoard (Audience-Based)                                            | OpenFeature (Context-Based)                                             |
+| --------------------------- | ------------------------------------------------------------------------ | ----------------------------------------------------------------------- |
+| **What you provide**        | **Explicit membership list** - "user belongs to these groups"            | **Properties about the user** - "here's what we know about the user"    |
+| **Example input**           | `['premium', 'org:acme', 'role:admin']`                                  | `{ tier: 'premium', organizationId: 'acme', role: 'admin' }`            |
+| **Who decides flag value?** | FeatureBoard service checks if any audience matches `audienceExceptions` | **Provider decides** how to interpret context                           |
+| **Semantic**                | "Is user IN any of these audiences?"                                     | "Given this information about the user, what should the flag value be?" |
+| **Standard**                | FeatureBoard-specific concept                                            | OpenFeature standard, but interpretation varies by provider             |
 
 ### **The Problem**
 
-| Aspect | FeatureBoard | OpenFeature | Incompatibility |
-|--------|-------------|-------------|-----------------|
-| **Input Format** | Array of strings `string[]` | Object `{ [key: string]: any }` | 🔴 Different structure |
-| **Semantic** | Explicit audience membership | Property-based context | 🔴 Different meaning |
-| **Standard** | FeatureBoard-specific | OpenFeature standard (no audiences) | 🔴 Must invent mapping |
-| **Matching** | Exact string match on array | Provider-specific interpretation | 🔴 No standard approach |
+| Aspect           | FeatureBoard                 | OpenFeature                         | Incompatibility         |
+| ---------------- | ---------------------------- | ----------------------------------- | ----------------------- |
+| **Input Format** | Array of strings `string[]`  | Object `{ [key: string]: any }`     | 🔴 Different structure  |
+| **Semantic**     | Explicit audience membership | Property-based context              | 🔴 Different meaning    |
+| **Standard**     | FeatureBoard-specific        | OpenFeature standard (no audiences) | 🔴 Must invent mapping  |
+| **Matching**     | Exact string match on array  | Provider-specific interpretation    | 🔴 No standard approach |
 
 ### **What OpenFeature Uses Instead of Audiences**
 
-OpenFeThe Translation Challenge**
+OpenFeThe Translation Challenge\*\*
 
 The provider must translate OpenFeature's **"properties about a user"** into FeatureBoard's **"list of groups the user belongs to"**.
 
 **Critical Questions the Provider Must Answer:**
 
 1. **How to interpret property values as audience membership?**
+
    ```typescript
    // Context property          → Audience string?
    tier: 'premium'             → 'premium'? or 'tier:premium'?
@@ -134,6 +138,7 @@ The provider must translate OpenFeature's **"properties about a user"** into Fea
    ```
 
 2. **Which properties represent audience membership vs. metadata?**
+
    ```typescript
    {
      userId: '123',          // ❓ Is this an audience?
@@ -146,6 +151,7 @@ The provider must translate OpenFeature's **"properties about a user"** into Fea
    ```
 
 3. **What about targetingKey?**
+
    ```typescript
    targetingKey: 'user-123'  → Include as audience 'user-123'?
                               → Or just for logging/debugging?
@@ -153,6 +159,7 @@ The provider must translate OpenFeature's **"properties about a user"** into Fea
    ```
 
 4. **How to handle non-string values?**
+
    ```typescript
    isPremium: true          → 'premium'? or 'isPremium'? or skip?
    subscriptionLevel: 3     → 'level:3'? or 'level-3'? or skip?
@@ -181,18 +188,22 @@ context: { tier: 'premium', organizationId: 'acme', betaProgram: true }
 ### **Critical Questions the Provider Must Answer**
 
 1. **Which context properties become audiences?**
+
    - Should `userId: '123'` become audience `'123'` or `'user:123'`?
    - Should `role: 'admin'` become `'admin'` or `'role:admin'`?
 
 2. **How to handle non-string values?**
+
    - What if `tier: 'premium'` vs `isPremium: true`?
    - What about numbers: `score: 100`?
 
 3. **How to handle nested or complex values?**
+
    - What if context has `user: { id: '123', role: 'admin' }`?
    - Should nested properties be flattened?
 
 4. **What about arbitrary custom properties?**
+
    - User adds `customSegment: 'vip'` - should this become an audience?
    - How to distinguish targeting properties from metadata?
 
@@ -202,27 +213,27 @@ context: { tier: 'premium', organizationId: 'acme', betaProgram: true }
 
 ### **Solution Strategies**
 
-| Strategy | Description | Pros | Cons | Recommended |
-|----------|-------------|------|------|-------------|
-| **1. Custom `audiences` property** | `context.audiences: string[]` | ✅ Explicit<br>✅ No ambiguity<br>✅ Direct pass-through | 🔴 Non-standard OpenFeature<br>🔴 Vendor-specific | ⭐⭐⭐⭐⭐ **PRIMARY** |
-| **2. Configurable property map** | User provides map<br>`{ tier: 'tier:{value}' }`<br>Provider applies templates | ✅ Declarative<br>✅ Easy to configure<br>✅ No code required<br>✅ Handles common cases | 🔴 Template syntax required<br>🔴 Limited to string templates | ⭐⭐⭐⭐⭐ **RECOMMENDED** |
-| **3. Property name mapping** | Map known properties<br>`userId → 'user:{value}'`<br>`role → 'role:{value}'` | ✅ Predictable<br>✅ Documented<br>✅ Works for common cases | 🔴 Limited flexibility<br>🔴 Must know all property names<br>🔴 Naming convention required | ⭐⭐⭐⭐ **DEFAULT FALLBACK** |
-| **4. Custom mapper function** | User provides function<br>`(ctx) => string[]` | ✅ Maximum flexibility<br>✅ User control<br>✅ Handles any logic | 🔴 Requires code<br>🔴 Learning curve<br>🔴 More complex setup | ⭐⭐⭐ **ADVANCED** |
-| **5. targetingKey only** | Use `context.targetingKey` as single audience | ✅ OpenFeature standard | 🔴 Only one audience<br>🔴 Loses FeatureBoard power | ⭐ Not recommended |
-| **6. Scan all properties** | Convert all string properties to audiences | ✅ No configuration | 🔴 Unpredictable<br>🔴 May include unwanted data<br>🔴 Unreliable | ❌ Not recommended |
+| Strategy                           | Description                                                                   | Pros                                                                                     | Cons                                                                                       | Recommended                   |
+| ---------------------------------- | ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ----------------------------- |
+| **1. Custom `audiences` property** | `context.audiences: string[]`                                                 | ✅ Explicit<br>✅ No ambiguity<br>✅ Direct pass-through                                 | 🔴 Non-standard OpenFeature<br>🔴 Vendor-specific                                          | ⭐⭐⭐⭐⭐ **PRIMARY**        |
+| **2. Configurable property map**   | User provides map<br>`{ tier: 'tier:{value}' }`<br>Provider applies templates | ✅ Declarative<br>✅ Easy to configure<br>✅ No code required<br>✅ Handles common cases | 🔴 Template syntax required<br>🔴 Limited to string templates                              | ⭐⭐⭐⭐⭐ **RECOMMENDED**    |
+| **3. Property name mapping**       | Map known properties<br>`userId → 'user:{value}'`<br>`role → 'role:{value}'`  | ✅ Predictable<br>✅ Documented<br>✅ Works for common cases                             | 🔴 Limited flexibility<br>🔴 Must know all property names<br>🔴 Naming convention required | ⭐⭐⭐⭐ **DEFAULT FALLBACK** |
+| **4. Custom mapper function**      | User provides function<br>`(ctx) => string[]`                                 | ✅ Maximum flexibility<br>✅ User control<br>✅ Handles any logic                        | 🔴 Requires code<br>🔴 Learning curve<br>🔴 More complex setup                             | ⭐⭐⭐ **ADVANCED**           |
+| **5. targetingKey only**           | Use `context.targetingKey` as single audience                                 | ✅ OpenFeature standard                                                                  | 🔴 Only one audience<br>🔴 Loses FeatureBoard power                                        | ⭐ Not recommended            |
+| **6. Scan all properties**         | Convert all string properties to audiences                                    | ✅ No configuration                                                                      | 🔴 Unpredictable<br>🔴 May include unwanted data<br>🔴 Unreliable                          | ❌ Not recommended            |
 
 ### **Recommended Implementation: Hybrid Strategy**
 
-```typescript
+````typescript
 function extractAudiences(context: EvaluationContext): string[] {
   // Strategy 1: Explicit audiences (RECOMMENDED - clearest)
   if (context.audiences && Array.isArray(context.audiences)) {
     return context.audiences as string[]
   }
-  
+
   // Strategy 2: Property mapping (FALLBACK - for standard cases)
   const audiences: string[] = []
-  
+
   // Include targetingKey as-is (OpenFeature standard)
   if (Real-World Example: The Mismatch**
 
@@ -254,7 +265,7 @@ const value = await client.getBooleanValue('premium-features', false, context)
 //    - Does subscriptionTier: 'premium' mean user is in 'premium' audience?
 //    - Does organizationName: 'enterprise-co' mean 'org:enterprise-co' audience?
 //    - How to construct the exact strings FeatureBoard expects?
-```
+````
 
 ### **Impact on Users**
 
@@ -268,9 +279,9 @@ const value = client.getFeatureValue('feature', false)
 // ✅ Crystal clear: user belongs to these audiences
 
 // OpenFeature Option 1: Custom audiences array (RECOMMENDED)
-const context = { 
+const context = {
   targetingKey: 'user-123',
-  audiences: ['premium', 'org:acme', 'role:admin']  // ⚠️ FeatureBoard-specific
+  audiences: ['premium', 'org:acme', 'role:admin'], // ⚠️ FeatureBoard-specific
 }
 const value = await client.getBooleanValue('feature', false, context)
 // ⚠️ Must know: 'audiences' is a custom convention, not OpenFeature standard
@@ -278,41 +289,44 @@ const value = await client.getBooleanValue('feature', false, context)
 // OpenFeature Option 2: Property mapping (IMPLICIT)
 const context = {
   targetingKey: 'user-123',
-  tier: 'premium',           // ⚠️ Provider translates to 'premium' or 'tier:premium'?
-  organizationId: 'acme',    // ⚠️ Provider translates to 'org:acme'?
-  role: 'admin'              // ⚠️ Provider translates to 'role:admin'?
+  tier: 'premium', // ⚠️ Provider translates to 'premium' or 'tier:premium'?
+  organizationId: 'acme', // ⚠️ Provider translates to 'org:acme'?
+  role: 'admin', // ⚠️ Provider translates to 'role:admin'?
 }
 const value = await client.getBooleanValue('feature', false, context)
 // ⚠️ Must understand provider's mapping rules
 ```
 
 **Users must understand:**
+
 1. **OpenFeature provides properties, not audience membership** - fundamentally different model
 2. **FeatureBoard provider needs to bridge this gap** with mapping conventions
 3. **Recommended approach**: Use explicit `context.audiences` array (FeatureBoard-specific)
 4. **Alternative**: Learn the property→audience mapping rules (e.g., `organizationId → 'org:{value}'`)
 5. **Advanced**: Provide custom `audienceMapper` function for complex business logic
 6. **Critical**: Context properties must produce the **exact audience strings** used in FeatureBoard configs
+
 ```typescript
 // FeatureBoard Native SDK - Clear and explicit
 const audiences = ['premium', 'org:acme', 'role:admin']
 const client = serverClient.request(audiences)
-const value = client.getFeatureValue('feature', false)  // ✅ Clear what audiences are used
+const value = client.getFeatureValue('feature', false) // ✅ Clear what audiences are used
 
 // OpenFeature Provider - Must understand mapping
-const context = { 
-  audiences: ['premium', 'org:acme', 'role:admin']  // ⚠️ FeatureBoard-specific convention
+const context = {
+  audiences: ['premium', 'org:acme', 'role:admin'], // ⚠️ FeatureBoard-specific convention
 }
 const value = await client.getBooleanValue('feature', false, context)
 
 // OR using property mapping
 const context = {
-  organizationId: 'acme',  // ⚠️ Must know this becomes 'org:acme'
-  role: 'admin'            // ⚠️ Must know this becomes 'role:admin'
+  organizationId: 'acme', // ⚠️ Must know this becomes 'org:acme'
+  role: 'admin', // ⚠️ Must know this becomes 'role:admin'
 }
 ```
 
 **Users must understand:**
+
 1. OpenFeature has no concept of "audiences" - this is FeatureBoard-specific
 2. How to construct context to match their FeatureBoard audience strings
 3. The naming conventions (e.g., `'user:{userId}'`, `'org:{organizationId}'`)
@@ -325,35 +339,36 @@ const context = {
 
 ### 1.1 Core Evaluation Methods
 
-| OpenFeature Method | FeatureBoard Equivalent | Compatibility | Notes |
-|-------------------|------------------------|---------------|-------|
-| `getBooleanValue(key, default, context)` | `getFeatureValue(key, default)` | 🟢 **100%** | Direct mapping, type matches |
-| `getStringValue(key, default, context)` | `getFeatureValue(key, default)` | 🟢 **100%** | Direct mapping, type matches |
-| `getNumberValue(key, default, context)` | `getFeatureValue(key, default)` | 🟢 **100%** | Direct mapping, type matches |
-| `getObjectValue(key, default, context)` | `getFeatureValue(key, default)` | 🟢 **100%** | Provider parses JSON strings to objects |
-| `getBooleanDetails(...)` | Constructed by provider | 🟢 **100%** | Provider constructs ResolutionDetails |
-| `getStringDetails(...)` | Constructed by provider | 🟢 **100%** | Provider constructs ResolutionDetails |
-| `getNumberDetails(...)` | Constructed by provider | 🟢 **100%** | Provider constructs ResolutionDetails |
-| `getObjectDetails(...)` | Constructed by provider | 🟢 **100%** | Provider parses JSON and constructs ResolutionDetails |
+| OpenFeature Method                       | FeatureBoard Equivalent         | Compatibility | Notes                                                 |
+| ---------------------------------------- | ------------------------------- | ------------- | ----------------------------------------------------- |
+| `getBooleanValue(key, default, context)` | `getFeatureValue(key, default)` | 🟢 **100%**   | Direct mapping, type matches                          |
+| `getStringValue(key, default, context)`  | `getFeatureValue(key, default)` | 🟢 **100%**   | Direct mapping, type matches                          |
+| `getNumberValue(key, default, context)`  | `getFeatureValue(key, default)` | 🟢 **100%**   | Direct mapping, type matches                          |
+| `getObjectValue(key, default, context)`  | `getFeatureValue(key, default)` | 🟢 **100%**   | Provider parses JSON strings to objects               |
+| `getBooleanDetails(...)`                 | Constructed by provider         | 🟢 **100%**   | Provider constructs ResolutionDetails                 |
+| `getStringDetails(...)`                  | Constructed by provider         | 🟢 **100%**   | Provider constructs ResolutionDetails                 |
+| `getNumberDetails(...)`                  | Constructed by provider         | 🟢 **100%**   | Provider constructs ResolutionDetails                 |
+| `getObjectDetails(...)`                  | Constructed by provider         | 🟢 **100%**   | Provider parses JSON and constructs ResolutionDetails |
 
 ### 1.2 Client Creation & Lifecycle
 
-| OpenFeature Pattern | FeatureBoard Pattern | Compatibility | Mapping Strategy |
-|---------------------|---------------------|---------------|------------------|
-| `OpenFeature.setProvider()` | `createServerClient()` | 🟢 **100%** | Provider wraps ServerClient |
-| `OpenFeature.setProviderAndWait()` | `serverClient.waitForInitialised()` | 🟢 **100%** | Direct mapping |
-| `OpenFeature.getClient()` | `serverClient.request(audiences)` | 🟡 **80%** | Requires context-to-audience mapping |
-| `client.addHandler(event)` | ❌ No direct equivalent | 🟡 **70%** | Can emit OpenFeature events from FeatureBoard state |
-| `OpenFeature.close()` | `serverClient.close()` | 🟢 **100%** | Direct mapping |
+| OpenFeature Pattern                | FeatureBoard Pattern                | Compatibility | Mapping Strategy                                    |
+| ---------------------------------- | ----------------------------------- | ------------- | --------------------------------------------------- |
+| `OpenFeature.setProvider()`        | `createServerClient()`              | 🟢 **100%**   | Provider wraps ServerClient                         |
+| `OpenFeature.setProviderAndWait()` | `serverClient.waitForInitialised()` | 🟢 **100%**   | Direct mapping                                      |
+| `OpenFeature.getClient()`          | `serverClient.request(audiences)`   | 🟡 **80%**    | Requires context-to-audience mapping                |
+| `client.addHandler(event)`         | ❌ No direct equivalent             | 🟡 **70%**    | Can emit OpenFeature events from FeatureBoard state |
+| `OpenFeature.close()`              | `serverClient.close()`              | 🟢 **100%**   | Direct mapping                                      |
 
 ### 1.3 Code Comparison
 
 #### FeatureBoard Current Pattern
+
 ```typescript
 // Setup
 const serverClient = createServerClient({
   environmentApiKey: 'env-key',
-  updateStrategy: 'polling'
+  updateStrategy: 'polling',
 })
 await serverClient.waitForInitialised()
 
@@ -361,38 +376,40 @@ await serverClient.waitForInitialised()
 app.get('/api', (req, res) => {
   const audiences = extractAudiences(req)
   const client = serverClient.request(audiences)
-  
-  const isEnabled = client.getFeatureValue('new-ui', false)  // Sync
+
+  const isEnabled = client.getFeatureValue('new-ui', false) // Sync
   const maxItems = client.getFeatureValue('max-items', 10)
 })
 ```
 
 #### OpenFeature Pattern
+
 ```typescript
 // Setup
 await OpenFeature.setProviderAndWait(
   new FeatureBoardProvider({
     environmentApiKey: 'env-key',
-    updateStrategy: 'polling'
-  })
+    updateStrategy: 'polling',
+  }),
 )
 
 // Per-request usage
 app.get('/api', async (req, res) => {
   const context = buildContext(req)
   const client = OpenFeature.getClient()
-  
-  const isEnabled = await client.getBooleanValue('new-ui', false, context)  // Async
+
+  const isEnabled = await client.getBooleanValue('new-ui', false, context) // Async
   const maxItems = await client.getNumberValue('max-items', 10, context)
 })
 ```
 
 #### Key Differences
-| Aspect | FeatureBoard | OpenFeature | Impact |
-|--------|-------------|-------------|--------|
-| **Async** | Optional (sync for most strategies) | Always required | More verbose, potential perf overhead |
-| **Scope** | Request-scoped client | Context per call | Need to pass context repeatedly |
-| **Setup** | Direct client creation | Provider registration | Extra abstraction layer |
+
+| Aspect    | FeatureBoard                        | OpenFeature           | Impact                                |
+| --------- | ----------------------------------- | --------------------- | ------------------------------------- |
+| **Async** | Optional (sync for most strategies) | Always required       | More verbose, potential perf overhead |
+| **Scope** | Request-scoped client               | Context per call      | Need to pass context repeatedly       |
+| **Setup** | Direct client creation              | Provider registration | Extra abstraction layer               |
 
 ---
 
@@ -400,16 +417,16 @@ app.get('/api', async (req, res) => {
 
 ### 2.1 Value Type Support Matrix
 
-| Type | FeatureBoard | OpenFeature | Compatibility | Mapping Strategy |
-|------|-------------|-------------|---------------|------------------|
-| **Boolean** | ✅ `boolean` | ✅ `boolean` | 🟢 **100%** | Direct pass-through |
-| **String** | ✅ `string` | ✅ `string` | 🟢 **100%** | Direct pass-through |
-| **Number** | ✅ `number` | ✅ `number` | 🟢 **100%** | Direct pass-through |
-| **Integer** | ✅ `number` | ✅ `number` | 🟢 **100%** | JS number works for both |
-| **Float** | ✅ `number` | ✅ `number` | 🟢 **100%** | JS number works for both |
-| **Object** | ⚠️ As JSON string | ✅ `JsonValue` | 🟢 **100%** | Provider parses JSON strings to objects |
-| **Array** | ⚠️ As JSON string | ✅ `JsonValue[]` | 🟢 **100%** | Provider parses JSON strings to arrays |
-| **Null** | ❌ Not supported | ✅ `null` | 🟡 **50%** | Returns DEFAULT reason |
+| Type        | FeatureBoard      | OpenFeature      | Compatibility | Mapping Strategy                        |
+| ----------- | ----------------- | ---------------- | ------------- | --------------------------------------- |
+| **Boolean** | ✅ `boolean`      | ✅ `boolean`     | 🟢 **100%**   | Direct pass-through                     |
+| **String**  | ✅ `string`       | ✅ `string`      | 🟢 **100%**   | Direct pass-through                     |
+| **Number**  | ✅ `number`       | ✅ `number`      | 🟢 **100%**   | Direct pass-through                     |
+| **Integer** | ✅ `number`       | ✅ `number`      | 🟢 **100%**   | JS number works for both                |
+| **Float**   | ✅ `number`       | ✅ `number`      | 🟢 **100%**   | JS number works for both                |
+| **Object**  | ⚠️ As JSON string | ✅ `JsonValue`   | 🟢 **100%**   | Provider parses JSON strings to objects |
+| **Array**   | ⚠️ As JSON string | ✅ `JsonValue[]` | 🟢 **100%**   | Provider parses JSON strings to arrays  |
+| **Null**    | ❌ Not supported  | ✅ `null`        | 🟡 **50%**    | Returns DEFAULT reason                  |
 
 **Note on Object/Array Support:** FeatureBoard stores complex values as JSON strings (e.g., `'{"key":"value"}'`). The provider automatically parses these when `resolveObjectEvaluation()` is called, providing seamless object support.
 
@@ -420,23 +437,23 @@ graph TD
     A[FeatureBoard Type Safety] -->|Compile Time| B[TypeScript Features Interface]
     B --> C[Typed getFeatureValue]
     C --> D[Type Error on Wrong Default]
-    
+
     E[OpenFeature Type Safety] -->|Runtime Only| F[Generic Methods]
     F --> G[Any string key accepted]
     G --> H[No compile-time validation]
-    
+
     style A fill:#90EE90
     style E fill:#FFB6C1
 ```
 
 #### Type Safety Comparison
 
-| Feature | FeatureBoard | OpenFeature | Migration Impact |
-|---------|-------------|-------------|------------------|
-| **Feature Key Validation** | ✅ Compile-time | ❌ Runtime only | High - loses type safety |
-| **Value Type Matching** | ✅ Enforced | ⚠️ By convention | High - potential runtime errors |
-| **Autocomplete** | ✅ Full IDE support | ⚠️ String keys only | Medium - reduced DX |
-| **Refactoring Safety** | ✅ Type-checked | ❌ String search needed | High - more error-prone |
+| Feature                    | FeatureBoard        | OpenFeature             | Migration Impact                |
+| -------------------------- | ------------------- | ----------------------- | ------------------------------- |
+| **Feature Key Validation** | ✅ Compile-time     | ❌ Runtime only         | High - loses type safety        |
+| **Value Type Matching**    | ✅ Enforced         | ⚠️ By convention        | High - potential runtime errors |
+| **Autocomplete**           | ✅ Full IDE support | ⚠️ String keys only     | Medium - reduced DX             |
+| **Refactoring Safety**     | ✅ Type-checked     | ❌ String search needed | High - more error-prone         |
 
 **Example Type Safety Loss:**
 
@@ -448,12 +465,12 @@ declare module '@featureboard/js-sdk' {
   }
 }
 
-client.getFeatureValue('max-items', false)  // ❌ Compile error - wrong type!
-client.getFeatureValue('max-itemz', 10)     // ❌ Compile error - typo!
+client.getFeatureValue('max-items', false) // ❌ Compile error - wrong type!
+client.getFeatureValue('max-itemz', 10) // ❌ Compile error - typo!
 
 // OpenFeature - No compile-time checks
-await client.getBooleanValue('max-items', false)  // ✅ Compiles but wrong type
-await client.getNumberValue('max-itemz', 10)      // ✅ Compiles but wrong key
+await client.getBooleanValue('max-items', false) // ✅ Compiles but wrong type
+await client.getNumberValue('max-itemz', 10) // ✅ Compiles but wrong key
 ```
 
 ---
@@ -469,20 +486,20 @@ graph TB
         A2 --> A3[FeatureBoard Evaluation]
         A3 --> A4[Match against audienceExceptions]
     end
-    
+
     subgraph "OpenFeature Context"
         B1[EvaluationContext] --> B2["{ targetingKey: 'user-123', userId: '123', organizationId: 'acme', role: 'admin', tier: 'premium' }"]
     end
-    
+
     subgraph "Provider Must Map"
         C1[Context Mapper] --> C2{Which properties?}
         C2 --> C3[Extract audiences]
         C3 --> C4["['user-123', 'user:123', 'org:acme', 'role:admin', 'tier:premium']"]
     end
-    
+
     B2 -.-> C1
     C4 -.-> A3
-    
+
     style A2 fill:#90EE90
     style B2 fill:#FFD700
     style C2 fill:#FF6B6B
@@ -493,13 +510,13 @@ graph TB
 
 ### 3.2 Context to Audience Mapping Strategies
 
-| Strategy | Description | Pros | Cons | Recommended |
-|----------|-------------|------|------|-------------|
-| **1. Dedicated Field** | Use `context.audiences: string[]` | Simple, explicit | Non-standard, requires docs | ⭐⭐⭐ |
-| **2. Targeting Key Only** | Map `context.targetingKey` → audience | Standard OpenFeature | Limited to one audience | ⭐ |
-| **3. Multi-Property** | Build from `userId`, `orgId`, `role`, etc. | Flexible, intuitive | Complex mapping logic | ⭐⭐⭐⭐ |
-| **4. Configurable** | User defines mapping rules | Maximum flexibility | More setup required | ⭐⭐⭐⭐⭐ |
-| **5. Composite Keys** | Build strings like `user:123` from context | Consistent naming | Coupling to naming convention | ⭐⭐⭐ |
+| Strategy                  | Description                                | Pros                 | Cons                          | Recommended |
+| ------------------------- | ------------------------------------------ | -------------------- | ----------------------------- | ----------- |
+| **1. Dedicated Field**    | Use `context.audiences: string[]`          | Simple, explicit     | Non-standard, requires docs   | ⭐⭐⭐      |
+| **2. Targeting Key Only** | Map `context.targetingKey` → audience      | Standard OpenFeature | Limited to one audience       | ⭐          |
+| **3. Multi-Property**     | Build from `userId`, `orgId`, `role`, etc. | Flexible, intuitive  | Complex mapping logic         | ⭐⭐⭐⭐    |
+| **4. Configurable**       | User defines mapping rules                 | Maximum flexibility  | More setup required           | ⭐⭐⭐⭐⭐  |
+| **5. Composite Keys**     | Build strings like `user:123` from context | Consistent naming    | Coupling to naming convention | ⭐⭐⭐      |
 
 ### 3.3 Recommended Mapping Implementation
 
@@ -507,25 +524,25 @@ graph TB
 interface FeatureBoardContext extends EvaluationContext {
   // Option 1: Explicit audiences (recommended)
   audiences?: string[]
-  
+
   // Option 2: Standard properties that map to audiences
-  targetingKey?: string     // → Primary audience
-  userId?: string          // → 'user:{userId}'
-  organizationId?: string  // → 'org:{organizationId}'
-  role?: string           // → 'role:{role}'
-  segment?: string        // → 'segment:{segment}'
-  
+  targetingKey?: string // → Primary audience
+  userId?: string // → 'user:{userId}'
+  organizationId?: string // → 'org:{organizationId}'
+  role?: string // → 'role:{role}'
+  segment?: string // → 'segment:{segment}'
+
   // Any other properties ignored for audience extraction
 }
 
 function extractAudiences(context: EvaluationContext): string[] {
   const audiences: string[] = []
-  
+
   // Strategy 1: Explicit audiences take precedence
   if ('audiences' in context && Array.isArray(context.audiences)) {
     return context.audiences as string[]
   }
-  
+
   // Strategy 2: Build from known properties
   if (context.targetingKey) {
     audiences.push(context.targetingKey)
@@ -539,20 +556,20 @@ function extractAudiences(context: EvaluationContext): string[] {
   if (context.role) {
     audiences.push(`role:${context.role}`)
   }
-  
+
   return audiences
 }
 ```
 
 ### 3.4 Context Mapping Examples
 
-| OpenFeature Context | Extracted Audiences | Notes |
-|---------------------|-------------------|-------|
-| `{ targetingKey: 'user-123' }` | `['user-123']` | Simple single audience |
-| `{ audiences: ['premium', 'beta'] }` | `['premium', 'beta']` | Explicit array (custom property) |
-| `{ userId: '123', role: 'admin' }` | `['user:123', 'role:admin']` | Built from properties |
-| `{ organizationId: 'acme', segment: 'enterprise' }` | `['org:acme', 'segment:enterprise']` | Multiple dimensions |
-| `{}` | `[]` | Empty context → no audiences |
+| OpenFeature Context                                 | Extracted Audiences                  | Notes                            |
+| --------------------------------------------------- | ------------------------------------ | -------------------------------- |
+| `{ targetingKey: 'user-123' }`                      | `['user-123']`                       | Simple single audience           |
+| `{ audiences: ['premium', 'beta'] }`                | `['premium', 'beta']`                | Explicit array (custom property) |
+| `{ userId: '123', role: 'admin' }`                  | `['user:123', 'role:admin']`         | Built from properties            |
+| `{ organizationId: 'acme', segment: 'enterprise' }` | `['org:acme', 'segment:enterprise']` | Multiple dimensions              |
+| `{}`                                                | `[]`                                 | Empty context → no audiences     |
 
 ---
 
@@ -560,23 +577,23 @@ function extractAudiences(context: EvaluationContext): string[] {
 
 ### 4.1 Required Methods
 
-| OpenFeature Requirement | FeatureBoard Implementation | Status | Implementation Notes |
-|------------------------|---------------------------|--------|---------------------|
-| **metadata.name** | `'FeatureBoard'` | 🟢 Implemented | Static property |
-| **resolveBooleanEvaluation()** | Map to `getFeatureValue()` | 🟢 Implemented | Type matches perfectly |
-| **resolveStringEvaluation()** | Map to `getFeatureValue()` | 🟢 Implemented | Type matches perfectly |
-| **resolveNumberEvaluation()** | Map to `getFeatureValue()` | 🟢 Implemented | Type matches perfectly |
-| **resolveObjectEvaluation()** | Map to `getFeatureValue()` | 🟢 Implemented | Parses JSON strings to objects |
+| OpenFeature Requirement        | FeatureBoard Implementation | Status         | Implementation Notes           |
+| ------------------------------ | --------------------------- | -------------- | ------------------------------ |
+| **metadata.name**              | `'FeatureBoard'`            | 🟢 Implemented | Static property                |
+| **resolveBooleanEvaluation()** | Map to `getFeatureValue()`  | 🟢 Implemented | Type matches perfectly         |
+| **resolveStringEvaluation()**  | Map to `getFeatureValue()`  | 🟢 Implemented | Type matches perfectly         |
+| **resolveNumberEvaluation()**  | Map to `getFeatureValue()`  | 🟢 Implemented | Type matches perfectly         |
+| **resolveObjectEvaluation()**  | Map to `getFeatureValue()`  | 🟢 Implemented | Parses JSON strings to objects |
 
 ### 4.2 Optional Methods
 
-| OpenFeature Method | FeatureBoard Support | Implementation Status | Notes |
-|-------------------|---------------------|----------------------|-------|
-| **initialize()** | ✅ `waitForInitialised()` | 🟢 Implemented | Creates client, waits for init, sets status |
-| **onClose()** | ✅ `close()` | 🟢 Implemented | Closes client, resets status |
-| **hooks** | ⚠️ Partial | 🟡 Not implemented | Can be added if needed |
-| **events** | ✅ `OpenFeatureEventEmitter` | 🟢 Implemented | Emits via provider.events |
-| **onContextChanged()** | ❌ No equivalent | 🟡 Not implemented | Not needed for this use case |
+| OpenFeature Method     | FeatureBoard Support         | Implementation Status | Notes                                       |
+| ---------------------- | ---------------------------- | --------------------- | ------------------------------------------- |
+| **initialize()**       | ✅ `waitForInitialised()`    | 🟢 Implemented        | Creates client, waits for init, sets status |
+| **onClose()**          | ✅ `close()`                 | 🟢 Implemented        | Closes client, resets status                |
+| **hooks**              | ⚠️ Partial                   | 🟡 Not implemented    | Can be added if needed                      |
+| **events**             | ✅ `OpenFeatureEventEmitter` | 🟢 Implemented        | Emits via provider.events                   |
+| **onContextChanged()** | ❌ No equivalent             | 🟡 Not implemented    | Not needed for this use case                |
 
 ### 4.3 Provider Lifecycle Mapping
 
@@ -587,7 +604,7 @@ sequenceDiagram
     participant FBProvider as FeatureBoard Provider
     participant FBClient as FeatureBoard ServerClient
     participant FBService as FeatureBoard Service
-    
+
     App->>OpenFeature: setProviderAndWait(provider)
     OpenFeature->>FBProvider: initialize()
     FBProvider->>FBClient: createServerClient(options)
@@ -596,7 +613,7 @@ sequenceDiagram
     FBClient-->>FBProvider: Initialized
     FBProvider->>OpenFeature: emit(PROVIDER_READY)
     OpenFeature-->>App: Provider ready
-    
+
     App->>OpenFeature: getClient()
     OpenFeature-->>App: client
     App->>OpenFeature: getBooleanValue(key, default, context)
@@ -617,44 +634,44 @@ sequenceDiagram
 
 ### 5.1 Core Features
 
-| Feature | FeatureBoard | OpenFeature | Compatibility | Migration Effort |
-|---------|-------------|-------------|---------------|------------------|
-| **Boolean Flags** | ✅ Native | ✅ Required | 🟢 100% | None |
-| **String Flags** | ✅ Native | ✅ Required | 🟢 100% | None |
-| **Number Flags** | ✅ Native | ✅ Required | 🟢 100% | None |
-| **Object Flags** | ⚠️ As JSON string | ✅ Required | 🟢 100% | Provider parses JSON |
-| **Default Values** | ✅ Native | ✅ Required | 🟢 100% | None |
-| **Targeting** | ✅ Audience-based | ✅ Context-based | 🟡 80% | Mapping layer |
+| Feature            | FeatureBoard      | OpenFeature      | Compatibility | Migration Effort     |
+| ------------------ | ----------------- | ---------------- | ------------- | -------------------- |
+| **Boolean Flags**  | ✅ Native         | ✅ Required      | 🟢 100%       | None                 |
+| **String Flags**   | ✅ Native         | ✅ Required      | 🟢 100%       | None                 |
+| **Number Flags**   | ✅ Native         | ✅ Required      | 🟢 100%       | None                 |
+| **Object Flags**   | ⚠️ As JSON string | ✅ Required      | 🟢 100%       | Provider parses JSON |
+| **Default Values** | ✅ Native         | ✅ Required      | 🟢 100%       | None                 |
+| **Targeting**      | ✅ Audience-based | ✅ Context-based | 🟡 80%        | Mapping layer        |
 
 ### 5.2 Advanced Features
 
-| Feature | FeatureBoard | OpenFeature | Compatibility | Notes |
-|---------|-------------|-------------|---------------|-------|
-| **Type Safety** | ✅ TypeScript interface | ❌ String keys | 🔴 40% | Major DX loss |
-| **Provider Hooks** | ⚠️ Can add | ✅ Supported | 🟡 70% | Create wrapper hooks |
-| **Client Hooks** | ❌ No | ✅ Supported | 🟡 60% | Can implement |
-| **Evaluation Hooks** | ❌ No | ✅ Supported | 🟡 60% | Can implement |
-| **Events** | ⚠️ Limited | ✅ Rich events | 🟡 70% | Map FeatureBoard state changes |
-| **Domains** | ❌ No | ✅ Supported | 🟢 100% | No conflict |
-| **Transaction Context** | ⚠️ Request scoping | ✅ AsyncLocalStorage | 🟡 80% | Different pattern |
-| **Shutdown** | ✅ close() | ✅ onClose() | 🟢 100% | Direct mapping |
+| Feature                 | FeatureBoard            | OpenFeature          | Compatibility | Notes                          |
+| ----------------------- | ----------------------- | -------------------- | ------------- | ------------------------------ |
+| **Type Safety**         | ✅ TypeScript interface | ❌ String keys       | 🔴 40%        | Major DX loss                  |
+| **Provider Hooks**      | ⚠️ Can add              | ✅ Supported         | 🟡 70%        | Create wrapper hooks           |
+| **Client Hooks**        | ❌ No                   | ✅ Supported         | 🟡 60%        | Can implement                  |
+| **Evaluation Hooks**    | ❌ No                   | ✅ Supported         | 🟡 60%        | Can implement                  |
+| **Events**              | ⚠️ Limited              | ✅ Rich events       | 🟡 70%        | Map FeatureBoard state changes |
+| **Domains**             | ❌ No                   | ✅ Supported         | 🟢 100%       | No conflict                    |
+| **Transaction Context** | ⚠️ Request scoping      | ✅ AsyncLocalStorage | 🟡 80%        | Different pattern              |
+| **Shutdown**            | ✅ close()              | ✅ onClose()         | 🟢 100%       | Direct mapping                 |
 
 ### 5.3 Update Strategies
 
-| FeatureBoard Strategy | OpenFeature Equivalent | Compatibility | Implementation |
-|----------------------|----------------------|---------------|----------------|
-| **manual** | Provider doesn't auto-refresh | 🟢 100% | No automatic updates |
-| **polling** | Initialize + background polling | 🟢 90% | Emit `PROVIDER_CONFIGURATION_CHANGED` |
-| **live** (WebSocket) | Initialize + real-time events | 🟢 90% | Emit `PROVIDER_CONFIGURATION_CHANGED` |
-| **on-request** | ❌ No direct equivalent | 🟡 60% | Fetch on each evaluation (expensive) |
+| FeatureBoard Strategy | OpenFeature Equivalent          | Compatibility | Implementation                        |
+| --------------------- | ------------------------------- | ------------- | ------------------------------------- |
+| **manual**            | Provider doesn't auto-refresh   | 🟢 100%       | No automatic updates                  |
+| **polling**           | Initialize + background polling | 🟢 90%        | Emit `PROVIDER_CONFIGURATION_CHANGED` |
+| **live** (WebSocket)  | Initialize + real-time events   | 🟢 90%        | Emit `PROVIDER_CONFIGURATION_CHANGED` |
+| **on-request**        | ❌ No direct equivalent         | 🟡 60%        | Fetch on each evaluation (expensive)  |
 
 ### 5.4 Subscription Patterns
 
-| Feature | FeatureBoard | OpenFeature | Impact |
-|---------|-------------|-------------|--------|
-| **Subscribe to Flag** | `subscribeToFeatureValue()` | ❌ No API | Lost feature |
-| **Provider Events** | ⚠️ Can add | `PROVIDER_CONFIGURATION_CHANGED` | Different pattern |
-| **Real-time Updates** | ✅ WebSocket support | ⚠️ Via events only | Less granular |
+| Feature               | FeatureBoard                | OpenFeature                      | Impact            |
+| --------------------- | --------------------------- | -------------------------------- | ----------------- |
+| **Subscribe to Flag** | `subscribeToFeatureValue()` | ❌ No API                        | Lost feature      |
+| **Provider Events**   | ⚠️ Can add                  | `PROVIDER_CONFIGURATION_CHANGED` | Different pattern |
+| **Real-time Updates** | ✅ WebSocket support        | ⚠️ Via events only               | Less granular     |
 
 **Pattern Comparison:**
 
@@ -678,29 +695,30 @@ client.addHandler(ProviderEvents.ConfigurationChanged, async () => {
 
 ### 6.1 ResolutionDetails Structure
 
-| Field | OpenFeature Type | FeatureBoard Source | Mapping Strategy |
-|-------|-----------------|-------------------|------------------|
-| **value** | `T` (boolean/string/number/object) | `getFeatureValue()` result | ✅ Direct mapping |
-| **variant** | `string \| undefined` | ❌ Not available | ⚠️ Leave undefined |
-| **reason** | `string` | Derived from evaluation | ⚠️ Map to 2 values |
-| **errorCode** | `ErrorCode \| undefined` | ❌ Not available | ⚠️ Construct on errors |
-| **errorMessage** | `string \| undefined` | ❌ Not available | ⚠️ Construct on errors |
-| **flagMetadata** | `FlagMetadata` | ❌ Not available | ⚠️ Return empty object |
+| Field            | OpenFeature Type                   | FeatureBoard Source        | Mapping Strategy       |
+| ---------------- | ---------------------------------- | -------------------------- | ---------------------- |
+| **value**        | `T` (boolean/string/number/object) | `getFeatureValue()` result | ✅ Direct mapping      |
+| **variant**      | `string \| undefined`              | ❌ Not available           | ⚠️ Leave undefined     |
+| **reason**       | `string`                           | Derived from evaluation    | ⚠️ Map to 2 values     |
+| **errorCode**    | `ErrorCode \| undefined`           | ❌ Not available           | ⚠️ Construct on errors |
+| **errorMessage** | `string \| undefined`              | ❌ Not available           | ⚠️ Construct on errors |
+| **flagMetadata** | `FlagMetadata`                     | ❌ Not available           | ⚠️ Return empty object |
 
 ### 6.2 Reason Code Mapping
 
-| FeatureBoard Scenario | OpenFeature Reason | Confidence | Notes |
-|----------------------|-------------------|------------|-------|
-| Audience exception matched | `TARGETING_MATCH` | 🟢 High | Clear semantic match |
-| Default value used | `DEFAULT` | 🟢 High | Clear semantic match |
-| Flag not found | `ERROR` | 🟢 High | With `FLAG_NOT_FOUND` error code |
-| Type mismatch | `ERROR` | 🟢 High | With `TYPE_MISMATCH` error code |
-| Initial state (cached) | `CACHED` | 🟡 Medium | Could use for initial load |
-| No audiences provided | `DEFAULT` | 🟡 Medium | Treated as default case |
+| FeatureBoard Scenario      | OpenFeature Reason | Confidence | Notes                            |
+| -------------------------- | ------------------ | ---------- | -------------------------------- |
+| Audience exception matched | `TARGETING_MATCH`  | 🟢 High    | Clear semantic match             |
+| Default value used         | `DEFAULT`          | 🟢 High    | Clear semantic match             |
+| Flag not found             | `ERROR`            | 🟢 High    | With `FLAG_NOT_FOUND` error code |
+| Type mismatch              | `ERROR`            | 🟢 High    | With `TYPE_MISMATCH` error code  |
+| Initial state (cached)     | `CACHED`           | 🟡 Medium  | Could use for initial load       |
+| No audiences provided      | `DEFAULT`          | 🟡 Medium  | Treated as default case          |
 
 ### 6.3 Example Resolution Details
 
 #### Scenario 1: Audience Match
+
 ```typescript
 // FeatureBoard evaluation
 audiences: ['premium']
@@ -720,6 +738,7 @@ defaultValue: 10
 ```
 
 #### Scenario 2: Default Value
+
 ```typescript
 // FeatureBoard evaluation
 audiences: ['free']
@@ -739,6 +758,7 @@ defaultValue: 10
 ```
 
 #### Scenario 3: Flag Not Found
+
 ```typescript
 // FeatureBoard evaluation
 featureKey: 'unknown-feature'
@@ -761,25 +781,25 @@ defaultValue: false
 
 ### 7.1 Error Code Mapping
 
-| OpenFeature Error Code | FeatureBoard Scenario | Mapping Confidence | Implementation |
-|-----------------------|----------------------|-------------------|----------------|
-| `PROVIDER_NOT_READY` | ServerClient not initialized | 🟢 100% | Check `initialised` flag |
-| `FLAG_NOT_FOUND` | Feature key not in state | 🟡 70% | FeatureBoard returns default silently |
-| `PARSE_ERROR` | ❌ N/A | 🔴 0% | FeatureBoard doesn't parse |
-| `TYPE_MISMATCH` | Wrong type for flag value | 🟡 60% | Can detect in provider |
-| `TARGETING_KEY_MISSING` | No audiences provided | 🟡 50% | Optional - could warn |
-| `INVALID_CONTEXT` | Invalid audience format | 🟡 50% | Validate in provider |
-| `GENERAL` | Unexpected errors | 🟢 100% | Catch-all |
+| OpenFeature Error Code  | FeatureBoard Scenario        | Mapping Confidence | Implementation                        |
+| ----------------------- | ---------------------------- | ------------------ | ------------------------------------- |
+| `PROVIDER_NOT_READY`    | ServerClient not initialized | 🟢 100%            | Check `initialised` flag              |
+| `FLAG_NOT_FOUND`        | Feature key not in state     | 🟡 70%             | FeatureBoard returns default silently |
+| `PARSE_ERROR`           | ❌ N/A                       | 🔴 0%              | FeatureBoard doesn't parse            |
+| `TYPE_MISMATCH`         | Wrong type for flag value    | 🟡 60%             | Can detect in provider                |
+| `TARGETING_KEY_MISSING` | No audiences provided        | 🟡 50%             | Optional - could warn                 |
+| `INVALID_CONTEXT`       | Invalid audience format      | 🟡 50%             | Validate in provider                  |
+| `GENERAL`               | Unexpected errors            | 🟢 100%            | Catch-all                             |
 
 ### 7.2 Error Scenarios
 
-| Scenario | FeatureBoard Behavior | OpenFeature Expected | Provider Action |
-|----------|----------------------|---------------------|-----------------|
-| Feature not found | Returns default value silently | Should set error code | ⚠️ Optionally set `FLAG_NOT_FOUND` |
-| Wrong type requested | Returns default value | Should set error code | ⚠️ Can detect and set `TYPE_MISMATCH` |
-| Provider not ready | Throws or returns default | Set `PROVIDER_NOT_READY` | ✅ Check initialization state |
-| Network error | Throws during init | Should throw/error | ✅ Let error propagate |
-| Invalid API key | Throws during init | Should throw/error | ✅ Let error propagate |
+| Scenario             | FeatureBoard Behavior          | OpenFeature Expected     | Provider Action                       |
+| -------------------- | ------------------------------ | ------------------------ | ------------------------------------- |
+| Feature not found    | Returns default value silently | Should set error code    | ⚠️ Optionally set `FLAG_NOT_FOUND`    |
+| Wrong type requested | Returns default value          | Should set error code    | ⚠️ Can detect and set `TYPE_MISMATCH` |
+| Provider not ready   | Throws or returns default      | Set `PROVIDER_NOT_READY` | ✅ Check initialization state         |
+| Network error        | Throws during init             | Should throw/error       | ✅ Let error propagate                |
+| Invalid API key      | Throws during init             | Should throw/error       | ✅ Let error propagate                |
 
 ### 7.3 Error Handling Strategy
 
@@ -798,12 +818,12 @@ async resolveBooleanEvaluation(
       errorMessage: 'FeatureBoard provider is not yet initialized'
     }
   }
-  
+
   try {
     const audiences = extractAudiences(context)
     const client = this.serverClient.request(audiences)
     const value = client.getFeatureValue(flagKey, defaultValue)
-    
+
     // Check 2: Type mismatch (optional - FeatureBoard doesn't expose this)
     if (typeof value !== 'boolean') {
       return {
@@ -813,7 +833,7 @@ async resolveBooleanEvaluation(
         errorMessage: `Expected boolean, got ${typeof value}`
       }
     }
-    
+
     // Success
     return {
       value,
@@ -837,13 +857,13 @@ async resolveBooleanEvaluation(
 
 ### 8.1 Event Type Mapping
 
-| OpenFeature Event | FeatureBoard Trigger | Confidence | Implementation |
-|-------------------|---------------------|------------|----------------|
-| `PROVIDER_READY` | `waitForInitialised()` resolves | 🟢 100% | Emit on successful init |
-| `PROVIDER_ERROR` | `waitForInitialised()` rejects | 🟢 100% | Emit on init failure |
-| `PROVIDER_CONFIGURATION_CHANGED` | Feature values update | 🟡 80% | Detect changes in state store |
-| `PROVIDER_STALE` | ❌ No equivalent | 🔴 0% | Not applicable |
-| `PROVIDER_CONTEXT_CHANGED` | ❌ No equivalent | 🟡 50% | Could detect context changes |
+| OpenFeature Event                | FeatureBoard Trigger            | Confidence | Implementation                |
+| -------------------------------- | ------------------------------- | ---------- | ----------------------------- |
+| `PROVIDER_READY`                 | `waitForInitialised()` resolves | 🟢 100%    | Emit on successful init       |
+| `PROVIDER_ERROR`                 | `waitForInitialised()` rejects  | 🟢 100%    | Emit on init failure          |
+| `PROVIDER_CONFIGURATION_CHANGED` | Feature values update           | 🟡 80%     | Detect changes in state store |
+| `PROVIDER_STALE`                 | ❌ No equivalent                | 🔴 0%      | Not applicable                |
+| `PROVIDER_CONTEXT_CHANGED`       | ❌ No equivalent                | 🟡 50%     | Could detect context changes  |
 
 ### 8.2 Event Flow Diagram
 
@@ -854,7 +874,7 @@ sequenceDiagram
     participant Provider as OpenFeature Provider
     participant OF as OpenFeature SDK
     participant App
-    
+
     Note over Server,Provider: Initialization Phase
     Provider->>Server: initialize()
     Server->>FB: Connect
@@ -862,7 +882,7 @@ sequenceDiagram
     Server->>Provider: Initialized
     Provider->>OF: emit(PROVIDER_READY)
     OF-->>App: Ready event
-    
+
     Note over Server,Provider: Runtime Updates
     FB->>Server: Feature update (WebSocket/Poll)
     Server->>Server: Update internal state
@@ -874,12 +894,12 @@ sequenceDiagram
 
 ### 8.3 Event Implementation Strategy
 
-| Update Strategy | Event Trigger | Implementation Complexity |
-|----------------|---------------|--------------------------|
-| **manual** | No automatic events | 🟢 Simple - no events |
-| **polling** | On successful poll with changes | 🟡 Medium - compare state |
-| **live** | On WebSocket message | 🟢 Simple - forward events |
-| **on-request** | On each request (too frequent) | 🔴 Complex - don't emit |
+| Update Strategy | Event Trigger                   | Implementation Complexity  |
+| --------------- | ------------------------------- | -------------------------- |
+| **manual**      | No automatic events             | 🟢 Simple - no events      |
+| **polling**     | On successful poll with changes | 🟡 Medium - compare state  |
+| **live**        | On WebSocket message            | 🟢 Simple - forward events |
+| **on-request**  | On each request (too frequent)  | 🔴 Complex - don't emit    |
 
 ---
 
@@ -892,16 +912,12 @@ sequenceDiagram
 ```typescript
 const serverClient = createServerClient({
   environmentApiKey: process.env.FB_API_KEY!,
-  updateStrategy: 'polling'
+  updateStrategy: 'polling',
 })
 
 app.use((req, res, next) => {
-  const audiences = [
-    req.user?.id ? `user:${req.user.id}` : null,
-    req.user?.org ? `org:${req.user.org}` : null,
-    req.user?.role ? `role:${req.user.role}` : null
-  ].filter(Boolean)
-  
+  const audiences = [req.user?.id ? `user:${req.user.id}` : null, req.user?.org ? `org:${req.user.org}` : null, req.user?.role ? `role:${req.user.role}` : null].filter(Boolean)
+
   req.featureBoard = serverClient.request(audiences)
   next()
 })
@@ -924,24 +940,18 @@ import { FeatureBoardProvider } from '@featureboard/openfeature-provider'
 await OpenFeature.setProviderAndWait(
   new FeatureBoardProvider({
     environmentApiKey: process.env.FB_API_KEY!,
-    updateStrategy: 'polling'
-  })
+    updateStrategy: 'polling',
+  }),
 )
 
-OpenFeature.setTransactionContextPropagator(
-  new AsyncLocalStorageTransactionContextPropagator()
-)
+OpenFeature.setTransactionContextPropagator(new AsyncLocalStorageTransactionContextPropagator())
 
 app.use((req, res, next) => {
   const context = {
     targetingKey: req.user?.id,
-    audiences: [
-      req.user?.id ? `user:${req.user.id}` : null,
-      req.user?.org ? `org:${req.user.org}` : null,
-      req.user?.role ? `role:${req.user.role}` : null
-    ].filter(Boolean)
+    audiences: [req.user?.id ? `user:${req.user.id}` : null, req.user?.org ? `org:${req.user.org}` : null, req.user?.role ? `role:${req.user.role}` : null].filter(Boolean),
   }
-  
+
   OpenFeature.setTransactionContext(context, () => next())
 })
 
@@ -961,13 +971,13 @@ app.get('/api/items', async (req, res) => {
 // Use FeatureBoard directly in performance-critical paths
 app.get('/api/fast', (req, res) => {
   const client = serverClient.request(getAudiences(req))
-  const value = client.getFeatureValue('feature', false)  // Sync
+  const value = client.getFeatureValue('feature', false) // Sync
 })
 
 // Use OpenFeature for vendor-neutral code
 app.get('/api/portable', async (req, res) => {
   const client = OpenFeature.getClient()
-  const value = await client.getBooleanValue('feature', false)  // Async
+  const value = await client.getBooleanValue('feature', false) // Async
 })
 ```
 
@@ -976,13 +986,13 @@ app.get('/api/portable', async (req, res) => {
 
 ### 9.2 Pattern Comparison
 
-| Aspect | FeatureBoard Direct | OpenFeature | Hybrid |
-|--------|-------------------|-------------|--------|
-| **Performance** | 🟢 Best (sync) | 🟡 Good (async overhead) | 🟢 Best where needed |
-| **Type Safety** | 🟢 Full | 🔴 None | 🟡 Partial |
-| **Vendor Lock-in** | 🔴 High | 🟢 None | 🟡 Medium |
-| **Code Complexity** | 🟢 Simple | 🟡 Medium | 🔴 Complex |
-| **Portability** | 🔴 Low | 🟢 High | 🟡 Medium |
+| Aspect              | FeatureBoard Direct | OpenFeature              | Hybrid               |
+| ------------------- | ------------------- | ------------------------ | -------------------- |
+| **Performance**     | 🟢 Best (sync)      | 🟡 Good (async overhead) | 🟢 Best where needed |
+| **Type Safety**     | 🟢 Full             | 🔴 None                  | 🟡 Partial           |
+| **Vendor Lock-in**  | 🔴 High             | 🟢 None                  | 🟡 Medium            |
+| **Code Complexity** | 🟢 Simple           | 🟡 Medium                | 🔴 Complex           |
+| **Portability**     | 🔴 Low              | 🟢 High                  | 🟡 Medium            |
 
 ---
 
@@ -990,15 +1000,15 @@ app.get('/api/portable', async (req, res) => {
 
 ### 10.1 Critical Gaps
 
-| Gap | Impact | Severity | Workaround | Effort |
-|-----|--------|----------|-----------|--------|
+| Gap                      | Impact                                                  | Severity        | Workaround                          | Effort                     |
+| ------------------------ | ------------------------------------------------------- | --------------- | ----------------------------------- | -------------------------- |
 | **No Audiences Concept** | **Core incompatibility** - must map context → audiences | 🔴 **CRITICAL** | Multiple strategies (see section 3) | High - requires clear docs |
-| **Object Values** | Can't use complex configs | 🔴 High | Store JSON strings, parse in app | Medium |
-| **Type Safety** | Lose compile-time checks | 🔴 High | Create wrapper utilities | Medium |
-| **Sync Evaluation** | All calls become async | 🟡 Medium | Accept the overhead | None |
-| **Variant Info** | No A/B test tracking | 🟡 Medium | Can't populate, leave undefined | None |
-| **Flag Metadata** | No rich metadata | 🟡 Low | Return empty object | None |
-| **Direct Subscriptions** | Lose per-flag subscriptions | 🟡 Medium | Use provider-level events | Low |
+| **Object Values**        | Can't use complex configs                               | 🔴 High         | Store JSON strings, parse in app    | Medium                     |
+| **Type Safety**          | Lose compile-time checks                                | 🔴 High         | Create wrapper utilities            | Medium                     |
+| **Sync Evaluation**      | All calls become async                                  | 🟡 Medium       | Accept the overhead                 | None                       |
+| **Variant Info**         | No A/B test tracking                                    | 🟡 Medium       | Can't populate, leave undefined     | None                       |
+| **Flag Metadata**        | No rich metadata                                        | 🟡 Low          | Return empty object                 | None                       |
+| **Direct Subscriptions** | Lose per-flag subscriptions                             | 🟡 Medium       | Use provider-level events           | Low                        |
 
 ### 10.2 Workaround Implementations
 
@@ -1011,21 +1021,17 @@ import type { Features } from '@featureboard/js-sdk'
 
 class TypedOpenFeatureClient {
   private client = OpenFeature.getClient()
-  
-  async getBoolean<K extends keyof Features>(
-    key: Features[K] extends boolean ? K : never,
-    defaultValue: Features[K],
-    context?: EvaluationContext
-  ): Promise<boolean> {
+
+  async getBoolean<K extends keyof Features>(key: Features[K] extends boolean ? K : never, defaultValue: Features[K], context?: EvaluationContext): Promise<boolean> {
     return this.client.getBooleanValue(key as string, defaultValue as boolean, context)
   }
-  
+
   // Similar for string, number...
 }
 
 // Usage maintains some type safety
 const client = new TypedOpenFeatureClient()
-const value = await client.getBoolean('bool-feature', false)  // Type-checked
+const value = await client.getBoolean('bool-feature', false) // Type-checked
 ```
 
 #### Workaround 2: Object Values via JSON
@@ -1049,7 +1055,7 @@ const config = JSON.parse(configStr)
 // Create subscription-like behavior with events
 class FeatureFlagSubscription {
   private cache = new Map<string, any>()
-  
+
   constructor(private client: Client) {
     client.addHandler(ProviderEvents.ConfigurationChanged, async () => {
       // Re-evaluate all subscribed flags
@@ -1062,7 +1068,7 @@ class FeatureFlagSubscription {
       }
     })
   }
-  
+
   subscribe(key: string, callback: (value: any) => void) {
     this.subscriptions.set(key, callback)
   }
@@ -1087,17 +1093,19 @@ pie title Impact of Compatibility Gaps on Adoption
 
 **Goal: Create `@featureboard/openfeature-node-provider` package**
 
-| Phase | Features | Timeline | Value |
-|-------|----------|----------|-------|
-| **Phase 1: MVP** | Core provider implementation, boolean/string/number evaluation | 2-3 weeks | 🟢 Critical |
-| **Phase 2: Lifecycle** | Initialize, shutdown, PROVIDER_READY/ERROR events | 1 week | 🟢 Critical |
-| **Phase 3: Updates** | PROVIDER_CONFIGURATION_CHANGED events, polling/live support | 1 week | 🟢 High |
-| **Phase 4: DX** | Type safety helpers, better error messages, examples | 1 week | 🟢 High |
-| **Phase 5: Advanced** | Provider hooks, transaction context utilities | 1-2 weeks | 🟡 Medium |
+| Phase                  | Features                                                       | Timeline  | Value       |
+| ---------------------- | -------------------------------------------------------------- | --------- | ----------- |
+| **Phase 1: MVP**       | Core provider implementation, boolean/string/number evaluation | 2-3 weeks | 🟢 Critical |
+| **Phase 2: Lifecycle** | Initialize, shutdown, PROVIDER_READY/ERROR events              | 1 week    | 🟢 Critical |
+| **Phase 3: Updates**   | PROVIDER_CONFIGURATION_CHANGED events, polling/live support    | 1 week    | 🟢 High     |
+| **Phase 4: DX**        | Type safety helpers, better error messages, examples           | 1 week    | 🟢 High     |
+| **Phase 5: Advanced**  | Provider hooks, transaction context utilities                  | 1-2 weeks | 🟡 Medium   |
+
 Provider as Separate Package
 ✅ **Recommended:** Create `@featureboard/openfeature-node-provider` as standalone package
 
 **Rationale:**
+
 - Clear separation of concerns
 - Optional dependency for users who want OpenFeature
 - Existing `@featureboard/node-sdk` users unaffected
@@ -1107,9 +1115,10 @@ Provider as Separate Package
 - Performance-critical code can stay synchronous
 - Gradual migration path
 
-####CRITICAL:** Provide extensive documentation on context-to-audience mapping
+####CRITICAL:\*\* Provide extensive documentation on context-to-audience mapping
 
 **Rationale:**
+
 - **This is the #1 friction point for users**
 - OpenFeature has no concept of audiences - this is FeatureBoard-specific
 - Users need to understand how their context becomes audiences
@@ -1118,34 +1127,40 @@ Provider as Separate Package
 - Explain naming conventions (e.g., `'user:{userId}'`)
 
 **Required Documentation:**
+
 1. **Quick Start Guide**: Show the recommended `audiences` array approach
 2. **Context Mapping Reference**: Explain all automatic mappings
 3. **Custom Mapper Guide**: How to write custom audience extraction logic
 4. **Migration Guide**: How to convert from native SDK to OpenFeature
 5. **Troubleshooting**: Common issues with audience mapping
+
 - Consider multiple strategies (explicit array, property mapping, etc.)
 
 #### Recommendation 3: Type Safety Utilities
+
 ⚠️ **Optional but valuable:** Provide TypeScript utilities to preserve type safety
 
 **Rationale:**
+
 - Major DX regression without types
 - Can provide optional wrapper
 - Reduces migration friction
 
 #### Recommendation 4: Monitoring & Debugging
+
 ✅ **Recommended:** Add extensive logging and debugging support
 
 **Rationale:**
+
 - ContextUsage Recommendations
 
-| User Segment | Recommendation | Rationale |
-|--------------|---------------|-----------|
-| **New Projects** | Consider OpenFeature Provider | Standards-based, vendor-neutral API |
-| **Existing Projects** | Continue with direct SDK | No migration needed, proven patterns |
-| **Multi-vendor** | Use OpenFeature Provider | Standardize on OpenFeature across vendors |
-| **Need vendor flexibility** | Use OpenFeature Provider | Easy to switch providers later |
-| **FeatureBoard-only** | Either option works | Choose based on team preference |
+| User Segment                | Recommendation                | Rationale                                 |
+| --------------------------- | ----------------------------- | ----------------------------------------- |
+| **New Projects**            | Consider OpenFeature Provider | Standards-based, vendor-neutral API       |
+| **Existing Projects**       | Continue with direct SDK      | No migration needed, proven patterns      |
+| **Multi-vendor**            | Use OpenFeature Provider      | Standardize on OpenFeature across vendors |
+| **Need vendor flexibility** | Use OpenFeature Provider      | Easy to switch providers later            |
+| **FeatureBoard-only**       | Either option works           | Choose based on team preference           |
 
 **Both options use FeatureBoard service as the backend** - this is only about which client API you prefer. |
 | **Existing Projects** | Keep FeatureBoard direct | No need to migrate, working code |
@@ -1155,34 +1170,37 @@ Provider as Separate Package
 
 ### 11.4 Future Enhancements
 
-| Enhancement | Benefit | Effort | Priority |
-|-------------|---------|--------|----------|
-| Add object value support to FeatureBoard | Full OpenFeature compatibility | High | 🟡 Medium |
-| Expose variant information | Better observability | Medium | 🟡 Medium |
-| Rich flag metadata | En85% (High)**
+| Enhancement                              | Benefit                        | Effort | Priority  |
+| ---------------------------------------- | ------------------------------ | ------ | --------- |
+| Add object value support to FeatureBoard | Full OpenFeature compatibility | High   | 🟡 Medium |
+| Expose variant information               | Better observability           | Medium | 🟡 Medium |
+| Rich flag metadata                       | En85% (High)\*\*               |
 
-| Category | Score | Assessment |
-|----------|-------|------------|
-| **Audience → Context Mapping** | 70% | 🟡 **Core challenge** - no standard, needs clear conventions |
-| **Core Flag Evaluation** | 95% | ✅ Excellent - primitives fully supported |
-| **Provider Implementation** | 90% | ✅ All required methods can be implemented |
-| **Type System** | 40% | ⚠️ Significant loss of type safety |
-| **Developer Experience** | 75% | ⚠️ Context mapping adds complexity |
-| **Performance** | 85% | ✅ Async overhead minimal |
-| **FeatureBoard Features** | 100% | ✅ All FeatureBoard capabilities preserved
+| Category                       | Score | Assessment                                                   |
+| ------------------------------ | ----- | ------------------------------------------------------------ |
+| **Audience → Context Mapping** | 70%   | 🟡 **Core challenge** - no standard, needs clear conventions |
+| **Core Flag Evaluation**       | 95%   | ✅ Excellent - primitives fully supported                    |
+| **Provider Implementation**    | 90%   | ✅ All required methods can be implemented                   |
+| **Type System**                | 40%   | ⚠️ Significant loss of type safety                           |
+| **Developer Experience**       | 75%   | ⚠️ Context mapping adds complexity                           |
+| **Performance**                | 85%   | ✅ Async overhead minimal                                    |
+| **FeatureBoard Features**      | 100%  | ✅ All FeatureBoard capabilities preserved                   |
+
 **Overall Compatibility: 75% (Medium-High)**
 
-| Category | Score | Assessment |
-|----------|-------|------------|
-| **Core Functionality** | 95% | ✅ Excellent - primitives fully supported |
-| **Type System** | 40% | ⚠️ Significant loss of type safety |
-| **Developer Experience** | 70% | ⚠️ More verbose, async overhead |
-| **Feature Parity** | 60% | ⚠️ Some OpenFeature features unmappable |
-| **Performance** | 80% | ⚠️ Async overhead acceptable |
-| **Portability** | 100% | ✅ Perfect - OpenFeature is vendor-neutral |
-FeatureBoard OpenFeature Provider**
+| Category                 | Score | Assessment                                 |
+| ------------------------ | ----- | ------------------------------------------ |
+| **Core Functionality**   | 95%   | ✅ Excellent - primitives fully supported  |
+| **Type System**          | 40%   | ⚠️ Significant loss of type safety         |
+| **Developer Experience** | 70%   | ⚠️ More verbose, async overhead            |
+| **Feature Parity**       | 60%   | ⚠️ Some OpenFeature features unmappable    |
+| **Performance**          | 80%   | ⚠️ Async overhead acceptable               |
+| **Portability**          | 100%  | ✅ Perfect - OpenFeature is vendor-neutral |
+
+FeatureBoard OpenFeature Provider\*\*
 
 **Justification:**
+
 - **FeatureBoard remains the backend** - no service changes needed
 - Core flag types (boolean, string, number) are **fully supported**
 - Provides **standards-based API** for applications
@@ -1191,6 +1209,7 @@ FeatureBoard OpenFeature Provider**
 - **Market opportunity** - OpenFeature is becoming industry standard
 
 **Implementation Approach:**
+
 - Create new package: `@featureboard/openfeature-node-provider`
 - Wraps existing `@featureboard/node-sdk` (no changes to core SDK)
 - Implements OpenFeature Provider specification
@@ -1198,6 +1217,7 @@ FeatureBoard OpenFeature Provider**
 - Users choose which API they prefer
 
 **Technical Feasibility:**
+
 - ✅ All required provider methods can be implemented
 - ✅ FeatureBoard's audience model maps to OpenFeature context
 - ✅ Event system can be bridged
@@ -1237,99 +1257,102 @@ libs/openfeature-node-provider/
 ## Appendix B: Reference Implementation Skeleton
 
 ``private audienceMapper: (context: EvaluationContext) => string[]
-  
-  constructor(private options: FeatureBoardProviderOptions) {
-    this.audienceMapper = options.audienceMapper || this.defaultAudienceMapper
-  -provider.ts
+
+constructor(private options: FeatureBoardProviderOptions) {
+this.audienceMapper = options.audienceMapper || this.defaultAudienceMapper
+-provider.ts
 
 import {
-  Provider,
-  ResolutionDetails,
-  EvaluationContext,
-  JsonValue,
-  Logger,
-  OpenFeatureEventEmitter,
-  ProviderEvents,
-  ErrorCode
+Provider,
+ResolutionDetails,
+EvaluationContext,
+JsonValue,
+Logger,
+OpenFeatureEventEmitter,
+ProviderEvents,
+ErrorCode
 } from '@openfeature/server-sdk'
 import {
-  createServerClient,
-  ServerClient,
-  CreateServerClientOptions
+createServerClient,
+ServerClient,
+CreateServerClientOptions
 } from '@featureboard/node-sdk'
 
-/**
- * Property mapping: map context properties to audience strings
- */
-export type PropertyMapping = {
+/\*\*
+
+- Property mapping: map context properties to audience strings
+  \*/
+  export type PropertyMapping = {
   [contextProperty: string]:
-    | string                              // Template: 'org:{value}'
-    | ((value: any) => string | null)     // Function: custom logic
-}
+  | string // Template: 'org:{value}'
+  | ((value: any) => string | null) // Function: custom logic
+  }
 
 export interface FeatureBoardProviderOptions extends CreateServerClientOptions {
-  /**
-   * Map context properties to audience strings (declarative approach)
-   * 
-   * Examples:
-   * - Direct value: { tier: '{value}' } → context.tier='premium' → 'premium'
-   * - Template: { organizationId: 'org:{value}' } → 'org:acme'
-   * - Function: { isPremium: (v) => v ? 'premium' : null }
-   * 
-   * Takes precedence over default mappings but can be overridden by audienceMapper
-   */
+/\*\*
+
+- Map context properties to audience strings (declarative approach)
+-
+- Examples:
+- - Direct value: { tier: '{value}' } → context.tier='premium' → 'premium'
+- - Template: { organizationId: 'org:{value}' } → 'org:acme'
+- - Function: { isPremium: (v) => v ? 'premium' : null }
+-
+- Takes precedence over default mappings but can be overridden by audienceMapper
+  \*/
   audiencePropertyMap?: PropertyMapping
-  
-  /**
-   * Custom function for complete control over audience extraction
-   * Overrides both audiencePropertyMap and default mappings
-   * Use when you need complex logic beyond simple property mapping
-   */
+
+/\*\*
+
+- Custom function for complete control over audience extraction
+- Overrides both audiencePropertyMap and default mappings
+- Use when you need complex logic beyond simple property mapping
+  \*/
   audienceMapper?: (context: EvaluationContext) => string[]
-}
+  }
   EvaluationContext,
   JsonValue,
   Logger,
   OpenFeatureEventEmitter,
   ProviderEvents,
   ErrorCode
-} from '@openfeature/server-sdk'
-import {
+  } from '@openfeature/server-sdk'
+  import {
   createServerClient,
   ServerClient,
   CreateServerClientOptions
-} from '@featureboard/node-sdk'
+  } from '@featureboard/node-sdk'
 
 export class FeatureBoardProvider implements Provider {
-  readonly runsOn = 'server' as const
-  readonly metadata = {
-    name: 'FeatureBoard Provider',
-    version: '1.0.0'
-  }
-  
-  private serverClient!: ServerClient
-  readonly events = new OpenFeatureEventEmitter()
-  
-  constructor(private options: CreateServerClientOptions) {}
-  
-  async initialize(context?: EvaluationContext): Promise<void> {
-    try {
-      this.serverClient = createServerClient(this.options)
-      await this.serverClient.waitForInitialised()
-      this.events.emit(ProviderEvents.Ready)
-    } catcdefaultAudienceMapper(context: EvaluationContext): string[] {
-    // Strategy 1: Use explicit audiences if provided
-    if ('audiences' in context && Array.isArray(context.audiences)) {
-      return context.audiences as string[]
-    }
-    
+readonly runsOn = 'server' as const
+readonly metadata = {
+name: 'FeatureBoard Provider',
+version: '1.0.0'
+}
+
+private serverClient!: ServerClient
+readonly events = new OpenFeatureEventEmitter()
+
+constructor(private options: CreateServerClientOptions) {}
+
+async initialize(context?: EvaluationContext): Promise<void> {
+try {
+this.serverClient = createServerClient(this.options)
+await this.serverClient.waitForInitialised()
+this.events.emit(ProviderEvents.Ready)
+} catcdefaultAudienceMapper(context: EvaluationContext): string[] {
+// Strategy 1: Use explicit audiences if provided
+if ('audiences' in context && Array.isArray(context.audiences)) {
+return context.audiences as string[]
+}
+
     // Strategy 2: Build from standard context properties
     const audiences: string[] = []
-    
+
     if (context.targetingKey) {
       audiences.push(context.targetingKey)
     }
-    
+
     // Map common context properties to audience strings
     const mappings: Record<string, string> = {
       userId: 'user',
@@ -1339,7 +1362,7 @@ export class FeatureBoardProvider implements Provider {
       segment: 'segment',
       tier: 'tier'
     }
-    
+
     for (const [key, prefix] of Object.entries(mappings)) {
       if (context[key] && typeof context[key] === 'string') {
         audiences.push(`${prefix}:${context[key]}`)
@@ -1356,8 +1379,8 @@ import { FeatureBoardProvider } from '@featureboard/openfeature-node-provider'
 await OpenFeature.setProviderAndWait(
   new FeatureBoardProvider({
     environmentApiKey: process.env.FEATUREBOARD_API_KEY!,
-    updateStrategy: 'polling'
-  })
+    updateStrategy: 'polling',
+  }),
 )
 
 // Get OpenFeature client
@@ -1366,8 +1389,8 @@ const client = OpenFeature.getClient()
 // IMPORTANT: Use 'audiences' array for FeatureBoard targeting
 // This is a FeatureBoard-specific convention (not OpenFeature standard)
 const context = {
-  targetingKey: 'user-123',     // OpenFeature standard field
-  audiences: ['premium', 'beta'] // FeatureBoard-specific: explicit audience list
+  targetingKey: 'user-123', // OpenFeature standard field
+  audiences: ['premium', 'beta'], // FeatureBoard-specific: explicit audience list
 }
 
 const newUIEnabled = await client.getBooleanValue('new-ui', false, context)
@@ -1416,37 +1439,31 @@ const app = express()
 await OpenFeature.setProviderAndWait(
   new FeatureBoardProvider({
     environmentApiKey: process.env.FEATUREBOARD_API_KEY!,
-    updateStrategy: 'live'
-  })
+    updateStrategy: 'live',
+  }),
 )
 
 // Enable transaction context for request-scoped evaluation
-OpenFeature.setTransactionContextPropagator(
-  new AsyncLocalStorageTransactionContextPropagator()
-)
+OpenFeature.setTransactionContextPropagator(new AsyncLocalStorageTransactionContextPropagator())
 
 // Middleware to set context per request
 app.use((req, res, next) => {
   const context = {
     targetingKey: req.user?.id,
-    audiences: [
-      req.user?.id && `user:${req.user.id}`,
-      req.user?.organization && `org:${req.user.organization}`,
-      req.user?.role && `role:${req.user.role}`
-    ].filter(Boolean)
+    audiences: [req.user?.id && `user:${req.user.id}`, req.user?.organization && `org:${req.user.organization}`, req.user?.role && `role:${req.user.role}`].filter(Boolean),
   }
-  
+
   OpenFeature.setTransactionContext(context, () => next())
 })
 
 // Use flags in routes
 app.get('/api/items', async (req, res) => {
   const client = OpenFeature.getClient()
-  
+
   // Context automatically from transaction context
   const maxItems = await client.getNumberValue('max-items', 10)
   const items = await fetchItems(maxItems)
-  
+
   res.json(items)
 })
 
@@ -1465,38 +1482,38 @@ await OpenFeature.setProviderAndWait(
     updateStrategy: 'polling',
     audiencePropertyMap: {
       // Direct value - use property value as-is
-      tier: '{value}',              // tier='premium' → 'premium'
-      
+      tier: '{value}', // tier='premium' → 'premium'
+
       // Template - inject value into template string
       organizationId: 'org:{value}', // organizationId='acme' → 'org:acme'
-      teamId: 'team:{value}',        // teamId='engineering' → 'team:engineering'
-      role: 'role:{value}',          // role='admin' → 'role:admin'
-      region: 'region:{value}',      // region='us-west' → 'region:us-west'
-      
+      teamId: 'team:{value}', // teamId='engineering' → 'team:engineering'
+      role: 'role:{value}', // role='admin' → 'role:admin'
+      region: 'region:{value}', // region='us-west' → 'region:us-west'
+
       // Function - custom logic for complex cases
-      isPremium: (value) => value === true ? 'premium' : null,
+      isPremium: (value) => (value === true ? 'premium' : null),
       subscriptionLevel: (level) => {
         if (level >= 3) return 'enterprise'
         if (level >= 2) return 'professional'
         if (level >= 1) return 'basic'
         return null
       },
-      
+
       // Conditional mapping
-      betaProgram: (enrolled) => enrolled ? 'beta-users' : null,
-    }
-  })
+      betaProgram: (enrolled) => (enrolled ? 'beta-users' : null),
+    },
+  }),
 )
 
 // Usage - properties automatically map to audiences
 const context = {
   targetingKey: 'user-123',
-  tier: 'premium',              // → 'premium'
-  organizationId: 'acme',       // → 'org:acme'
-  role: 'admin',                // → 'role:admin'
-  isPremium: true,              // → 'premium' (via function)
-  subscriptionLevel: 3,         // → 'enterprise' (via function)
-  betaProgram: true             // → 'beta-users' (via function)
+  tier: 'premium', // → 'premium'
+  organizationId: 'acme', // → 'org:acme'
+  role: 'admin', // → 'role:admin'
+  isPremium: true, // → 'premium' (via function)
+  subscriptionLevel: 3, // → 'enterprise' (via function)
+  betaProgram: true, // → 'beta-users' (via function)
 }
 // Extracted audiences: ['premium', 'org:acme', 'role:admin', 'enterprise', 'beta-users']
 
@@ -1511,25 +1528,25 @@ import { FeatureBoardProvider } from '@featureboard/openfeature-node-provider'
 // Define custom audience extraction logic (overrides everything)
 const customAudienceMapper = (context: EvaluationContext): string[] => {
   const audiences: string[] = []
-  
+
   // Complex business logic
   if (context.subscription?.tier) {
     audiences.push(`tier-${context.subscription.tier}`)
   }
-  
+
   if (context.features?.includes('beta')) {
     audiences.push('beta-user')
   }
-  
+
   if (context.permissions?.includes('admin')) {
     audiences.push('admin')
   }
-  
+
   // Combine multiple properties
   if (context.organization && context.role) {
     audiences.push(`${context.organization}:${context.role}`)
   }
-  
+
   return audiences
 }
 
@@ -1537,8 +1554,8 @@ await OpenFeature.setProviderAndWait(
   new FeatureBoardProvider({
     environmentApiKey: process.env.FEATUREBOARD_API_KEY!,
     updateStrategy: 'polling',
-    audienceMapper: customAudienceMapper  // Full control
-  })
+    audienceMapper: customAudienceMapper, // Full control
+  }),
 )
 ```
 
@@ -1547,7 +1564,7 @@ await OpenFeature.setProviderAndWait(
 ```typescript
 // Approach 1: Explicit audiences (simplest, clearest)
 const context1 = {
-  audiences: ['premium', 'org:acme', 'role:admin']
+  audiences: ['premium', 'org:acme', 'role:admin'],
 }
 
 // Approach 2: Property map (declarative, no code)
@@ -1556,13 +1573,13 @@ const provider2 = new FeatureBoardProvider({
   audiencePropertyMap: {
     tier: '{value}',
     organizationId: 'org:{value}',
-    role: 'role:{value}'
-  }
+    role: 'role:{value}',
+  },
 })
 const context2 = {
   tier: 'premium',
   organizationId: 'acme',
-  role: 'admin'
+  role: 'admin',
 }
 
 // Approach 3: Custom function (maximum flexibility)
@@ -1574,12 +1591,12 @@ const provider3 = new FeatureBoardProvider({
     if (ctx.organizationId) audiences.push(`org:${ctx.organizationId}`)
     if (ctx.role) audiences.push(`role:${ctx.role}`)
     return audiences
-  }
+  },
 })
 const context3 = {
   tier: 'premium',
   organizationId: 'acme',
-  role: 'admin'
+  role: 'admin',
 }
 
 // All three produce the same audiences: ['premium', 'org:acme', 'role:admin']
@@ -1612,13 +1629,14 @@ client.addHandler(ProviderEvents.Error, (eventDetails) => {
 ---
 
 ## Appendix Dthis.errorResolution(defaultValue, ErrorCode.PROVIDER_NOT_READY)
+
     }
-    
+
     try {
       const audiences = this.extractAudiences(context)
       const client = this.serverClient.request(audiences)
       const value = client.getFeatureValue(flagKey, defaultValue)
-      
+
       return {
         value,
         reason: this.determineReason(value, defaultValue),
@@ -1627,59 +1645,62 @@ client.addHandler(ProviderEvents.Error, (eventDetails) => {
     } catch (error) {
       return this.errorResolution(defaultValue, ErrorCode.GENERAL, error.message)
     }
-  }
-  
-  async resolveStringEvaluation(/* similar */) {}
-  async resolveNumberEvaluation(/* similar */) {}
-  
-  async resolveObjectEvaluation<T extends JsonValue>(
-    flagKey: string,
-    defaultValue: T,
-    context: EvaluationContext,
-    logger: Logger
-  ): Promise<ResolutionDetails<T>> {
-    return this.errorResolution(
-      defaultValue,
-      ErrorCode.FLAG_NOT_FOUND,
-      'FeatureBoard does not support object values'
-    )
-  }
-  
-  async onClose(): Promise<void> {
-    this.serverClient?.close()
-  }
-  
-  private extractAudiences(context: EvaluationContext): string[] {
-    // Implementation of audience extraction strategy
-    if ('audiences' in context && Array.isArray(context.audiences)) {
-      return context.audiences as string[]
-    }
-    
+
+}
+
+async resolveStringEvaluation(/_ similar _/) {}
+async resolveNumberEvaluation(/_ similar _/) {}
+
+async resolveObjectEvaluation<T extends JsonValue>(
+flagKey: string,
+defaultValue: T,
+context: EvaluationContext,
+logger: Logger
+): Promise<ResolutionDetails<T>> {
+return this.errorResolution(
+defaultValue,
+ErrorCode.FLAG_NOT_FOUND,
+'FeatureBoard does not support object values'
+)
+}
+
+async onClose(): Promise<void> {
+this.serverClient?.close()
+}
+
+private extractAudiences(context: EvaluationContext): string[] {
+// Implementation of audience extraction strategy
+if ('audiences' in context && Array.isArray(context.audiences)) {
+return context.audiences as string[]
+}
+
     const audiences: string[] = []
     if (context.targetingKey) audiences.push(context.targetingKey)
     // ... more extraction logic
     return audiences
-  }
-  
-  private determineReason(value: any, defaultValue: any): string {
-    // If we could track whether audience exception was used:
-    return value !== defaultValue ? 'TARGETING_MATCH' : 'DEFAULT'
-  }
-  
-  private errorResolution<T>(
-    defaultValue: T,
-    errorCode: ErrorCode,
-    errorMessage?: string
-  ): ResolutionDetails<T> {
-    return {
-      value: defaultValue,
-      reason: 'ERROR',
-      errorCode,
-      errorMessage,
-      flagMetadata: {}
-    }
-  }
+
 }
+
+private determineReason(value: any, defaultValue: any): string {
+// If we could track whether audience exception was used:
+return value !== defaultValue ? 'TARGETING_MATCH' : 'DEFAULT'
+}
+
+private errorResolution<T>(
+defaultValue: T,
+errorCode: ErrorCode,
+errorMessage?: string
+): ResolutionDetails<T> {
+return {
+value: defaultValue,
+reason: 'ERROR',
+errorCode,
+errorMessage,
+flagMetadata: {}
+}
+}
+}
+
 ```
 
 ---
@@ -1703,3 +1724,4 @@ client.addHandler(ProviderEvents.Error, (eventDetails) => {
 **Document End**
 
 *For questions or feedback on this compatibility report, please contact the FeatureBoard team.*
+```

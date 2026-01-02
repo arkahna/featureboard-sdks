@@ -7,7 +7,9 @@
         "lint": {
             "executor": "@nx/eslint:lint",
             "options": {
-                "lintFilePatterns": ["libs/openfeature-node-provider/src/**/*.ts"]
+                "lintFilePatterns": [
+                    "libs/openfeature-node-provider/src/**/*.ts"
+                ]
             }
         },
         "test": {
